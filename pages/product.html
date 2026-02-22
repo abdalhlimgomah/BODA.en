@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1b1b20">
     <title>BODA Product Detail</title>
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../assets/css/style.css">
     <script src="../assets/js/product-detail.config.js"></script>
     <script src="../assets/vendor/tailwind/tailwind-forms-container-queries.js"></script>
     <link href="../assets/css/product-detail.css" rel="stylesheet"/>
-    <link rel="stylesheet" href="assets/css/product-detail.css">
+    <link href="../assets/fonts/inter.css" rel="stylesheet"/>
+    <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet"/>
+    <script src="../assets/vendor/tailwind/tailwind-forms-typography.js"></script>
+    <link href="../assets/css/home.css" rel="stylesheet"/>
     <style>
         /* Specific styles for product details that extend the main theme */
         
@@ -89,13 +92,12 @@
         .product-badge {
             display: inline-block;
             padding: 0.4rem 1rem;
-            background: rgba(0, 212, 255, 0.15);
-            color: #00d4ff;
+    background: linear-gradient(45deg, #b1682a, #9b2d2d);
             border-radius: 20px;
             font-size: 0.85rem;
             font-weight: 700;
             margin-bottom: 1rem;
-            border: 1px solid rgba(0, 212, 255, 0.3);
+            text-shadow: 0 0 20px rgb(0 0 0 / 30%);;
         }
 
         .product-title {
@@ -104,7 +106,7 @@
             font-weight: 800;
             line-height: 1.2;
             margin-bottom: 1rem;
-            background: linear-gradient(45deg, #00d4ff, #ffffff);
+background: linear-gradient(45deg, #000000, #040404);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
@@ -152,7 +154,7 @@
         }
 
         .description {
-            color: #e0e0e0;
+            color: #000000;
             line-height: 1.8;
             margin-bottom: 2.5rem;
             font-size: 1.05rem;
@@ -172,7 +174,7 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 25px;
             padding: 0.5rem;
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgb(0 0 0 / 20%);
         }
 
         .qty-btn {
@@ -203,7 +205,7 @@
 
         .add-to-cart-btn {
             flex: 1;
-            background: linear-gradient(45deg, #00d4ff, #090979);
+            background: linear-gradient(45deg, #ff7600, #090979);
             color: #fff;
             border: none;
             border-radius: 25px;
@@ -215,7 +217,7 @@
             justify-content: center;
             gap: 1rem;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 212, 255, 0.3);
+            box-shadow: 0 5px 15px rgb(0 0 0 / 30%);
         }
 
         .add-to-cart-btn:hover {
@@ -261,7 +263,7 @@
             gap: 1rem;
             font-size: 0.95rem;
             font-weight: 500;
-            color: #e0e0e0;
+            color: #0c0b0b;
         }
 
         .feature-item i { color: #00d4ff; font-size: 1.1rem; text-shadow: 0 0 10px rgba(0, 212, 255, 0.5); }
@@ -287,7 +289,7 @@
         }
 
         .tab-link:hover { color: #e0e0e0; }
-        .tab-link.active { color: #00d4ff; }
+        .tab-link.active { color: #000000 }
         .tab-link.active::after {
             content: '';
             position: absolute;
@@ -295,8 +297,8 @@
             right: 0;
             width: 100%;
             height: 2px;
-            background: #00d4ff;
-            box-shadow: 0 0 10px #00d4ff;
+            background: #1b1e1f;
+            box-shadow: 0 0 10px #bd7e7e;
         }
 
         /* Review Section */
@@ -328,11 +330,11 @@
             margin-bottom: 1.5rem;
             font-family: inherit;
             resize: none;
-            color: #fff;
+            color: #000000;
         }
 
         .review-btn {
-            background: linear-gradient(45deg, #00d4ff, #090979);
+            background: linear-gradient(45deg, #e5850e, #090979);
             color: #fff;
             border: none;
             padding: 0.8rem 2rem;
@@ -386,8 +388,8 @@
         
         .section-header h2 {
             font-family: 'Orbitron', monospace;
-            color: #00d4ff;
-            text-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+    color: #020202;
+    text-shadow: 0 0 10px rgb(6 6 6 / 50%);
         }
 
         .product-grid {
@@ -442,43 +444,45 @@
         }
 
         @media (max-width: 576px) {
-            .features-grid { grid-template-columns: 1fr; }
             .purchase-wrap { flex-direction: column; }
             .add-to-cart-btn { padding: 1rem; }
             .tabs-nav { gap: 1.5rem; overflow-x: auto; }
         }
+        .mu {
+            background: url('../assets/images/product-bg.jpg') no-repeat center center fixed;
+            background-size: cover;
+        }
     </style>
 </head>
-<body>
+<body class="mu">
 
-    <header class="header">
-        <div class="logo-container" onclick="window.location.href='../index.html'" style="cursor: pointer;">
-            <div class="logo">🛍️ BODA</div>
-        </div>
-        <div class="header-search">
-            <form action="products.html" method="GET" class="search-form">
-                <input type="text" name="search" placeholder="ابحث عن المنتجات..." aria-label="Search">
-                <button type="submit"><i class="fas fa-search"></i></button>
-            </form>
-        </div>
-        <nav class="nav-menu">
-            <a href="../index.html">الرئيسية</a>
-            <a href="products.html">المنتجات</a>
-            <a href="orders.html">الطلبات</a>
-                    <div class="header-actions">
-            <a href="cart.html" class="cart-link">
-                <div id="nav-cart-count-container" class="nav-cart-count-container">
-                    <span id="nav-cart-count" aria-hidden="true" class="nav-cart-count nav-cart-0">0</span>
-                    <span class="nav-cart-icon">🛒</span>
+    <header class="sticky top-0 z-50 bg-surface-light dark:bg-surface-dark shadow-sm">
+    <div class="px-4 py-3 flex items-center justify-between gap-3">
+    <a class="p-2 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="wishlist.html">
+    <span class="material-icons-outlined text-2xl">favorite_border</span>
+    <a href="wishlist.html" class="absolute inset-0"></a>
+    </a>
+    <div class="flex-1 relative">
+    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+    <span class="material-icons-outlined text-slate-400 text-xl">search</span>
+    </div>
+    <input class="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:border-secondary dark:focus:border-primary focus:ring-1 focus:ring-secondary dark:focus:ring-primary transition-colors" id="home-search" placeholder="What are you looking for?" type="text"/>
+    </div>
+    <div class="flex items-center gap-2">
+    <div class="text-secondary dark:text-white font-black text-2xl tracking-tighter flex items-center">
+    <span class="text-primary mr-1">
+    <span class="material-icons-outlined align-middle text-2xl">shopping_bag</span>
+    </span>
+                    BODA
                 </div>
-                السلة
-            </a>
-        </div>
-        </nav>
-                    <a href="wishlist.html" class="wishlist-link">❤️ المفضلة</a>
+
+    </div>
+    </div>
+
+    </div>
     </header>
 
-    <main>
+    <main class="w-full max-w-md mx-auto sm:max-w-full">
         <!-- Main Product Section -->
         <section class="product-main">
             <!-- Gallery -->
@@ -569,11 +573,10 @@
     </main>
 
     <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
-    <script src="../js/supabase-config.js"></script>
-    <script src="../js/mock-api.js"></script>
-    <script src="../js/api-integration.js"></script>
-    <script src="../js/session-manager.js"></script>
-    <script src="../js/script.js"></script>
+    <script src="../assets/js/mock-api.js"></script>
+    <script src="../assets/js/store.js"></script>
+    <script src="../assets/js/script.js"></script>
+    <script src="../assets/js/product-detail.js"></script>
     <script>
         // ... (Existing JS Logic)
         let currentProduct = null;
@@ -699,6 +702,7 @@
         function addToCartClick() {
             const qty = parseInt(document.getElementById('quantity').value);
             addToCart(currentProduct, qty);
+            updateCartCount();
             
             // Animation for button
             const btn = document.querySelector('.add-to-cart-btn');
@@ -841,6 +845,7 @@
                 </a>
             `).join('');
         }
-    </script>
+</script>
+
 </body>
 </html>

@@ -8,6 +8,37 @@
 <link href="../assets/fonts/inter.css" rel="stylesheet"/>
 <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet"/>
 <link href="../assets/css/home.css" rel="stylesheet"/>
+<style>
+  /* Carousel auto-play animation - slow smooth slide to left */
+  @keyframes carouselScroll {
+    0% { transform: translateX(0); }
+    10% { transform: translateX(0); }
+    20% { transform: translateX(-100%); }
+    30% { transform: translateX(-100%); }
+    40% { transform: translateX(-200%); }
+    50% { transform: translateX(-200%); }
+    60% { transform: translateX(-300%); }
+    70% { transform: translateX(-300%); }
+    80% { transform: translateX(-400%); }
+    90% { transform: translateX(-400%); }
+    100% { transform: translateX(0); }
+  }
+  
+  .carousel-autoplay {
+    display: flex;
+    gap: 0;
+    animation: carouselScroll 50s ease infinite;
+  }
+  
+  .carousel-slide {
+    flex: 0 0 100%;
+    min-width: 100%;
+  }
+  
+  .carousel-section:hover .carousel-autoplay {
+    animation-play-state: paused;
+  }
+</style>
   </head>
 <body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-24">
 <header class="sticky top-0 z-50 bg-surface-light dark:bg-surface-dark shadow-sm">
@@ -35,16 +66,17 @@
 <div class="flex items-center gap-1 truncate max-w-[80%]">
 <span class="font-medium text-slate-400 dark:text-slate-500">Deliver to</span>
 <div class="flex items-center font-medium text-slate-800 dark:text-slate-200 truncate">
-<span>Dubai Marina, Street 4...</span>
+<span id="deliver-to-text">Dubai Marina, Street 4...</span>
 </div>
 </div>
 <span class="material-icons-outlined text-secondary dark:text-primary text-lg">location_on</span>
 </div>
 </header>
 <main class="w-full max-w-md mx-auto sm:max-w-full">
-<section class="mt-4 px-4">
-<div class="w-full overflow-x-auto hide-scrollbar flex snap-x snap-mandatory gap-4">
-  <div class="snap-center shrink-0 w-full relative aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-br from-orange-500 to-red-600 shadow-lg">
+<section class="mt-4 px-4 carousel-section">
+<div class="w-full overflow-hidden rounded-2xl shadow-lg">
+  <div class="carousel-autoplay">
+    <div class="carousel-slide snap-center shrink-0 w-full relative aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-br from-orange-500 to-red-600 shadow-lg">
 <div class="absolute inset-0 flex flex-col justify-center px-6 z-10">
 <span class="text-white/80 text-xs font-bold uppercase tracking-wider mb-2">Mega Sale</span>
 <h2 class="text-white text-2xl sm:text-3xl font-bold leading-tight mb-4">50% OFF<br/>Headphones</h2>
@@ -60,7 +92,7 @@
 </div>
 
 </div>
-<div class="snap-center shrink-0 w-full relative aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-br from-secondary to-blue-900 shadow-lg">
+    <div class="carousel-slide snap-center shrink-0 w-full relative aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-br from-secondary to-blue-900 shadow-lg">
 <div class="absolute inset-0 flex flex-col justify-center px-6 z-10">
 <span class="text-orange-300 text-xs font-bold uppercase tracking-wider mb-2">New Arrival</span>
 <h2 class="text-white text-2xl sm:text-3xl font-bold leading-tight mb-4">Smart Watch<br/>Series 8</h2>
@@ -72,11 +104,51 @@
 <img alt="Smart Watch" class="w-32 h-32 object-contain drop-shadow-2xl" src="../assets/images/remote/home-hero-smart-watch.jpg"/>
 </div>
 </div>
+    <div class="carousel-slide snap-center shrink-0 w-full relative aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-br from-purple-500 to-pink-600 shadow-lg">
+<div class="absolute inset-0 flex flex-col justify-center px-6 z-10">
+<span class="text-white/80 text-xs font-bold uppercase tracking-wider mb-2">Exclusive</span>
+<h2 class="text-white text-2xl sm:text-3xl font-bold leading-tight mb-4">Mobile<br/>Gadgets</h2>
+<button class="w-fit bg-white text-purple-600 text-xs font-bold py-2 px-4 rounded-full shadow-md hover:bg-slate-100 transition">
+  Explore
+</button>
 </div>
-<div class="flex justify-center gap-1.5 mt-3">
-<div class="w-2 h-2 rounded-full bg-secondary dark:bg-primary"></div>
-<div class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></div>
-<div class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+<div class="absolute right-[-20px] bottom-[-20px] w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+<div class="absolute right-4 top-1/2 -translate-y-1/2">
+<img alt="Mobile Gadgets" class="w-32 h-32 object-contain drop-shadow-2xl" src="../assets/images/remote/home-hero-headphones.jpg"/>
+</div>
+</div>
+    <div class="carousel-slide snap-center shrink-0 w-full relative aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-br from-green-500 to-emerald-600 shadow-lg">
+<div class="absolute inset-0 flex flex-col justify-center px-6 z-10">
+<span class="text-white/80 text-xs font-bold uppercase tracking-wider mb-2">Limited Time</span>
+<h2 class="text-white text-2xl sm:text-3xl font-bold leading-tight mb-4">Fashion<br/>Collection</h2>
+<button class="w-fit bg-white text-green-600 text-xs font-bold py-2 px-4 rounded-full shadow-md hover:bg-slate-100 transition">
+  Browse
+</button>
+</div>
+<div class="absolute right-4 top-1/2 -translate-y-1/2">
+<img alt="Fashion" class="w-32 h-32 object-contain drop-shadow-2xl" src="../assets/images/remote/home-hero-smart-watch.jpg"/>
+</div>
+</div>
+    <div class="carousel-slide snap-center shrink-0 w-full relative aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-br from-indigo-500 to-cyan-600 shadow-lg">
+<div class="absolute inset-0 flex flex-col justify-center px-6 z-10">
+<span class="text-white/80 text-xs font-bold uppercase tracking-wider mb-2">Best Deals</span>
+<h2 class="text-white text-2xl sm:text-3xl font-bold leading-tight mb-4">Sports<br/>Shoes</h2>
+<button class="w-fit bg-white text-indigo-600 text-xs font-bold py-2 px-4 rounded-full shadow-md hover:bg-slate-100 transition">
+  View Deals
+</button>
+</div>
+<div class="absolute right-4 top-1/2 -translate-y-1/2">
+<img alt="Sports Shoes" class="w-32 h-32 object-contain drop-shadow-2xl" src="../assets/images/remote/home-hero-headphones.jpg"/>
+</div>
+</div>
+  </div>
+</div>
+<div class="flex justify-center gap-1.5 mt-3" id="carouselDots">
+<div class="w-2 h-2 rounded-full bg-secondary dark:bg-primary cursor-pointer dot" data-slide="0"></div>
+<div class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 cursor-pointer dot" data-slide="1"></div>
+<div class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 cursor-pointer dot" data-slide="2"></div>
+<div class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 cursor-pointer dot" data-slide="3"></div>
+<div class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600 cursor-pointer dot" data-slide="4"></div>
 </div>
 </section>
 <section class="mt-8 px-4">
@@ -174,4 +246,49 @@
 
 <script src="../assets/js/store.js"></script>
 <script src="../assets/js/home.js"></script>
+<script>
+  // Carousel dots update logic
+  let currentSlide = 0;
+  const totalSlides = 5;
+  const carouselAnimationDuration = 50000; // 50 seconds (matches CSS animation for 5 slides)
+  
+  function updateCarouselDots() {
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach((dot, index) => {
+      if (index === currentSlide) {
+        dot.classList.remove('bg-slate-300', 'dark:bg-slate-600');
+        dot.classList.add('bg-secondary', 'dark:bg-primary');
+      } else {
+        dot.classList.remove('bg-secondary', 'dark:bg-primary');
+        dot.classList.add('bg-slate-300', 'dark:bg-slate-600');
+      }
+    });
+  }
+  
+  // Update carousel slide every animation cycle
+  setInterval(() => {
+    currentSlide = (currentSlide + 1) % totalSlides;
+    updateCarouselDots();
+  }, carouselAnimationDuration);
+  
+  // Allow manual dot click to navigate
+  document.addEventListener('DOMContentLoaded', () => {
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        currentSlide = parseInt(dot.dataset.slide);
+        updateCarouselDots();
+      });
+    });
+    
+    // Render deals from store on page load
+    renderHomeProducts();
+    // Update cart count display on page load
+    if (typeof updateCartCount === 'function') {
+      updateCartCount();
+    } else if (typeof BODAStore !== 'undefined' && typeof BODAStore.updateCartCount === 'function') {
+      BODAStore.updateCartCount();
+    }
+  });
+</script>
 </body></html>
