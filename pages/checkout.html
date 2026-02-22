@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Mobile Checkout Screen</title>
+<script src="../assets/js/checkout.config.js"></script>
+<script src="../assets/vendor/tailwind/tailwind-forms-container-queries.js"></script>
+<link href="../assets/fonts/inter.css" rel="stylesheet"/>
+<link href="../assets/css/checkout.css" rel="stylesheet"/>
+  </head>
+<body class="bg-brand-bg font-sans text-gray-800 antialiased h-screen flex flex-col overflow-hidden max-w-md mx-auto shadow-2xl relative">
+<!-- BEGIN: MainHeader -->
+<header class="bg-brand-navy pt-6 pb-8 px-4 flex-none z-20 rounded-b-xl shadow-md">
+<!-- Top Navigation Bar -->
+<div class="flex items-center justify-between mb-6">
+<button class="text-white hover:opacity-80 transition-opacity p-1">
+<span class="sr-only">Go Back</span>
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M15.75 19.5L8.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<h1 class="text-white text-lg font-bold tracking-wide">Checkout</h1>
+<span class="text-white text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 border border-white/30 rounded">BODA</span>
+</div>
+<!-- Stepper Navigation -->
+<!-- Flex container for the 3 steps using custom CSS shapes for the arrow effect -->
+<div class="flex items-stretch justify-center h-12 w-full text-white text-sm select-none"><!-- Step 1: Address (Completed) -->
+<div class="relative flex-1 bg-brand-navy flex flex-col items-center justify-center z-10">
+<div class="flex flex-col items-center">
+<div class="bg-brand-orange rounded-full p-0.5 mb-1">
+<svg class="w-3 h-3 text-white" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<span class="text-[10px] opacity-80 font-medium tracking-wide">Address</span>
+</div>
+<!-- Arrow cutout for next step -->
+<div class="absolute right-0 top-0 bottom-0 w-4 bg-brand-orange" style="clip-path: polygon(0 0, 100% 50%, 0 100%);"></div>
+</div>
+<!-- Step 2: Payment (Active) -->
+<div class="relative flex-[1.4] bg-brand-orange flex flex-col items-center justify-center z-20" style="clip-path: polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%, 10% 50%); margin-left: -10px; padding-left: 10px;">
+<div class="flex flex-col items-center">
+<div class="bg-white rounded-full p-0.5 mb-1">
+<svg class="w-3 h-3 text-brand-orange" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<span class="text-[10px] font-bold tracking-wide">Payment</span>
+</div>
+</div>
+<!-- Step 3: Confirm (Pending) -->
+<div class="relative flex-1 bg-white/10 flex flex-col items-center justify-center z-10" style="background-color: #2c3e5a; margin-left: -15px; padding-left: 15px;">
+<div class="flex flex-col items-center opacity-60">
+<div class="border border-gray-400 rounded-full w-4 h-4 mb-1"></div>
+<span class="text-[10px] font-medium tracking-wide">Confirm</span>
+</div>
+</div></div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-4 pb-32">
+<!-- Card 1: Delivery Address -->
+<section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100" data-purpose="delivery-address-card" style="box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+<div class="flex justify-between items-center mb-3">
+<h2 class="font-bold text-gray-800">Delivery Address</h2>
+<button class="text-brand-orange text-sm font-medium hover:text-orange-700">Change</button>
+</div>
+<div class="flex items-start gap-3">
+<div class="bg-gray-50 p-2 rounded-full mt-1 flex-shrink-0">
+<svg class="w-5 h-5 text-gray-700" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M11.54 22.351l.07.04.028.016a.76.76 0 00.723 0l.028-.015.071-.041a16.975 16.975 0 001.144-.742 19.58 19.58 0 002.683-2.282c1.944-1.99 3.963-4.98 3.963-8.827a8.25 8.25 0 00-16.5 0c0 3.846 2.02 6.837 3.963 8.827a19.58 19.58 0 002.682 2.282 16.975 16.975 0 001.145.742zM12 13.5a3 3 0 100-6 3 3 0 000 6z" fill-rule="evenodd"></path>
+</svg>
+</div>
+<address class="not-italic text-sm text-gray-600 leading-relaxed">
+                    123 Main St, Apt 4B,<br/>
+                    New York, NY 10001
+                </address>
+</div>
+</section>
+<!-- Card 2: Payment Method -->
+<section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100" data-purpose="payment-method-card" style="box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+<div class="flex justify-between items-center mb-4">
+<h2 class="font-bold text-gray-800">Payment Method</h2>
+<div class="inline-flex items-center bg-gray-100 px-2 py-1 rounded text-[10px] text-gray-500 font-medium">
+<svg class="w-3 h-3 mr-1" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" fill-rule="evenodd"></path>
+</svg>
+                    Secure Payment
+                </div>
+</div>
+<!-- Payment Options -->
+<div class="space-y-4"><!-- Option 1: Credit Card (Selected) -->
+<label class="flex items-start gap-3 cursor-pointer group">
+<div class="pt-1">
+<input checked="" class="custom-radio w-5 h-5 border-2 border-gray-300 focus:ring-brand-orange" name="payment_method" type="radio"/>
+</div>
+<div class="flex-1">
+<div class="flex items-center gap-3 mb-1">
+<div class="bg-brand-navy p-1.5 rounded text-white">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="font-bold text-gray-800 text-sm">Credit Card</span>
+</div>
+<div class="text-xs text-gray-500 pl-1">
+<p>**** **** **** 4589</p>
+<p class="mt-0.5">Expiry 12/25</p>
+</div>
+</div>
+</label>
+<!-- Option 2: Apple Pay -->
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="flex-shrink-0">
+<input class="custom-radio w-5 h-5 border-2 border-gray-300 focus:ring-brand-orange" name="payment_method" type="radio"/>
+</div>
+<div class="flex-1 flex items-center gap-3">
+<div class="bg-white border border-gray-200 p-1.5 rounded shadow-sm text-black">
+<svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M17.637 13.916c0-2.31 1.89-3.415 1.973-3.46-1.077-1.574-2.753-1.789-3.348-1.807-1.417-.145-2.766.834-3.486.834-.718 0-1.825-.818-3.007-.798-1.545.023-2.98.9-3.778 2.288-1.613 2.796-.412 6.94 1.156 9.208.767 1.11 1.68 2.356 2.879 2.313 1.153-.046 1.588-.745 2.983-.745 1.393 0 1.789.745 3.012.723 1.242-.023 2.03-1.127 2.793-2.24 0 0 .04-.06.074-.117.876-1.278 1.236-2.52 1.254-2.584-.027-.01-2.454-.942-2.505-3.615zm-2.484-6.666c.636-.77 1.064-1.84 0-2.825-.972.037-2.149.65-2.818 1.442-.587.688-1.1 1.802-.036 2.864.954-.075 2.218-.71 2.854-1.481z"></path>
+</svg>
+</div>
+<span class="font-medium text-gray-800 text-sm">Apple Pay</span>
+</div>
+</label>
+<!-- Option 3: Cash on Delivery -->
+<label class="flex items-center gap-3 cursor-pointer group">
+<div class="flex-shrink-0">
+<input class="custom-radio w-5 h-5 border-2 border-gray-300 focus:ring-brand-orange" name="payment_method" type="radio"/>
+</div>
+<div class="flex-1 flex items-center gap-3">
+<div class="bg-green-50 p-1.5 rounded text-green-700">
+<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.5" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="font-medium text-gray-800 text-sm">Cash on Delivery</span>
+</div>
+</label></div>
+</section>
+<!-- Card 3: Price Breakdown -->
+<section class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100" data-purpose="price-breakdown-card" style="box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+<h2 class="font-bold text-gray-800 mb-4">Price Breakdown</h2>
+<div class="space-y-3 text-sm"><div class="flex justify-between text-gray-600">
+<span>Subtotal:</span>
+<span class="font-medium text-gray-800">$150.00</span>
+</div>
+<div class="flex justify-between text-gray-600">
+<span>Shipping:</span>
+<span class="font-medium text-gray-800">$10.00</span>
+</div>
+<div class="flex justify-between text-gray-600 pb-4 border-b border-gray-100">
+<span>Tax:</span>
+<span class="font-medium text-gray-800">$12.00</span>
+</div>
+<div class="flex justify-between items-center pt-2">
+<span class="text-lg font-bold text-gray-900">Total:</span>
+<span class="text-2xl font-black text-brand-orange">$172.00</span>
+</div></div>
+</section>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: FooterAction -->
+<footer class="absolute bottom-0 left-0 right-0 bg-white border-t border-gray-100 p-4 pb-8 z-30 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+<button class="w-full bg-brand-orange text-white h-[50px] rounded-xl font-semibold text-lg shadow-lg shadow-orange-200 active:scale-[0.98] transition-transform flex items-center justify-center">
+            Confirm Order
+        </button>
+<!-- Home indicator bar (simulated) -->
+<div class="w-32 h-1 bg-gray-900 rounded-full mx-auto mt-6 opacity-80"></div>
+</footer>
+<!-- END: FooterAction -->
+</body></html>

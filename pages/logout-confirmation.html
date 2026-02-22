@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BODA - Logout Confirmation</title>
+<script src="../assets/js/logout-confirmation.config.js"></script>
+<link rel="stylesheet" href="assets/css/logout-confirmation.css">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="../assets/css/logout-confirmation.css" rel="stylesheet"/>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display min-h-screen flex flex-col antialiased selection:bg-primary selection:text-white">
+
+<!-- OVERLAY / MODAL START -->
+<div class="absolute inset-0 z-50 flex items-center justify-center px-4">
+<!-- Backdrop -->
+<div class="absolute inset-0 bg-slate-900/60 dark:bg-black/70 backdrop-blur-sm transition-opacity duration-300"></div>
+<!-- Modal Card -->
+<div class="relative w-full max-w-[340px] bg-white dark:bg-surface-dark rounded-2xl shadow-2xl border border-slate-100 dark:border-border-dark flex flex-col items-center p-6 text-center transform transition-all scale-100">
+<!-- Icon Circle -->
+<div class="mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-danger/10 dark:bg-danger/10">
+<span class="material-symbols-outlined text-danger text-[40px] ml-1">logout</span>
+</div>
+<!-- Text Content -->
+<h3 class="mb-2 text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Logout?</h3>
+<p class="mb-8 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
+                    Are you sure you want to log out of your BODA account?
+                </p>
+<!-- Action Buttons -->
+<div class="flex w-full flex-col gap-3">
+<!-- Primary Action -->
+<button class="flex h-12 w-full items-center justify-center rounded-xl bg-danger text-white hover:bg-orange-600 active:scale-[0.98] transition-all duration-200 font-bold tracking-wide shadow-lg shadow-danger/25">
+                        Yes, Logout
+                    </button>
+<!-- Secondary Action -->
+<button class="flex h-12 w-full items-center justify-center rounded-xl bg-transparent text-primary dark:text-primary hover:bg-slate-50 dark:hover:bg-white/5 active:scale-[0.98] transition-all duration-200 font-semibold">
+                        Cancel
+                    </button>
+</div>
+</div>
+</div>
+<!-- OVERLAY / MODAL END -->
+</div>
+</body></html>

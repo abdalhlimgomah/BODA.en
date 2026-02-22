@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BODA Home Screen</title>
+<script src="../assets/js/home.config.js"></script>
+<script src="../assets/vendor/tailwind/tailwind-forms-typography.js"></script>
+<link href="../assets/fonts/inter.css" rel="stylesheet"/>
+<link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet"/>
+<link href="../assets/css/home.css" rel="stylesheet"/>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen pb-24">
+<header class="sticky top-0 z-50 bg-surface-light dark:bg-surface-dark shadow-sm">
+<div class="px-4 py-3 flex items-center justify-between gap-3">
+<a class="p-2 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="wishlist.html">
+<span class="material-icons-outlined text-2xl">favorite_border</span>
+</a>
+<div class="flex-1 relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons-outlined text-slate-400 text-xl">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:border-secondary dark:focus:border-primary focus:ring-1 focus:ring-secondary dark:focus:ring-primary transition-colors" id="home-search" placeholder="What are you looking for?" type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<div class="text-secondary dark:text-white font-black text-2xl tracking-tighter flex items-center">
+<span class="text-primary mr-1">
+<span class="material-icons-outlined align-middle text-2xl">shopping_bag</span>
+</span>
+                    BODA
+                </div>
+
+</div>
+</div>
+<div class="bg-white dark:bg-surface-dark border-t border-slate-100 dark:border-slate-700 px-4 py-2 flex items-center justify-between text-xs sm:text-sm text-slate-600 dark:text-slate-300">
+<div class="flex items-center gap-1 truncate max-w-[80%]">
+<span class="font-medium text-slate-400 dark:text-slate-500">Deliver to</span>
+<div class="flex items-center font-medium text-slate-800 dark:text-slate-200 truncate">
+<span>Dubai Marina, Street 4...</span>
+</div>
+</div>
+<span class="material-icons-outlined text-secondary dark:text-primary text-lg">location_on</span>
+</div>
+</header>
+<main class="w-full max-w-md mx-auto sm:max-w-full">
+<section class="mt-4 px-4">
+<div class="w-full overflow-x-auto hide-scrollbar flex snap-x snap-mandatory gap-4">
+  <div class="snap-center shrink-0 w-full relative aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-br from-orange-500 to-red-600 shadow-lg">
+<div class="absolute inset-0 flex flex-col justify-center px-6 z-10">
+<span class="text-white/80 text-xs font-bold uppercase tracking-wider mb-2">Mega Sale</span>
+<h2 class="text-white text-2xl sm:text-3xl font-bold leading-tight mb-4">50% OFF<br/>Headphones</h2>
+
+<button class="w-fit bg-white text-orange-600 text-xs font-bold py-2 px-4 rounded-full shadow-md hover:bg-slate-100 transition">
+    View Offers
+</button>
+
+</div>
+<div class="absolute right-[-20px] bottom-[-20px] w-48 h-48 bg-white/10 rounded-full blur-2xl"></div>
+<div class="absolute right-4 top-1/2 -translate-y-1/2">
+<img alt="Headphones" class="w-32 h-32 object-contain drop-shadow-2xl grayscale brightness-200" src="../assets/images/remote/home-hero-headphones.jpg"/>
+</div>
+
+</div>
+<div class="snap-center shrink-0 w-full relative aspect-[2/1] rounded-2xl overflow-hidden bg-gradient-to-br from-secondary to-blue-900 shadow-lg">
+<div class="absolute inset-0 flex flex-col justify-center px-6 z-10">
+<span class="text-orange-300 text-xs font-bold uppercase tracking-wider mb-2">New Arrival</span>
+<h2 class="text-white text-2xl sm:text-3xl font-bold leading-tight mb-4">Smart Watch<br/>Series 8</h2>
+<button class="w-fit bg-primary text-white text-xs font-bold py-2 px-4 rounded-full shadow-md hover:bg-orange-600 transition">
+  Shop Now
+</button>
+</div>
+<div class="absolute right-4 top-1/2 -translate-y-1/2">
+<img alt="Smart Watch" class="w-32 h-32 object-contain drop-shadow-2xl" src="../assets/images/remote/home-hero-smart-watch.jpg"/>
+</div>
+</div>
+</div>
+<div class="flex justify-center gap-1.5 mt-3">
+<div class="w-2 h-2 rounded-full bg-secondary dark:bg-primary"></div>
+<div class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+<div class="w-2 h-2 rounded-full bg-slate-300 dark:bg-slate-600"></div>
+</div>
+</section>
+<section class="mt-8 px-4">
+<h3 class="text-lg font-bold text-slate-800 dark:text-slate-100 text-right mb-4">Shop by Category</h3>
+<div class="grid grid-cols-4 gap-y-6 gap-x-2">
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="w-16 h-16 rounded-2xl bg-[#FFF6E9] dark:bg-slate-800 flex items-center justify-center mb-2 shadow-sm border border-transparent group-hover:border-primary transition-all relative overflow-hidden">
+<div class="absolute bottom-0 w-full h-1 bg-primary"></div>
+<img alt="Electronics" class="w-8 h-8 opacity-80 dark:invert" src="../assets/images/remote/home-category-electronics.jpg"/>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Mobiles</span>
+</div>
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="w-16 h-16 rounded-2xl bg-[#FFF6E9] dark:bg-slate-800 flex items-center justify-center mb-2 shadow-sm border border-transparent group-hover:border-primary transition-all relative overflow-hidden">
+<div class="absolute bottom-0 w-full h-1 bg-primary"></div>
+<img alt="Fashion" class="w-8 h-8 opacity-80 dark:invert" src="../assets/images/remote/home-category-fashion.jpg"/>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Fashion</span>
+</div>
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="w-16 h-16 rounded-2xl bg-[#FFF6E9] dark:bg-slate-800 flex items-center justify-center mb-2 shadow-sm border border-transparent group-hover:border-primary transition-all relative overflow-hidden">
+<div class="absolute bottom-0 w-full h-1 bg-primary"></div>
+<img alt="Home" class="w-8 h-8 opacity-80 dark:invert" src="../assets/images/remote/home-category-home.jpg"/>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Home</span>
+</div>
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="w-16 h-16 rounded-2xl bg-[#FFF6E9] dark:bg-slate-800 flex items-center justify-center mb-2 shadow-sm border border-transparent group-hover:border-primary transition-all relative overflow-hidden">
+<div class="absolute bottom-0 w-full h-1 bg-primary"></div>
+<img alt="Beauty" class="w-8 h-8 opacity-80 dark:invert" src="../assets/images/remote/home-category-beauty.jpg"/>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Beauty</span>
+</div>
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="w-16 h-16 rounded-2xl bg-[#FFF6E9] dark:bg-slate-800 flex items-center justify-center mb-2 shadow-sm border border-transparent group-hover:border-primary transition-all relative overflow-hidden">
+<div class="absolute bottom-0 w-full h-1 bg-primary"></div>
+<img alt="Kitchen" class="w-8 h-8 opacity-80 dark:invert" src="../assets/images/remote/home-category-kitchen.jpg"/>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Kitchen</span>
+</div>
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="w-16 h-16 rounded-2xl bg-[#FFF6E9] dark:bg-slate-800 flex items-center justify-center mb-2 shadow-sm border border-transparent group-hover:border-primary transition-all relative overflow-hidden">
+<div class="absolute bottom-0 w-full h-1 bg-primary"></div>
+<img alt="Sports" class="w-8 h-8 opacity-80 dark:invert" src="../assets/images/remote/home-category-sports.jpg"/>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Sports</span>
+</div>
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="w-16 h-16 rounded-2xl bg-[#FFF6E9] dark:bg-slate-800 flex items-center justify-center mb-2 shadow-sm border border-transparent group-hover:border-primary transition-all relative overflow-hidden">
+<div class="absolute bottom-0 w-full h-1 bg-primary"></div>
+<img alt="Laptops" class="w-8 h-8 opacity-80 dark:invert" src="../assets/images/remote/home-category-laptops.jpg"/>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Laptops</span>
+</div>
+<div class="flex flex-col items-center group cursor-pointer">
+<div class="w-16 h-16 rounded-2xl bg-[#FFF6E9] dark:bg-slate-800 flex items-center justify-center mb-2 shadow-sm border border-transparent group-hover:border-primary transition-all relative overflow-hidden">
+<div class="absolute bottom-0 w-full h-1 bg-primary"></div>
+<img alt="Grocery" class="w-8 h-8 opacity-80 dark:invert" src="../assets/images/remote/home-category-grocery.jpg"/>
+</div>
+<span class="text-xs font-medium text-slate-600 dark:text-slate-400 text-center leading-tight">Grocery</span>
+</div>
+</div>
+</section>
+<section class="mt-8 px-4 mb-4">
+<div class="flex items-center justify-between mb-4">
+<button class="text-sm font-semibold text-primary">View All</button>
+<h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">Deals of the Day</h3>
+</div>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar pb-4" id="home-products"></div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-surface-dark border-t border-slate-200 dark:border-slate-700 pb-safe pt-2 px-2 z-50">
+<div class="flex justify-around items-center">
+<a class="flex flex-col items-center gap-1 w-full py-1 text-secondary dark:text-primary" href="home.html">
+<span class="material-icons-outlined text-2xl">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 w-full py-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300" href="products.html">
+<span class="material-icons-outlined text-2xl">grid_view</span>
+<span class="text-[10px] font-medium">Categories</span>
+</a>
+</a>
+<a class="flex flex-col items-center gap-1 w-full py-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300" href="ahsab.html">
+<span class="material-icons-outlined text-2xl">person_outline</span>
+<span class="text-[10px] font-medium">My Account</span>
+</a>
+<a class="flex flex-col items-center gap-1 w-full py-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 relative" href="empty-cart.html">
+<span class="material-icons-outlined text-2xl">shopping_cart</span>
+<span class="absolute top-0 right-[25%] bg-primary text-white text-[8px] font-bold px-1 rounded-full nav-cart-0" id="nav-cart-count">0</span>
+<span class="text-[10px] font-medium">Cart</span>
+</a>
+</div>
+<div class="h-6 w-full"></div> 
+</nav>
+
+<script src="../assets/js/store.js"></script>
+<script src="../assets/js/home.js"></script>
+</body></html>

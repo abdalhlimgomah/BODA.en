@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BODA Profile</title>
+<script src="../assets/vendor/tailwind/tailwind-forms-typography.js"></script>
+<link href="../assets/fonts/inter.css" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#1e3a8a", // Deep Blue
+                        secondary: "#f97316", // Orange
+                        "background-light": "#f3f4f6", // Gray-100
+                        "background-dark": "#111827", // Gray-900
+                        "surface-light": "#ffffff",
+                        "surface-dark": "#1f2937", // Gray-800
+                    },
+                    fontFamily: {
+                        display: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "0.75rem", // 12px
+                    },
+                },
+            },
+        };
+    </script>
+<link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet"/>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }.no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-gray-800 dark:text-gray-100 pb-20">
+<header class="bg-surface-light dark:bg-surface-dark px-4 py-3 shadow-sm sticky top-0 z-50">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-3">
+<h1 class="text-2xl font-bold text-primary dark:text-blue-400 tracking-tight">BODA</h1>
+</div>
+<div class="flex items-center gap-4">
+<div class="flex-1 hidden md:flex">
+<div class="relative w-full max-w-xs">
+<span class="absolute inset-y-0 left-0 flex items-center pl-3">
+<span class="material-icons-outlined text-gray-400">search</span>
+</span>
+<input class="w-full py-2 pl-10 pr-4 text-sm bg-gray-100 dark:bg-gray-700 border-none rounded-full focus:ring-2 focus:ring-primary" placeholder="What are you looking for?" type="text"/>
+</div>
+</div>
+<button class="text-gray-600 dark:text-gray-300">
+<span class="material-icons-outlined text-2xl">favorite_border</span>
+<a href="wishlist.html" class="absolute inset-0"></a>
+</button>
+</div>
+</div>
+</header>
+<main class="p-4 space-y-4">
+<section class="bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-sm flex items-center justify-between">
+<div class="flex flex-col">
+<h2 class="text-lg font-bold text-gray-900 dark:text-white">Hello Amina</h2>
+<p class="text-sm text-gray-500 dark:text-gray-400 mb-2">amina.khan@email.com</p>
+<button class="bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-200 text-xs font-medium py-1.5 px-4 rounded-full w-max transition-colors">
+                    Edit Profile
+                </button>
+</div>
+<div class="flex-shrink-0">
+<div class="w-14 h-14 bg-primary/10 dark:bg-blue-900/30 rounded-full flex items-center justify-center text-primary dark:text-blue-300 font-bold text-xl">
+                    AK
+                </div>
+</div>
+</section>
+<section class="grid grid-cols-2 gap-3">
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm flex flex-col items-start justify-between h-24 relative overflow-hidden group">
+<div class="absolute right-3 top-3 text-gray-400 dark:text-gray-500 group-hover:text-primary transition-colors">
+<span class="material-icons-outlined">restart_alt</span>
+</div>
+<span class="text-xs text-gray-500 dark:text-gray-400 mt-auto">0 in progress</span>
+<span class="font-bold text-gray-900 dark:text-white">Returns</span>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm flex flex-col items-start justify-between h-24 relative overflow-hidden group">
+<div class="absolute right-3 top-3 text-gray-400 dark:text-gray-500 group-hover:text-primary transition-colors">
+<span class="material-icons-outlined">local_shipping</span>
+</div>
+<span class="text-xs text-gray-500 dark:text-gray-400 mt-auto">Track &amp; Manage</span>
+<span class="font-bold text-gray-900 dark:text-white">Orders</span>
+<a href="my-orders.html" class="absolute inset-0"></a>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm flex flex-col items-start justify-between h-24 relative overflow-hidden group">
+<div class="absolute right-3 top-3 text-gray-400 dark:text-gray-500 group-hover:text-secondary transition-colors">
+<span class="material-icons-outlined">favorite_border</span>
+</div>
+<span class="text-xs text-gray-500 dark:text-gray-400 mt-auto">12 items</span>
+<span class="font-bold text-gray-900 dark:text-white">Favorites</span>
+<a href="wishlist.html" class="absolute inset-0"></a>
+</div>
+<div class="bg-surface-light dark:bg-surface-dark p-4 rounded-xl shadow-sm flex flex-col items-start justify-between h-24 relative overflow-hidden group">
+<div class="absolute right-3 top-3 text-gray-400 dark:text-gray-500 group-hover:text-primary transition-colors">
+<span class="material-icons-outlined">account_balance_wallet</span>
+</div>
+<span class="text-xs text-gray-500 dark:text-gray-400 mt-auto">$0.00</span>
+<span class="font-bold text-gray-900 dark:text-white">BODA Pay</span>
+</div>
+</section>
+<section class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm overflow-hidden mt-6">
+<h3 class="px-4 pt-4 pb-2 text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Account Settings</h3>
+<div class="divide-y divide-gray-100 dark:divide-gray-700">
+<a class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-icons-outlined text-gray-500 dark:text-gray-400">location_on</span>
+<span class="font-medium text-gray-700 dark:text-gray-200">Addresses</span>
+</div>
+<span class="material-icons-outlined text-gray-400 text-sm">arrow_forward_ios</span>
+</a>
+</a>
+<a class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" href="#">
+<div class="flex items-center gap-3">
+<span class="material-icons-outlined text-gray-500 dark:text-gray-400">settings</span>
+<span class="font-medium text-gray-700 dark:text-gray-200">Preferences</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="text-xs text-gray-400">EN / USD</span>
+<span class="material-icons-outlined text-gray-400 text-sm">arrow_forward_ios</span>
+</div>
+</a>
+</div>
+</section>
+<section class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm overflow-hidden mt-4">
+<h3 class="px-4 pt-4 pb-2 text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Support</h3>
+<div class="divide-y divide-gray-100 dark:divide-gray-700">
+<a class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" href="contact.html">
+<div class="flex items-center gap-3">
+<span class="material-icons-outlined text-gray-500 dark:text-gray-400">headset_mic</span>
+<span class="font-medium text-gray-700 dark:text-gray-200">Help Center</span>
+</div>
+<span class="material-icons-outlined text-gray-400 text-sm">arrow_forward_ios</span>
+</a>
+<a class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" href="logout-confirmation.html">
+<div class="flex items-center gap-3">
+<span class="material-icons-outlined text-secondary">logout</span>
+<span class="font-medium text-secondary">Sign Out</span>
+</div>
+<span class="material-icons-outlined text-gray-400 text-sm">arrow_forward_ios</span>
+</a>
+</div>
+</section>
+<div class="fixed bottom-24 left-4 z-40">
+<button class="bg-secondary text-white dark:text-white px-4 py-2.5 rounded-full shadow-lg flex items-center gap-2 font-medium hover:bg-orange-600 transition-colors">
+<span class="material-icons-outlined text-xl">help_outline</span>
+<a href="contact.html" class="text-white">Need Help?</a>
+</button>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-white dark:bg-surface-dark border-t border-gray-200 dark:border-gray-700 py-2 px-6 z-50">
+<ul class="flex justify-between items-center">
+<li>
+<a class="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-blue-400" href="home.html">
+<span class="material-icons-outlined text-2xl">home</span>
+<span class="text-[10px] font-medium">Home</span>
+</a>
+</li>
+<li>
+<a class="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-blue-400" href="products.html">
+<span class="material-icons-outlined text-2xl">category</span>
+<span class="text-[10px] font-medium">Categories</span>
+</a>
+</li>
+<li class="relative">
+<a class="flex flex-col items-center gap-1 text-gray-500 dark:text-gray-400 hover:text-primary dark:hover:text-blue-400" href="empty-cart.html">
+<span class="absolute top-0 right-3 w-2 h-2 bg-secondary rounded-full"></span>
+<span class="material-icons-outlined text-2xl">shopping_cart</span>
+<span class="text-[10px] font-medium">Cart</span>
+</a>
+</li>
+<li>
+<a class="flex flex-col items-center gap-1 text-primary dark:text-blue-400" href="ahsab.html">
+<span class="material-icons-outlined text-2xl">person</span>
+<span class="text-[10px] font-medium">Profile</span>
+</a>
+</li>
+</ul>
+<div class="w-1/3 h-1 bg-gray-300 dark:bg-gray-600 rounded-full mx-auto mt-3"></div>
+</nav>
+
+</body></html>

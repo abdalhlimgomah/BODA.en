@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BODA Splash Screen</title>
+<script src="../assets/js/splash.config.js"></script>
+<script src="../assets/vendor/tailwind/tailwind-forms-typography.js"></script>
+<link href="../assets/fonts/fredoka.css" rel="stylesheet"/>
+<link href="../assets/fonts/inter.css" rel="stylesheet"/>
+<link href="../assets/css/splash.css" rel="stylesheet"/>
+  </head>
+<body class="bg-background-light dark:bg-background-dark h-screen w-full flex flex-col items-center justify-center overflow-hidden antialiased splash-bg">
+<div class="flex flex-col items-center justify-center relative z-10 p-8">
+<div class="relative flex items-end mb-12"> 
+<div class="absolute -top-10 left-[26%] transform -translate-x-1/2 w-16 h-12 z-20">
+<svg class="w-full h-full drop-shadow-md" fill="none" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 55 C 30 50, 70 50, 90 55 L 85 30 L 70 45 L 50 15 L 30 45 L 15 30 Z" fill="url(#crown-gradient)" stroke="none"></path>
+<circle cx="15" cy="30" fill="#FBBF24" r="4"></circle>
+<circle cx="50" cy="15" fill="#FBBF24" r="5"></circle>
+<circle cx="85" cy="30" fill="#FBBF24" r="4"></circle>
+<defs>
+<linearGradient gradientUnits="userSpaceOnUse" id="crown-gradient" x1="50" x2="50" y1="0" y2="60">
+<stop stop-color="#FFC107"></stop>
+<stop offset="1" stop-color="#F97316"></stop>
+</linearGradient>
+</defs>
+</svg>
+</div>
+<div class="flex items-baseline font-display text-[6rem] leading-none tracking-tight drop-shadow-xl select-none">
+<span class="text-[#0078D7]">B</span>
+<span class="text-[#F25822]">u</span>
+<span class="text-[#00A651]">d</span>
+<span class="text-[#60399E]">a</span>
+</div>
+</div>
+<div class="flex flex-col items-center gap-3">
+<div class="gradient-spinner"></div>
+<span class="text-white text-sm font-sans tracking-wide opacity-80 font-medium">Loading...</span>
+</div>
+</div>
+<script src="../assets/js/splash.js"></script>
+</body></html>

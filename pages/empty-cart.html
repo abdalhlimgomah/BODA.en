@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BODA Empty Cart</title>
+<script src="../assets/js/empty-cart.config.js"></script>
+<script src="../assets/vendor/tailwind/tailwind-forms-typography.js"></script>
+<link href="../assets/fonts/inter.css" rel="stylesheet"/>
+<link href="../assets/fonts/material-symbols-outlined.css" rel="stylesheet"/>
+<link href="../assets/css/empty-cart.css" rel="stylesheet"/>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display min-h-screen flex flex-col antialiased">
+<div class="bg-secondary text-white px-4 pt-3 pb-2 flex justify-between items-center text-xs font-medium">
+<span>10:45 AM</span>
+<div class="flex items-center space-x-1">
+<span class="material-symbols-outlined text-sm">signal_cellular_alt</span>
+<span class="material-symbols-outlined text-sm">wifi</span>
+<span class="material-symbols-outlined text-sm">battery_full</span>
+</div>
+</div>
+
+<main class="flex-1 flex flex-col items-center justify-center p-6 text-center">
+<div class="mb-6 relative">
+<div class="absolute -top-4 -left-8 text-primary opacity-20 text-2xl animate-bounce">×</div>
+<div class="absolute top-0 -right-6 text-secondary dark:text-blue-400 opacity-20 text-xl">○</div>
+<div class="absolute bottom-4 -left-6 text-secondary dark:text-blue-400 opacity-20 text-xl">○</div>
+<div class="absolute -bottom-2 -right-8 text-primary opacity-20 text-2xl animate-pulse">+</div>
+<div class="w-48 h-48 mx-auto relative flex items-center justify-center">
+<div class="bg-yellow-100 dark:bg-yellow-900/30 rounded-full w-40 h-40 absolute top-4 left-4 z-0"></div>
+<img alt="Empty yellow shopping cart illustration" class="w-40 h-40 object-contain relative z-10 drop-shadow-lg opacity-90 hover:scale-105 transition-transform duration-300" src="../assets/images/remote/empty-cart-illustration.jpg"/>
+</div>
+</div>
+<h2 class="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            Your cart is empty
+        </h2>
+<p class="text-gray-500 dark:text-gray-400 mb-8 max-w-xs mx-auto">
+            Looks like you haven't added anything to your cart yet.
+        </p>
+<button class="my-5">
+<a href="home.html" class="w-full h-full absolute inset-0">Start Shopping</a>
+<span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</main>
+</body></html>
