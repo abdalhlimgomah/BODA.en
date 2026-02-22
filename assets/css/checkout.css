@@ -1,0 +1,55 @@
+/* 
+ * Creates the arrow shape for the active step.
+ * Using clip-path is cleaner than borders for complex angles.
+ */
+.step-arrow-active {
+  position: relative;
+  background-color: #FF5722;
+  clip-path: polygon(0% 0%, 85% 0%, 100% 50%, 85% 100%, 0% 100%, 15% 50%);
+  /* Slight offset to fit previous arrow tail */
+  margin-left: -15px; 
+  padding-left: 25px; /* Compenstate for the indent */
+  padding-right: 25px; /* Compensate for the point */
+  z-index: 10;
+}
+
+.step-start {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-top-left-radius: 8px;
+  border-bottom-left-radius: 8px;
+  /* Point outward to the right */
+  clip-path: polygon(0% 0%, 85% 0%, 100% 50%, 85% 100%, 0% 100%);
+  z-index: 5;
+  padding-right: 25px; /* Space for arrow point */
+}
+
+.step-end {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-top-right-radius: 8px;
+  border-bottom-right-radius: 8px;
+  /* Indent on the left to receive arrow */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 15% 50%);
+  margin-left: -15px;
+  z-index: 1;
+  padding-left: 25px; /* Space for incoming arrow */
+}
+
+/* Custom radio button styling to match design exactly */
+.custom-radio:checked {
+  color: #1A2B49; /* The inner dot color */
+  background-color: #fff;
+  border-color: #1A2B49;
+  background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='%231A2B49' xmlns='http://www.w3.org/2000/svg'%3e%3ccircle cx='8' cy='8' r='5'/%3e%3c/svg%3e");
+}
+
+/* Hide scrollbar for cleaner mobile look */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+body {
+  min-height: max(884px, 100dvh);
+}

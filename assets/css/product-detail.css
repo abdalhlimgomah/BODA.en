@@ -1,0 +1,16 @@
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: white;
+  padding-bottom: 100px; /* Space for fixed bottom bar */
+}
+/* Hide scrollbar for clean horizontal scroll if needed */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+body {
+  min-height: max(884px, 100dvh);
+}

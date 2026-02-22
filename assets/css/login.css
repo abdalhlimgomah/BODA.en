@@ -1,0 +1,13 @@
+.pill-input {
+  border-radius: 9999px;
+  border: 1px solid #1a2b49;
+  height: 56px;
+}
+.pill-input:focus {
+  ring: 2px solid #FF5722;
+  outline: none;
+  border-color: #FF5722;
+}
+body {
+  min-height: max(884px, 100dvh);
+}
