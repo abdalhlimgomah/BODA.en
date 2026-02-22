@@ -1,8 +1,15 @@
 const renderHomeProducts = (filter = "") => {
   const container = document.getElementById("home-products");
-  if (!container || !window.BODAStore) return;
+  if (!container) return;
 
-  const products = Object.values(BODAStore.getAllProducts());
+  const store = window.BODAStore || window;
+  if (!store.getAllProducts) {
+    console.warn("No product loader found (BODAStore.getAllProducts or getAllProducts)");
+    container.innerHTML = '<div class="text-sm text-gray-500">No products available</div>';
+    return;
+  }
+
+  const products = Object.values(store.getAllProducts());
   const query = filter.trim().toLowerCase();
   const filtered = query
     ? products.filter((product) => product.name.toLowerCase().includes(query))
@@ -51,6 +58,7 @@ const renderHomeProducts = (filter = "") => {
       const product = BODAStore.getProductById(productId);
       if (product) {
         BODAStore.addToCart(product, 1);
+        BODAStore.updateCartCount();
       }
     });
   });
@@ -58,7 +66,9 @@ const renderHomeProducts = (filter = "") => {
   container.querySelectorAll("[data-view-product]").forEach((button) => {
     button.addEventListener("click", () => {
       const productId = button.getAttribute("data-view-product");
-      window.location.href = `product-detail.html?id=${productId}`;
+      // Navigate to product detail page inside the pages folder
+      const isInPages = window.location.pathname.includes('/pages/');
+      window.location.href = isInPages ? `product.html?id=${productId}` : `pages/product.html?id=${productId}`;
     });
   });
 
@@ -73,6 +83,32 @@ const renderHomeProducts = (filter = "") => {
 document.addEventListener("DOMContentLoaded", () => {
   renderHomeProducts();
   BODAStore.updateCartCount();
+
+  // Apply saved address to header
+  try {
+    const userEmail = localStorage.getItem("userEmail");
+    const selected = userEmail ? localStorage.getItem(`selected_address_${userEmail}`) : null;
+    const deliverEl = document.getElementById("deliver-to-text");
+    if (deliverEl) {
+      if (selected) deliverEl.textContent = selected;
+      else {
+        const addresses = userEmail ? JSON.parse(localStorage.getItem(`addresses_${userEmail}`) || "[]") : [];
+        if (addresses && addresses.length > 0) deliverEl.textContent = addresses[0];
+      }
+    }
+  } catch (err) {
+    console.warn("Error applying saved address", err);
+  }
+
+  // Apply locale (simple)
+  const locale = localStorage.getItem("locale") || "en";
+  if (locale === "ar") {
+    document.documentElement.lang = "ar";
+    document.documentElement.dir = "rtl";
+  } else {
+    document.documentElement.lang = "en";
+    document.documentElement.dir = "ltr";
+  }
 
   const searchInput = document.getElementById("home-search");
   if (searchInput) {

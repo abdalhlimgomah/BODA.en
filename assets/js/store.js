@@ -136,12 +136,19 @@ const productsDatabase = {
 const getPagePrefix = () => (window.location.pathname.includes("/pages/") ? "../" : "");
 
 const getImagePath = (path) => {
-  if (!path) return "";
-  if (path.startsWith("http") || path.startsWith("data:")) return path;
-  return `${getPagePrefix()}${path}`;
+  const isFile = window.location && window.location.protocol === 'file:';
+  if (!path) return isFile ? (window.location.pathname.includes('/pages/') ? '../assets/images/placeholder.jpg' : 'assets/images/placeholder.jpg') : '/assets/images/placeholder.jpg';
+  if (path.startsWith('http') || path.startsWith('data:')) return path;
+
+  let normalized = path.replace(/^\.{1,2}\//, '').replace(/^\//, '');
+  if (isFile) {
+    const prefix = window.location.pathname.includes('/pages/') ? '../' : '';
+    return prefix + normalized;
+  }
+  return '/' + normalized;
 };
 
-const getAllProducts = () => {
+const _getAllProducts = () => {
   let all = { ...productsDatabase };
 
   for (let i = 0; i < localStorage.length; i += 1) {
@@ -192,7 +199,7 @@ const getAllProducts = () => {
 };
 
 const getProductById = (id) => {
-  const all = getAllProducts();
+  const all = _getAllProducts();
   return all[id] || null;
 };
 
@@ -312,7 +319,7 @@ const toggleWishlist = (productId) => {
 
 window.BODAStore = {
   getImagePath,
-  getAllProducts,
+  getAllProducts: _getAllProducts,
   getProductById,
   getCart,
   saveCart,
@@ -324,3 +331,11 @@ window.BODAStore = {
   saveWishlist,
   toggleWishlist
 };
+
+// Backwards-compat: expose old global helpers for pages that call them directly
+if (typeof window !== 'undefined') {
+  window.getAllProducts = window.getAllProducts || _getAllProducts;
+  window.getProductById = window.getProductById || getProductById;
+  window.getImagePath = window.getImagePath || getImagePath;
+  window.updateCartCount = window.updateCartCount || updateCartCount;
+}
