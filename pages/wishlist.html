@@ -6,6 +6,16 @@
     <title>المفضلة - BODA</title>
     <link rel="stylesheet" href="../assets/css/home.css">
     <link rel="stylesheet" href="../assets/vendor/fontawesome/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <script src="../assets/vendor/tailwind/tailwind-forms-typography.js"></script>
+<link href="../assets/fonts/inter.css" rel="stylesheet"/>
+<script src="../assets/js/home.config.js"></script>
+<script src="../assets/vendor/tailwind/tailwind-forms-typography.js"></script>
+<link href="../assets/fonts/inter.css" rel="stylesheet"/>
+<link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet"/>
+<link href="../assets/css/home.css" rel="stylesheet"/>
+<link rel="stylesheet" href="/pages/signup/index.html">
+<link rel="stylesheet" href="/pages/signin/login in.html">
+<link rel="stylesheet" href="/pages/signin/style.css">
     <style>
         .wishlist-container {
             max-width: 1200px;
@@ -304,6 +314,28 @@
     </style>
 </head>
 <body class="my">
+    <header class="sticky top-0 z-50 bg-surface-light dark:bg-surface-dark shadow-sm">
+<div class="px-4 py-3 flex items-center justify-between gap-3">
+<a class="p-2 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="wishlist.html">
+<span class="material-icons-outlined text-2xl">favorite_border</span>
+</a>
+<div class="flex-1 relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons-outlined text-slate-400 text-xl">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:border-secondary dark:focus:border-primary focus:ring-1 focus:ring-secondary dark:focus:ring-primary transition-colors" id="home-search" placeholder="What are you looking for?" type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<div class="text-secondary dark:text-white font-black text-2xl tracking-tighter flex items-center">
+<span class="text-primary mr-1">
+<span class="material-icons-outlined align-middle text-2xl">shopping_bag</span>
+</span>
+                    BODA
+                </div>
+
+</div>
+</div>
+</header>
     <div class="wishlist-container">
         <h1 class="wishlist-header">المفضلة</h1>
 
@@ -349,8 +381,34 @@
         </div>
     </div>
 
+    <header>
+        <nav class="fixed bottom-0 w-full bg-white dark:bg-surface-dark border-t border-gray-200 dark:border-gray-800 pb-safe pt-2 px-6 z-50">
+<div class="flex justify-between items-center pb-4">
+<a class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500" href="home.html">
+<span class="material-icons-outlined text-2xl">home</span>
+<span class="text-[10px]">Home</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500" href="products.html">
+<span class="material-icons-outlined text-2xl">category</span>
+<span class="text-[10px]">Categories</span>
+</a>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500" href="ahsab.html">
+<span class="material-icons-outlined text-2xl">person</span>
+<span class="text-[10px]">Account</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500" href="empty-cart.html">
+<span class="material-icons-outlined text-2xl">shopping_cart</span>
+<span class="text-[10px]">Cart</span>
+
+</div>
+</nav>
+    </header>
+
     
 <script src="../assets/js/wishlist.js"></script>
+<script src="../assets/js/store.js"></script>
+<script src="../assets/js/home.js"></script>
     <script>
         function renderWishlist() {
             const wishlist = getWishlist();
