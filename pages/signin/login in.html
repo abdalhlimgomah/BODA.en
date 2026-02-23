@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log in Form</title>
+    <!-- Font Awesome CDN -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+        <script src="../assets/js/home.config.js"></script>
+<script src="../assets/vendor/tailwind/tailwind-forms-typography.js"></script>
+<link href="../assets/fonts/inter.css" rel="stylesheet"/>
+<link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet"/>
+<link href="../assets/css/home.css" rel="stylesheet"/>
+<link rel="stylesheet" href="/pages/signup/index.html">
+<link rel="stylesheet" href="/pages/signin/login in.html">
+<link rel="stylesheet" href="/pages/signin/style.css">
+
+    <!-- Css File -->
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="container">
+      <div class="login-container">
+        <h1>log in</h1>
+
+        <form>
+          <div class="input-group">
+            <input type="text" name="username" id="username" required />
+            <label for="username"
+              ><i class="fa-solid fa-user"></i> Username</label
+            >
+            <div class="underline"></div>
+          </div>
+
+          <div class="input-group">
+            <input type="password" name="password" id="password" required />
+            <label for="password"
+              ><i class="fa-solid fa-lock"></i> Password</label
+            >
+            <span id="eye" class="eye"><i class="fa-solid fa-eye"></i></span>
+            <div class="underline"></div>
+          </div>
+
+          <div class="bottom-group">
+            <label>
+              <input type="checkbox" name="remember" checked />
+              Remember Me
+            </label>
+
+            <a href="#">Forget Password?</a>
+          </div>
+
+          <button type="button">log in</button>
+        </form>
+
+        <div class="alternate">
+          <div>Or create account with</div>
+        </div>
+
+        <div class="social-icons">
+          <a href="">
+            <img src="./img/google.png" alt="" />
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- JS File -->
+    <script src="main.js"></script>
+    <script src="../assets/js/store.js"></script>
+<script src="../assets/js/home.js"></script>
+  </body>
+</html>

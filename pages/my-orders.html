@@ -11,7 +11,26 @@
 <link href="../assets/css/my-orders.css" rel="stylesheet"/>
 </head>
 <body class="bg-background-light dark:bg-background-dark min-h-screen text-text-light dark:text-text-dark pb-24">
+<div class="px-4 py-3 flex items-center justify-between gap-3">
+<a class="p-2 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors" href="wishlist.html">
+<span class="material-icons-outlined text-2xl">favorite_border</span>
+</a>
+<div class="flex-1 relative">
+<div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+<span class="material-icons-outlined text-slate-400 text-xl">search</span>
+</div>
+<input class="block w-full pl-10 pr-3 py-2 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-800 text-sm placeholder-slate-400 focus:outline-none focus:border-secondary dark:focus:border-primary focus:ring-1 focus:ring-secondary dark:focus:ring-primary transition-colors" id="home-search" placeholder="What are you looking for?" type="text"/>
+</div>
+<div class="flex items-center gap-2">
+<div class="text-secondary dark:text-white font-black text-2xl tracking-tighter flex items-center">
+<span class="text-primary mr-1">
+<span class="material-icons-outlined align-middle text-2xl">shopping_bag</span>
+</span>
+                    BODA
+                </div>
 
+</div>
+</div>
 <main class="px-4 space-y-4">
 <div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
 <div class="px-4 py-3 border-b border-gray-100 dark:border-gray-700 flex justify-between items-start">
@@ -26,127 +45,7 @@
 <span class="material-icons">more_vert</span>
 </button>
 </div>
-<div class="p-4 flex gap-4">
-<div class="w-20 h-20 flex-shrink-0 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-gray-100 dark:border-gray-700">
-<img alt="Blue T-Shirt" class="w-16 h-auto object-contain mix-blend-multiply dark:mix-blend-normal" src="../assets/images/remote/my-orders-blue-tshirt.jpg"/>
-</div>
-<div class="flex-1 flex flex-col justify-between">
-<div>
-<h4 class="text-sm font-medium text-gray-800 dark:text-gray-100 line-clamp-2 leading-snug">
-                            Premium Cotton Crew Neck T-Shirt - Ocean Blue, Size L
-                        </h4>
-<p class="mt-1 text-sm font-bold text-gray-900 dark:text-white">$29.99</p>
-</div>
-</div>
-</div>
-<div class="px-4 pb-4 pt-0 flex items-center justify-between">
-<div class="inline-flex items-center bg-yellow-400/20 text-yellow-700 dark:text-yellow-400 text-[10px] font-bold px-2 py-0.5 rounded">
-<span class="mr-1">⚡</span> BODA EXPRESS
-                </div>
-<div class="text-xs text-gray-400 dark:text-gray-500">
-                Sold by: Official Store
-                </div>
-</div>
-<div class="px-4 pb-4">
-<button class="w-full bg-primary hover:bg-blue-900 text-white font-medium py-2.5 rounded-lg text-sm transition shadow-sm">
-                    Track Order
-                </button>
-</div>
-</div>
-<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative">
-<div class="px-4 py-3 flex justify-between items-center">
-<div>
-<p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Cancelled on Saturday, Feb 7</p>
-<p class="text-xs text-gray-500 dark:text-gray-400">Order #BODA-67890</p>
-</div>
-<div class="bg-red-50 dark:bg-red-900/20 p-1.5 rounded-full">
-<span class="material-icons-outlined text-red-500 text-xl">block</span>
-</div>
-</div>
-<div class="px-4 pb-4 flex gap-4">
-<div class="w-20 h-20 flex-shrink-0 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-gray-100 dark:border-gray-700">
-<img alt="Running Shoes" class="w-16 h-auto object-contain mix-blend-multiply dark:mix-blend-normal" src="../assets/images/remote/my-orders-running-shoes.jpg"/>
-</div>
-<div class="flex-1 flex flex-col justify-center">
-<h4 class="text-sm font-medium text-gray-800 dark:text-gray-100 line-clamp-2">
-                        Air Max Retro High Performance Running Shoes - Grey/Orange
-                    </h4>
-<p class="mt-1 text-sm font-bold text-gray-900 dark:text-white">$165.00</p>
-</div>
-</div>
-<div class="border-t border-gray-100 dark:border-gray-700 mx-4 mb-3"></div>
-<div class="px-4 pb-4 flex justify-between items-center">
-<div class="inline-flex items-center bg-yellow-400 text-black text-[10px] font-bold px-3 py-1 rounded-sm shadow-sm">
-                    EXPRESS
-                </div>
-<span class="text-xs text-gray-400 dark:text-gray-500">Order ID: NEGI10030418583</span>
-</div>
-</div>
-<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
-<div class="px-4 py-3 flex justify-between items-center">
-<div>
-<p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Delivered on Monday, Oct 16</p>
-<p class="text-xs text-gray-500 dark:text-gray-400">Order #BODA-11223</p>
-</div>
-<div class="bg-green-50 dark:bg-green-900/20 p-1.5 rounded-full">
-<span class="material-icons-outlined text-green-600 text-xl">check_circle</span>
-</div>
-</div>
-<div class="px-4 pb-4 flex gap-4">
-<div class="w-20 h-20 flex-shrink-0 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-gray-100 dark:border-gray-700">
-<img alt="Smart Watch" class="w-14 h-auto object-contain mix-blend-multiply dark:mix-blend-normal" src="../assets/images/remote/my-orders-smart-watch.jpg"/>
-</div>
-<div class="flex-1 flex flex-col justify-center">
-<h4 class="text-sm font-medium text-gray-800 dark:text-gray-100 line-clamp-2">
-                        Series 7 Smart Watch, Midnight Aluminum Case with Sport Band
-                    </h4>
-<p class="mt-1 text-sm font-bold text-gray-900 dark:text-white">$399.00</p>
-</div>
-</div>
-<div class="border-t border-gray-100 dark:border-gray-700 mx-4 mb-3"></div>
-<div class="px-4 pb-4 flex justify-between items-center">
-<div class="inline-flex items-center bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300 text-[10px] font-bold px-3 py-1 rounded-sm shadow-sm">
-                    MARKET
-                </div>
-<button class="text-secondary hover:text-orange-700 text-xs font-bold uppercase tracking-wide">
-                Buy Again
-                </button>
-</div>
-<div class="px-4 pb-4">
-<button class="w-full bg-white dark:bg-transparent border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-white font-medium py-2 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition">
-                    View Details
-                </button>
-</div>
-</div>
-<div class="bg-surface-light dark:bg-surface-dark rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden relative">
-<div class="px-4 py-3 flex justify-between items-center">
-<div>
-<p class="text-sm font-semibold text-gray-800 dark:text-gray-200">Cancelled on Friday, Feb 20</p>
-<p class="text-xs text-gray-500 dark:text-gray-400">Order #BODA-99887</p>
-</div>
-<div class="bg-red-50 dark:bg-red-900/20 p-1.5 rounded-full">
-<span class="material-icons-outlined text-red-500 text-xl">block</span>
-</div>
-</div>
-<div class="px-4 pb-4 flex gap-4">
-<div class="w-20 h-20 flex-shrink-0 bg-gray-50 dark:bg-gray-800 rounded-lg flex items-center justify-center border border-gray-100 dark:border-gray-700">
-<img alt="Hair Straightener" class="w-16 h-auto object-contain mix-blend-multiply dark:mix-blend-normal" src="../assets/images/remote/my-orders-hair-straightener.jpg"/>
-</div>
-<div class="flex-1 flex flex-col justify-center">
-<div class="text-[10px] text-gray-400 uppercase tracking-wider mb-0.5">Tornado Gold</div>
-<h4 class="text-sm font-medium text-gray-800 dark:text-gray-100 line-clamp-2">
-                        Tornado Gold Hair Straightener Professional Salon Grade
-                    </h4>
-<p class="mt-1 text-sm font-bold text-gray-900 dark:text-white">$1295.00</p>
-</div>
-</div>
-<div class="border-t border-gray-100 dark:border-gray-700 mx-4 mb-3"></div>
-<div class="px-4 pb-4 flex justify-between items-center">
-<div class="inline-flex items-center bg-yellow-400 text-black text-[10px] font-bold px-3 py-1 rounded-sm shadow-sm">
-                    EXPRESS
-                </div>
-</div>
-</div>
+
 </main>
 <div class="fixed bottom-24 left-4 z-50">
 <button class="bg-accent-yellow text-gray-900 flex items-center gap-2 px-5 py-3 rounded-full shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-200 font-bold text-sm border-2 border-yellow-500 dark:border-yellow-600">
@@ -165,15 +64,17 @@
 <span class="material-icons-outlined text-2xl">category</span>
 <span class="text-[10px]">Categories</span>
 </a>
-<a class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500" href="empty-cart.html">
-<span class="material-icons-outlined text-2xl">shopping_cart</span>
-<span class="text-[10px]">Cart</span>
 </a>
 <a class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500" href="ahsab.html">
 <span class="material-icons-outlined text-2xl">person</span>
 <span class="text-[10px]">Account</span>
 </a>
+<a class="flex flex-col items-center gap-1 text-gray-400 dark:text-gray-500" href="empty-cart.html">
+<span class="material-icons-outlined text-2xl">shopping_cart</span>
+<span class="text-[10px]">Cart</span>
+
 </div>
 </nav>
+
 
 </body></html>
