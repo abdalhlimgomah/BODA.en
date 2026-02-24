@@ -5,48 +5,8 @@
  * Keep calls here minimal to avoid duplicate declarations.
  */
 
-// ========== SHOPPING CART FUNCTIONS ==========
-// Define a fallback `addToCart` only if one hasn't been provided by `store.js` or BODAStore.
-if (typeof addToCart === 'undefined') {
-    var addToCart = function(product, quantity = 1) {
-        try {
-            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-            if (!isLoggedIn) {
-                showNotification('❌ يجب تسجيل الدخول أولاً');
-                setTimeout(() => { window.location.href = '/pages/login.html'; }, 1500);
-                return;
-            }
-
-            if (typeof BODAStore !== 'undefined' && typeof BODAStore.addToCart === 'function') {
-                BODAStore.addToCart(product, quantity);
-                if (typeof BODAStore.updateCartCount === 'function') {
-                    BODAStore.updateCartCount();
-                } else if (typeof updateCartCount === 'function') {
-                    updateCartCount();
-                }
-                showNotification('✅ تم إضافة المنتج إلى العربة');
-                return;
-            }
-
-            // Fallback cart logic if BODAStore not available
-            const cart = getCart();
-            const existing = cart.find(item => item.id === product.id);
-            if (existing) {
-                existing.quantity += quantity;
-            } else {
-                cart.push({ id: product.id, name: product.name, price: product.price, quantity, image: product.image || '/assets/images/placeholder.jpg', category: product.category });
-            }
-            saveCart(cart);
-            if (typeof updateCartCount === 'function') {
-                updateCartCount();
-            }
-            showNotification('✅ تم إضافة المنتج إلى العربة');
-        } catch (e) {
-            console.error(e);
-            showNotification('حدث خطأ أثناء إضافة المنتج', 'error');
-        }
-    };
-}
+// Shopping cart functions are provided by `assets/js/store.js` (BODAStore).
+// Do not redeclare `addToCart` here to avoid conflicts with the centralized store implementation.
 
 // Ensure updateCartCount exists (delegate to BODAStore if available)
 if (typeof updateCartCount === 'undefined') {

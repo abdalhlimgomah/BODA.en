@@ -338,4 +338,6 @@ if (typeof window !== 'undefined') {
   window.getProductById = window.getProductById || getProductById;
   window.getImagePath = window.getImagePath || getImagePath;
   window.updateCartCount = window.updateCartCount || updateCartCount;
+  // Expose addToCart globally for pages that call it directly
+  window.addToCart = window.addToCart || addToCart;
 }
