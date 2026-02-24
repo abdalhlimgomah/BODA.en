@@ -20,9 +20,8 @@
 <link href="../assets/fonts/inter.css" rel="stylesheet"/>
 <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet"/>
 <link href="../assets/css/home.css" rel="stylesheet"/>
-<link rel="stylesheet" href="/pages/signup/index.html">
-<link rel="stylesheet" href="/pages/signin/login in.html">
-<link rel="stylesheet" href="/pages/signin/style.css">
+    <link rel="stylesheet" href="../tfasil/src/output.css" />
+<!-- signup/signin CSS not required here -->
     <style>
         /* Specific styles for product details that extend the main theme */
         
@@ -459,8 +458,7 @@ background: linear-gradient(45deg, #000000, #040404);
             .tabs-nav { gap: 1.5rem; overflow-x: auto; }
         }
         .mu {
-            background: url('../assets/images/product-bg.jpg') no-repeat center center fixed;
-            background-size: cover;
+            background: linear-gradient(180deg,#ffffff 0%, #ffffff 100%);
         }
     </style>
 </head>
@@ -493,59 +491,53 @@ background: linear-gradient(45deg, #000000, #040404);
     </header>
 
     <main class="w-full max-w-md mx-auto sm:max-w-full">
-        <!-- Main Product Section -->
-        <section class="product-main">
-            <!-- Gallery -->
-            <div class="gallery-wrap">
-                <div class="main-img-container" id="mainImageContainer">
-                    <img id="mainImage" src="" alt="صورة المنتج">
-                </div>
-                <div class="thumbs-grid" id="thumbnailGallery">
-                    <!-- Dynamic thumbs -->
-                </div>
-            </div>
+                <!-- Replaced top product section with TFASIL product card -->
+                <div class="max-w-5xl min-h-screen m-auto flex items-center md:px-7 px-3 py-7">
+                    <div class="w-full grid md:grid-cols-2 grid-cols-1 gap-5 bg-white shadow-xl rounded-2xl md:overflow-visible overflow-hidden">
+                        <div class="bg-[#afde3d] relative p-3 rounded-tl-2xl md:rounded-bl-2xl">
+                            <img id="mainImage" src="../tfasil/src/assets/nike-gr.png" alt="Nike Shoe Image" class="md:absolute md:scale-[1.2] scale-90 md:-skew-y-12 md:top-[50%] md:-translate-y-[50%] lg:-left-0.5 md:animate-[scaleupMD_2s_linear] animate-[scaleupSM_2s_linear]" />
+                        </div>
+                        <!-- Thumbnails (populated from product images) -->
+                        <div class="thumbs-grid mt-3" id="thumbnailGallery" style="display:none; grid-template-columns: repeat(5, 1fr); gap:0.6rem;"></div>
 
-            <!-- Info -->
-            <div class="product-info-wrap">
-                <div class="product-badge" id="productCategory">...</div>
-                <h1 class="product-title" id="productTitle">جاري تحميل المنتج...</h1>
-                
-                <div class="rating-summary">
-                    <div class="stars" id="productRatingStars"></div>
-                    <a href="#reviews" class="review-link">(<span id="reviewCount">0</span> مراجعة عميل)</a>
-                </div>
+                        <div class="p-5 md:ps-0">
+                            <div class="product-badge" id="productCategory">...</div>
+                            <h2 id="productTitle" class="capitalize md:text-4xl text-3xl font-semibold tracking-wider mb-4">nike shoes</h2>
 
-                <div class="price-wrap">
-                    <span class="current-price" id="productPrice">0 ج.م</span>
-                    <span class="old-price" id="originalPrice" style="display: none;">0 ج.م</span>
-                    <span class="discount-tag" id="discountBadge" style="display: none;">-0%</span>
-                </div>
+                            <div class="md:flex justify-between mb-3">
+                                <h3 id="productPrice" class="md:text-3xl text-2xl">$462.44</h3>
 
-                <p class="description" id="productDescription">يرجى الانتظار...</p>
+                                <div class="flex items-center">
+                                    <div class="mr-2">
+                                        <i class="fa-solid fa-star text-amber-500 md:text-base text-sm"></i>
+                                        <i class="fa-solid fa-star text-amber-500 md:text-base text-sm"></i>
+                                        <i class="fa-solid fa-star text-amber-500 md:text-base text-sm"></i>
+                                        <i class="fa-solid fa-star text-amber-500 md:text-base text-sm"></i>
+                                        <i class="fa-regular fa-star text-amber-500 md:text-base text-sm"></i>
+                                    </div>
+                                    <span class="text-slate-600 text-sm">(3410 Reviews)</span>
+                                </div>
+                            </div>
 
-                <div class="purchase-wrap">
-                    <div class="qty-picker">
-                        <button class="qty-btn" onclick="updateQty(-1)"><i class="fa-solid fa-minus"></i></button>
-                        <input type="number" id="quantity" class="qty-input" value="1" readonly>
-                        <button class="qty-btn" onclick="updateQty(1)"><i class="fa-solid fa-plus"></i></button>
+                            <hr class="border-0 bg-slate-300 h-[2px]" />
+
+                            <div class="md:px-4">
+                                <div class="my-5">
+                                    <h3 class="capitalize text-lg font-semibold">product description</h3>
+                                      <p id="productDescription" class="text-slate-700 md:ps-4">Lorem ipsum dolor sit amet consectetur adipisicing elit. Eligendi, fuga! Architecto aspernatur facilis, iusto minima nulla quod esse beatae ex illum ipsa soluta quia dolores reprehenderit dicta ut ullam et error facere quae.</p>
+                                </div>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-6 mt-10">
+                                    <button class="bg-[#afde3d] py-2 px-10 capitalize rounded-md text-lg hover:bg-[#94cc12] cursor-pointer">buy now <i class="fa-solid fa-cart-shopping"></i></button>
+
+                                    <button class="text-red-800 bg-red-200 hover:bg-red-300 px-3 py-2 text-lg rounded-md cursor-pointer"><i class="fa-solid fa-heart"></i></button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <button class="add-to-cart-btn" onclick="addToCartClick()">
-                        <i class="fa-solid fa-cart-plus"></i>
-                        أضف إلى العربة
-                    </button>
-                    <button class="wishlist-btn" id="wishlistBtn" onclick="handleToggleWishlist()">
-                        <i class="fa-solid fa-heart"></i>
-                    </button>
                 </div>
-
-                <div class="features-grid" id="featuresList">
-                    <div class="feature-item"><i class="fa-solid fa-circle-check"></i> شحن سريع لكل المحافظات</div>
-                    <div class="feature-item"><i class="fa-solid fa-circle-check"></i> دفع عند الاستلام</div>
-                    <div class="feature-item"><i class="fa-solid fa-circle-check"></i> معاينة المنتج قبل الاستلام</div>
-                    <div class="feature-item"><i class="fa-solid fa-circle-check"></i> ضمان جودة 100%</div>
-                </div>
-            </div>
-        </section>
 
         <!-- Reviews Section -->
         <section class="product-details-tabs" id="reviews">
@@ -612,8 +604,10 @@ background: linear-gradient(45deg, #000000, #040404);
     <script src="../assets/js/store.js"></script>
     <script src="../assets/js/script.js"></script>
     <script src="../assets/js/product-detail.js"></script>
-    <script src="../assets/js/store.js"></script>
 <script src="../assets/js/home.js"></script>
+    <script src="../tfasil/main.js"></script>
+    <!-- Import products from main.js -->
+    <script src="main.js"></script>
     <script>
         // ... (Existing JS Logic)
         let currentProduct = null;
@@ -628,8 +622,27 @@ background: linear-gradient(45deg, #000000, #040404);
                 return;
             }
 
-            // Load Product
-            currentProduct = getProductById(productId);
+            // Enhanced product loading - support both store.js and main.js products
+            let currentProduct = getProductById(productId);
+            
+            // If not found in store, try to find in main.js products
+            if (!currentProduct && typeof products !== 'undefined') {
+                const mainProduct = products.find(p => p.id == productId);
+                if (mainProduct) {
+                    // Convert main.js format to store format
+                    currentProduct = {
+                        id: mainProduct.id.toString(),
+                        name: mainProduct.title,
+                        category: mainProduct.category,
+                        price: parseFloat(mainProduct.price.replace('$', '')),
+                        description: mainProduct.description,
+                        image: mainProduct.img,
+                        images: [mainProduct.img]
+                    };
+                    console.log('✅ Found product from main.js:', currentProduct);
+                }
+            }
+            
             if (!currentProduct) {
                 alert('المنتج غير موجود');
                 window.location.href = 'products.html';
@@ -638,7 +651,12 @@ background: linear-gradient(45deg, #000000, #040404);
 
             renderProductDetails(currentProduct);
             loadReviews(productId);
-            loadSimilarProducts(currentProduct.category, currentProduct.id);
+            
+            // Load similar products with a small delay to ensure all scripts are loaded
+            setTimeout(() => {
+                loadSimilarProducts(currentProduct.category, currentProduct.id);
+            }, 100);
+            
             checkWishlistStatus(productId);
             
             // Star rating interaction
@@ -652,9 +670,15 @@ background: linear-gradient(45deg, #000000, #040404);
         });
 
         function renderProductDetails(p) {
+            console.log('renderProductDetails:', p && p.id, p && p.name);
+            // Store current product globally for button handlers
+            currentProduct = p;
+            
             document.title = `${p.name} - BODA`;
-            document.getElementById('productTitle').textContent = p.name;
-            document.getElementById('productCategory').textContent = p.category;
+            const titleEl = document.getElementById('productTitle');
+            if (titleEl) titleEl.textContent = p.name;
+            const catEl = document.getElementById('productCategory');
+            if (catEl) catEl.textContent = p.category;
             
             // Pricing
             const priceEl = document.getElementById('productPrice');
@@ -662,24 +686,37 @@ background: linear-gradient(45deg, #000000, #040404);
             const discountBadge = document.getElementById('discountBadge');
 
             if (p.discountPrice && p.discountPrice < p.price) {
-                priceEl.textContent = `${p.discountPrice.toFixed(2)} ج.م`;
-                originalPriceEl.textContent = `${p.price.toFixed(2)} ج.م`;
-                originalPriceEl.style.display = 'inline-block';
-                
+                if (priceEl) priceEl.textContent = `${p.discountPrice.toFixed(2)} ج.م`;
+                if (originalPriceEl) {
+                    originalPriceEl.textContent = `${p.price.toFixed(2)} ج.م`;
+                    originalPriceEl.style.display = 'inline-block';
+                }
                 const pct = Math.round(((p.price - p.discountPrice) / p.price) * 100);
-                discountBadge.textContent = `-${pct}%`;
-                discountBadge.style.display = 'inline-block';
+                if (discountBadge) {
+                    discountBadge.textContent = `-${pct}%`;
+                    discountBadge.style.display = 'inline-block';
+                }
             } else {
-                priceEl.textContent = `${p.price.toFixed(2)} ج.م`;
-                originalPriceEl.style.display = 'none';
-                discountBadge.style.display = 'none';
+                if (priceEl) priceEl.textContent = `${p.price.toFixed(2)} ج.م`;
+                if (originalPriceEl) originalPriceEl.style.display = 'none';
+                if (discountBadge) discountBadge.style.display = 'none';
             }
 
             document.getElementById('productDescription').textContent = p.description || 'لا يوجد وصف متاح لهذا المنتج.';
             
             // Images
             const mainImg = document.getElementById('mainImage');
-            mainImg.src = getImagePath(p.image);
+            if (mainImg) mainImg.src = getImagePath(p.image || p.images?.[0] || '../tfasil/src/assets/nike-gr.png');
+
+            // Also populate TFASIL-specific elements (if present)
+            const tfTitle = document.getElementById('productTitle');
+            const tfPrice = document.getElementById('productPrice');
+            const tfDesc = document.getElementById('productDescription');
+            const tfCategory = document.getElementById('productCategory');
+            if (tfTitle) tfTitle.textContent = p.name;
+            if (tfPrice) tfPrice.textContent = (p.discountPrice && p.discountPrice < p.price) ? `${p.discountPrice.toFixed(2)} ج.م` : `${p.price.toFixed(2)} ج.م`;
+            if (tfDesc) tfDesc.textContent = p.description || tfDesc.textContent;
+            if (tfCategory) tfCategory.textContent = p.category || tfCategory.textContent;
             
             // Thumbs
             const thumbsContainer = document.getElementById('thumbnailGallery');
@@ -692,12 +729,22 @@ background: linear-gradient(45deg, #000000, #040404);
             }
 
             if (productImages.length > 1) {
-                thumbsContainer.innerHTML = productImages.map((img, i) => `
-                    <div class="thumb ${i === 0 ? 'active' : ''}" onclick="switchImage(this, '${getImagePath(img)}')">
-                        <img src="${getImagePath(img)}" alt="thumb">
-                    </div>
-                `).join('');
-                thumbsContainer.style.display = 'grid';
+                    // create thumbnails programmatically to avoid path/onclick issues
+                    thumbsContainer.innerHTML = '';
+                    productImages.forEach((img, i) => {
+                        const div = document.createElement('div');
+                        div.className = `thumb ${i === 0 ? 'active' : ''}`;
+                        const im = document.createElement('img');
+                        const src = getImagePath(img);
+                        im.src = src;
+                        im.alt = `thumb-${i}`;
+                        div.appendChild(im);
+                        div.addEventListener('click', () => {
+                            switchImage(div, src);
+                        });
+                        thumbsContainer.appendChild(div);
+                    });
+                    thumbsContainer.style.display = 'grid';
             } else {
                 thumbsContainer.style.display = 'none';
             }
@@ -718,6 +765,7 @@ background: linear-gradient(45deg, #000000, #040404);
         }
 
         function switchImage(el, src) {
+            console.log('switchImage called with src:', src);
             document.querySelectorAll('.thumb').forEach(t => t.classList.remove('active'));
             el.classList.add('active');
             
@@ -865,22 +913,89 @@ background: linear-gradient(45deg, #000000, #040404);
         }
 
         function loadSimilarProducts(category, excludeId) {
-            const all = Object.values(getAllProducts());
-            const similar = all.filter(p => p.category === category && p.id !== excludeId).slice(0, 4);
+            console.log('🔍 loadSimilarProducts called with category:', category, 'excludeId:', excludeId);
+            
+            let allProducts = [];
+            
+            // Get products from main.js
+            console.log('📦 Checking for products array...');
+            if (typeof products !== 'undefined' && Array.isArray(products)) {
+                console.log(`✅ Found ${products.length} products from main.js`);
+                allProducts = allProducts.concat(products);
+            }
+            
+            // Get products from store.js
+            try {
+                if (typeof getAllProducts === 'function') {
+                    const storeProducts = Object.values(getAllProducts());
+                    console.log(`✅ Found ${storeProducts.length} products from store.js`);
+                    allProducts = allProducts.concat(storeProducts);
+                }
+            } catch (e) {
+                console.warn('Could not load store products:', e);
+            }
+            
+            console.log(`📊 Total products loaded: ${allProducts.length}`);
+            
+            // Convert excludeId to string for comparison
+            const excludeIdStr = String(excludeId);
+            
+            // Filter similar products
+            const similar = allProducts.filter(p => {
+                const pCategory = String(p.category || '');
+                const pIdStr = String(p.id || '');
+                const matches = pCategory === category && pIdStr !== excludeIdStr;
+                if (matches) {
+                    console.log(`✅ Matched: ${p.title || p.name} (id: ${pIdStr}, category: ${pCategory})`);
+                }
+                return matches;
+            }).slice(0, 4);
+            
+            console.log(`🎯 Found ${similar.length} similar products in category "${category}"`);
             
             const container = document.getElementById('similarProducts');
+            if (!container) {
+                console.error('❌ Container #similarProducts not found!');
+                return;
+            }
+            
             if (similar.length === 0) {
-                container.innerHTML = '<p style="color: #888;">لا توجد منتجات مشابهة حالياً.</p>';
+                console.warn('⚠️ No similar products found');
+                container.innerHTML = '<p style="color: #888; text-align: center; padding: 2rem; grid-column: 1/-1;">لا توجد منتجات مشابهة حالياً.</p>';
                 return;
             }
 
-            container.innerHTML = similar.map(p => `
-                <a href="product.html?id=${p.id}" class="mini-card">
-                    <img src="${getImagePath(p.image)}" alt="${p.name}">
-                    <div class="mini-name">${p.name}</div>
-                    <div class="mini-price">${p.price.toFixed(2)} ج.م</div>
-                </a>
-            `).join('');
+            console.log('🎨 Rendering similar products...');
+            container.innerHTML = similar.map(p => {
+                const name = p.name || p.title || 'منتج بدون اسم';
+                let imageSrc = p.image || p.img || '';
+                
+                if (typeof getImagePath === 'function') {
+                    try {
+                        imageSrc = getImagePath(imageSrc);
+                    } catch (e) {
+                        console.warn('Could not get image path:', e);
+                    }
+                }
+                
+                let price = p.price;
+                if (typeof price === 'string') {
+                    price = parseFloat(price.replace(/[$ج\.م]/g, '') || '0');
+                }
+                const formattedPrice = isNaN(price) ? '0.00' : parseFloat(price).toFixed(2);
+                
+                console.log(`  📦 ${name} - ${formattedPrice}`);
+                
+                return `
+                    <a href="product.html?id=${p.id}" class="mini-card" title="${name}">
+                        <img src="${imageSrc}" alt="${name}" onerror="this.src='../tfasil/src/assets/nike-gr.png'">
+                        <div class="mini-name">${name}</div>
+                        <div class="mini-price">${formattedPrice} ج.م</div>
+                    </a>
+                `;
+            }).join('');
+            
+            console.log('✨ Similar products rendered successfully!');
         }
 </script>
 

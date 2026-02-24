@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Log in Form</title>
+    <!-- Font Awesome CDN -->
+    <link
+    rel="stylesheet"
+    ref="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+    />
+    <script src="../../assets/js/home.config.js"></script>
+    <script src="../../assets/vendor/tailwind/tailwind-forms-typography.js"></script>
+    <link href="../../assets/fonts/inter.css" rel="stylesheet"/>
+    <link href="../../assets/fonts/material-icons-outlined.css" rel="stylesheet"/>
+    <link href="../../assets/css/home.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="signin.css">
+
+    <!-- Local page CSS (moved to assets) --></head>
+<body>
+    <div class="container">
+    <div class="login-container">
+        <h1>log in</h1>
+
+        <form onsubmit="return false;">
+        <div class="input-group">
+            <input type="text" name="username" id="username" required />
+            <label for="username"
+            ><i class="fa-solid fa-user"></i> Username</label
+            >
+            <div class="underline"></div>
+        </div>
+
+        <div class="input-group">
+            <input type="password" name="password" id="password" required />
+            <label for="password"
+            ><i class="fa-solid fa-lock"></i> Password</label
+            >
+            <span id="eye" class="eye"><i class="fa-solid fa-eye"></i></span>
+            <div class="underline"></div>
+        </div>
+
+        <div class="bottom-group">
+            <label>
+            <input type="checkbox" name="remember" checked />
+            Remember Me
+            </label>
+
+            <a href="#">Forget Password?</a>
+        </div>
+
+    <button type="button" onclick="handleLogIn(event)">log in</button>
+        </form>
+
+        <div style="text-align: center; margin-top: 1.5rem; color: #888;">
+          <p>ما لديك حساب؟ <a href="../signup/index.html" style="color: #ff6b35; text-decoration: none; font-weight: bold; cursor: pointer;">إنشاء حساب</a></p>
+        </div>
+
+<div id="g_id_onload"
+data-client_id="438250899406-a6l7sgsi9g703u0207nlo4cuu273kjd8.apps.googleusercontent.com"
+data-context="signin"
+data-ux_mode="popup"
+data-callback="TFA"
+data-auto_prompt="false">
+</div>
+
+<div class="g_id_signin"
+    data-type="standard"
+    data-shape="rectangular"
+    data-theme="outline"
+    data-text="continue_with"
+    data-size="large"
+    data-logo_alignment="left">
+</div>
+    </div>
+    </div>
+
+    <!-- JS File (moved to assets) -->
+    <script src="signin.js"></script>
+    <script src="../../assets/js/store.js"></script>
+    <script src="../../assets/js/home.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <script>
+      // Initialize Google Sign-In
+    window.onload = function () {
+        google.accounts.id.initialize({
+        client_id: "438250899406-a6l7sgsi9g703u0207nlo4cuu273kjd8.apps.googleusercontent.com",
+        callback: TFA,
+        });
+        google.accounts.id.renderButton(
+        document.querySelector(".g_id_signin"),
+        {
+            theme: "outline",
+            size: "large",
+            text: "continue_with",
+            shape: "rectangular",
+            logo_alignment: "left",
+        }
+        );
+    };
+    </script>
+</body>
+</html>

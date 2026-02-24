@@ -3,227 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سياسة الخصوصية - BODA</title>
-    <link rel="stylesheet" href="../css/style.css">
-    <link rel="stylesheet" href="../assets/vendor/fontawesome/css/all.min.css">
+    <title>معاينة منتج - BODA</title>
+    <link rel="stylesheet" href="../assets/css/home.css">
+    <link rel="stylesheet" href="../assets/fonts/inter.css">
+    <link rel="stylesheet" href="../assets/fonts/material-icons-outlined.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: linear-gradient(135deg, #ffffff 0%, #f0f9fa 100%);
-            font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
-            color: #1e293b;
-            line-height: 1.8;
-        }
-
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            padding: 3rem 1rem;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .header h1 {
-            font-size: 2.2rem;
-            color: #0f172a;
-            margin-bottom: 0.5rem;
-        }
-
-        .header p {
-            color: #64748b;
-            font-size: 0.95rem;
-        }
-
-        .content {
-            background: white;
-            border-radius: 12px;
-            padding: 2rem;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .section {
-            margin-bottom: 2rem;
-        }
-
-        .section h2 {
-            color: #06b6d4;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.8rem;
-        }
-
-        .section h3 {
-            color: #0f172a;
-            font-size: 1.1rem;
-            margin: 1.5rem 0 0.5rem;
-            font-weight: 600;
-        }
-
-        .section ul {
-            margin: 1rem 0 1rem 2rem;
-            list-style-position: inside;
-        }
-
-        .section li {
-            margin-bottom: 0.8rem;
-        }
-
-        .highlight {
-            background: rgba(6, 182, 212, 0.1);
-            border-left: 4px solid #06b6d4;
-            padding: 1rem;
-            border-radius: 8px;
-            margin: 1rem 0;
-        }
-
-        .highlight.warning {
-            background: rgba(245, 158, 11, 0.1);
-            border-left-color: #f59e0b;
-        }
-
-        .footer {
-            text-align: center;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 1px solid #e2e8f0;
-            color: #64748b;
-            font-size: 0.9rem;
-        }
-
-        a {
-            color: #06b6d4;
-            text-decoration: none;
-        }
-
-        a:hover {
-            text-decoration: underline;
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                padding: 2rem 1rem;
-            }
-
-            .content {
-                padding: 1.5rem;
-            }
-
-            .header h1 {
-                font-size: 1.6rem;
-            }
-        }
+        /* Minimal TFASIL-like card styles (adapted to project CSS) */
+        :root { --card-bg: #ffffff; --accent: #afde3d; }
+        body { background: linear-gradient(180deg,#eef2ff 0%, #f8fafc 100%); font-family: Inter, sans-serif; }
+        .tf-container { max-width: 980px; margin: 3rem auto; padding: 1rem; }
+        .tf-card { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; background: var(--card-bg); border-radius: 16px; box-shadow: 0 10px 30px rgba(2,6,23,0.08); overflow: hidden; }
+        .tf-media { background: linear-gradient(135deg,var(--accent),#94cc12); padding: 2rem; display:flex; align-items:center; justify-content:center; }
+        .tf-media img { max-width: 90%; height: auto; object-fit:contain; }
+        .tf-info { padding: 2rem; display:flex; flex-direction:column; gap:1rem; }
+        .tf-title { font-size: 1.75rem; font-weight:800; color:#0b1220; }
+        .tf-price { font-size:1.5rem; color:#0b1220; font-weight:800; }
+        .tf-desc { color:#334155; line-height:1.6; }
+        .tf-controls { display:flex; gap:0.75rem; align-items:center; margin-top:1rem; }
+        .btn { padding:0.8rem 1.25rem; border-radius:10px; border:none; cursor:pointer; font-weight:700; }
+        .btn-primary { background: linear-gradient(45deg,var(--accent),#090979); color:#fff; }
+        .btn-ghost { background: rgba(0,0,0,0.05); }
+        @media (max-width:800px) { .tf-card { grid-template-columns: 1fr; } }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>
-                <i class="fas fa-lock"></i>
-                سياسة الخصوصية
-            </h1>
-            <p>آخر تحديث: 18 فبراير 2026</p>
-        </div>
-
-        <div class="content">
-            <div class="section">
-                <h2>
-                    <i class="fas fa-info-circle"></i>
-                    مقدمة
-                </h2>
-                <p>
-                    نحن في BODA نعتبر خصوصيتك أولويتنا الأساسية. هذه السياسة توضح كيفية نحن نجمع ونستخدم ونحمي بيانات الشركاء والعملاء. نلتزم بحماية بيانات المستخدمين وفقاً لأعلى معايير الأمان والقانون المصري.
-                </p>
+    <div class="tf-container">
+        <div class="tf-card" id="tfCard">
+            <div class="tf-media">
+                <img id="tfMainImage" src="../assets/images/1f2269e3-3b3c-4c33-9bfe-606c60be3058.jpg" alt="product image">
             </div>
+            <div class="tf-info">
+                <div>
+                    <div id="tfCategory" style="font-weight:700;color:#6b7280;">... التصنيف</div>
+                    <div id="tfTitle" class="tf-title">جاري تحميل المنتج...</div>
+                    <div class="tf-price" id="tfPrice">0 ج.م</div>
+                </div>
+                <p id="tfDescription" class="tf-desc">وصف المنتج سيظهر هنا عندما تختار منتج.</p>
 
-
-            <div class="section">
-                <h2>
-                    <i class="fas fa-cogs"></i>
-
-                <h3>2.1 الأهداف الأساسية</h3>
-                <p>نستخدم البيانات لـ:</p>
-                <ul>
-                    <li>إدارة حسابك وتوفير الخدمات</li>
-                    <li>معالجة الطلبات والمدفوعات</li>
-                    <li>الاتصال بك عند الحاجة</li>
-                    <li>تحسين جودة الخدمة</li>
-                    <li>الامتثال للقوانين واللوائح</li>
-                </ul>
-
-                <h3>2.2 التسويق والعروض</h3>
-                <p>قد نستخدم بريدك الإلكتروني لإرسال عروض وأخبار متعلقة بـ BODA. يمكنك إلغاء الاشتراك في أي وقت.</p>
-
-                <h3>2.3 التحليل والإحصاء</h3>
-                <p>نستخدم البيانات المجمعة (بشكل مجهول) لتحليل الأداء وتحسين المنصة.</p>
-            </div>
-
-            <div class="section">
-                <h2>
-                    <i class="fas fa-lock"></i>
-                    3. حماية البيانات
-                </h2>
-
-                <h3>3.1 تدابير الأمان</h3>
-                <ul>
-                    <li>تشفير البيانات أثناء النقل والتخزين</li>
-                    <li>جدران حماية وأنظمة كشف الهجمات</li>
-                    <li>حسابات آمنة بكلمات مرور قوية</li>
-                    <li>مراجعات أمنية دورية</li>
-                </ul>
-
-
-            <div class="section">
-                <h2>
-                    <i class="fas fa-share-alt"></i>
-                    4. مشاركة البيانات
-                </h2>
-
-                <h3>4.3 التزامات الأطراف الثالثة</h3>
-                <p>جميع الأطراف الثالثة ملزمة بحماية البيانات وعدم استخدامها إلا للأغراض المتفق عليها.</p>
-            </div>
-
-            <div class="section">
-                <h2>
-                    <i class="fas fa-user"></i>
-                    5. حقوق المستخدم
-                </h2>
-
-                <h3>5.1 حق الوصول</h3>
-
-                <h3>5.2 حق التعديل</h3>
-                <p>يمكنك تصحيح أو تحديث بيانات حسابك في أي وقت.</p>
-
-                <h3>5.3 حق الحذف</h3>
-                <p>يحق لك طلب حذف حسابك وبياناتك الشخصية، مع الالتزامات القانونية والضريبية.</p>
-
-                <h3>5.4 حق الاعتراض</h3>
-                <p>يحق لك الاعتراض على معالجة بيانات معينة في ظروف محددة.</p>
-
-                <h3>5.5 تقديم الشكاوى</h3>
-                <p>يمكنك تقديم شكاوى متعلقة بخصوصيتك إلى: <a href="mailto:abdalhlimgomah2@gmail.com">support@boda.com</a></p>
-            </div>
-
-            <div class="highlight warning">
-                <strong>التعاون الأمني:</strong> إذا وجدت ثغرة أمنية، يرجى الاتصال بـ: <a href="mailto:abdalhlimgomah2@gmail.com">support@boda.com</a>
-            </div>
-
-
-            <div class="footer">
-                <p>© 2026 BODA. جميع الحقوق محفوظة.</p>
-                <p>للاستفسارات: <a href="mailto:abdalhlimgomah2@gmail.com">support@boda.com</a></p>
-                <p>الهاتف: 01121068271</p>
+                <div class="tf-controls">
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                        <button class="btn btn-ghost" id="tfQtyMinus">-</button>
+                        <input id="tfQty" type="number" value="1" min="1" style="width:56px;text-align:center;border-radius:8px;border:1px solid #e6e6e6;padding:6px;" />
+                        <button class="btn btn-ghost" id="tfQtyPlus">+</button>
+                    </div>
+                    <div style="margin-left:auto;display:flex;gap:0.5rem;">
+                        <button class="btn btn-primary" id="tfAddToCart">أضف إلى العربة</button>
+                        <button class="btn btn-ghost" id="tfWishlist">❤</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
+    <script>
+        // Render product into this TFASIL-like card using existing store
+        (function(){
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id') || 'shirt-001';
+            const p = (typeof BODAStore !== 'undefined' && BODAStore.getProductById) ? BODAStore.getProductById(id) : (window.getProductById ? getProductById(id) : null);
+            const mainImage = document.getElementById('tfMainImage');
+            const title = document.getElementById('tfTitle');
+            const price = document.getElementById('tfPrice');
+            const desc = document.getElementById('tfDescription');
+            const cat = document.getElementById('tfCategory');
+            if (p) {
+                title.textContent = p.name;
+                price.textContent = (p.discountPrice && p.discountPrice < p.price) ? p.discountPrice.toFixed(2)+' ج.م' : p.price.toFixed(2)+' ج.م';
+                desc.textContent = p.description || 'لا يوجد وصف';
+                cat.textContent = p.category || '';
+                const img = (p.images && p.images.length>0) ? p.images[0] : p.image;
+                if (img) {
+                    try { mainImage.src = (typeof getImagePath==='function') ? getImagePath(img) : img; } catch(e){ mainImage.src = img; }
+                }
+            }
+
+            const qtyInput = document.getElementById('tfQty');
+            document.getElementById('tfQtyPlus').addEventListener('click', ()=> qtyInput.value = parseInt(qtyInput.value||1)+1);
+            document.getElementById('tfQtyMinus').addEventListener('click', ()=> { qtyInput.value = Math.max(1, parseInt(qtyInput.value||1)-1); });
+
+            document.getElementById('tfAddToCart').addEventListener('click', ()=>{
+                const q = parseInt(qtyInput.value||1);
+                if (typeof BODAStore !== 'undefined' && typeof BODAStore.addToCart === 'function') {
+                    BODAStore.addToCart(p, q);
+                    BODAStore.updateCartCount && BODAStore.updateCartCount();
+                    alert('✅ تم إضافة المنتج إلى العربة');
+                } else if (typeof addToCart === 'function') {
+                    addToCart(p, q);
+                    alert('✅ تم إضافة المنتج إلى العربة');
+                } else {
+                    alert('حدث خطأ: لا توجد دالة إضافة للعربة متاحة');
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

@@ -27,23 +27,32 @@
 <span class="material-symbols-outlined text-danger text-[40px] ml-1">logout</span>
 </div>
 <!-- Text Content -->
-<h3 class="mb-2 text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">Logout?</h3>
+<h3 class="mb-2 text-xl font-extrabold text-slate-900 dark:text-white tracking-tight">تسجيل الخروج؟</h3>
 <p class="mb-8 text-sm leading-relaxed text-slate-500 dark:text-slate-400">
-                    Are you sure you want to log out of your BODA account?
+                    هل أنت متأكد من رغبتك في تسجيل الخروج من حسابك على BODA؟
                 </p>
 <!-- Action Buttons -->
 <div class="flex w-full flex-col gap-3">
 <!-- Primary Action -->
-<button class="flex h-12 w-full items-center justify-center rounded-xl bg-danger text-white hover:bg-orange-600 active:scale-[0.98] transition-all duration-200 font-bold tracking-wide shadow-lg shadow-danger/25">
-                        Yes, Logout
+<button onclick="confirmLogout()" class="flex h-12 w-full items-center justify-center rounded-xl bg-danger text-white hover:bg-orange-600 active:scale-[0.98] transition-all duration-200 font-bold tracking-wide shadow-lg shadow-danger/25">
+                        نعم، تسجيل خروج
                     </button>
 <!-- Secondary Action -->
-<button class="flex h-12 w-full items-center justify-center rounded-xl bg-transparent text-primary dark:text-primary hover:bg-slate-50 dark:hover:bg-white/5 active:scale-[0.98] transition-all duration-200 font-semibold">
-                        Cancel
+<button onclick="goBack()" class="flex h-12 w-full items-center justify-center rounded-xl bg-transparent text-primary dark:text-primary hover:bg-slate-50 dark:hover:bg-white/5 active:scale-[0.98] transition-all duration-200 font-semibold">
+                        إلغاء
                     </button>
 </div>
 </div>
 </div>
 <!-- OVERLAY / MODAL END -->
 </div>
+
+<!-- Scripts -->
+<script src="./signin/signin.js"></script>
+<script>
+  function goBack() {
+    console.log('📌 Going back...');
+    window.history.back();
+  }
+</script>
 </body></html>

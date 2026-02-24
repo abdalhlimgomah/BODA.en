@@ -8,14 +8,27 @@
       href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
       rel="stylesheet"
     />
-    <link rel="stylesheet" href="style.css" />
+        <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+      integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="../../assets/js/home.config.js"></script>
+    <script src="../../assets/vendor/tailwind/tailwind-forms-typography.js"></script>
+    <link href="../../assets/fonts/inter.css" rel="stylesheet"/>
+    <link href="../../assets/fonts/material-icons-outlined.css" rel="stylesheet"/>
+    <link href="../../assets/css/home.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="../signin/signin.css">
+    <link rel="stylesheet" href="signup.css" />
   </head>
   <body>
     <div class="container">
       <div class="signup-container">
         <h1>sign up</h1>
 
-        <form>
+        <form onsubmit="handleSignUp(event)">
           <input type="text" name="name" placeholder="full name" required />
 
           <input
@@ -41,7 +54,85 @@
 
           <button type="submit">sign up</button>
         </form>
+
+        <div style="text-align: center; margin-top: 1.5rem; color: #888;">
+          <p>هل لديك حساب بالفعل؟ <a href="../signin/login.html" style="color: #ff6b35; text-decoration: none; font-weight: bold; cursor: pointer;">سجل دخول</a></p>
+        </div>
+
+<div id="g_id_onload"
+    data-client_id="438250899406-a6l7sgsi9g703u0207nlo4cuu273kjd8.apps.googleusercontent.com"
+    data-context="signin"
+    data-ux_mode="popup"
+    data-callback="TFA"
+    data-auto_prompt="false">
+</div>
+
+<div class="g_id_signin"
+    data-type="standard"
+    data-shape="rectangular"
+    data-theme="outline"
+    data-text="continue_with"
+    data-size="large"
+    data-logo_alignment="left">
+</div>
       </div>
+      
     </div>
+    
+    <script src="../signin/signin.js"></script>
+    <script src="../../assets/js/store.js"></script>
+    <script src="../../assets/js/home.js"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+    <script>
+      // Initialize Google Sign-In
+      window.onload = function () {
+        google.accounts.id.initialize({
+          client_id: "438250899406-a6l7sgsi9g703u0207nlo4cuu273kjd8.apps.googleusercontent.com",
+          callback: TFA,
+        });
+        google.accounts.id.renderButton(
+          document.querySelector(".g_id_signin"),
+          {
+            theme: "outline",
+            size: "large",
+            text: "continue_with",
+            shape: "rectangular",
+            logo_alignment: "left",
+          }
+        );
+      };
+    </script>
   </body>
 </html>
+
+-- Create users table
+CREATE TABLE users (
+  id BIGSERIAL PRIMARY KEY,
+  email VARCHAR(255) UNIQUE NOT NULL,
+  name VARCHAR(255) NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Enable Row Level Security
+ALTER TABLE users ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies if they exist
+DROP POLICY IF EXISTS "Allow insert for anonymous users" ON users;
+DROP POLICY IF EXISTS "Allow select for anonymous users" ON users;
+
+-- Create new policies
+CREATE POLICY "Allow insert for anonymous users" ON users
+  FOR INSERT 
+  WITH CHECK (true);
+
+CREATE POLICY "Allow select for anonymous users" ON users
+  FOR SELECT 
+  USING (true);
+
+CREATE POLICY "Allow update for authenticated users" ON users
+  FOR UPDATE 
+  USING (true)
+  WITH CHECK (true);

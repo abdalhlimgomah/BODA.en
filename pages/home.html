@@ -75,10 +75,9 @@
 </div>
 </div>
 <header class="my-lo">
-  <div class="my-login">
-  <a href="/pages/signup/index.html">sign up</a>
-  <a href="/pages/signin/login in.html">sign in</a>
-</div>
+  <div class="my-login" id="auth-section">
+  <!-- Auth links will be inserted here by JavaScript -->
+  </div>
 </header>
 </header>
 
@@ -297,6 +296,42 @@
     } else if (typeof BODAStore !== 'undefined' && typeof BODAStore.updateCartCount === 'function') {
       BODAStore.updateCartCount();
     }
+    
+    // ===== Check Authentication =====
+    function updateAuthUI() {
+      const authSection = document.getElementById('auth-section');
+      const userJson = localStorage.getItem('currentUser');
+      
+      if (userJson) {
+        try {
+          const user = JSON.parse(userJson);
+          console.log('👤 User logged in:', user.name);
+          
+          // Show only user greeting - logout moved to ahsab.html
+          authSection.innerHTML = `
+            <span style="color: #ffffff; font-weight: 500;">👋 مرحباً ${user.name}</span>
+          `;
+        } catch (e) {
+          console.error('Error parsing user:', e);
+          // Fall back to show login/signup
+          authSection.innerHTML = `
+            <a href="signup/index.html">sign up</a>
+            <a href="signin/login.html">sign in</a>
+          `;
+        }
+      } else {
+        console.log('No user logged in');
+        // Show login/signup links
+        authSection.innerHTML = `
+          <a href="signup/index.html">sign up</a>
+          <a href="signin/login.html">sign in</a>
+        `;
+      }
+    }
+    
+    // Initialize auth UI on page load
+    updateAuthUI();
   });
 </script>
+<script src="./signin/signin.js"></script>
 </body></html>

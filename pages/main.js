@@ -99,6 +99,12 @@ const products = [
 const filterContainer = document.getElementById('filterContainer');
 const productsGrid = document.getElementById('productsGrid');
 
+// Only run if on products.html (has the required DOM elements)
+if (!filterContainer || !productsGrid) {
+  console.log('ℹ️ Products page DOM elements not found. Skipping products page initialization.');
+  console.log('📦 products array is available for other pages if needed.');
+} else {
+
 // Render buttons
 const renderButtons = () => {
   filterContainer.innerHTML = buttons
@@ -117,33 +123,97 @@ const renderButtons = () => {
 const renderProducts = (productsToShow) => {
   productsGrid.innerHTML = productsToShow
     .map(
-      (product) => `
-        <div class="product-card show" data-category="${product.category}">
+      (product) => {
+        // Support both main.js format and store.js format
+        const title = product.title || product.name || 'Unknown Product';
+        const description = product.description || '';
+        
+        // Handle image path - use BODAStore.getImagePath for store products
+        let imageSrc = product.img || product.image || '';
+        if (product.image && window.BODAStore && window.BODAStore.getImagePath) {
+          try {
+            imageSrc = window.BODAStore.getImagePath(product.image);
+          } catch (e) {
+            console.warn('Could not get image path:', e);
+          }
+        }
+        
+        const priceStr = typeof product.price === 'string' ? product.price : '$' + product.price;
+        const category = product.category || 'general';
+        const productId = product.id;
+        
+        return `
+        <div class="product-card show" data-category="${category}" data-product-id="${productId}">
           <div class="product-image">
-            <img src="${product.img}" alt="${product.title}" />
-            <button><i class="${
+            <img src="${imageSrc}" alt="${title}" class="product-img" />
+            <button class="wishlist-btn"><i class="${
               product.id === 2 ? 'fa-solid' : 'fa-regular'
             } fa-heart"></i></button>
           </div>
 
           <div class="product-info">
-            <span class="category">${product.category}</span>
-            <h3 class="title">${product.title}</h3>
+            <span class="category">${category}</span>
+            <h3 class="title">${title}</h3>
             <p class="description">
-              ${product.description}
+              ${description}
             </p>
-            <p class="price">${product.price}</p>
+            <p class="price">${priceStr}</p>
             <div class="actions">
-              <button class="btn">shop now</button>
-              <button class="rounded-btn">
+              <button class="btn shop-now-btn" data-product-id="${productId}">shop now</button>
+              <button class="rounded-btn cart-btn" data-product-id="${productId}">
                 <i class="fa-solid fa-cart-shopping"></i>
               </button>
             </div>
           </div>
         </div>
-        `
+        `;
+      }
     )
     .join('');
+    
+  // Add event listeners to shop now buttons
+  document.querySelectorAll('.shop-now-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      const productId = button.getAttribute('data-product-id');
+      console.log('🛍️ Shop now clicked for product:', productId);
+      window.location.href = `product.html?id=${productId}`;
+    });
+  });
+  
+  // Add event listeners to product images
+  document.querySelectorAll('.product-img').forEach((img) => {
+    img.addEventListener('click', (e) => {
+      const productId = e.target.closest('[data-product-id]').getAttribute('data-product-id');
+      console.log('🖼️ Product image clicked:', productId);
+      window.location.href = `product.html?id=${productId}`;
+    });
+    img.style.cursor = 'pointer';
+  });
+  
+  // Add event listeners to cart buttons
+  document.querySelectorAll('.cart-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      const productId = button.getAttribute('data-product-id');
+      console.log('🛒 Add to cart clicked for product:', productId);
+      // Add to cart logic here if needed
+      alert('تمت إضافة المنتج للسلة!');
+    });
+  });
+  
+  // Add event listeners to wishlist buttons
+  document.querySelectorAll('.wishlist-btn').forEach((button) => {
+    button.addEventListener('click', () => {
+      button.classList.toggle('active');
+      const icon = button.querySelector('i');
+      if (button.classList.contains('active')) {
+        icon.classList.remove('fa-regular');
+        icon.classList.add('fa-solid');
+      } else {
+        icon.classList.add('fa-regular');
+        icon.classList.remove('fa-solid');
+      }
+    });
+  });
 };
 
 // Filter products
@@ -159,14 +229,27 @@ const filterProducts = (category) => {
   // Show filtered products
   setTimeout(() => {
     if (category === 'all') {
-      renderProducts(products);
+      // Show all products from main.js + products from store.js
+      let allProducts = [...products];
+      
+      // Add products from BODAStore if available
+      try {
+        if (window.BODAStore && window.BODAStore.getAllProducts) {
+          const storeProducts = Object.values(window.BODAStore.getAllProducts());
+          allProducts = allProducts.concat(storeProducts);
+          console.log('✅ Added ' + storeProducts.length + ' products from BODA Store');
+        }
+      } catch (e) {
+        console.warn('⚠️ Could not load BODA Store products:', e);
+      }
+      
+      renderProducts(allProducts);
     } else {
       const filteredProducts = products.filter(
         (product) => product.category === category
       );
       renderProducts(filteredProducts);
     }
-    heartEventListener();
   }, 500);
 };
 
@@ -189,31 +272,23 @@ const filterEventListener = () => {
   });
 };
 
-// Event listener for heart buttons
-const heartEventListener = () => {
-  const heartButtons = document.querySelectorAll('.product-image button');
-
-  heartButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      btn.classList.toggle('active');
-
-      const icon = btn.querySelector('i');
-
-      if (btn.classList.contains('active')) {
-        icon.classList.remove('fa-regular');
-        icon.classList.add('fa-solid');
-      } else {
-        icon.classList.add('fa-regular');
-        icon.classList.remove('fa-solid');
-      }
-    });
-  });
-};
-
 // Initiate the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
   renderButtons();
-  renderProducts(products);
+  
+  // Initial render: Show all products from main.js + store.js
+  let initialProducts = [...products];
+  try {
+    if (window.BODAStore && window.BODAStore.getAllProducts) {
+      const storeProducts = Object.values(window.BODAStore.getAllProducts());
+      initialProducts = initialProducts.concat(storeProducts);
+      console.log('✅ Loaded ' + storeProducts.length + ' products from BODA Store');
+    }
+  } catch (e) {
+    console.warn('⚠️ Could not load BODA Store products:', e);
+  }
+  
+  renderProducts(initialProducts);
   filterEventListener();
-  heartEventListener();
 });
+}

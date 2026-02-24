@@ -10,9 +10,7 @@
 <link href="../assets/fonts/inter.css" rel="stylesheet"/>
 <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet"/>
 <link href="../assets/css/home.css" rel="stylesheet"/>
-<link rel="stylesheet" href="/pages/signup/index.html">
-<link rel="stylesheet" href="/pages/signin/login in.html">
-<link rel="stylesheet" href="/pages/signin/style.css">
+<!-- removed signup/signin CSS to avoid global override -->
 <script>
         tailwind.config = {
             darkMode: "class",
@@ -75,7 +73,20 @@
 </div>
 </div>
 </header>
-<main class="p-4 space-y-4">
+
+<!-- Login Required Screen -->
+<div id="login-required" class="fixed inset-0 bg-background-light dark:bg-background-dark flex flex-col items-center justify-center z-40 hidden">
+  <div class="text-center space-y-4">
+    <span class="material-icons-outlined text-6xl text-primary">lock</span>
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-white">تسجيل الدخول مطلوب</h2>
+    <p class="text-gray-500 dark:text-gray-400">يجب عليك تسجيل الدخول لعرض حسابك</p>
+    <a href="signin/login.html" class="inline-block mt-4 bg-primary text-white font-bold py-2 px-6 rounded-lg hover:bg-blue-700 transition-colors">
+      تسجيل الدخول
+    </a>
+  </div>
+</div>
+
+<main id="profile-content" class="p-4 space-y-4">
 <section class="bg-surface-light dark:bg-surface-dark rounded-xl p-4 shadow-sm flex items-center justify-between">
 <div class="flex flex-col">
 <h2 id="profile-name" class="text-lg font-bold text-gray-900 dark:text-white">Hello</h2>
@@ -192,12 +203,12 @@
 </div>
 <span class="material-icons-outlined text-gray-400 text-sm">arrow_forward_ios</span>
 </a>
-<a id="sign-out-link" class="flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors" href="logout-confirmation.html">
+<button id="sign-out-link" class="w-full flex items-center justify-between p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors cursor-pointer bg-transparent border-none text-left" onclick="handleSignOutClick(); return false;" style="cursor: pointer;">
 <div class="flex items-center gap-3">
 <span class="material-icons-outlined text-secondary">logout</span>
-<span class="font-medium text-secondary">Sign Out</span>
+<span class="font-medium text-secondary">تسجيل خروج</span>
 </div>
-</a>
+</button>
 </div>
 </section>
 <div class="fixed bottom-24 left-4 z-40">
@@ -226,6 +237,63 @@
 </div>
 </nav>
 
+<script src="../pages/signin/signin.js"></script>
 <script src="../assets/js/ahsab.js"></script>
-
+<script>
+  // Check if user is logged in
+  document.addEventListener('DOMContentLoaded', () => {
+    const userJson = localStorage.getItem('currentUser');
+    const profileContent = document.getElementById('profile-content');
+    const loginRequired = document.getElementById('login-required');
+    
+    if (!userJson) {
+      // Not logged in
+      console.log('❌ User not logged in - showing login screen');
+      profileContent.style.display = 'none';
+      loginRequired.classList.remove('hidden');
+    } else {
+      // Logged in
+      console.log('✅ User logged in - showing profile');
+      profileContent.style.display = 'block';
+      loginRequired.classList.add('hidden');
+      
+      // ===== Update Profile Display =====
+      try {
+        const user = JSON.parse(userJson);
+        console.log('👤 User data:', user);
+        
+        // Update name
+        const profileName = document.getElementById('profile-name');
+        if (profileName) {
+          profileName.textContent = user.name || 'المستخدم';
+          console.log('✅ Updated name:', user.name);
+        }
+        
+        // Update email
+        const profileEmail = document.getElementById('profile-email');
+        if (profileEmail) {
+          profileEmail.textContent = user.email || 'user@example.com';
+          console.log('✅ Updated email:', user.email);
+        }
+        
+        // Update avatar with first letter
+        const profileAvatar = document.getElementById('profile-avatar');
+        if (profileAvatar && user.name) {
+          const firstLetter = user.name.charAt(0).toUpperCase();
+          profileAvatar.textContent = firstLetter;
+          console.log('✅ Updated avatar:', firstLetter);
+        }
+      } catch (e) {
+        console.error('Error updating profile:', e);
+      }
+    }
+  });
+  
+  // Handle Sign Out button click - outside of DOMContentLoaded
+  window.handleSignOutClick = function() {
+    console.log('🔐 Sign Out clicked');
+    console.log('Current URL:', window.location.href);
+    window.location.href = 'logout-confirmation.html';
+  };
+</script>
 </body></html>
