@@ -1,0 +1,113 @@
+/* ============================================================
+   StickyAddToCart — persistent mobile/tablet bottom bar.
+   Replaces the app bottom-nav on the PDP (<1200px). Always visible,
+   never scrolls away, respects safe-area insets.
+   ============================================================ */
+
+.pdp-sticky-bar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--pdp-border);
+  box-shadow: 0 -8px 24px rgba(15, 23, 42, 0.08);
+  transform: translateY(0);
+  transition: transform var(--pdp-fade) var(--pdp-ease);
+}
+.pdp-sticky-bar.is-hidden { transform: translateY(100%); }
+
+.pdp-sticky-price-wrap { display: flex; flex-direction: column; min-width: 84px; }
+.pdp-sticky-price {
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--pdp-price);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+.pdp-sticky-price-old {
+  font-size: 0.68rem;
+  color: var(--pdp-price-old);
+  text-decoration: line-through;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.pdp-sticky-qty {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--pdp-border);
+  border-radius: 10px;
+  padding: 4px 6px;
+  flex: none;
+}
+.pdp-qty-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 0;
+  background: #f2f5fa;
+  color: var(--pdp-ink);
+  font-size: 1rem;
+  font-weight: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.pdp-qty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.pdp-qty-value { min-width: 18px; text-align: center; font-weight: 800; }
+
+.pdp-sticky-add-btn {
+  flex: 1;
+  min-height: 46px;
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--pdp-blue) 0%, var(--pdp-blue-strong) 100%);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.88rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(31, 111, 235, 0.25);
+}
+.pdp-sticky-add-btn:active { transform: translateY(1px); }
+.pdp-sticky-add-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+.pdp-sticky-add-btn .material-icons-outlined { font-size: 19px; }
+
+.pdp-sticky-wish-btn {
+  flex: none;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  border: 1px solid var(--pdp-border);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #64748b;
+  cursor: pointer;
+}
+.pdp-sticky-wish-btn.is-active { color: #e3245c; border-color: #f7c9d6; background: #fff5f8; }
+
+/* Keep page content from hiding behind the fixed bar */
+.pdp-page { padding-bottom: 78px; }
+
+@media (min-width: 1200px) {
+  .pdp-sticky-bar { display: none !important; }
+  .pdp-page { padding-bottom: 0; }
+}
+
+@media (max-width: 340px) {
+  .pdp-sticky-price-wrap { display: none; }
+}

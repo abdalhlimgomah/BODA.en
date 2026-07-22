@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>سلة التسوق - Buda</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-symbols-outlined.css" rel="stylesheet" />
+  <link href="../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260630" rel="stylesheet" />
+  <link href="../assets/css/noon-components.css" rel="stylesheet" />
+  <link href="../assets/css/home.css" rel="stylesheet" />
+  <link href="../assets/css/cart.css?v=20260706" rel="stylesheet" />
+  <link href="../assets/css/phone-verification.css" rel="stylesheet" />
+<link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="../assets/icons/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="../assets/icons/site.webmanifest">
+<meta name="theme-color" content="#FFD500">
+</head>
+<body class="app-shell cart-page">
+
+  <header class="app-header buda-header">
+    <div class="buda-header-top">
+      <div class="buda-header-top-inner">
+        <div class="header-start">
+          <div class="brand-badge">Buda</div>
+        </div>
+
+
+        <div class="app-search search-left-icon buda-search">
+          <span class="material-icons-outlined">search</span>
+          <input id="home-search" type="text" data-search-target="search.html" placeholder="ابحث عن منتج أو فئة" autocomplete="off" />
+          <button class="buda-search-clear" id="budaSearchClear" type="button" aria-label="مسح">
+          </button>
+        </div>
+
+        <div class="buda-lang" id="budaLangTrigger">
+          <span class="buda-lang-text">EN</span>
+          <span class="material-icons-outlined buda-lang-globe">language</span>
+        </div>
+
+        <div class="buda-account" id="budaAccountTrigger">
+          <div class="buda-account-avatar" id="budaAccountAvatar">
+            <span class="material-icons-outlined">person</span>
+          </div>
+          <div class="buda-account-info">
+            <span class="buda-account-name" id="budaAccountName">حسابي</span>
+            <span class="material-icons-outlined buda-account-arrow">keyboard_arrow_down</span>
+          </div>
+          <div class="buda-account-dropdown" id="budaAccountDropdown">
+            <a href="ahsab.html" class="buda-dd-item"><span class="material-icons-outlined">person</span> حسابي</a>
+            <a href="my-orders.html" class="buda-dd-item"><span class="material-icons-outlined">receipt_long</span> طلباتي</a>
+            <a href="returns.html" class="buda-dd-item"><span class="material-icons-outlined">undo</span> الإرجاعات</a>
+            <a href="addresses.html" class="buda-dd-item"><span class="material-icons-outlined">location_on</span> العناوين</a>
+            <a href="wishlist.html" class="buda-dd-item"><span class="material-icons-outlined">favorite_border</span> المفضلة</a>
+            <a href="#" class="buda-dd-item" id="budaSupportBtn"><span class="material-icons-outlined">chat</span> الدعم</a>
+            <a href="edit-account.html" class="buda-dd-item"><span class="material-icons-outlined">settings</span> الإعدادات</a>
+            <div class="buda-dd-divider"></div>
+            <a href="logout-confirmation.html" class="buda-dd-item buda-dd-logout"><span class="material-icons-outlined">logout</span> تسجيل الخروج</a>
+          </div>
+        </div>
+
+        <a href="my-orders.html" class="buda-header-action" title="طلباتي">
+          <span class="material-icons-outlined">receipt_long</span>
+          <small>طلباتي</small>
+        </a>
+
+        <a href="wishlist.html" class="buda-header-action" title="المفضلة">
+          <span class="material-icons-outlined">favorite_border</span>
+          <small>المفضلة</small>
+        </a>
+
+        <a href="empty-cart.html" class="buda-header-action buda-header-cart" title="العربة">
+          <span class="material-icons-outlined">shopping_cart</span>
+          <small>العربة</small>
+          <span class="buda-cart-badge" id="budaCartBadge">0</span>
+        </a>
+      </div>
+    </div>
+
+  </header>
+
+  <main class="cart-layout">
+    <!-- ===== RIGHT COLUMN ===== -->
+    <div class="cart-main-col">
+
+      <!-- SKELETON -->
+      <div id="cart-skeleton">
+        <div class="cart-skeleton-item">
+          <div class="cart-skeleton-img"></div>
+          <div class="cart-skeleton-body">
+            <div class="cart-skeleton-line w70"></div>
+            <div class="cart-skeleton-line w50"></div>
+            <div class="cart-skeleton-line w30 h10"></div>
+            <div class="cart-skeleton-line w70 h10"></div>
+            <div class="cart-skeleton-line h28"></div>
+          </div>
+        </div>
+        <div class="cart-skeleton-item">
+          <div class="cart-skeleton-img"></div>
+          <div class="cart-skeleton-body">
+            <div class="cart-skeleton-line w70"></div>
+            <div class="cart-skeleton-line w50"></div>
+            <div class="cart-skeleton-line w30 h10"></div>
+            <div class="cart-skeleton-line w70 h10"></div>
+            <div class="cart-skeleton-line h28"></div>
+          </div>
+        </div>
+        <div class="cart-skeleton-item">
+          <div class="cart-skeleton-img"></div>
+          <div class="cart-skeleton-body">
+            <div class="cart-skeleton-line w70"></div>
+            <div class="cart-skeleton-line w50"></div>
+            <div class="cart-skeleton-line w30 h10"></div>
+            <div class="cart-skeleton-line w70 h10"></div>
+            <div class="cart-skeleton-line h28"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- EMPTY STATE -->
+      <div id="cart-empty-state" class="cart-empty hidden">
+        <div class="cart-empty-illustration">
+          <svg viewBox="0 0 200 180" fill="none">
+            <defs>
+              <linearGradient id="ceg1" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stop-color="#e8ecf3"/>
+                <stop offset="100%" stop-color="#d1d9e8"/>
+              </linearGradient>
+              <linearGradient id="ceg2" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#3866df"/>
+                <stop offset="100%" stop-color="#2b4db2"/>
+              </linearGradient>
+            </defs>
+            <!-- Shadow -->
+            <ellipse cx="100" cy="168" rx="55" ry="6" fill="rgba(0,0,0,0.06)"/>
+            <!-- Basket body -->
+            <path d="M48 62 L56 148 H144 L152 62 Z" fill="url(#ceg1)" stroke="#c4d2ed" stroke-width="1.5"/>
+            <!-- Basket grid lines -->
+            <line x1="56" y1="85" x2="144" y2="85" stroke="#b8c8e8" stroke-width="1" opacity="0.5"/>
+            <line x1="58" y1="105" x2="142" y2="105" stroke="#b8c8e8" stroke-width="1" opacity="0.5"/>
+            <line x1="60" y1="125" x2="140" y2="125" stroke="#b8c8e8" stroke-width="1" opacity="0.5"/>
+            <!-- Handle -->
+            <path d="M60 62 Q60 30 80 22 Q100 14 120 22 Q140 30 140 62" stroke="url(#ceg2)" stroke-width="4" stroke-linecap="round" fill="none"/>
+            <!-- Handle highlight -->
+            <path d="M70 38 Q85 28 100 28 Q115 28 130 38" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-linecap="round" fill="none"/>
+            <!-- Wheels -->
+            <circle cx="72" cy="152" r="12" fill="url(#ceg2)"/>
+            <circle cx="72" cy="152" r="5" fill="#fff" opacity="0.2"/>
+            <circle cx="128" cy="152" r="12" fill="url(#ceg2)"/>
+            <circle cx="128" cy="152" r="5" fill="#fff" opacity="0.2"/>
+            <!-- Question mark -->
+            <text x="100" y="112" text-anchor="middle" fill="#b8c8e8" font-size="28" font-weight="700" font-family="Cairo,sans-serif">?</text>
+            <!-- Sad face subtle -->
+            <circle cx="88" cy="66" r="3" fill="#b8c8e8" opacity="0.4"/>
+            <circle cx="112" cy="66" r="3" fill="#b8c8e8" opacity="0.4"/>
+            <path d="M88 74 Q100 80 112 74" stroke="#b8c8e8" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.3"/>
+          </svg>
+        </div>
+        <h2 class="cart-empty-title">العربة فاضية</h2>
+        <p class="cart-empty-sub">مستني إيه ؟</p>
+        <button id="start-shopping" class="cart-empty-btn" type="button">
+          يلا نبدأ شوبينج دلوقتي
+        </button>
+      </div>
+
+      <!-- EMPTY SLIDER -->
+      <div id="empty-slider-section" class="cart-card cart-slider-section hidden">
+        <div class="cart-slider-header">
+          <h3>مقترح لك</h3>
+        </div>
+        <div id="empty-slider-list"></div>
+      </div>
+
+      <!-- CART ITEMS -->
+      <div id="cart-content" class="hidden">
+        <div class="cart-card" id="cart-items-container">
+          <div id="cart-items" class="cart-card-body" style="padding:0"></div>
+        </div>
+
+        <!-- OFFERS SLIDER -->
+        <div id="offers-section" class="cart-card cart-slider-section hidden">
+          <div class="cart-slider-header">
+            <h3>عروض اليوم</h3>
+          </div>
+          <div id="offers-list"></div>
+        </div>
+        <!-- RECOMMENDED SLIDER -->
+        <div id="recommended-section" class="cart-card cart-slider-section hidden">
+          <div class="cart-slider-header">
+            <h3>مقترح لك</h3>
+          </div>
+          <div id="recommended-list"></div>
+        </div>
+
+        <!-- Coupon -->
+        <div class="cart-card">
+          <div class="cart-coupon-card">
+            <div class="cart-coupon-title">
+              <span class="material-icons-outlined"></span>
+              هل لديك كود خصم؟
+            </div>
+            <div class="cart-coupon-row">
+              <input id="coupon-input" type="text" class="cart-coupon-input" placeholder="أدخل كود الخصم" autocomplete="off" />
+              <button id="coupon-apply-btn" class="cart-coupon-btn" type="button">تطبيق</button>
+            </div>
+            <div id="coupon-status" class="cart-coupon-status"></div>
+            <div id="coupon-applied" class="cart-coupon-applied hidden">
+              <span class="material-icons-outlined"></span>
+              <span id="coupon-applied-text"></span>
+              <button id="coupon-remove-btn" class="cart-coupon-remove" type="button" aria-label="إزالة"><span class="material-icons-outlined">close</span></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== LEFT COLUMN (Sticky) ===== -->
+    <div class="cart-side-col" id="cart-sidebar">
+
+      <!-- Order Summary -->
+      <div class="cart-card">
+        <div class="cart-summary-card">
+          <h3>ملخص الطلب</h3>
+          <div class="cart-summary-row">
+            <span id="s-items-label">المنتجات (0)</span>
+            <span id="s-subtotal" class="cart-summary-value">0.00 ج.م</span>
+          </div>
+          <div id="s-discount-row" class="cart-summary-row hidden">
+            <span style="color:var(--cart-success)">الخصومات</span>
+            <span id="s-savings" class="cart-summary-value" style="color:var(--cart-success)">- 0.00 ج.م</span>
+          </div>
+          <div class="cart-summary-row">
+            <span>رسوم الشحن</span>
+            <span id="s-shipping" class="cart-summary-value">--</span>
+          </div>
+          <div class="cart-summary-row">
+            <span>الضريبة</span>
+            <span id="s-tax" class="cart-summary-value">12.00 ج.م</span>
+          </div>
+          <div class="cart-summary-row total">
+            <span>الإجمالي</span>
+            <span id="s-grand-total">0.00 ج.م</span>
+          </div>
+          <button id="checkout-btn" class="cart-checkout-btn" type="button">
+            متابعة للدفع
+            <span class="material-icons-outlined">arrow_left</span>
+          </button>
+        </div>
+      </div>
+
+
+
+      <!-- View Offers -->
+      <div class="cart-card" id="offers-card">
+        <div class="cart-offers-link" id="offers-link">
+          <span class="material-icons-outlined"></span>
+          <span>مشاهدة العروض المتاحة</span>
+          <span class="spacer"></span>
+          <span class="material-icons-outlined"></span>
+        </div>
+      </div>
+
+
+    </div>
+  </main>
+
+  <!-- MOBILE STICKY -->
+  <div id="cart-sticky-mobile" class="cart-sticky-mobile hidden">
+    <div class="cart-sticky-row">
+      <div>
+        <div id="m-grand-total" class="cart-sticky-price">0.00 ج.م</div>
+        <div id="m-savings" class="cart-sticky-savings hidden"></div>
+      </div>
+      <button id="m-toggle" class="cart-sticky-toggle" type="button">
+        تفاصيل الطلب
+        <span class="material-icons-outlined"></span>
+      </button>
+    </div>
+    <div id="m-details" class="cart-sticky-details">
+      <div class="detail-row"><span>المنتجات (<span id="m-count">0</span>)</span><span id="m-subtotal">0.00 ج.م</span></div>
+      <div id="m-discount-row" class="detail-row hidden" style="color:var(--cart-success)"><span>الخصومات</span><span id="m-savings-val">- 0.00 ج.م</span></div>
+      <div class="detail-row"><span>الشحن</span><span id="m-shipping">--</span></div>
+      <div class="detail-row"><span>الضريبة</span><span id="m-tax">12.00 ج.م</span></div>
+      <div class="detail-row total"><span>الإجمالي</span><span id="m-grand-total-val">0.00 ج.م</span></div>
+    </div>
+    <button id="checkout-btn-mobile" class="cart-checkout-btn" type="button">
+      متابعة للدفع
+      <span class="material-icons-outlined"></span>
+    </button>
+  </div>
+
+  <!-- ADD-TO-CART BOTTOM SHEET -->
+  <div id="cart-sheet-overlay" class="cart-sheet-overlay"></div>
+  <div id="cart-sheet" class="cart-sheet">
+    <div class="cart-sheet-handle"></div>
+    <div class="cart-sheet-header">
+      <span class="material-icons-outlined"></span>
+      <div>
+        <div class="cart-sheet-title">تمت الإضافة للسلة بنجاح</div>
+        <div id="cart-sheet-count" class="cart-sheet-subtitle"></div>
+      </div>
+    </div>
+    <div id="cart-sheet-product" class="cart-sheet-product"></div>
+    <div id="cart-sheet-total" class="cart-sheet-cart-count"></div>
+    <div class="cart-sheet-btns">
+      <button id="cart-sheet-continue" class="cart-sheet-btn secondary" type="button">متابعة التسوق</button>
+      <a id="cart-sheet-goto" href="empty-cart.html" class="cart-sheet-btn primary">عرض السلة</a>
+    </div>
+    <div id="cart-sheet-suggestions" class="cart-sheet-suggestions hidden">
+      <h4>منتجات قد تهمك</h4>
+      <div id="cart-sheet-suggestions-list"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script>
+    window.SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
+    window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
+    window.__rawSupabase = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    window.supabaseClient = window.__rawSupabase;
+  </script>
+  <script src="../assets/js/auth.config.js?v=20260630"></script>
+  <script src="../assets/js/taager-integration.js?v=20260630d"></script>
+  <script src="../assets/js/store.js?v=20260712c"></script>
+  <script src="../assets/js/supabase-client.js?v=20260712c"></script>
+  <script src="../assets/js/pricing-engine.js?v=20260703"></script>
+  <script src="../assets/js/shipping-zones.js"></script>
+  <script src="../assets/js/cart.js?v=20260706"></script>
+  <script src="../assets/js/noon-shell.js?v=20260719a"></script>
+  <script src="../assets/js/phone-verification-modal.js"></script>
+
+  <nav class="bottom-nav" id="bottom-nav">
+    <a href="home.html" data-nav="home">
+      <span class="material-icons-outlined"></span>
+      <small>الرئيسية</small>
+    </a>
+    <a href="products.html" data-nav="products">
+      <span class="material-icons-outlined"></span>
+      <small>الفئات</small>
+    </a>
+    <button class="nav-home-btn" id="nav-home-btn" type="button" aria-label="الرئيسية">
+      <span class="material-icons-outlined" style="font-size:24px;"></span>
+    </button>
+    <a href="ahsab.html" data-nav="account">
+      <span class="material-icons-outlined"></span>
+      <small>حسابي</small>
+    </a>
+    <a href="empty-cart.html" data-nav="cart">
+      <span class="material-icons-outlined"></span>
+      <small>العربة</small>
+      <span class="nav-cart-count nav-cart-0" id="nav-cart-count">0</span>
+    </a>
+  </nav>
+
+  <script>
+    function hasSavedAddress() {
+      try {
+        var ae = localStorage.getItem("userEmail") || "";
+        if (!ae) return false;
+        var normalizedEmail = ae.trim().toLowerCase();
+        // Use the same country detection as addresses page
+        var ac = "EG";
+        var userCountry = localStorage.getItem("userCountry");
+        if (userCountry) {
+          ac = userCountry;
+        } else if (window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry) {
+          var sel = window.TaagerIntegration.getSelectedCountry();
+          if (sel && sel.code) ac = sel.code;
+        }
+        var normalizedCountry = ac.toUpperCase();
+        // Use the same key format as addresses page: buda_saved_addresses_{email}_{country}
+        var listKey = "buda_saved_addresses_" + normalizedEmail + "_" + normalizedCountry;
+        var raw = localStorage.getItem(listKey);
+        if (!raw) {
+          // Fallback: check legacy key without country (for backward compatibility)
+          var legacyKey = "buda_saved_addresses_" + normalizedEmail;
+          var legacyRaw = localStorage.getItem(legacyKey);
+          if (!legacyRaw) return false;
+          var legacyList = JSON.parse(legacyRaw);
+          return Array.isArray(legacyList) && legacyList.length > 0;
+        }
+        var list = JSON.parse(raw);
+        return Array.isArray(list) && list.length > 0;
+      } catch (e) { return false; }
+    }
+
+    async function handleCheckoutClick(e) {
+      e.preventDefault();
+      if (!hasSavedAddress()) {
+        window.location.href = "addresses.html?redirect=checkout";
+        return;
+      }
+      if (localStorage.getItem("userPhoneVerified") === "true") {
+        window.location.href = "checkout.html";
+        return;
+      }
+      var userEmail = localStorage.getItem("userEmail") || "";
+      if (!userEmail) {
+        try { var raw = window.__rawSupabase || (window.supabaseClient && window.supabaseClient.raw ? window.supabaseClient.raw() : null); if (raw) { var { data } = await raw.auth.getUser(); if (data && data.user) userEmail = data.user.email || ""; } } catch (err) {}
+      }
+      if (userEmail && window.supabaseClient) {
+        try {
+          var { data: profiles } = await window.supabaseClient.from("profiles").select("phone_number,phone_verified,phone_country").eq("email", userEmail).limit(1);
+          if (profiles && profiles.length && profiles[0].phone_verified && profiles[0].phone_number) {
+            localStorage.setItem("userPhone", profiles[0].phone_number);
+            localStorage.setItem("userPhoneVerified", "true");
+            localStorage.setItem("userPhoneCountry", profiles[0].phone_country || "EG");
+            window.location.href = "checkout.html"; return;
+          }
+        } catch (err) {}
+      }
+      PhoneVerification.show(userEmail, function () { window.location.href = "checkout.html"; }, {
+        prefillPhone: localStorage.getItem("userPhone") || "", prefillCountry: localStorage.getItem("userPhoneCountry") || "EG"
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+/* ============================================================
+   ProductInfo — brand, title, rating row, stock message, nudges
+   ============================================================ */
+
+.pdp-info {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pdp-brand {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: var(--pdp-blue);
+    text-decoration: none;
+}
+.pdp-brand:empty {
+    display: none;
+}
+
+.pdp-title {
+    margin: 0;
+    font-size: 1.05rem;
+    line-height: 1.4;
+    font-weight: 800;
+    color: var(--pdp-ink);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    line-clamp: 3;
+    overflow: hidden;
+}
+
+@media (min-width: 768px) {
+    .pdp-title {
+        font-size: 1.2rem;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+    }
+}
+@media (min-width: 1200px) {
+    .pdp-title {
+        font-size: 1.32rem;
+    }
+}
+
+.pdp-rating-row {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    font-size: 0.82rem;
+    color: var(--pdp-muted);
+}
+
+.pdp-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    color: var(--pdp-yellow);
+}
+.pdp-stars .material-icons-outlined {
+    font-size: 16px;
+}
+.pdp-stars .is-empty {
+    color: #e2e8f0;
+}
+
+.pdp-rating-link {
+    color: var(--pdp-blue);
+    font-weight: 700;
+    text-decoration: none;
+}
+.pdp-rating-link:hover {
+    text-decoration: underline;
+}
+
+.pdp-sold-count {
+    color: var(--pdp-muted);
+}
+
+.pdp-nudges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+.pdp-nudge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 9px;
+    border-radius: 999px;
+    background: #eef2ff;
+    color: var(--pdp-blue-strong);
+    font-size: 0.68rem;
+    font-weight: 800;
+}
+.pdp-nudge .material-icons-outlined,
+.pdp-nudge svg {
+    width: 13px;
+    height: 13px;
+    font-size: 13px;
+}
+.pdp-nudge.pdp-nudge-hot {
+    background: #fdeeea;
+    color: var(--pdp-stock-low-text);
+}
+.pdp-nudge.pdp-nudge-express {
+    background: var(--pdp-express-bg);
+    color: var(--pdp-express-text);
+}
+
+/* ---------- Stock message ---------- */
+.pdp-stock {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    font-weight: 800;
+    width: fit-content;
+}
+.pdp-stock .material-icons-outlined {
+    font-size: 17px;
+}
+.pdp-stock.is-ok {
+    color: var(--pdp-stock-ok);
+}
+.pdp-stock.is-low {
+    color: var(--pdp-stock-low-text);
+    background: var(--pdp-stock-low-bg);
+    padding: 4px 10px;
+    border-radius: 8px;
+}
+.pdp-stock.is-out {
+    color: var(--pdp-stock-out);
+}
+
+.pdp-explore-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: var(--pdp-blue);
+    text-decoration: none;
+    width: fit-content;
+}
+.pdp-explore-link .material-icons-outlined {
+    font-size: 16px;
+}
+.pdp-explore-link:hover {
+    text-decoration: underline;
+}
+
+/* ---------- Offers accordion (coupons / bank offers) ---------- */
+.pdp-offers {
+    border: 1px solid var(--pdp-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+.pdp-offers-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px;
+    cursor: pointer;
+    list-style: none;
+    font-size: 0.85rem;
+    font-weight: 800;
+    color: var(--pdp-ink);
+}
+.pdp-offers-summary::-webkit-details-marker {
+    display: none;
+}
+.pdp-offers-summary .material-icons-outlined {
+    color: var(--pdp-muted);
+    transition: transform var(--pdp-fade-fast) ease;
+}
+.pdp-offers[open] .pdp-offers-summary .material-icons-outlined {
+    transform: rotate(180deg);
+}
+.pdp-offers-body {
+    padding: 0 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.pdp-offer-group-title {
+    font-size: 0.74rem;
+    font-weight: 800;
+    color: var(--pdp-muted);
+}
+.pdp-offer-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    border: 1px dashed var(--pdp-border);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 0.78rem;
+}
+.pdp-offer-code {
+    font-weight: 900;
+    color: var(--pdp-blue);
+    background: #eef4ff;
+    border-radius: 6px;
+    padding: 2px 8px;
+    direction: ltr;
+}
+.pdp-bank-offer-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: var(--pdp-text);
+}
+.pdp-bank-offer-row .material-icons-outlined {
+    font-size: 16px;
+    color: var(--pdp-blue);
+}

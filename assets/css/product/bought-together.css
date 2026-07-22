@@ -1,0 +1,148 @@
+/* ============================================================
+   BoughtTogether — current product + up to 3 companions, each
+   with a checkbox, connected visually with "+", total + CTA.
+   ============================================================ */
+
+.pdp-bt { display: flex; flex-direction: column; gap: 16px; }
+
+.pdp-bt-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+}
+.pdp-bt-row::-webkit-scrollbar { display: none; }
+
+.pdp-bt-plus {
+  flex: none;
+  align-self: center;
+  color: var(--pdp-muted);
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding-top: 34px;
+}
+
+.pdp-bt-item {
+  flex: 0 0 108px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+
+.pdp-bt-item-imgwrap {
+  position: relative;
+  width: 92px;
+  height: 92px;
+  border-radius: 12px;
+  border: 1px solid var(--pdp-border);
+  background: #fff;
+  overflow: hidden;
+}
+.pdp-bt-item-imgwrap img { width: 100%; height: 100%; object-fit: contain; padding: 6px; }
+
+.pdp-bt-checkbox {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  border: 2px solid #fff;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 1px var(--pdp-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.pdp-bt-checkbox.is-checked { background: var(--pdp-blue); box-shadow: 0 0 0 1px var(--pdp-blue); }
+.pdp-bt-checkbox .material-icons-outlined { font-size: 14px; color: #fff; display: none; }
+.pdp-bt-checkbox.is-checked .material-icons-outlined { display: block; }
+.pdp-bt-checkbox.is-locked { cursor: not-allowed; }
+
+.pdp-bt-item-name {
+  font-size: 0.7rem;
+  color: var(--pdp-text);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  line-clamp: 2;
+  overflow: hidden;
+  line-height: 1.3;
+  min-height: 2.6em;
+}
+.pdp-bt-item-price { font-size: 0.76rem; font-weight: 900; color: var(--pdp-price); }
+
+.pdp-bt-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px dashed var(--pdp-border);
+}
+.pdp-bt-summary-label { font-size: 0.76rem; color: var(--pdp-muted); }
+.pdp-bt-summary-price { font-size: 1.1rem; font-weight: 900; color: var(--pdp-price); display: block; }
+.pdp-bt-summary-count { font-size: 0.72rem; color: var(--pdp-muted); }
+
+.pdp-bt-btn {
+  border: 0;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--pdp-blue) 0%, var(--pdp-blue-strong) 100%);
+  color: #fff;
+  font-weight: 900;
+  font-size: 0.84rem;
+  padding: 12px 22px;
+  cursor: pointer;
+  box-shadow: 0 8px 16px rgba(31, 111, 235, 0.22);
+}
+.pdp-bt-btn:disabled { opacity: 0.5; cursor: not-allowed; box-shadow: none; }
+
+@media (min-width: 768px) {
+  .pdp-bt-item { flex: 0 0 120px; }
+  .pdp-bt-item-imgwrap { width: 104px; height: 104px; }
+}
+
+/* ===== Product gallery images stacked vertically ===== */
+.pdp-bt-gallery {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-top: 14px;
+  margin-top: 10px;
+  border-top: 1px solid var(--pdp-border);
+}
+
+.pdp-bt-gallery-item {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 12px;
+  border: 2px solid var(--pdp-border);
+  overflow: hidden;
+  background: #fff;
+}
+.pdp-bt-gallery-item.is-active {
+  border-color: var(--pdp-blue);
+}
+.pdp-bt-gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 8px;
+}
+
+@media (min-width: 768px) {
+  .pdp-bt-gallery {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .pdp-bt-gallery-item {
+    aspect-ratio: 1 / 1;
+  }
+}

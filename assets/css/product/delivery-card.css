@@ -1,0 +1,111 @@
+/* ============================================================
+   DeliveryCard — express badge, ETA, countdown, shipping fee,
+   selected city + change action, and the trust/feature icon row.
+   ============================================================ */
+
+.pdp-delivery { display: flex; flex-direction: column; gap: 10px; }
+
+.pdp-delivery-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--pdp-border);
+  border-radius: 12px;
+  background: #fafcff;
+}
+
+.pdp-delivery-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #eef4ff;
+  color: var(--pdp-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+}
+
+.pdp-delivery-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+
+.pdp-delivery-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.pdp-express-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 9px;
+  border-radius: 6px;
+  background: var(--pdp-express-bg);
+  color: var(--pdp-express-text);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.pdp-delivery-eta {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--pdp-ink);
+}
+
+.pdp-delivery-countdown {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--pdp-countdown);
+  direction: ltr;
+  unicode-bidi: isolate;
+  text-align: right;
+}
+
+.pdp-delivery-fee {
+  font-size: 0.76rem;
+  color: var(--pdp-muted);
+}
+
+.pdp-delivery-city {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--pdp-muted);
+  padding: 0 2px;
+}
+.pdp-delivery-city strong { color: var(--pdp-ink); font-weight: 800; }
+.pdp-delivery-change {
+  border: 0;
+  background: none;
+  color: var(--pdp-blue);
+  font-weight: 800;
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 2px 4px;
+}
+.pdp-delivery-change:hover { text-decoration: underline; }
+
+/* ---------- Trust / feature icon row ---------- */
+.pdp-trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 18px;
+  padding-top: 4px;
+}
+.pdp-trust-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  color: var(--pdp-muted);
+  flex: 1 1 auto;
+  min-width: 118px;
+}
+.pdp-trust-item .material-icons-outlined {
+  font-size: 18px;
+  color: var(--pdp-blue);
+  flex: none;
+}
+
+@media (min-width: 1200px) {
+  .pdp-trust-row { flex-direction: column; gap: 12px; }
+  .pdp-trust-item { min-width: 0; }
+}

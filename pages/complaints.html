@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تواصل معنا - Buda</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+  <link href="../assets/css/noon-components.css" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260709" rel="stylesheet" />
+  <link href="../assets/css/desktop-animations.css?v=20260709" rel="stylesheet" />
+  <link href="../assets/css/home.css" rel="stylesheet" />
+<link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="../assets/icons/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="../assets/icons/site.webmanifest">
+<meta name="theme-color" content="#FFD500">
+</head>
+<body class="app-shell">
+  <header class="app-header">
+    <div class="app-header-inner">
+      <div class="header-start">
+        <a href="home.html" style="text-decoration:none;"><div class="brand-badge">Buda</div></a>
+      </div>
+      <div class="app-search search-left-icon">
+        <span class="material-icons-outlined"></span>
+        <input type="text" placeholder="ابحث عن منتج أو فئة" />
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <div class="hm-content">
+      <section class="hm-section" style="padding: 24px; max-width: 600px; margin: 0 auto;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <div style="width: 64px; height: 64px; margin: 0 auto 12px; border-radius: 50%; background: #eef2ff; display: grid; place-items: center;">
+            <span class="material-icons-outlined" style="color: #4f46e5; font-size: 32px;"></span>
+          </div>
+          <h2 style="margin: 0 0 6px; font-size: 1.3rem;">تواصل معنا</h2>
+          <p style="margin: 0; color: #6b7280; font-size: 0.9rem;">نحن هنا لمساعدتك. أرسل لنا استفسارك أو شكواك وسنرد عليك في أقرب وقت.</p>
+        </div>
+
+        <div id="complaint-status" class="status-note hidden" style="margin-bottom: 16px; display: none;"></div>
+
+        <form id="complaint-form">
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; color: #374151;">الاسم</label>
+            <input id="comp-name" type="text" class="auth-input" placeholder="اسمك" style="width: 100%;" required />
+          </div>
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; color: #374151;">البريد الإلكتروني</label>
+            <input id="comp-email" type="email" class="auth-input" placeholder="بريدك الإلكتروني" style="width: 100%;" required />
+          </div>
+          <div style="margin-bottom: 14px;">
+            <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; color: #374151;">الموضوع</label>
+            <input id="comp-subject" type="text" class="auth-input" placeholder="عنوان الرسالة" style="width: 100%;" required />
+          </div>
+          <div style="margin-bottom: 20px;">
+            <label style="display: block; font-weight: 700; font-size: 0.85rem; margin-bottom: 4px; color: #374151;">الرسالة</label>
+            <textarea id="comp-message" class="auth-input" rows="5" placeholder="اكتب رسالتك هنا..." style="width: 100%; resize: vertical; font-family: inherit;" required></textarea>
+          </div>
+          <button id="comp-submit-btn" type="submit" class="btn-primary" style="width: 100%; padding: 12px; font-size: 1rem;">
+            إرسال
+          </button>
+        </form>
+      </section>
+    </div>
+  </main>
+
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      var form = document.getElementById("complaint-form");
+      var statusEl = document.getElementById("complaint-status");
+      var submitBtn = document.getElementById("comp-submit-btn");
+
+      // Pre-fill if logged in
+      var storedEmail = localStorage.getItem("userEmail") || "";
+      var storedName = localStorage.getItem("userFullName") || "";
+      if (storedEmail) document.getElementById("comp-email").value = storedEmail;
+      if (storedName) document.getElementById("comp-name").value = storedName;
+
+      function setStatus(msg, type) {
+        statusEl.textContent = msg;
+        statusEl.className = "status-note " + type;
+        statusEl.style.display = "block";
+      }
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        submitBtn.textContent = "جاري الإرسال...";
+        setStatus("", "");
+
+        var name = document.getElementById("comp-name").value.trim();
+        var email = document.getElementById("comp-email").value.trim().toLowerCase();
+        var subject = document.getElementById("comp-subject").value.trim();
+        var message = document.getElementById("comp-message").value.trim();
+
+        if (!name || !email || !subject || !message) {
+          setStatus("يرجى ملء جميع الحقول.", "error");
+          submitBtn.disabled = false;
+          submitBtn.textContent = "إرسال";
+          return;
+        }
+
+        try {
+          var client = window.getSupabaseClient ? window.getSupabaseClient() : null;
+          if (!client) throw new Error("Supabase not available");
+
+          var { error } = await client.from("complaints").insert([{
+            name: name,
+            email: email,
+            subject: subject,
+            message: message,
+            status: "pending",
+          }]);
+
+          if (error) throw error;
+
+          setStatus("تم إرسال رسالتك بنجاح. سنرد عليك في أقرب وقت.", "success");
+          form.reset();
+
+        } catch (err) {
+          console.error("[complaints] error:", err);
+          setStatus("فشل الإرسال. حاول مرة أخرى لاحقاً.", "error");
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = "إرسال";
+        }
+      });
+    });
+  </script>
+</body>
+</html>

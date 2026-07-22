@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>التحقق من البريد - Buda</title>
+  <link rel="stylesheet" href="../../assets/vendor/fontawesome/css/all.min.css" />
+  <link href="../../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../../assets/css/noon-components.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../signin/signin.css" />
+  <link rel="stylesheet" href="signup.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function () {
+      emailjs.init({ publicKey: "xdVqEELgzBCftq4cf" });
+    })();
+  </script>
+<link rel="icon" type="image/x-icon" href="../../assets/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="../../assets/icons/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../../assets/icons/favicon-64x64.png">
+<link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="../../assets/icons/site.webmanifest">
+<meta name="theme-color" content="#FFD500">
+</head>
+<body>
+  <div class="auth-shell">
+    <div class="auth-card">
+      <a class="auth-brand" href="../home.html">
+        <span class="material-icons-outlined"></span>
+        Buda
+      </a>
+      <h1 class="auth-title">التحقق من البريد الإلكتروني</h1>
+      <div class="verification-info">
+        <p>أرسلنا رمز تحقق مكوّن من 6 أرقام إلى:</p>
+        <p id="email-display" style="margin: 6px 0; font-weight: 900; color: #102a43;">جارٍ التحميل...</p>
+        <p>أدخل الرمز لإكمال إنشاء الحساب.</p>
+      </div>
+
+      <form class="auth-form" onsubmit="handleVerifyOTP(event)">
+        <div class="otp-input-container" id="otp-container">
+          <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+          <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+          <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+          <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+          <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+          <input type="text" class="otp-input" maxlength="1" inputmode="numeric" />
+        </div>
+
+        <div id="error-message" class="error-message" style="display: none;"></div>
+        <button type="submit" class="verify-btn">تحقق</button>
+      </form>
+
+      <div class="resend-section">
+        <p style="margin: 0 0 6px; color: #667085;">لم تستلم الرمز؟</p>
+        <button class="resend-btn" id="resend-btn" onclick="handleResendOTP(event)">
+          إعادة إرسال الرمز
+          <span class="countdown" id="countdown" style="display: none;"></span>
+        </button>
+        <div class="resend-attempts" id="resend-attempts"></div>
+      </div>
+
+      <div class="auth-footer">
+        <a href="index.html">العودة إلى التسجيل</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="../../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../../assets/js/supabase-client.js?v=20260327-1"></script>
+  <script src="../../assets/js/store.js?v=20260327-1"></script>
+  <script src="../../assets/js/security-utils.js"></script>
+  <script src="../signin/signin.js"></script>
+  <script>
+    let isResending = false;
+
+    function updateResendAttemptsDisplay() {
+      const resendAttemptsDiv = document.getElementById("resend-attempts");
+      const resendBtn = document.getElementById("resend-btn");
+      const attempts = parseInt(sessionStorage.getItem("resend_attempts") || "0", 10);
+      const maxAttempts = parseInt(sessionStorage.getItem("max_resend_attempts") || "3", 10);
+
+      if (attempts >= maxAttempts) {
+        resendAttemptsDiv.textContent = "تم استهلاك كل محاولات إعادة الإرسال.";
+        resendAttemptsDiv.className = "resend-attempts locked";
+        resendBtn.disabled = true;
+      } else {
+        const remaining = maxAttempts - attempts;
+        resendAttemptsDiv.textContent = `المحاولات المتبقية: ${remaining}`;
+        resendAttemptsDiv.className = remaining === 1 ? "resend-attempts warning" : "resend-attempts";
+      }
+    }
+
+    function startResendCountdown(btn, expiresAt) {
+      const countdownSpan = document.getElementById("countdown");
+      btn.disabled = true;
+      countdownSpan.style.display = "inline";
+
+      const update = () => {
+        const remaining = Math.ceil((expiresAt - Date.now()) / 1000);
+        if (remaining > 0) {
+          countdownSpan.textContent = `(${remaining}ث)`;
+          setTimeout(update, 1000);
+        } else {
+          btn.disabled = false;
+          countdownSpan.style.display = "none";
+          sessionStorage.removeItem("resend_countdown");
+        }
+      };
+
+      update();
+    }
+
+    function generateOTP() {
+      return Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const otpInputs = document.querySelectorAll(".otp-input");
+      const emailDisplay = document.getElementById("email-display");
+      const email = sessionStorage.getItem("signup_email");
+
+      emailDisplay.textContent = email || "بريد غير متاح";
+      updateResendAttemptsDisplay();
+      otpInputs[0]?.focus();
+
+      otpInputs.forEach((input, index) => {
+        input.addEventListener("input", (event) => {
+          if (isResending) return;
+          const value = event.target.value.replace(/\D/g, "");
+          event.target.value = value;
+          event.target.classList.toggle("filled", Boolean(value));
+          if (value && index < otpInputs.length - 1) otpInputs[index + 1].focus();
+          if (Array.from(otpInputs).every((item) => item.value)) {
+            document.querySelector("form").dispatchEvent(new Event("submit"));
+          }
+        });
+
+        input.addEventListener("keydown", (event) => {
+          if (event.key === "Backspace" && !event.target.value && index > 0) {
+            otpInputs[index - 1].focus();
+          }
+        });
+      });
+
+      const resendCountdown = sessionStorage.getItem("resend_countdown");
+      if (resendCountdown) {
+        const expiresAt = parseInt(resendCountdown, 10);
+        if (Date.now() < expiresAt) {
+          startResendCountdown(document.getElementById("resend-btn"), expiresAt);
+        }
+      }
+    });
+
+    async function handleVerifyOTP(event) {
+      event.preventDefault();
+
+      const otpInputs = document.querySelectorAll(".otp-input");
+      const otpCode = Array.from(otpInputs).map((item) => item.value).join("");
+      const errorMessage = document.getElementById("error-message");
+      const verifyBtn = event.target.querySelector('button[type="submit"]');
+
+      if (otpCode.length !== 6 || !/^\d{6}$/.test(otpCode)) {
+        errorMessage.textContent = "الرجاء إدخال رمز صحيح مكون من 6 أرقام.";
+        errorMessage.style.display = "block";
+        otpInputs.forEach((item) => item.classList.add("error"));
+        return;
+      }
+
+      const storedOTP = sessionStorage.getItem("signup_otp");
+      const otpExpiresAt = parseInt(sessionStorage.getItem("otp_expires_at") || "0", 10);
+      const signupData = JSON.parse(sessionStorage.getItem("signup_data") || "{}");
+
+      if (!otpExpiresAt || Date.now() > otpExpiresAt) {
+        errorMessage.textContent = "انتهت صلاحية رمز التحقق. أعد الإرسال مرة أخرى.";
+        errorMessage.style.display = "block";
+        return;
+      }
+
+      if (!signupData?.email || !signupData?.name) {
+        errorMessage.textContent = "بيانات التسجيل غير مكتملة. أعد التسجيل من البداية.";
+        errorMessage.style.display = "block";
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 900);
+        return;
+      }
+
+      if (otpCode !== storedOTP) {
+        errorMessage.textContent = "الرمز غير صحيح. حاول مرة أخرى.";
+        errorMessage.style.display = "block";
+        otpInputs.forEach((item) => item.classList.add("error"));
+        setTimeout(() => otpInputs.forEach((item) => item.classList.remove("error")), 1200);
+        return;
+      }
+
+      errorMessage.style.display = "none";
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = "جارٍ إنشاء الحساب...";
+
+      try {
+        const client = getSupabaseClient();
+        const normalizedEmail = (window.BudaSecurity?.normalizeEmail
+          ? window.BudaSecurity.normalizeEmail(signupData.email)
+          : String(signupData.email || "").trim().toLowerCase());
+        const rawPassword = String(signupData.password || signupData.password_hash || "");
+
+        const { data: insertedRows, error: insertErr } = await client.from("users").insert([
+          {
+            email: normalizedEmail,
+            name: signupData.name,
+            password: rawPassword,
+          },
+        ]).select("id,email,name").limit(1);
+
+        if (insertErr) {
+          errorMessage.textContent =
+            insertErr.code === "23505"
+              ? "هذا البريد الإلكتروني مسجل بالفعل."
+              : "فشل إنشاء الحساب. حاول مرة أخرى.";
+          errorMessage.style.display = "block";
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = "تحقق";
+          return;
+        }
+
+        let insertedUser = Array.isArray(insertedRows) && insertedRows.length ? insertedRows[0] : null;
+        if (!insertedUser?.id) {
+          const { data: foundRows, error: findErr } = await client
+            .from("users")
+            .select("id,email,name")
+            .eq("email", normalizedEmail)
+            .limit(1);
+
+          if (findErr) {
+            throw findErr;
+          }
+
+          insertedUser = Array.isArray(foundRows) && foundRows.length ? foundRows[0] : null;
+        }
+
+        if (!insertedUser?.id || !insertedUser?.email) {
+          errorMessage.textContent = "تعذر تأكيد إنشاء الحساب. حاول تسجيل الدخول أو إعادة المحاولة.";
+          errorMessage.style.display = "block";
+          verifyBtn.disabled = false;
+          verifyBtn.textContent = "تحقق";
+          return;
+        }
+
+        localStorage.setItem("currentUser",
+          JSON.stringify({
+            id: insertedUser.id,
+            email: insertedUser.email,
+            name: insertedUser.name || signupData.name,
+            loginTime: new Date().toISOString(),
+          })
+        );
+        localStorage.setItem("isLoggedIn", "true");
+        localStorage.setItem("userEmail", insertedUser.email);
+        localStorage.setItem("userFullName", insertedUser.name || signupData.name);
+
+        // Create/update profile record in Supabase with country
+        var profileCountry = signupData.country;
+        console.log("[verify] signupData.country =", profileCountry, "signupData =", JSON.stringify(signupData));
+        if (!profileCountry) profileCountry = "EG";
+        try {
+          // Check if profile exists first
+          var { data: existingProfile } = await client.from("profiles").select("email").eq("email", insertedUser.email).limit(1);
+          var profileExists = Array.isArray(existingProfile) && existingProfile.length > 0;
+          console.log("[verify] profile exists?", profileExists, "saving country:", profileCountry);
+
+          if (profileExists) {
+            var { error: updErr } = await client.from("profiles").update({ country_code: profileCountry }).eq("email", insertedUser.email);
+            if (updErr) console.warn("[verify] update error:", updErr);
+          } else {
+            var { error: insErr } = await client.from("profiles").insert({
+              email: insertedUser.email,
+              full_name: insertedUser.name || signupData.name,
+              first_name: (insertedUser.name || signupData.name || "").split(" ")[0] || "",
+              last_name: (insertedUser.name || signupData.name || "").split(" ").slice(1).join(" ") || "",
+              country_code: profileCountry,
+            });
+            if (insErr) console.warn("[verify] insert error:", insErr);
+          }
+
+          // Verify column exists and value was saved
+          var { data: verifyData } = await client.from("profiles").select("country_code").eq("email", insertedUser.email).limit(1);
+          if (verifyData && verifyData.length) {
+            console.log("[verify] verify saved country_code =", verifyData[0].country_code);
+            if (verifyData[0].country_code !== profileCountry) {
+              console.warn("[verify] country_code mismatch after save, column may be missing");
+            }
+          } else {
+            console.warn("[verify] no profile found after save attempt");
+          }
+        } catch (e) {
+          console.warn("[verify] profile creation/update error:", e);
+        }
+
+        // Auto-register in partner_accounts for partner portal
+        try {
+          var { data: existingPartner } = await client.from("partner_accounts").select("email").eq("email", insertedUser.email).limit(1);
+          if (!existingPartner || !existingPartner.length) {
+            await client.from("partner_accounts").insert({
+              user_id: insertedUser.id,
+              email: insertedUser.email,
+              full_name: insertedUser.name || signupData.name || "",
+              avatar_url: "",
+              status: "active"
+            });
+          }
+        } catch (e) {
+          console.warn("[verify] partner_accounts sync skipped:", e.message);
+        }
+
+        // Set the user's country in TaagerIntegration and localStorage
+        var userCountry = signupData.country || "EG";
+        if (window.TaagerIntegration) {
+          var countryObj = null;
+          var countries = window.TaagerIntegration.getAvailableCountries();
+          for (var ci = 0; ci < countries.length; ci++) {
+            if (countries[ci].code === userCountry) {
+              countryObj = countries[ci];
+              break;
+            }
+          }
+          if (countryObj) {
+            window.TaagerIntegration.setSelectedCountry(countryObj);
+          }
+        }
+        localStorage.setItem("userCountry", userCountry);
+
+        [
+          "signup_email",
+          "signup_otp",
+          "signup_data",
+          "otp_expires_at",
+          "max_resend_attempts",
+          "resend_countdown",
+          "resend_attempts",
+        ].forEach((key) => sessionStorage.removeItem(key));
+
+        errorMessage.textContent = "تم إنشاء الحساب بنجاح، جارٍ التحويل...";
+        errorMessage.className = "success-message";
+        errorMessage.style.display = "block";
+
+        setTimeout(() => {
+          window.location.href = "../home.html";
+        }, 1200);
+      } catch (error) {
+        console.error("verify error", error);
+        errorMessage.textContent = "حدث خطأ أثناء إنشاء الحساب. حاول مرة أخرى.";
+        errorMessage.style.display = "block";
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = "تحقق";
+      }
+    }
+
+    async function handleResendOTP(event) {
+      event.preventDefault();
+      const email = sessionStorage.getItem("signup_email");
+      const attempts = parseInt(sessionStorage.getItem("resend_attempts") || "0", 10);
+      const maxAttempts = parseInt(sessionStorage.getItem("max_resend_attempts") || "3", 10);
+
+      if (!email) {
+        const errorMessage = document.getElementById("error-message");
+        errorMessage.textContent = "انتهت الجلسة، أعد التسجيل من البداية.";
+        errorMessage.className = "error-message";
+        errorMessage.style.display = "block";
+        setTimeout(() => {
+          window.location.href = "index.html";
+        }, 1000);
+        return;
+      }
+      if (attempts >= maxAttempts) return;
+
+      isResending = true;
+      document.querySelectorAll(".otp-input").forEach((item) => {
+        item.value = "";
+        item.classList.remove("filled", "error");
+      });
+      document.querySelector(".otp-input")?.focus();
+
+      sessionStorage.setItem("resend_attempts", String(attempts + 1));
+      const newOTP = generateOTP();
+      sessionStorage.setItem("signup_otp", newOTP);
+
+      try {
+        await sendOTPEmail(email, newOTP);
+      } catch (error) {
+        console.error("resend failed", error);
+        errorMessage.textContent = "فشل إرسال الكود. تحقق من اتصالك أو حاول لاحقاً.";
+        errorMessage.style.display = "block";
+      }
+
+      const expiresAt = Date.now() + 60000;
+      sessionStorage.setItem("resend_countdown", String(expiresAt));
+      startResendCountdown(document.getElementById("resend-btn"), expiresAt);
+      updateResendAttemptsDisplay();
+      setTimeout(() => {
+        isResending = false;
+      }, 50);
+    }
+  </script>
+</body>
+</html>

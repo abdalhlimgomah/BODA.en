@@ -1,0 +1,879 @@
+================================================================================
+موقع Buda - تحليل كامل للمشروع (Full Project Analysis)
+================================================================================
+
+📅 تاريخ التحليل: 2025-07-11
+📁 المسار: C:\Users\BODa\Documents\Date bsnas Home BODA\موقع الخاص بك
+
+================================================================================
+1. هيكل المشروع (Project Structure Overview)
+================================================================================
+
+موقع الخاص بك/
+├── index.html                          # نقطة الدخول - يعيد توجيه إلى pages/home.html
+├── fix-wishlist.js                     # سكريبت إصلاح wishlist (مهم)
+├── refresh_token_daily.bat             # ملف batch لتحديث التوكن يومياً (Windows)
+├── _dir_path.txt                       # مسار الدليل (ملف تهيئة)
+├── error_response.json                 # نموذج لرد خطأ (للاختبار)
+├── taager_refresh.log                  # ملف سجل مزامنة تاجر
+├── assets/
+│   ├── css/                            # ملفات CSS الأساسية (40+ ملف)
+│   │   ├── style.css                   # CSS رئيسي (قديم - قد لا يُستخدم)
+│   │   ├── noon-theme.css              # ثيم نون الرئيسي
+│   │   ├── noon-shell.css              # هيكل الصفحة (هيدر، فوتر، نافبار)
+│   │   ├── noon-components.css         # مكونات UI
+│   │   ├── desktop.css                 # تنسيقات سطح المكتب
+│   │   ├── desktop-animations.css      # أنيميشن سطح المكتب
+│   │   ├── home.css                    # تنسيقات الصفحة الرئيسية
+│   │   ├── product-detail.css          # تنسيقات صفحة المنتج
+│   │   ├── cart.css                    # تنسيقات السلة
+│   │   ├── checkout.css                # تنسيقات الدفع
+│   │   ├── my-orders.css               # تنسيقات طلباتي
+│   │   ├── category.css                # تنسيقات الفئات
+│   │   ├── search.css                  # تنسيقات البحث
+│   │   ├── login.css                   # تنسيقات تسجيل الدخول
+│   │   ├── sign-up.css                 # تنسيقات التسجيل
+│   │   ├── account.css                 # تنسيقات الحساب
+│   │   ├── addresses.css               # تنسيقات العناوين
+│   │   ├── order-tracking.css          # تنسيقات تتبع الطلب
+│   │   ├── order-summary.css           # تنسيقات ملخص الطلب
+│   │   ├── product-reviews.css         # تنسيقات تقييمات المنتجات
+│   │   ├── skeleton.css                # هيكل التحميل
+│   │   ├── empty-cart.css              # سلة فارغة
+│   │   ├── empty-cart-alt.css          # سلة فارغة بديلة
+│   │   ├── logout-confirmation.css     # تأكيد تسجيل الخروج
+│   │   ├── phone-verification.css      # التحقق بالهاتف
+│   │   ├── pricing-engine.css          # محرك التسعير
+│   │   ├── addresses.css               # عناوين
+│   │   ├── contact.css                 # تواصل
+│   │   ├── complaints.css              # شكاوى
+│   │   ├── privacy.css                 # سياسة الخصوصية
+│   │   ├── returns.css                 # إرجاع
+│   │   ├── about.css                   # عن الموقع
+│   │   ├── admin.css                   # لوحة الإدارة
+│   │   ├── ahsab.css                   # الحساب
+│   │   ├── section.css                 # قسم
+│   │   └── product/                    # CSS مخصصة للمنتج (16 ملف)
+│   ├── js/                             # ملفات JavaScript الأساسية (50+ ملف)
+│   │   ├── store.js                    # متجر المنتجات (مهم جداً - قاعدة البيانات المحلية)
+│   │   ├── supabase-client.js          # عميل Supabase المركزي (مهم جداً)
+│   │   ├── taager-integration.js       # تكامل تاجر (Taager API)
+│   │   ├── pricing-engine.js           # محرك التسعير التلقائي
+│   │   ├── cart.js                     # منطق السلة والدفع
+│   │   ├── home.js                     # الصفحة الرئيسية (كبير - 2700+ سطر)
+│   │   ├── main.js                     # صفحة المنتجات (الفلترة، التصفح)
+│   │   ├── category.js                 # صفحة الفئات
+│   │   ├── product-detail.js           # صفحة تفاصيل المنتج
+│   │   ├── product-reviews.js          # تقييمات المنتجات
+│   │   ├── search.js                   # البحث
+│   │   ├── checkout.js                 # الدفع
+│   │   ├── my-orders.js                # طلباتي
+│   │   ├── my-orders.config.js         # إعدادات طلباتي
+│   │   ├── edit-account.js             # تعديل الحساب
+│   │   ├── delete-account.js           # حذف الحساب
+│   │   ├── logout-confirmation.js      # تأكيد الخروج
+│   │   ├── login.js                    # تسجيل الدخول
+│   │   ├── login.config.js             # إعدادات تسجيل الدخول
+│   │   ├── sign-up.js                  # التسجيل
+│   │   ├── sign-up.config.js           # إعدادات التسجيل
+│   │   ├── password-reset.js           # إعادة تعيين كلمة المرور
+│   │   ├── addresses.js                # العناوين
+│   │   ├── wishlist.js                 # المفضلة
+│   │   ├── script.js                   # سكريبت عام
+│   │   ├── splash.js                   # شاشة البداية
+│   │   ├── splash.config.js            # إعدادات شاشة البداية
+│   │   ├── ahsab.js                    # الحساب
+│   │   ├── desktop-effects.js          # تأثيرات سطح المكتب
+│   │   ├── carousel.js                 # كراسيل
+│   │   ├── skeleton-loader.js          # هيكل التحميل
+│   │   ├── error-overlay.js            # طبقة الخطأ
+│   │   ├── security-utils.js           # أدوات الأمان
+│   │   ├── shipping-zones.js           # مناطق الشحن
+│   │   ├── orders-common.js            # طلبات مشتركة
+│   │   ├── order-tracking.js           # تتبع الطلب
+│   │   ├── phone-verification-modal.js # موديل التحقق بالهاتف
+│   │   ├── mock-api.js                 # API وهمي للاختبار
+│   │   ├── test-functions.js           # دوال اختبار
+│   │   ├── noon-shell.js               # شل نون (هيدر، فوتر، نافبار)
+│   │   ├── product/                    # وحدات المنتج (16 ملف)
+│   │   │   ├── index.js                # نقطة الدخول
+│   │   ├── ├── data.js                 # بيانات المنتج
+│   │   ├── ├── product-info.js         # معلومات المنتج
+│   │   ├── ├── product-gallery.js      # معرض الصور
+│   │   ├── ├── price-card.js           # بطاقة السعر
+│   │   ├── ├── sticky-add-to-cart.js   # إضافة للسلة لاصقة
+│   │   ├── ├── variant-selector.js     # اختيار المتغيرات
+│   │   ├── ├── size-selector.js        # اختيار المقاس
+│   │   ├── ├── size-guide.js           # دليل المقاسات
+│   │   ├── ├── seller-card.js          # بطاقة البائع
+│   │   ├── ├── seller-generator.js     # مولد البائع
+│   │   ├── ├── review-section.js       # قسم التقييمات
+│   │   ├── ├── recommended-products.js # منتجات مقترحة
+│   │   ├── ├── product-skeleton.js     # هيكل المنتج
+│   │   ├── ├── bought-together.js      # منتجات مشتراة معاً
+│   │   ├── ├── installment-card.js     # بطاقة التقسيط
+│   │   ├── ├── delivery-card.js        # بطاقة التوصيل
+│   ├── vendor/                         # مكتبات خارجية
+│   │   ├── supabase/                   # Supabase JS SDK
+│   │   ├── tailwind/                   # Tailwind CSS extras
+│   │   └── fontawesome/                # Font Awesome
+│   ├── fonts/                          # خطوط (Cairo, Inter, Roboto, Orbitron, Material Icons)
+│   ├── images/                         # صور المنتجات والبنرات
+│   └── icons/                          # أيقونات الموقع (favicon)
+├── pages/                              # صفحات HTML (30+ صفحة)
+│   ├── home.html                       # الصفحة الرئيسية (مهمة)
+│   ├── product.html                    # صفحة المنتج (مهمة)
+│   ├── products.html                   # صفحة المنتجات/الفلترة (مهمة)
+│   ├── category.html                   # صفحة الفئات
+│   ├── search.html                     # البحث
+│   ├── cart.html / empty-cart.html     # السلة
+│   ├── checkout.html                   # الدفع
+│   ├── my-orders.html                  # طلباتي
+│   ├── order-tracking.html             # تتبع الطلب
+│   ├── order-summary.html              # ملخص الطلب
+│   ├── wishlist.html                   # المفضلة
+│   ├── ahsab.html                      # حسابي
+│   ├── edit-account.html               # تعديل الحساب
+│   ├── delete-account.html             # حذف الحساب
+│   ├── logout-confirmation.html        # تأكيد الخروج
+│   ├── addresses.html                  # العناوين
+│   ├── contact.html                    # تواصل بنا
+│   ├── complaints.html                 # الشكاوى
+│   ├── about.html                      # عن الموقع
+│   ├── privacy.html                    # سياسة الخصوصية
+│   ├── returns.html                    # الإرجاع
+│   ├── section.html                    # قسم
+│   ├── splash.html                     # شاشة البداية
+│   ├── admin.html                      # لوحة الإدارة
+│   ├── signin/                         # صفحات تسجيل الدخول
+│   │   ├── login.html                  # تسجيل الدخول
+│   │   ├── login in.html               # مكرر (غير مستخدم)
+│   │   ├── forgot-password.html        # نسيان كلمة المرور
+│   │   ├── reset-code.html             # كود إعادة التعيين
+│   │   ├── reset-password.html         # إعادة تعيين كلمة المرور
+│   │   ├── signin.js                   # منطق تسجيل الدخول
+│   │   ├── signin.css                  # تنسيقات تسجيل الدخول
+│   │   ├── style.css                   # تنسيقات إضافية
+│   │   ├── main.js                     # سكريبت رئيسي
+│   │   ├── password-reset.js           # إعادة تعيين كلمة المرور
+│   │   └── img/                        # صور تسجيل الدخول
+│   ├── signup/                         # صفحات التسجيل
+│   │   ├── index.html                  # التسجيل
+│   │   ├── verify.html                 # التحقق
+│   │   ├── style.css                   # تنسيقات
+│   │   ├── signup.css                  # تنسيقات التسجيل
+│   │   ├── google.png                  # أيقونة جوجل
+│   │   └── bg-img.jpg                  # صورة خلفية
+│   └── style.css                       # CSS عام للصفحات
+├── sql/                                # ملفات SQL (قاعدة البيانات)
+│   ├── create_profiles_table.sql       # إنشاء جدول البروفايلات
+│   ├── create_home_sections.sql        # أقسام الصفحة الرئيسية
+│   ├── create_product_original_prices.sql # أسعار أصلية للمنتجات
+│   ├── create_support_chat.sql         # دعم المحادثات
+│   ├── create_wishlist_items_table.sql # عناصر المفضلة
+│   ├── fix_kobon_rls.sql               # إصلاح RLS للكوبونات
+│   ├── fix_mismatched_prefix.sql       # إصلاح البادئة
+│   ├── fix_ratings_foreign_key.sql     # إصلاح مفتاح التقييمات
+│   ├── phone_verification_schema.sql   # مخطط التحقق بالهاتف
+│   ├── populate_original_prices_from_taager.sql # تعبئة الأسعار من تاجر
+│   ├── rls_policies.sql                # سياسات RLS
+│   ├── seller_profiles_setup.sql       # إعداد بروفايلات البائعين
+│   └── supabase-security.sql           # أمان Supabase
+├── supabase/                           # إعدادات Supabase
+│   ├── config.toml                     # تكوين Supabase المحلي
+│   ├── migrations/                     # ترحيلات قاعدة البيانات (17 ملف)
+│   │   ├── 20250706001_backfill_extra_fields.sql
+│   │   ├── 20250706002_add_product_images.sql
+│   │   ├── 20250706003_backfill_images.sql
+│   │   ├── 20250706004_backfill_comprehensive.sql
+│   │   ├── 20250706005_find_duplicates.sql
+│   │   ├── 20260705235959_add_taager_extra_fields.sql
+│   │   ├── 20260707000001_add_review_images.sql
+│   │   ├── 20260707000002_add_ratings_created_at.sql
+│   │   ├── 20260707000003_fix_order_items_product_id.sql
+│   │   ├── 20260709080000_create_support_chat.sql
+│   │   ├── 20260709090000_change_user_id_type.sql
+│   │   ├── 20260709100000_disable_support_rls.sql
+│   │   ├── 20260709110000_support_storage_bucket.sql
+│   │   ├── 20260709120000_add_last_message_type.sql
+│   │   └── 20260711000001_add_country_code_to_profiles.sql
+│   └── functions/                      # Edge Functions (Deno)
+│       ├── taager-proxy/               # Proxy لتاجر API (مهم جداً - 1200+ سطر)
+│       │   └── index.ts                # نقطة الدخول - مزامنة المنتجات، الطلبات، الصور
+│       └── phone-verification/         # التحقق بالهاتف (Twilio)
+│           └── index.ts                # إرسال/التحقق من OTP
+├── tmp/                                # ملفات مؤقتة (غير مهمة)
+│   ├── cart-viewport-check.spec.js
+│   ├── cart-viewport-check.mjs
+│   ├── cart-storage.json
+│   └── build-cart-storage.mjs
+
+================================================================================
+2. الملفات المهمة والمستخدمة فعلياً (Critical Files - ACTIVELY USED)
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ A. نقطة الدخول والصفحات الرئيسية                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ index.html           │ نقطة الدخول - يعيد التوجيه إلى pages/home.html       │
+│ pages/home.html      │ الصفحة الرئيسية - الهيكل الكامل مع skeleton loading │
+│ pages/product.html   │ صفحة تفاصيل المنتج - تستخدم PDP modules             │
+│ pages/products.html  │ صفحة المنتجات مع فلترة وتصنيف (main.js)             │
+│ pages/category.html  │ صفحة الفئات (category.js)                            │
+│ pages/search.html    │ صفحة البحث (search.js)                               │
+│ pages/checkout.html  │ صفحة الدفع (checkout.js)                             │
+│ pages/cart.html      │ صفحة السلة (cart.js)                                  │
+│ pages/empty-cart.html│ السلة الفارغة                                        │
+│ pages/my-orders.html │ طلباتي (my-orders.js)                                │
+│ pages/order-tracking.html│ تتبع الطلب (order-tracking.js)                  │
+│ pages/order-summary.html │ ملخص الطلب                                      │
+│ pages/wishlist.html  │ المفضلة (wishlist.js)                                │
+│ pages/ahsab.html     │ حسابي (ahsab.js)                                     │
+│ pages/edit-account.html│ تعديل الحساب (edit-account.js)                     │
+│ pages/delete-account.html│ حذف الحساب (delete-account.js)                  │
+│ pages/logout-confirmation.html│ تأكيد الخروج (logout-confirmation.js)     │
+│ pages/addresses.html │ العناوين (addresses.js)                              │
+│ pages/contact.html   │ تواصل بنا                                           │
+│ pages/complaints.html│ الشكاوى (دعم فني)                                   │
+│ pages/about.html     │ عن الموقع                                          │
+│ pages/privacy.html   │ سياسة الخصوصية                                      │
+│ pages/returns.html   │ الإرجاع                                            │
+│ pages/section.html   │ قسم عام                                           │
+│ pages/splash.html    │ شاشة البداية (splash.js)                            │
+│ pages/admin.html     │ لوحة الإدارة                                        │
+│ pages/signin/login.html      │ تسجيل الدخول (signin.js, main.js)           │
+│ pages/signin/forgot-password.html│ نسيان كلمة المرور                      │
+│ pages/signin/reset-code.html   │ كود إعادة التعيين                         │
+│ pages/signin/reset-password.html│ إعادة تعيين كلمة المرور                  │
+│ pages/signup/index.html        │ التسجيل (sign-up.js)                       │
+│ pages/signup/verify.html       │ التحقق من البريد                          │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ B. JavaScript الأساسي (Core JS) - الأهم                                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ assets/js/store.js                      │ قاعدة البيانات المحلية للمنتجات  │
+│                                         │ (productsDatabase)، السلة، المفضلة،│
+│                                         │ مزامنة Supabase، تطبيع البيانات   │
+│ assets/js/supabase-client.js            │ عميل Supabase المركزي (1400+ سطر)│
+│                                         │ إدارة المنتجات، الطلبات، الكوبونات،│
+│                                         │ تقييمات، Taager integration       │
+│ assets/js/taager-integration.js         │ تكامل Taager API (830+ سطر)       │
+│                                         │ مزامنة المنتجات، فلترة بالبلد،    │
+│                                         │ كاش، صور، merchant-info           │
+│ assets/js/pricing-engine.js             │ محرك التسعير التلقائي             │
+│                                         │ تحميل tiers من Supabase، حساب     │
+│                                         │ سعر البيع من سعر المورد            │
+│ assets/js/cart.js                       │ منطق السلة والدفع (1700+ سطر)    │
+│                                         │ كوبونات، شحن، توصيل، suggestions │
+│ assets/js/home.js                       │ الصفحة الرئيسية (2773 سطر)       │
+│                                         │ Config-driven sections، banners،  │
+│                                         │ hero، categories، brands، offers  │
+│ assets/js/main.js                       │ صفحة المنتجات - فلترة، ترقيم     │
+│                                         │ صفحات، بحث (784 سطر)              │
+│ assets/js/product-detail.js             │ صفحة تفاصيل المنتج               │
+│ assets/js/product-reviews.js            │ تقييمات المنتجات                 │
+│ assets/js/search.js                     │ البحث                           │
+│ assets/js/checkout.js                   │ الدفع                            │
+│ assets/js/my-orders.js                  │ طلباتي                          │
+│ assets/js/my-orders.config.js           │ إعدادات طلباتي                   │
+│ assets/js/edit-account.js               │ تعديل الحساب                      │
+│ assets/js/delete-account.js             │ حذف الحساب                        │
+│ assets/js/logout-confirmation.js        │ تأكيد الخروج                     │
+│ assets/js/addresses.js                  │ العناوين                         │
+│ assets/js/wishlist.js                   │ المفضلة                          │
+│ assets/js/login.js                      │ تسجيل الدخول                    │
+│ assets/js/login.config.js               │ إعدادات تسجيل الدخول             │
+│ assets/js/sign-up.js                    │ التسجيل                         │
+│ assets/js/sign-up.config.js             │ إعدادات التسجيل                  │
+│ assets/js/password-reset.js             │ إعادة تعيين كلمة المرور          │
+│ assets/js/ahsab.js                      │ الحساب                           │
+│ assets/js/noon-shell.js                 │ شل نون - هيدر، فوتر، نافبار      │
+│ assets/js/skeleton-loader.js            │ هيكل التحميل (Skeleton UI)      │
+│ assets/js/carousel.js                   │ كراسيل/سلايدر                   │
+│ assets/js/desktop-effects.js            │ تأثيرات سطح المكتب              │
+│ assets/js/error-overlay.js              │ طبقة الخطأ                      │
+│ assets/js/security-utils.js             │ أدوات الأمان                     │
+│ assets/js/shipping-zones.js             │ مناطق الشحن                      │
+│ assets/js/orders-common.js              │ طلبات مشتركة                     │
+│ assets/js/order-tracking.js             │ تتبع الطلب                      │
+│ assets/js/phone-verification-modal.js   │ موديل التحقق بالهاتف            │
+│ assets/js/mock-api.js                   │ API وهمي للاختبار                │
+│ assets/js/test-functions.js             │ دوال اختبار                      │
+│ assets/js/splash.js                     │ شاشة البداية                     │
+│ assets/js/splash.config.js              │ إعدادات شاشة البداية             │
+│ assets/js/fix-wishlist.js               │ إصلاح المفضلة (مهم)              │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ C. وحدات المنتج (Product Modules) - assets/js/product/                     │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ index.js                  │ نقطة الدخول - يصدّر جميع الوحدات               │
+│ data.js                   │ بيانات المنتج، تطبيع، جلب                      │
+│ product-info.js           │ معلومات المنتج (الاسم، الوصف، السعر)          │
+│ product-gallery.js        │ معرض الصور (السلايدر، التكبير)                │
+│ price-card.js             │ بطاقة السعر (السعر الحالي، الأصلي، الخصم)     │
+│ sticky-add-to-cart.js     │ إضافة للسلة لاصقة عند التمرير                 │
+│ variant-selector.js       │ اختيار المتغيرات (اللون، الحجم، إلخ)          │
+│ size-selector.js          │ اختيار المقاس                                  │
+│ size-guide.js             │ دليل المقاسات                                  │
+│ seller-card.js            │ بطاقة البائع                                   │
+│ seller-generator.js       │ مولد البائع                                    │
+│ review-section.js         │ قسم التقييمات                                 │
+│ recommended-products.js   │ منتجات مقترحة                                 │
+│ product-skeleton.js       │ هيكل المنتج (loading skeleton)                │
+│ bought-together.js        │ منتجات مشتراة معاً (Cross-sell)               │
+│ installment-card.js       │ بطاقة التقسيط                                  │
+│ delivery-card.js          │ بطاقة التوصيل                                  │
+│ utils.js                  │ دوال مساعدة مشتركة                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ D. CSS الأساسي (Core CSS)                                                   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ assets/css/noon-theme.css         │ الثيم الرئيسي - ألوان، متغيرات CSS    │
+│ assets/css/noon-shell.css         │ هيكل الصفحة - هيدر، فوتر، نافبار     │
+│ assets/css/noon-components.css    │ مكونات UI - أزرار، كروت، نماذج        │
+│ assets/css/desktop.css            │ تنسيقات سطح المكتب                    │
+│ assets/css/desktop-animations.css │ أنيميشن سطح المكتب                    │
+│ assets/css/home.css               │ تنسيقات الصفحة الرئيسية               │
+│ assets/css/product-detail.css     │ تنسيقات صفحة المنتج                   │
+│ assets/css/cart.css               │ تنسيقات السلة                         │
+│ assets/css/checkout.css           │ تنسيقات الدفع                         │
+│ assets/css/my-orders.css          │ تنسيقات طلباتي                        │
+│ assets/css/category.css           │ تنسيقات الفئات                        │
+│ assets/css/search.css             │ تنسيقات البحث                         │
+│ assets/css/login.css              │ تنسيقات تسجيل الدخول                 │
+│ assets/css/sign-up.css            │ تنسيقات التسجيل                      │
+│ assets/css/account.css            │ تنسيقات الحساب                        │
+│ assets/css/addresses.css          │ تنسيقات العناوين                      │
+│ assets/css/order-tracking.css     │ تنسيقات تتبع الطلب                   │
+│ assets/css/order-summary.css      │ تنسيقات ملخص الطلب                   │
+│ assets/css/product-reviews.css    │ تنسيقات التقييمات                    │
+│ assets/css/skeleton.css           │ هيكل التحميل                         │
+│ assets/css/empty-cart.css         │ السلة الفارغة                         │
+│ assets/css/empty-cart-alt.css     │ السلة الفارغة البديلة                │
+│ assets/css/logout-confirmation.css│ تأكيد الخروج                         │
+│ assets/css/phone-verification.css │ التحقق بالهاتف                       │
+│ assets/css/pricing-engine.css     │ محرك التسعير                         │
+│ assets/css/contact.css            │ تواصل بنا                            │
+│ assets/css/complaints.css         │ الشكاوى                              │
+│ assets/css/privacy.css            │ سياسة الخصوصية                       │
+│ assets/css/returns.css            │ الإرجاع                              │
+│ assets/css/about.css              │ عن الموقع                            │
+│ assets/css/admin.css              │ لوحة الإدارة                          │
+│ assets/css/ahsab.css              │ الحساب                               │
+│ assets/css/section.css            │ قسم عام                             │
+│ assets/css/product/*.css          │ 16 ملف CSS مخصص للمنتج               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ E. Supabase Backend                                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ supabase/config.toml              │ تكوين Supabase المحلي (ports، auth، DB)│
+│ supabase/migrations/*.sql         │ 17 ملف ترحيل قاعدة البيانات            │
+│ supabase/functions/taager-proxy/  │ Edge Function لتاجر (مهم جداً)         │
+│   └── index.ts                    │ مزامنة المنتجات، جلب merchant-info،    │
+│                                   │ إنشاء الطلبات، proxy الصور، backfill  │
+│ supabase/functions/phone-verification/│ التحقق بالهاتف (Twilio)           │
+│   └── index.ts                    │ إرسال/التحقق OTP، rate limiting      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ F. ملفات SQL (Database Schema)                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ sql/create_profiles_table.sql           │ جدول البروفايلات                  │
+│ sql/create_home_sections.sql            │ أقسام الصفحة الرئيسية              │
+│ sql/create_product_original_prices.sql  │ الأسعار الأصلية للمنتجات          │
+│ sql/create_support_chat.sql             │ دعم المحادثات                      │
+│ sql/create_wishlist_items_table.sql     │ عناصر المفضلة                      │
+│ sql/fix_kobon_rls.sql                   │ إصلاح RLS للكوبونات               │
+│ sql/fix_mismatched_prefix.sql           │ إصلاح البادئة غير المتطابقة        │
+│ sql/fix_ratings_foreign_key.sql         │ إصلاح مفتاح التقييمات الخارجي     │
+│ sql/phone_verification_schema.sql       │ مخطط التحقق بالهاتف               │
+│ sql/populate_original_prices_from_taager.sql│ تعبئة الأسعار من تاجر          │
+│ sql/rls_policies.sql                    │ سياسات RLS                        │
+│ sql/seller_profiles_setup.sql           │ إعداد بروفايلات البائعين          │
+│ sql/supabase-security.sql               │ أمان Supabase                      │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+3. الملفات غير المهمة / غير المستخدمة / مكررة (Unused / Duplicate / Temp Files)
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ A. ملفات مكررة (Duplicate Files)                                           │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ pages/signin/login in.html      │ ❌ مكرر من login.html (مسافة في الاسم)    │
+│ pages/signin/style.css          │ ⚠️ مكرر جزئياً مع signin.css              │
+│ pages/signin/signin.css         │ ⚠️ نفس وظيفة style.css                    │
+│ pages/style.css                 │ ⚠️ قد لا يُستخدم (يوجد CSS في assets/)   │
+│ assets/css/style.css            │ ⚠️ CSS قديم، تم استبداله بـ noon-theme.css│
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ B. ملفات مؤقتة / اختبار (Temp / Test Files) - في مجلد tmp/                 │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ tmp/cart-viewport-check.spec.js   │ ❌ ملف اختبار Playwright               │
+│ tmp/cart-viewport-check.mjs       │ ❌ سكريبت اختبار                       │
+│ tmp/cart-storage.json             │ ❌ بيانات اختبار محلية                 │
+│ tmp/build-cart-storage.mjs        │ ❌ سكريبت بناء                         │
+│ test-results/.last-run.json       │ ❌ نتائج اختبار قديمة                  │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ C. ملفات نظام / تهيئة (Config / System Files) - قد لا تكون مطلوبة للنشر   │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ _dir_path.txt                   │ ❌ مسار الدليل (ملف تهيئة محلي)          │
+│ error_response.json             │ ❌ نموذج رد خطأ (للاختبار)               │
+│ refresh_token_daily.bat         │ ⚠️ ملف batch لـ Windows لتحديث التوكن   │
+│ taager_refresh.log              │ ⚠️ ملف سجل مزامنة تاجر (يتجدد تلقائياً) │
+│ nul                             │ ❌ ملف نظام Windows (غير مقصود)          │
+│ supabase/.temp/                 │ ❌ ملفات مؤقتة لـ Supabase CLI           │
+│ supabase/.temp/pgdelta/         │ ❌ ملفات pg-delta                        │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ D. ملفات CSS/JS قد تكون قديمة أو غير مستخدمة                                │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ assets/css/empty-cart-alt.css     │ ⚠️ بديل للسلة الفارغة (قد لا يُستخدم)  │
+│ assets/css/section.css            │ ⚠️ قسم عام (قد لا يُستخدم)             │
+│ assets/js/script.js               │ ⚠️ سكريبت عام قديم                      │
+│ assets/js/mock-api.js             │ ⚠️ API وهمي (للتطوير فقط)              │
+│ assets/js/test-functions.js       │ ❌ دوال اختبار                          │
+│ assets/js/orders-common.js        │ ⚠️ قد يكون مدمجاً في my-orders.js       │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+4. شرح تفصيلي لكل ملف رئيسي (Detailed File Descriptions)
+================================================================================
+
+================================================================================
+📄 index.html
+================================================================================
+الوظيفة: نقطة الدخول الوحيدة للموقع
+المحتوى: 
+- <meta> tags للعربية RTL
+- redirect فوري إلى pages/home.html عبر <meta http-equiv="refresh">
+- إعدادات favicon و manifest و theme-color
+الاستخدام: ضروري - لا تحذف
+
+================================================================================
+📄 pages/home.html (الصفحة الرئيسية - أهم صفحة)
+================================================================================
+الوظيفة: الصفحة الرئيسية الكاملة مع جميع الأقسام
+البنية:
+- Header: بثلاثة صفوف (العلامة التجارية + البحث، الموقع، الإجراءات)
+- Navigation: صف الفئات القابل للتمرير أفقياً
+- Main Content: 
+  * Skeleton loading blocks (8 أقسام)
+  * يتم استبدالها ديناميكياً بـ home.js
+- Footer: روابط، دفع، تحميل التطبيق
+- Bottom Nav: للتنقل على الموبايل
+- Support Drawer: دردشة الدعم
+- Location Modal: اختيار عنوان التوصيل
+السكريبتات المحملة (بالترتيب):
+1. noon-shell.js - هيدر/فوتر/نافبار
+2. skeleton-loader.js - هيكل التحميل
+3. store.js - متجر المنتجات
+4. pricing-engine.js - محرك التسعير
+5. taager-integration.js - تكامل تاجر
+6. cart.js - السلة
+7. supabase-js@2.js - SDK
+8. supabase-client.js - عميل Supabase
+9. home.js - منطق الصفحة الرئيسية
+
+================================================================================
+📄 assets/js/store.js (قاعدة البيانات المحلية - مهم جداً)
+================================================================================
+الوظيفة: In-memory database للمنتجات + localStorage sync + Supabase sync
+المكونات الرئيسية:
+1. productsDatabase - كائن بـ 12 منتج تجريبي (seed data)
+2. SEED_ARABIC_COPY - إصلاح النصوص العربية المكسورة (mojibake)
+3. دوال تطبيع:
+   - normalizeProductRecord() - توحيد هيكل المنتج
+   - resolveProductPrice() - حساب السعر مع الخصومات والأسعار الوهمية
+   - extractProductImages() - جمع الصور من حقول متعددة
+   - resolveProductRating() - التقييمات من جدول ratings فقط
+4. BudaStore object (window.BudaStore):
+   - getAllProducts(), getProductById()
+   - getCart(), saveCart(), addToCart(), removeFromCart()
+   - getWishlist(), saveWishlist(), isInWishlist()
+   - syncCartToSupabase(), loadCartFromSupabase()
+   - syncWishlistToSupabase(), loadWishlistFromSupabase()
+   - loadProductsFromSupabase() - مزامنة من قاعدة البيانات
+   - loadFakeOriginalPrices() - أسعار وهمية من product_original_prices
+5. دوال مساعدة: parseNumeric, roundPrice, repairMojibakeText, splitImageString, toDirectImageUrl
+
+================================================================================
+📄 assets/js/supabase-client.js (عميل Supabase المركزي - مهم جداً)
+================================================================================
+الوظيفة: wrapper موحد لـ Supabase مع منطق أعمال كامل
+المكونات الرئيسية:
+1. إعدادات: SUPABASE_URL, SUPABASE_ANON_KEY (مدمجة في الكود)
+2. دوال تطبيع المنتجات:
+   - normalizeTaagerProduct() - من Taager API
+   - normalizeTaagerDbProduct() - من قاعدة البيانات
+   - filterTaagerProductsByCountry() - فلترة بالبلد
+3. دوال الطلبات:
+   - createOrder() - إنشاء طلب مع fallback patterns
+   - getOrders() - جلب الطلبات مع فلترة مرنة
+   - updateOrderStatus() - تحديث حالة الطلب
+4. دوال الكوبونات:
+   - validateCoupon() - التحقق من كوبون (kobon table)
+5. دوال التقييمات:
+   - annotateProductsWithRatingsTable() - إضافة التقييمات من جدول ratings
+6. دوال Taager:
+   - fetchTaagerProducts() - جلب من taager_products table
+   - fetchAllProductsWithTaager() - دمج داخلي + Taager
+   - createOrderWithTaager() - طلب مع بيانات Taager
+7. دوال المزامنة:
+   - loadTaagerCredentials() - تحميل credentials من app_settings
+8. window.supabaseClient - API مكشوف للصفحات
+
+================================================================================
+📄 assets/js/taager-integration.js (تكامل تاجر - 830+ سطر)
+================================================================================
+الوظيفة: جسر بين الموقع و Taager Merchant API
+المميزات:
+1. جلب المنتجات من Taager (مع pagination حتى 50 صفحة × 100 منتج)
+2. كاش محلي (localStorage) بـ TTL 10 دقائق
+3. فلترة حسب البلد (EG, SA) مع mapping لرموز ISO3
+4. تنسيق المنتجات: normalizeTaagerProduct()
+5. استخراج الصور من حقول متعددة (thumbnail, images, gallery, variants)
+6. حقول إضافية: quick_details, content_ideas, how_to_use, videos
+7. Merchant Info API لجلب تفاصيل إضافية لكل منتج
+8. دوال مساعدة: parseArrayField, sanitizeText, safeNumber
+9. window.TaagerIntegration API:
+   - fetchTaagerProducts(countryCode)
+   - mergeTaagerIntoStore(products)
+   - filterByCountry(products, countryCode)
+   - getSelectedCountry(), setSelectedCountry(country)
+   - getAvailableCountries()
+   - annotateCartItemWithSource(), getOrderPayloadExtra()
+
+================================================================================
+📄 assets/js/pricing-engine.js (محرك التسعير)
+================================================================================
+الوظيفة: حساب سعر البيع تلقائياً من سعر المورد بناءً على tiers
+المميزات:
+- تحميل tiers من جدول price_tiers في Supabase
+- كل tier: min_price, max_price, markup, sort_order, is_active
+- calculate(supplierPrice) - يجد tier المناسب ويضيف markup
+- calculateBatch() - لمعالجة عدة منتجات
+- getMarkup() - الحصول على قيمة الـ markup فقط
+- refresh() - إعادة تحميل tiers
+- تحميل تلقائي عند DOMContentLoaded
+
+================================================================================
+📄 assets/js/cart.js (السلة والدفع - 1700+ سطر)
+================================================================================
+الوظيفة: منطق كامل للسلة، الكوبونات، الشحن، التوصيل، الاقتراحات
+المميزات الرئيسية:
+1. ثوابت: الشحن 19 ج.م، ضريبة 12 ج.م، أيام التوصيل 2-5
+2. كوبونات: normalizeCouponCode, getActiveCoupon, calculateCouponDiscount
+3. توصيل: نافذة زمنية (2-5 أيام)، countdown للساعة الحالية في القاهرة
+4. اقتراحات: empty slider, offers slider, top selling, recommended
+5. كاش للاقتراحات (10 ثواني) وكاش للسلايدر (15 ثانية)
+6. دوال عرض: renderSuggestionCard, renderProductsInContainer
+7. أحداث: attachSuggestionsEvents
+8. تنسيقات: formatMoney, formatEgp, escapeHtml, normalizeText
+
+================================================================================
+📄 assets/js/home.js (الصفحة الرئيسية - 2773 سطر - أكبر ملف)
+================================================================================
+الوظيفة: Config-driven section renderer للصفحة الرئيسية
+البنية:
+1. HOME_CONFIG - كائن إعداد ضخم يحتوي على:
+   - banners: 7 بنرات مع روابط وأحجام (wide/half)
+   - heroSlides: 8 شرائح هيرو
+   - categories: 16 فئة مع صور وروابط
+   - brands: 6 علامات تجارية
+   - sections: 28 قسم بالترتيب (hero, banner, categories, brands, offers, for-you, 
+     category-products, shein-trend, shein-deal, shein-style, shein-new, daily, 
+     random, taager-extra)
+2. دوال العرض لكل نوع قسم:
+   - renderHero(), renderBanner(), renderCategories(), renderBrands()
+   - renderMegaOffers(), renderOffers(), renderForYou()
+   - renderCategoryProducts(), renderDaily(), renderRandom()
+   - renderSheinTrend(), renderSheinDeal(), renderSheinStyle(), renderSheinNew()
+   - renderTaagerExtra()
+3. دوال مساعدة: getProductsForSection(), sortProducts(), filterProducts()
+4. تهيئة: initHomePage() - يستبدل skeleton بالمحتوى الحقيقي
+
+================================================================================
+📄 assets/js/main.js (صفحة المنتجات - 784 سطر)
+================================================================================
+الوظيفة: فلترة، تصفح، ترقيم صفحات للمنتجات
+المميزات:
+1. 34 فئة محددة في مصفوفة categories
+2. categoryMap - خريطة من query param إلى اسم فئة عربي
+3. CATEGORY_KEYWORDS - كلمات مفتاحية لكل فئة (للتنقيح الذكي)
+4. applyCategoryFilter() - فلترة دقيقة (مطابقة تامة + كلمات مفتاحية)
+5. renderProducts() - عرض مع ترقيم صفحات (92 منتج/صفحة)
+6. renderPagination() - أزرار التنقل مع ellipsis
+7. renderFilters() / renderSidebar() - فلاتر علوية وجانبية
+8. fetchProducts() - جلب من Supabase + Taager
+9. أحداث: boda:country-changed, boda:wishlist-updated
+
+================================================================================
+📄 supabase/functions/taager-proxy/index.ts (Edge Function - 1219 سطر)
+================================================================================
+الوظيفة: Proxy آمن لـ Taager API (لا يكشف credentials في frontend)
+الإجراءات (actions):
+1. products - جلب منتجات حية من Taager API
+2. stored-products - جلب منتجات مخزنة من Supabase
+3. db-stats - إحصائيات قاعدة البيانات
+4. sync / sync-products - مزامنة كاملة (مع authorization)
+5. test-fix - اختبار إصلاح ترميز العربية
+6. debug-name - تشخيص اسم المنتج
+7. fix-encoding - إصلاح ترميز جماعي للمنتجات
+8. backfill - تعبئة الحقول المفقودة (SQL + API)
+9. proxy-image - بروكسي للصور (CORS)
+10. backfill-images - تعبئة الصور المفقودة
+11. highlights - منتجات مميزة
+12. product - تفاصيل منتج واحد من Taager
+13. get-product - منتج من قاعدة البيانات
+14. update-product - تحديث منتج
+15. create-order - إنشاء طلب في Taager
+16. deduplicate - إزالة المكررات (dry-run أو تنفيذ)
+
+المميزات التقنية:
+- تطبيع شامل للبيانات العربية (fixArabicText)
+- دمج المنتجات المكررة (mergeNormalizedProducts)
+- enrichment من merchant-info API
+-_rate limiting, auth via TAAGER_SYNC_SECRET
+- logging إلى taager_sync_logs table
+
+================================================================================
+📄 supabase/functions/phone-verification/index.ts (Edge Function)
+================================================================================
+الوظيفة: التحقق برقم الهاتف عبر Twilio (SMS + WhatsApp)
+الإجراءات:
+1. send-otp - إرسال رمز تحقق (مع rate limiting، duplicate check، fallback)
+2. verify-otp - التحقق من الرمز (محاولات محدودة، lockout بعد 7 محاولات)
+المميزات:
+- تنسيق أرقام مصر (+20) والسعودية (+966)
+- Hash OTP بـ SHA-256 قبل التخزين
+- Logging مفصل (phone_verification_logs)
+- Device detection, IP tracking
+- Auto fallback من WhatsApp إلى SMS
+
+================================================================================
+📄 assets/js/product/*.js (وحدات صفحة المنتج - 16 وحدة)
+================================================================================
+index.js          - نقطة الدخول، تهيئة PDP، تنسيق البيانات
+data.js           - جلب وتطبيع بيانات المنتج (داخلي + Taager)
+product-info.js   - عرض الاسم، الوصف، البائع، التوفر
+product-gallery.js- سلايدر صور مع تكبير، thumbnails، keyboard nav
+price-card.js     - السعر، الخصم، السعر الأصلي، شارة الخصم
+sticky-add-to-cart.js- زر إضافة للسلة يثبت أسفل الشاشة عند التمرير
+variant-selector.js- اختيار المتغيرات (اللون، النمط) مع تحديث السعر/الصور
+size-selector.js  - اختيار المقاس مع المخزون
+size-guide.js     - دليل المقاسات (modal مع جدول)
+seller-card.js    - عرض معلومات البائع، التقييم، المتابعة
+seller-generator.js- توليد بائع وهمي للمنتجات الداخلية
+review-section.js - عرض التقييمات، توزيع النجوم، إضافة تقييم
+recommended-products.js- منتجات مقترحة (carousel)
+product-skeleton.js- هيكل التحميل للمنتج
+bought-together.js- منتجات مشتراة معاً (cross-sell مع checkbox)
+installment-card.js- خيارات التقسيط (Valu, Sympl, Tabby)
+delivery-card.js  - معلومات التوصيل، النافذة الزمنية، العد التنازلي
+utils.js          - دوال مشتركة: escapeHtml, money, getProductImages, fallbackImage
+
+================================================================================
+📁 sql/*.sql (مخطط قاعدة البيانات)
+================================================================================
+create_profiles_table.sql           - جدول profiles (المستخدمين، البائعين)
+create_home_sections.sql            - أقسام الصفحة الرئيسية القابلة للتكوين
+create_product_original_prices.sql  - أسعار أصلية للمنتجات (للخصم الوهمي)
+create_support_chat.sql             - محادثات الدعم الفني
+create_wishlist_items_table.sql     - عناصر المفضلة
+fix_kobon_rls.sql                   - إصلاح RLS لجدول الكوبونات
+fix_mismatched_prefix.sql           - إصلاح معرفات المنتجات
+fix_ratings_foreign_key.sql         - مفتاح خارجي للتقييمات
+phone_verification_schema.sql       - جداول التحقق بالهاتف
+populate_original_prices_from_taager.sql- تعبئة الأسعار من تاجر
+rls_policies.sql                    - سياسات Row Level Security
+seller_profiles_setup.sql           - إعداد بروفايلات البائعين
+supabase-security.sql               - إعدادات أمان شاملة
+
+================================================================================
+📁 supabase/migrations/*.sql (17 ترحيل)
+================================================================================
+مرتبة زمنياً من 2025-07-06 إلى 2026-07-11:
+1. backfill_extra_fields - تعبئة حقول إضافية
+2. add_product_images - إضافة صور المنتجات
+3. backfill_images - تعبئة الصور
+4. backfill_comprehensive - تعبئة شاملة
+5. find_duplicates - العثور على مكررات
+6. add_taager_extra_fields - حقول تاجر إضافية
+7. add_review_images - صور التقييمات
+8. add_ratings_created_at - تاريخ إنشاء التقييمات
+9. fix_order_items_product_id - إصلاح product_id في order_items
+10. create_support_chat - إنشاء دعم المحادثات
+11. change_user_id_type - تغيير نوع user_id
+12. disable_support_rls - تعطيل RLS للدعم
+13. support_storage_bucket - bucket التخزين للدعم
+14. add_last_message_type - نوع آخر رسالة
+15. add_country_code_to_profiles - كود البلد في البروفايلات
+
+================================================================================
+5. تدفق البيانات الرئيسي (Data Flow)
+================================================================================
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ تحميل الصفحة الرئيسية                                                         │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 1. index.html → redirect → pages/home.html                                   │
+│ 2. home.html يحمل: noon-shell.js, skeleton-loader.js, store.js,             │
+│    pricing-engine.js, taager-integration.js, cart.js, supabase-js,          │
+│    supabase-client.js, home.js                                              │
+│ 3. noon-shell.js: يبني الهيدر، الفوتر، النافبار، المودالز                    │
+│ 4. skeleton-loader.js: يعرض skeleton blocks فوراً                           │
+│ 5. store.js: يهيئ productsDatabase، يحاول sync من Supabase                   │
+│ 6. taager-integration.js: يجلب منتجات تاجر (من الكاش أو API)                │
+│ 7. home.js: يقرأ HOME_CONFIG، يعرض الأقسام باستبدال skeleton                │
+│ 8. PricingEngine: يحمّل tiers من Supabase لحساب الأسعار                     │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┖
+│ إضافة منتج للسلة                                                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 1. المستخدم يضغط "أضف للسلة" (product-detail.js أو bought-together.js)      │
+│ 2. store.js: addToCart(product, quantity, options)                           │
+│ 3. يتحقق من تسجيل الدخول (localStorage.isLoggedIn)                          │
+│ 4. ينشئ cart item مع: id, name, price, quantity, image, source,             │
+│    taager_product_id, country_code, seller_id, etc.                          │
+│ 5. يحفظ في localStorage (cart_<email> أو cart)                               │
+│ 6. يحدث عداد السلة في الهيدر (updateCartCount)                               │
+│ 7. يعرض toast notification (notifyCartAdded)                                 │
+│ 8. إذا مزامنة مفعلة: syncCartToSupabase() → table cart_items                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ إنشاء طلب (Checkout)                                                          │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 1. checkout.js: يجمع بيانات الشحن، الدفع، الكوبون                           │
+│ 2. ينشئ كائن order: user_name, email, phone, address, total_price, items   │
+│ 3. supabase-client.js: createOrder(order, items)                            │
+│ 4. يحاول بإدخال مباشر مع columns مكتشفة ديناميكياً                          │
+│ 5. إذا فشل: fallback patterns (12 pattern مختلف لأسماء الأعمدة)             │
+│ 6. ينشئ order_items مرتبط بالطلب                                           │
+│ 7. يحفظ snapshot محلي للطلب (localStorage)                                  │
+│ 8. إذا منتجات Taager: يبعث طلب لـ Taager API عبر taager-proxy               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ مزامنة منتجات تاجر (Taager Sync)                                               │
+├─────────────────────────────────────────────────────────────────────────────┤
+│ 1. يدوي: استدعاء taager-proxy?action=sync&secret=xxx                        │
+│ 2. يومي: refresh_token_daily.bat (Windows Task Scheduler)                   │
+│ 3. Edge Function:                                                            │
+│    - fetchLiveProducts() → Taager API (variants + highlights)               │
+│    - normalizeDbRow() → تنسيق موحد                                         │
+│    - enrichProductsBatch() → merchant-info API للتفاصيل                    │
+│    - persistProducts() → upsert في taager_products table                   │
+│    - writeSyncLog() → تسجيل في taager_sync_logs                            │
+│ 4. Frontend: taager-integration.js يجلب من taager_products table            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+================================================================================
+6. التوصيات للتنظيف (Cleanup Recommendations)
+================================================================================
+
+🔴 احذف فوراً (Safe to Delete):
+├── nul                                    # ملف نظام Windows
+├── _dir_path.txt                          # مسار محلي
+├── error_response.json                    # نموذج اختبار
+├── tmp/                                   # مجلد كامل (ملفات اختبار)
+├── test-results/                          # نتائج اختبار قديمة
+├── supabase/.temp/                        # ملفات مؤقتة Supabase CLI
+├── pages/signin/login in.html             # مكرر (مسافة في الاسم)
+├── taager_refresh.log                     # ملف سجل (يتجدد تلقائياً)
+
+🟡 راجع واحذف إذا لم يُستخدم (Review & Remove):
+├── assets/css/style.css                   # قديم - استبدل بـ noon-theme.css
+├── assets/css/empty-cart-alt.css          # بديل غير مستخدم
+├── assets/css/section.css                 # قد لا يُستخدم
+├── assets/js/script.js                    # سكريبت عام قديم
+├── assets/js/mock-api.js                  # للتطوير فقط
+├── assets/js/test-functions.js            # للاختبار فقط
+├── assets/js/orders-common.js             # قد يكون مدمج في my-orders.js
+├── pages/signin/style.css                 # مكرر مع signin.css
+├── pages/signin/signin.css                # مكرر مع style.css
+├── refresh_token_daily.bat                # إذا لا تستخدم Windows Task Scheduler
+
+🟢 احتفظ (Essential - لا تمس):
+جميع الملفات المذكورة في القسم 2 (Critical Files)
+
+================================================================================
+7. متغيرات البيئة المطلوبة (Environment Variables)
+================================================================================
+
+Supabase (في supabase/config.toml أو Vercel/Netlify):
+├── SUPABASE_URL = https://msgqzgzoslearaprgiqq.supabase.co
+├── SUPABASE_ANON_KEY = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+├── SUPABASE_SERVICE_ROLE_KEY = (للـ Edge Functions فقط)
+
+Taager API (في Supabase Edge Functions Environment Variables):
+├── TAAGER_JWT_TOKEN = (Bearer token)
+├── TAAGER_TAAGER_ID = 2226119
+├── TAAGER_SESSION_KEY = (ui-session-key)
+├── TAAGER_SYNC_SECRET = (سر المزامنة للأمان)
+├── TAAGER_EDGE_FUNCTION_URL = (اختياري - للوظائف الطرفية)
+
+Twilio (للتحقق بالهاتف):
+├── TWILIO_ACCOUNT_SID = 
+├── TWILIO_AUTH_TOKEN = 
+├── TWILIO_SMS_SENDER = (رقم المرسل SMS)
+├── TWILIO_WHATSAPP_SENDER = (رقم المرسل WhatsApp)
+
+أخرى:
+├── OPENAI_API_KEY = (لـ Supabase AI في Studio)
+├── S3_HOST, S3_REGION, S3_ACCESS_KEY, S3_SECRET_KEY = (للـ experimental S3)
+
+================================================================================
+8. أوامر التشغيل والتطوير (Development Commands)
+================================================================================
+
+# تشغيل محلي بسيط (Static Server)
+npx serve .                    # أو أي static server
+python -m http.server 8000     # Python
+
+# Supabase Local Development
+supabase start                 # يبدأ stack المحلي (Docker مطلوب)
+supabase status                # يتحقق من الحالة
+supabase db reset              # يعيد تعيين DB مع migrations + seeds
+supabase functions serve       # يشغل Edge Functions محلياً
+supabase db push               # يدفع migrations للـ remote
+
+# نشر Edge Functions
+supabase functions deploy taager-proxy
+supabase functions deploy phone-verification
+
+# تعيين متغيرات بيئة للوظائف
+supabase secrets set TAAGER_JWT_TOKEN=xxx TAAGER_TAAGER_ID=xxx ...
+
+================================================================================
+9. ملخص: ماذا يفعل كل جزء؟
+================================================================================
+
+| المكون | الوظيفة الرئيسية | الملفات الرئيسية |
+|--------|------------------|------------------|
+| **الصفحة الرئيسية** | عرض ديناميكي للأقسام، بنرات، منتجات | home.html, home.js, HOME_CONFIG |
+| **المنتجات/الفلترة** | تصفح، بحث، فلترة، ترقيم صفحات | products.html, main.js, category.js |
+| **تفاصيل المنتج** | معرض، سعر، متغيرات، تقييمات، اشترى معه | product.html, product/*.js |
+| **السلة والدفع** | إدارة السلة، كوبونات، شحن، توصيل، طلب | cart.js, checkout.js, empty-cart.html |
+| **الحساب/المصادقة** | تسجيل دخول، تسجيل، OTP، بروفايل | signin/, signup/, ahsab.js, edit-account.js |
+| **المفضلة** | إضافة/إزالة، مزامنة | wishlist.js, wishlist.html |
+| **الطلبات** | عرض، تتبع، ملخص، إرجاع | my-orders.js, order-tracking.js |
+| **تاجر (Taager)** | مزامنة منتجات، أسعار، صور، طلبات | taager-integration.js, taager-proxy/ |
+| **قاعدة البيانات** | Supabase (PostgreSQL)، RLS، RPC | supabase-client.js, migrations/, sql/ |
+| **التسعير التلقائي** | tiers من DB، markup على سعر المورد | pricing-engine.js |
+| **التحقق بالهاتف** | Twilio SMS/WhatsApp OTP | phone-verification/ |
+| **UI/Shell** | هيدر، فوتر، نافبار، مودالز، skeleton | noon-shell.js, noon-*.css |
+
+================================================================================
+انتهى التحليل
+================================================================================

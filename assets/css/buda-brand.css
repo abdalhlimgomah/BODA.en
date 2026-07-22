@@ -1,0 +1,49 @@
+/* ─── buda-brand.css — now delegates to design-system.css ─── */
+@import url('design-system.css');
+
+/* Bottom sheet, dialog, toggle, radio, checkbox, empty state, section */
+.buda-sheet-overlay { position: fixed; inset: 0; z-index: 9998; background: rgba(0,0,0,0.4); display: none; }
+.buda-sheet-overlay.open { display: block; animation: budaFadeIn 200ms ease; }
+.buda-sheet { position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999; background: #fff; border-radius: 24px 24px 0 0; padding: 20px 24px; padding-bottom: calc(20px + env(safe-area-inset-bottom,0)); transform: translateY(100%); transition: transform 300ms cubic-bezier(0.32,0.72,0,1); max-height: 85vh; overflow-y: auto; }
+.buda-sheet.open { transform: translateY(0); }
+.buda-sheet-handle { width: 40px; height: 4px; border-radius: 2px; background: #D1D5DB; margin: 0 auto 16px; }
+
+.buda-dialog-overlay { position: fixed; inset: 0; z-index: 9998; background: rgba(0,0,0,0.4); display: none; align-items: center; justify-content: center; padding: 20px; }
+.buda-dialog-overlay.open { display: flex; }
+.buda-dialog { background: #fff; border-radius: var(--buda-radius-dialog); padding: 28px; max-width: 420px; width: 100%; box-shadow: var(--buda-shadow-lg); animation: budaScaleIn 250ms ease; }
+.buda-dialog-title { font-size: 1.15rem; font-weight: 800; margin-bottom: 8px; color: var(--buda-text); }
+.buda-dialog-desc { font-size: 0.9rem; color: var(--buda-text-secondary); line-height: 1.6; margin-bottom: 24px; }
+.buda-dialog-actions { display: flex; gap: 12px; }
+.buda-dialog-actions .buda-btn { flex: 1; }
+
+.buda-switch { position: relative; display: inline-flex; width: 48px; height: 28px; cursor: pointer; }
+.buda-switch input { display: none; }
+.buda-switch-track { position: absolute; inset: 0; background: #D1D5DB; border-radius: 999px; transition: background var(--buda-transition); }
+.buda-switch input:checked + .buda-switch-track { background: var(--buda-primary); }
+.buda-switch-thumb { position: absolute; top: 3px; right: 3px; width: 22px; height: 22px; background: #fff; border-radius: 50%; transition: transform var(--buda-transition); box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+.buda-switch input:checked ~ .buda-switch-thumb { transform: translateX(-20px); }
+
+.buda-radio, .buda-checkbox { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; font-size: 0.9rem; }
+.buda-radio input, .buda-checkbox input { display: none; }
+.buda-radio-mark { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #D1D5DB; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--buda-transition); }
+.buda-radio input:checked + .buda-radio-mark { border-color: var(--buda-primary); background: var(--buda-primary); }
+.buda-radio input:checked + .buda-radio-mark::after { content: ''; width: 8px; height: 8px; border-radius: 50%; background: #fff; }
+.buda-checkbox-mark { width: 22px; height: 22px; border-radius: 6px; border: 2px solid #D1D5DB; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all var(--buda-transition); }
+.buda-checkbox input:checked + .buda-checkbox-mark { border-color: var(--buda-primary); background: var(--buda-primary); }
+.buda-checkbox input:checked + .buda-checkbox-mark::after { content: ''; width: 6px; height: 10px; border: solid #fff; border-width: 0 2px 2px 0; transform: rotate(45deg); margin-top: -2px; }
+
+.buda-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; text-align: center; }
+.buda-empty-icon { width: 80px; height: 80px; border-radius: 50%; background: #F3E8FF; display: flex; align-items: center; justify-content: center; margin-bottom: 20px; color: var(--buda-primary); font-size: 36px; }
+.buda-empty-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 8px; color: var(--buda-text); }
+.buda-empty-desc { font-size: 0.9rem; color: var(--buda-text-secondary); line-height: 1.6; margin-bottom: 24px; max-width: 320px; }
+
+.buda-section { margin-bottom: 20px; }
+.buda-section-header { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 0; }
+.buda-section-title { font-size: 1.05rem; font-weight: 800; color: var(--buda-text); }
+.buda-section-link { font-size: 0.82rem; font-weight: 700; color: var(--buda-primary); }
+
+.buda-divider { width: 100%; height: 1px; background: var(--buda-border); margin: 16px 0; }
+
+@media (max-width: 768px) {
+  .buda-dialog { padding: 24px; border-radius: var(--buda-radius); }
+}

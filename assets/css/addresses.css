@@ -1,0 +1,83 @@
+/* ===== Desktop Styles ===== */
+@media (min-width: 768px) {
+  .addr-body {
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .addr-screen {
+    max-width: 480px;
+    width: 100%;
+    height: auto;
+    min-height: 80vh;
+    border-radius: var(--addr-radius);
+    overflow: hidden;
+    box-shadow: var(--addr-shadow-lg);
+  }
+
+  .addr-list-header,
+  .addr-list-sub,
+  .addr-add-btn,
+  .addr-cards-wrap,
+  .addr-map-topbar,
+  .addr-map-search,
+  .addr-map-bottom,
+  .addr-form-topbar,
+  .addr-form-scroll,
+  .addr-minimap-wrap {
+    padding-left: 24px;
+    padding-right: 24px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .addr-add-btn {
+    width: calc(480px - 48px);
+  }
+
+  .addr-back-btn {
+    width: 40px;
+    height: 40px;
+  }
+
+  .addr-back-btn .material-icons-outlined {
+    font-size: 24px;
+  }
+
+  .addr-card {
+    padding: 20px;
+    border-radius: var(--addr-radius);
+  }
+
+  .addr-card-label {
+    font-size: 0.9rem;
+  }
+
+  .addr-card-address {
+    font-size: 0.82rem;
+  }
+
+  .addr-form-footer {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    padding-left: 24px;
+    padding-right: 24px;
+    background: var(--addr-white);
+  }
+
+  .addr-bottom-btn {
+    max-width: 432px;
+    margin: 0 auto;
+  }
+
+  .addr-map-container .leaflet-container {
+    min-height: 60vh;
+    height: 60vh;
+  }
+
+  .addr-minimap {
+    height: 140px;
+  }
+}

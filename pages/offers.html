@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>عروض وتخفيضات - Buda | أفضل العروض الحصرية</title>
+  <meta name="description" content="اكتشف أحدث العروض والتخفيضات في Buda. عروض حصرية على آلاف المنتجات من علامات تجارية متنوعة. خصومات تصل إلى 70%.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://buda-rho.vercel.app/pages/offers.html">
+  <meta property="og:title" content="عروض وتخفيضات - Buda">
+  <meta property="og:description" content="أفضل العروض والتخفيضات الحصرية في Buda.">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ar_AR">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" type="image/png" href="../assets/icons/favicon.png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="../assets/css/noon.css">
+  <link rel="stylesheet" href="../assets/css/blog.css">
+  <style>
+    .offers-page { max-width: 1200px; margin: 0 auto; padding: 32px 20px; direction: rtl; }
+    .offers-page h1 { font-size: 32px; color: #1a2530; margin-bottom: 8px; text-align: center; }
+    .offers-page .subtitle { color: #64748b; text-align: center; margin-bottom: 32px; }
+    .offers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 20px; }
+    .offer-card { background: #fff; border: 1px solid #f1f5f9; border-radius: 16px; overflow: hidden; transition: transform 0.2s; text-decoration: none; color: inherit; display: block; }
+    .offer-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+    .offer-card-image { width: 100%; height: 200px; object-fit: cover; }
+    .offer-card-body { padding: 20px; }
+    .offer-card-badge { display: inline-block; background: #ef4444; color: #fff; padding: 4px 12px; border-radius: 8px; font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+    .offer-card-title { font-size: 18px; font-weight: 700; color: #1a2530; margin-bottom: 8px; }
+    .offer-card-desc { font-size: 14px; color: #64748b; margin-bottom: 12px; line-height: 1.5; }
+    .offer-card-meta { font-size: 13px; color: #94a3b8; display: flex; gap: 12px; }
+    .offer-card-coupon { background: #f8fafc; padding: 8px 12px; border-radius: 8px; font-size: 14px; font-weight: 600; direction: ltr; display: inline-block; margin-top: 8px; }
+    .sale-banner { background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 20px; padding: 32px 40px; color: #fff; margin-bottom: 32px; text-align: center; }
+    .sale-banner h2 { font-size: 28px; margin-bottom: 8px; }
+    .sale-banner p { opacity: 0.9; }
+  </style>
+  <script src="../assets/js/seo/seo-utils.js"></script>
+</head>
+<body>
+  <div id="shell-root"></div>
+
+  <div class="offers-page">
+    <h1>عروض وتخفيضات</h1>
+    <p class="subtitle">أفضل العروض الحصرية على آلاف المنتجات</p>
+
+    <div class="sale-banner">
+      <h2>🔥 تخفيضات موسمية</h2>
+      <p>خصومات تصل إلى 70% على منتجات مختارة. لفترة محدودة!</p>
+    </div>
+
+    <div class="offers-grid" id="offers-grid">
+      <div class="blog-loading"><div class="skeleton-loader" style="height:380px;border-radius:16px"></div></div>
+    </div>
+  </div>
+
+  <div id="shell-footer"></div>
+
+  <script src="../assets/js/seo/blog-engine.js"></script>
+  <script src="../assets/js/seo/product-seo-engine.js"></script>
+  <script>
+    (function () {
+      ProductSEO.getActiveOffers(20).then(function (offers) {
+        var grid = document.getElementById('offers-grid');
+        if (!grid) return;
+        if (!offers || !offers.length) {
+          grid.innerHTML = '<div class="blog-empty" style="grid-column:1/-1"><span class="material-icons-outlined" style="font-size:64px">local_offer</span><p>لا توجد عروض حالياً. ترقبوا العروض القادمة!</p></div>';
+          return;
+        }
+        grid.innerHTML = offers.map(function (o) {
+          var now = new Date();
+          var end = o.end_date ? new Date(o.end_date) : null;
+          var isActive = !end || end > now;
+
+          return '<a href="offer.html?slug=' + encodeURIComponent(o.slug) + '" class="offer-card">' +
+            (o.banner_image ? '<img src="' + o.banner_image + '" alt="' + BlogEngine.escHtml(o.title) + '" class="offer-card-image" loading="lazy">' : '') +
+            '<div class="offer-card-body">' +
+            (o.discount_percent ? '<div class="offer-card-badge">خصم ' + o.discount_percent + '%</div>' : '') +
+            '<h3 class="offer-card-title">' + BlogEngine.escHtml(o.title) + '</h3>' +
+            (o.description ? '<p class="offer-card-desc">' + BlogEngine.escHtml(o.description.substring(0, 100)) + '</p>' : '') +
+            (o.coupon_code ? '<div class="offer-card-coupon">كود: ' + o.coupon_code + '</div>' : '') +
+            '<div class="offer-card-meta">' +
+            (isActive ? '<span style="color:#16a34a">🔵 ساري</span>' : '<span style="color:#94a3b8">⚪ انتهى</span>') +
+            (o.end_date ? '<span>حتى ' + new Date(o.end_date).toLocaleDateString('ar-SA') + '</span>' : '') +
+            '</div></div></a>';
+        }).join("");
+      });
+    })();
+  </script>
+  <script src="../assets/js/noon-shell.js"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+</body>
+</html>

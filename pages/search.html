@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>بحث المنتجات - Buda</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css?v=20260719a" rel="stylesheet" />
+  <link href="../assets/css/home.css?v=20260711a" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260630" rel="stylesheet" />
+  <link href="../assets/css/noon-components.css" rel="stylesheet" />
+  <link href="../assets/css/skeleton.css?v=20260701" rel="stylesheet" />
+  <link href="../assets/css/search.css?v=20260719" rel="stylesheet" />
+<link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="../assets/icons/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="../assets/icons/site.webmanifest">
+<meta name="theme-color" content="#FFD500"> 
+</head>
+<body class="app-shell">
+    <header class="app-header">
+    <div class="app-header-inner">
+      <div class="header-start">
+        <div class="brand-badge">Buda</div>
+      </div>
+      <div class="app-search search-left-icon">
+        <span class="material-icons-outlined">search</span>
+        <input id="search-input" type="text" data-search-target="search.html" placeholder="ابحث عن منتج أو فئة" autocomplete="off" />
+        <button id="clear-button" class="buda-search-clear" type="button" aria-label="مسح">
+          <span class="material-icons-outlined">close</span>
+        </button>
+        <button id="search-button" type="button" aria-label="بحث">
+          <span class="material-icons-outlined">search</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="app-main">
+    <section class="section-block search-shell">
+      <ul id="suggestions" class="search-list hidden" aria-label="اقتراحات البحث"></ul>
+      <ul id="search-history" class="search-list search-history-list" aria-label="عمليات البحث السابقة"></ul>
+      
+      <!-- شريط الترتيب -->
+      <div id="search-sort-bar" class="hidden"></div>
+      
+      <!-- فلاتر الأقسام لنتائج البحث -->
+      <div id="search-filter-container" class="chip-row hidden" style="margin-bottom: 16px; padding: 4px 8px; overflow-x: auto; display: flex; gap: 8px; scrollbar-width: none;"></div>
+      
+      <div id="search-results" class="search-results-grid"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="home.html" data-nav="home">
+      <span class="material-icons-outlined">home</span>
+      <small data-i18n="الرئيسية">الرئيسية</small>
+    </a>
+    <a href="products.html" data-nav="products">
+      <span class="material-icons-outlined">grid_view</span>
+      <small data-i18n="الفئات">الفئات</small>
+    </a>
+    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="الرئيسية">
+      <img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" />
+    </button>
+    <a href="ahsab.html" data-nav="account">
+      <span class="material-icons-outlined">person</span>
+      <small data-i18n="حسابي">حسابي</small>
+    </a>
+    <a href="empty-cart.html" data-nav="cart">
+      <span class="material-icons-outlined">shopping_cart</span>
+      <small data-i18n="العربة">العربة</small>
+      <span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span>
+    </a>
+  </nav>
+
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../assets/js/supabase-client.js?v=20260712a"></script>
+  <script src="../assets/js/auth.config.js?v=20260630"></script>
+  <script src="../assets/js/taager-integration.js?v=20260710"></script>
+  <script src="../assets/js/store.js?v=20260712a"></script>
+  <script src="../assets/js/pricing-engine.js"></script>
+  <script src="../assets/js/noon-shell.js?v=20260719a"></script>
+  <script src="../assets/js/search.js?v=20260719a"></script>
+  <script src="../assets/js/seo/analytics-manager.js"></script>
+</body>
+</html>

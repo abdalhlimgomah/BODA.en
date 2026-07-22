@@ -1,0 +1,37 @@
+User-agent: *
+Disallow: /pages/signin/
+Disallow: /pages/signup/
+Disallow: /pages/checkout.html
+Disallow: /pages/order-success.html
+Disallow: /pages/order-summary.html
+Disallow: /pages/empty-cart.html
+Disallow: /pages/logout-confirmation.html
+Disallow: /pages/delete-account.html
+Disallow: /pages/edit-account.html
+Disallow: /assets/
+Disallow: /tmp/
+Disallow: /nul
+
+Allow: /assets/js/
+Allow: /assets/css/
+Allow: /assets/images/
+Allow: /assets/fonts/
+
+Allow: /pages/blog/
+Allow: /pages/knowledge-center.html
+Allow: /pages/guide.html
+Allow: /pages/comparison.html
+Allow: /pages/landing.html
+Allow: /pages/seller.html
+Allow: /pages/offers.html
+Allow: /pages/offer.html
+Allow: /api/merchant-feed/feed.xml
+
+Sitemap: https://buda.com/api/merchant-feed/feed.xml
+
+Sitemap: https://buda.com/sitemap_index.xml
+Sitemap: https://buda.com/sitemap.xml
+
+# Buda - SEO Optimized
+# Last updated: 2026-07-19
+# Content SEO Phase - Blog, Knowledge Center, Guides, Comparisons, Landing Pages

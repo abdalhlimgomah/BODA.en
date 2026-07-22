@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>إتمام الطلب - Buda</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-symbols-outlined.css" rel="stylesheet" />
+  <link href="../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260630" rel="stylesheet" />
+  <link href="../assets/css/noon-components.css" rel="stylesheet" />
+  <link href="../assets/css/checkout.css?v=20260715" rel="stylesheet" />
+  <link href="../assets/css/phone-verification.css" rel="stylesheet" />
+<link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="../assets/icons/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="../assets/icons/site.webmanifest">
+<meta name="theme-color" content="#FFD500">
+</head>
+<body class="checkout-page app-shell">
+  <!-- HEADER (Noon-style) -->
+  <div class="ch-header">
+    <div class="ch-header-inner">
+      <button class="ch-back-link" onclick="history.back()" type="button">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12.5 15L7.5 10L12.5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="ch-back-text">عربة التسوق</span>
+      </button>
+      <div class="ch-header-right">
+        <div class="ch-secure-badge">
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="7" width="10" height="8" rx="1.5" stroke="#6b7c93" stroke-width="1.2"/><path d="M5.5 7V4.5C5.5 2.843 6.843 1.5 8.5 1.5C10.157 1.5 11.5 2.843 11.5 4.5V7" stroke="#6b7c93" stroke-width="1.2" stroke-linecap="round"/><circle cx="8.5" cy="10.5" r="1" fill="#6b7c93"/><path d="M8.5 10.5V12" stroke="#6b7c93" stroke-width="1.2" stroke-linecap="round"/></svg>
+          <span class="ch-secure-text">الدفع آمن</span>
+        </div>
+        <div class="ch-logo">
+          <svg width="72" height="24" viewBox="0 0 72 24" fill="none"><text x="0" y="20" font-family="Cairo, sans-serif" font-weight="800" font-size="18" fill="#1a1a2e">Buda</text></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <main class="ch-layout">
+    <!-- LEFT COLUMN -->
+    <div class="ch-main-col">
+
+      <!-- ADDRESS CARD (shown when saved address exists) -->
+      <div id="ch-address-card" class="ch-card ch-address-card hidden">
+        <button id="ch-address-btn" class="ch-address-btn" type="button">
+          <div class="ch-address-icon">
+            <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M11 1C6.58 1 3 4.58 3 9C3 15 11 21 11 21C11 21 19 15 19 9C19 4.58 15.42 1 11 1ZM11 11.5C9.62 11.5 8.5 10.38 8.5 9C8.5 7.62 9.62 6.5 11 6.5C12.38 6.5 13.5 7.62 13.5 9C13.5 10.38 12.38 11.5 11 11.5Z" fill="#3866df"/></svg>
+          </div>
+          <div class="ch-address-body">
+            <div class="ch-address-heading">
+              <span class="ch-deliver-to">تسليم إلى</span>
+              <span id="ch-address-tag" class="ch-address-tag">المنزل</span>
+            </div>
+            <p id="ch-address-text" class="ch-address-text"></p>
+          </div>
+          <span class="ch-address-cta">تعديل العنوان</span>
+        </button>
+      </div>
+
+      <!-- ADDRESS FORM (shown when no saved address / editing) -->
+      <div id="ch-address-form" class="ch-card ch-address-form">
+        <h3 class="ch-section-title">عنوان التوصيل</h3>
+        <div class="ch-field">
+          <label for="ch-address">العنوان التفصيلي</label>
+          <textarea id="ch-address" placeholder="الشارع، المنطقة، المدينة..." required></textarea>
+        </div>
+      </div>
+
+      <!-- RECEIVER INFO (display like Noon) -->
+      <div class="ch-card ch-receiver-card">
+        <div class="ch-section-title-wrap">
+          <h3 class="ch-section-title">
+            <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><path d="M9 9C11.21 9 13 7.21 13 5C13 2.79 11.21 1 9 1C6.79 1 5 2.79 5 5C5 7.21 6.79 9 9 9ZM9 11C6.33 11 1 12.34 1 15V17H17V15C17 12.34 11.67 11 9 11Z" fill="#3866df"/></svg>
+            مين هيستلم الطلب؟
+            <span id="ch-receiver-title-name" class="ch-receiver-title-name"></span>
+          </h3>
+          <span id="ch-receiver-saved-badge" class="ch-receiver-saved-badge hidden">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5L4.5 8.5L9.5 3.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            حفظ
+          </span>
+        </div>
+        <!-- Display mode (saved receiver, like Noon) -->
+        <div id="ch-receiver-display" class="ch-receiver-display hidden">
+          <button id="ch-receiver-btn" class="ch-receiver-btn" type="button">
+            <div class="ch-receiver-icon-box">
+              <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 10C12.21 10 14 8.21 14 6C14 3.79 12.21 2 10 2C7.79 2 6 3.79 6 6C6 8.21 7.79 10 10 10ZM10 12C7.33 12 2 13.34 2 16V18H18V16C18 13.34 12.67 12 10 12Z" fill="#3866df"/></svg>
+            </div>
+            <div class="ch-receiver-body">
+              <span class="ch-receiver-name-wrap">
+                <span id="ch-receiver-name" class="ch-receiver-name">الاسم</span>
+                <span id="ch-receiver-verified" class="ch-receiver-verified hidden">
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" fill="#3866df"/><path d="M4.5 8.5L6.5 10.5L11.5 5.5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+              </span>
+              <span id="ch-receiver-phone" class="ch-receiver-phone ltr">+20</span>
+            </div>
+            <span class="ch-receiver-cta">تغيير المستلم</span>
+          </button>
+        </div>
+        <!-- Edit mode (form) -->
+        <div id="ch-receiver-form" class="ch-receiver-form">
+          <div class="ch-field">
+            <label for="ch-name">الاسم الكامل</label>
+            <input id="ch-name" type="text" placeholder="الاسم الكامل" required />
+          </div>
+          <div class="ch-field">
+            <label for="ch-phone">رقم الهاتف</label>
+            <input id="ch-phone" type="tel" placeholder="01XXXXXXXXX" required />
+          </div>
+          <div class="ch-field">
+            <label for="ch-email">البريد الإلكتروني</label>
+            <input id="ch-email" type="email" placeholder="example@email.com" required />
+          </div>
+        </div>
+      </div>
+
+      <!-- GOVERNORATE (under receiver — shows once then saves) -->
+      <div id="ch-gov-card" class="ch-card ch-gov-card">
+        <div id="ch-gov-selector">
+          <h3 class="ch-section-title" id="ch-gov-section-title">اختر المحافظة</h3>
+          <div id="ch-governorate" class="ch-gov-select" role="button" tabindex="0">
+            <span id="ch-gov-placeholder" class="ch-gov-placeholder">اختر المحافظة</span>
+            <svg class="ch-gov-arrow" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="#6b7c93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <input type="hidden" id="ch-gov-input" value="" />
+        </div>
+        <div id="ch-gov-display" class="ch-gov-display hidden">
+          <div class="ch-gov-display-row">
+            <div class="ch-gov-display-body">
+              <span class="ch-gov-display-label">المحافظة</span>
+              <div class="ch-gov-display-main">
+                <span id="ch-gov-display-name" class="ch-gov-display-name"></span>
+                <span id="ch-gov-display-fee" class="ch-gov-display-fee"></span>
+              </div>
+            </div>
+            <button id="ch-gov-change-btn" class="ch-gov-change-btn" type="button">تغيير</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORDER ITEMS -->
+      <div id="ch-items" class="ch-items"></div>
+
+      <!-- PAYMENT METHODS -->
+      <div class="ch-card ch-payment-card-section">
+        <h3 class="ch-section-title">ادفع باستخدام</h3>
+        <div id="ch-payment-options" class="ch-payment-grid">
+          <div class="ch-payment-option selected" data-payment="cod" onclick="window.selectPayment(this)">
+            <div class="ch-payment-icon-box">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><path d="M20 4H4C2.89 4 2 4.89 2 6V18C2 19.11 2.89 20 4 20H20C21.11 20 22 19.11 22 18V6C22 4.89 21.11 4 20 4ZM20 18H4V12H20V18ZM20 8H4V6H20V8Z" fill="#3866df"/></svg>
+            </div>
+            <span class="ch-payment-label">الدفع عند الاستلام</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- COUPON -->
+      <div class="ch-card ch-coupon-card">
+        <button id="ch-coupon-toggle" class="ch-coupon-toggle" type="button">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M14 2H6C4.9 2 4 2.9 4 4V18L10 15L16 18V4C16 2.9 15.1 2 14 2ZM10 4.5C10.83 4.5 11.5 5.17 11.5 6C11.5 6.83 10.83 7.5 10 7.5C9.17 7.5 8.5 6.83 8.5 6C8.5 5.17 9.17 4.5 10 4.5ZM13 13H7V12.5C7 11.17 9.67 10.5 10 10.5C10.33 10.5 13 11.17 13 12.5V13Z" fill="#6b7c93"/></svg>
+          <span id="ch-coupon-toggle-text">هل لديك كود خصم؟</span>
+          <svg class="ch-coupon-arrow" width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M5 7.5L10 12.5L15 7.5" stroke="#6b7c93" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <div id="ch-coupon-body" class="ch-coupon-body hidden">
+          <div class="ch-coupon-input-wrap">
+            <input id="ch-coupon-input" type="text" placeholder="أدخل كود الخصم" maxlength="30" />
+            <button id="ch-coupon-apply" class="ch-coupon-apply" type="button">تطبيق</button>
+          </div>
+          <div id="ch-coupon-status" class="ch-coupon-status"></div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="ch-side-col">
+      <div class="ch-summary-card">
+        <div class="ch-summary-header">
+          <h3 class="ch-summary-title">ملخص الدفع</h3>
+          <span id="ch-items-count" class="ch-items-badge">0 منتجات</span>
+        </div>
+        <div class="ch-summary-body">
+          <div class="ch-summary-row">
+            <span class="ch-summary-label">المجموع الفرعي</span>
+            <span id="ch-subtotal" class="ch-summary-value">0.00 ج.م</span>
+          </div>
+          <div id="ch-discount-row" class="ch-summary-row ch-summary-discount hidden">
+            <span class="ch-summary-label">الخصومات</span>
+            <span id="ch-discount" class="ch-summary-value">- 0.00 ج.م</span>
+          </div>
+          <div class="ch-summary-row">
+            <span class="ch-summary-label ch-muted">
+              <span>رسوم الشحن</span>
+              <button id="ch-shipping-info-btn" class="ch-shipping-info-btn" type="button">
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="#6b7c93" stroke-width="1.2"/><path d="M8 5V8.5M8 11V10.5" stroke="#6b7c93" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </button>
+            </span>
+            <span id="ch-shipping" class="ch-summary-value ch-muted">--</span>
+          </div>
+          <div class="ch-summary-row">
+            <span class="ch-summary-label ch-muted">الضرائب</span>
+            <span id="ch-tax" class="ch-summary-value ch-muted">12.00 ج.م</span>
+          </div>
+          <div class="ch-summary-divider"></div>
+          <div class="ch-summary-row ch-total-row">
+            <span class="ch-total-label">المجموع شامل الضريبة</span>
+            <span id="ch-grand-total" class="ch-total-value">0.00 ج.م</span>
+          </div>
+        </div>
+        <div id="ch-status" class="ch-status"></div>
+        <button id="ch-confirm-btn" class="ch-confirm-btn" type="button">
+          تأكيد الطلبية
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- MOBILE STICKY FOOTER -->
+  <div class="ch-footer" id="ch-footer">
+    <div class="ch-footer-left">
+      <small class="ch-footer-label">الإجمالي</small>
+      <span id="ch-footer-total" class="ch-footer-total">0.00 ج.م</span>
+    </div>
+    <button id="ch-confirm-mobile" class="ch-confirm-btn" type="button">
+      تأكيد الطلبية
+    </button>
+  </div>
+
+  <!-- ADDRESS MODAL (shows saved addresses) -->
+  <div id="ch-address-modal" class="ch-modal" aria-hidden="true">
+    <div class="ch-modal-backdrop" id="ch-address-backdrop"></div>
+    <div class="ch-modal-panel ch-address-modal-panel" role="dialog" aria-modal="true" aria-label="العناوين">
+      <div class="ch-modal-header">
+        <h3>العناوين</h3>
+        <button id="ch-address-modal-close" class="ch-modal-close" type="button" aria-label="إغلاق">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15 5L5 15M5 5L15 15" stroke="#404553" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="ch-modal-body">
+        <p class="ch-address-modal-subtitle">قم بإدارة عناوينك المحفوظة لتتمكن من إنهاء عمليات الشراء بسرعة وسهولة عبر متاجرنا</p>
+        <button id="ch-address-add-new" class="ch-address-add-btn" type="button">
+          <span>+</span>
+          <span>إضافة عنوان جديد</span>
+        </button>
+        <div id="ch-address-list" class="ch-address-list">
+          <!-- rendered by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECEIVER CHANGE MODAL (Noon-style) -->
+  <div id="ch-receiver-modal" class="ch-modal" aria-hidden="true">
+    <div class="ch-modal-backdrop" id="ch-receiver-backdrop"></div>
+    <div class="ch-modal-panel" role="dialog" aria-modal="true" aria-label="تغيير المستلم">
+      <div class="ch-modal-header">
+        <h3>شخص آخر بيستلم الطلب</h3>
+        <button id="ch-receiver-modal-close" class="ch-modal-close" type="button" aria-label="إغلاق">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15 5L5 15M5 5L15 15" stroke="#404553" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="ch-modal-body">
+        <div class="ch-receiver-note">
+          <img alt="info" width="32" height="32" src="https://a.nooncdn.com/rn/noon/sales/receiver-phone-number-note-ar.svg" style="width:32px;height:32px;">
+          <span>إذا لزم الأمر سيتصل المندوب بالمُستلم، وبيكون الاتصال معك فقط إذا كان المُستلم غير متاح.</span>
+        </div>
+        <div class="ch-receiver-form-modal">
+          <div class="ch-receiver-form-header">
+            <span class="ch-receiver-form-save-label">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M1.5 5.5L3.5 7.5L8.5 2.5" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              حفظ
+            </span>
+          </div>
+          <div class="ch-field">
+            <label>أضف رقم المستلم</label>
+            <input id="ch-receiver-modal-name" type="text" placeholder="الاسم" />
+          </div>
+          <div class="ch-field">
+            <label>رقم الجوال</label>
+            <input id="ch-receiver-modal-phone" type="tel" placeholder="رقم الجوال" />
+          </div>
+        </div>
+        <div class="ch-receiver-or"><span>أو</span></div>
+        <div class="ch-receiver-saved">
+          <span class="ch-receiver-saved-label">استخدم رقم محفوظ مسبقًا</span>
+          <div id="ch-receiver-contacts" class="ch-receiver-contacts">
+            <!-- saved contacts rendered here -->
+          </div>
+        </div>
+      </div>
+      <div class="ch-modal-footer">
+        <label class="ch-checkbox-label">
+          <input id="ch-receiver-save-check" type="checkbox" checked />
+          <span class="ch-checkbox-faux">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 7.5L5.5 10L11 4" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span>احفظ هذا الاختيار لطلباتك المستقبلية على نفس العنوان المحدد</span>
+        </label>
+        <button id="ch-receiver-save-btn" class="ch-modal-submit" type="button">حفظ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GOVERNORATE BOTTOM SHEET -->
+  <div id="governorate-sheet" class="governorate-sheet" aria-hidden="true">
+    <div class="governorate-sheet-backdrop" id="governorate-backdrop"></div>
+    <div class="governorate-sheet-panel" role="dialog" aria-modal="true" aria-label="اختر المحافظة">
+      <div class="governorate-sheet-header">
+        <h3>اختر المحافظة</h3>
+        <button id="governorate-close-btn" class="governorate-close-btn" type="button" aria-label="إغلاق">
+          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M15 5L5 15M5 5L15 15" stroke="#1a1a2e" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="governorate-search-wrap">
+        <svg width="18" height="18" viewBox="0 0 18 18" fill="none"><circle cx="8" cy="8" r="6.5" stroke="#6b7c93" stroke-width="1.5"/><path d="M13 13L16.5 16.5" stroke="#6b7c93" stroke-width="1.5" stroke-linecap="round"/></svg>
+        <input type="text" id="governorate-search" placeholder="ابحث عن محافظة" autocomplete="off" />
+      </div>
+      <div class="governorate-list" id="governorate-list"></div>
+    </div>
+  </div>
+
+  <!-- ORDER CONFIRMATION ANIMATION OVERLAY -->
+  <div id="ch-confirm-overlay" class="ch-confirm-overlay" aria-hidden="true">
+    <div class="ch-confirm-bg"></div>
+    <div class="ch-confirm-scene">
+      <div class="ch-confirm-stage" id="ch-stage-1">
+        <div class="ch-icon-3d">
+          <div class="ch-cube">
+            <div class="ch-cube-face ch-cube-front">
+              <div class="ch-cube-brand">Buda</div>
+              <div class="ch-cube-lines">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="ch-cube-face ch-cube-top"></div>
+            <div class="ch-cube-face ch-cube-right"></div>
+          </div>
+        </div>
+        <div class="ch-progress-bar"><span></span></div>
+        <p class="ch-confirm-text">جار تجهيز طلبك</p>
+      </div>
+      <div class="ch-confirm-stage hidden" id="ch-stage-2">
+        <div class="ch-map-ani">
+          <div class="ch-map-dot ch-map-dot-from"></div>
+          <div class="ch-map-dot ch-map-dot-to"></div>
+          <svg class="ch-map-arc" viewBox="0 0 120 60" fill="none">
+            <path d="M10 50 Q60 5 110 50" stroke="rgba(255,255,255,0.2)" stroke-width="1.5" stroke-dasharray="4 6"/>
+            <path class="ch-arc-travel" d="M10 50 Q60 5 110 50" stroke="#3866df" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="180" stroke-dashoffset="180"/>
+          </svg>
+          <div class="ch-ship-wrap">
+            <div class="ch-ship">
+              <div class="ch-ship-body">
+                <span class="ch-ship-brand">Buda</span>
+              </div>
+              <div class="ch-ship-window"></div>
+            </div>
+          </div>
+        </div>
+        <p class="ch-confirm-text">طلبك في الطريق</p>
+      </div>
+      <div class="ch-confirm-stage hidden" id="ch-stage-3">
+        <div class="ch-success-ring">
+          <svg viewBox="0 0 100 100">
+            <circle class="ch-sr-track" cx="50" cy="50" r="45" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
+            <circle class="ch-sr-progress" cx="50" cy="50" r="45" fill="none" stroke="#16a34a" stroke-width="4" stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="283"/>
+            <path class="ch-sr-check" d="M32 52 L46 66 L70 38" fill="none" stroke="#16a34a" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="60" stroke-dashoffset="60"/>
+          </svg>
+        </div>
+        <p class="ch-confirm-text ch-confirm-success">تم تأكيد الطلب</p>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+  <script>
+    window.SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
+    window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
+  </script>
+  <script src="../assets/js/supabase-client.js?v=20260712f"></script>
+  <script src="../assets/js/auth.config.js?v=20260630"></script>
+  <script src="../assets/js/taager-integration.js?v=20260630d"></script>
+  <script src="../assets/js/store.js?v=20260630d"></script>
+  <script src="../assets/js/pricing-engine.js?v=20260703"></script>
+  <script src="../assets/js/shipping-zones.js"></script>
+  <script src="../assets/js/checkout.js?v=20260715"></script>
+  <script src="../assets/js/phone-verification-modal.js"></script>
+  <script src="../assets/js/seo/analytics-manager.js"></script>
+  <script src="../assets/js/noon-shell.js"></script>
+</body>
+</html>

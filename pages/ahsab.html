@@ -1,0 +1,2041 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>حسابي - Buda</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+  <link href="../assets/css/noon-components.css" rel="stylesheet" />
+  <link href="../assets/css/home.css?v=20260711a" rel="stylesheet" />
+  <link href="../assets/css/account.css?v=20260630d" rel="stylesheet" />
+  <link href="../assets/css/skeleton.css?v=20260701" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260709" rel="stylesheet" media="only screen and (min-width: 768px)" />
+  <link href="../assets/css/desktop-animations.css?v=20260709" rel="stylesheet" media="only screen and (min-width: 768px)" />
+  <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="../assets/icons/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="../assets/icons/site.webmanifest">
+  <meta name="theme-color" content="#FFD500">
+  <style>
+    /* ===== Noon Support Floating Button ===== */
+    .noon-support-btn-wrapper {
+      position: fixed;
+      bottom: 75px;
+      right: 24px;
+      z-index: 999;
+    }
+    .noon-support-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      height: 42px;
+      padding: 0 16px;
+      background-color: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      color: #1e293b;
+      position: relative;
+    }
+    .noon-support-btn:hover {
+      background-color: #fafafa;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    .noon-support-btn .support-chat-icon {
+      font-size: 20px;
+      color: #475569;
+    }
+    .noon-support-btn .support-btn-text {
+      font-family: 'Cairo', sans-serif;
+      font-weight: bold;
+      font-size: 14px;
+    }
+    
+    @media (max-width: 768px) {
+      .noon-support-btn-wrapper {
+        bottom: 90px;
+        right: 12px;
+        left: 12px;
+      }
+      .noon-support-btn {
+        width: 60%;
+        justify-content: center;
+        height: 35ٍpx;
+        border-radius: 10px;
+      }
+      .noon-support-btn .support-btn-text {
+        font-size: 13px;
+      }
+    }
+    @media (max-width: 480px) {
+      .noon-support-btn-wrapper {
+        bottom: 85px;
+      }
+    }
+    
+    /* Red Notification Badge */
+    .noon-support-badge {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      background-color: #dc2626;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 700;
+      height: 18px;
+      min-width: 18px;
+      border-radius: 9px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 5px;
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.4);
+      z-index: 1000;
+      transform: scale(1);
+      transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    .noon-support-badge.hidden {
+      transform: scale(0);
+      display: none;
+    }
+
+    /* ===== Redesigned Support Drawer ===== */
+
+    /* Overlay layer (covers whole screen) */
+    .support-drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 9998;
+      /* display controlled by JS inline style (none / block) */
+      pointer-events: none;
+    }
+    .support-drawer.open-drawer {
+      pointer-events: auto;
+    }
+
+    /* Dark backdrop */
+    .support-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transition: opacity 300ms ease;
+    }
+    .support-drawer.open-drawer .support-backdrop {
+      opacity: 1;
+    }
+
+    /* Sliding panel */
+    .support-panel {
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 420px;
+      max-width: 100vw;
+      background: #ffffff;
+      box-shadow: -8px 0 40px rgba(0, 0, 0, 0.15);
+      display: flex;
+      flex-direction: column;
+      transform: translateX(100%);
+      transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1), bottom 0.25s ease;
+      z-index: 9999;
+    }
+    .support-drawer.open-drawer .support-panel {
+      transform: translateX(0);
+    }
+
+    /* Header */
+    .support-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px 16px;
+      border-bottom: 1px solid #e8ecf0;
+      background-color: #ffffff;
+      flex-shrink: 0;
+    }
+    .support-close {
+      background: none;
+      border: none;
+      padding: 4px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #475569;
+      transition: color 0.2s ease;
+    }
+    .support-close:hover {
+      color: #0f172a;
+    }
+    .support-close .material-icons-outlined {
+      font-size: 24px;
+    }
+    .support-title {
+      font-family: 'Cairo', sans-serif;
+      font-size: 1.05rem;
+      font-weight: bold;
+      color: #0f172a;
+      margin: 0;
+    }
+
+    /* Messages area */
+    .support-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      background-color: #efeae2;
+      background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+      background-repeat: repeat;
+      background-size: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .support-message {
+      display: flex;
+      flex-direction: column;
+      max-width: 80%;
+      animation: supportMsgIn 0.25s ease forwards;
+    }
+    @keyframes supportMsgIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Client message: right aligned, blue background, white text, nice border-radius */
+    .support-message.own {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+    .support-message.own .support-bubble {
+      background-color: #3b82f6;
+      color: #ffffff;
+      border-radius: 16px 16px 4px 16px;
+      box-shadow: 0 1px 2px rgba(59, 130, 246, 0.25);
+    }
+
+    /* Company message: left aligned, white background, light grey border, light shadow */
+    .support-message:not(.own) {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+    .support-message:not(.own) .support-bubble {
+      background-color: #ffffff;
+      color: #1e293b;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      border-radius: 16px 16px 16px 4px;
+    }
+
+    .support-bubble {
+      padding: 10px 14px;
+      font-size: 0.875rem;
+      line-height: 1.5;
+      word-break: break-word;
+      white-space: pre-wrap;
+    }
+    .support-time {
+      font-size: 0.65rem;
+      color: #94a3b8;
+      margin-top: 4px;
+      padding: 0 4px;
+    }
+
+    /* Empty State */
+    .support-empty {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      text-align: center;
+      padding: 24px;
+      color: #64748b;
+    }
+    .support-empty .empty-icon {
+      font-size: 56px;
+      color: #cbd5e1;
+      margin-bottom: 12px;
+      opacity: 0.8;
+    }
+    .support-empty .empty-title {
+      font-family: 'Cairo', sans-serif;
+      font-size: 1.1rem;
+      font-weight: bold;
+      color: #334155;
+      margin: 0 0 8px 0;
+    }
+    .support-empty .empty-desc {
+      font-family: 'Cairo', sans-serif;
+      font-size: 0.85rem;
+      color: #64748b;
+      margin: 0;
+      line-height: 1.5;
+    }
+
+    /* Typing Box */
+    .support-input-wrap {
+      padding: 12px 16px;
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
+      background-color: #ffffff;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .support-input {
+      width: 100%;
+      min-height: 40px;
+      max-height: 120px;
+      padding: 10px 16px;
+      border: 1px solid #cbd5e1;
+      border-radius: 20px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      line-height: 1.4;
+      resize: none;
+      outline: none;
+      background-color: #f8fafc;
+      transition: all 0.2s ease;
+    }
+    .support-input:focus {
+      border-color: #3b82f6;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .support-panel {
+        width: 380px;
+      }
+    }
+    @media (max-width: 600px) {
+      .support-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 0;
+      }
+    }
+
+    /* Client Image Lightbox */
+    .client-lightbox {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      z-index: 100000;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      cursor: zoom-out;
+    }
+    .client-lightbox.open {
+      display: flex;
+      opacity: 1;
+    }
+    .client-lightbox-img {
+      max-width: 90%;
+      max-height: 85%;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      transform: scale(0.9);
+      transition: transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: default;
+    }
+    .client-lightbox.open .client-lightbox-img {
+      transform: scale(1);
+    }
+    .client-lightbox-close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      font-size: 40px;
+      color: #ffffff;
+      cursor: pointer;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+      user-select: none;
+      font-family: Arial, sans-serif;
+    }
+    .client-lightbox-close:hover {
+      opacity: 1;
+    }
+
+    /* ===== Noon Redesign Styles ===== */
+    main.app-main {
+      background-color: #f7f9fa !important;
+      padding: 16px !important;
+      min-height: 100vh;
+      animation: fadeInSupport 0.4s ease;
+    }
+    @keyframes fadeInSupport {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .noon-account-container {
+      max-width: 900px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      width: 100%;
+    }
+
+    /* Profile Card styling */
+    .profile-card {
+      background: #ffffff !important;
+      border-radius: 14px !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05) !important;
+      padding: 20px !important;
+      border: 1px solid #f1f5f9 !important;
+    }
+    .profile-card-top {
+      display: flex !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      gap: 16px !important;
+    }
+    .profile-avatar-wrap {
+      flex-shrink: 0;
+    }
+    #profile-avatar {
+      width: 68px !important;
+      height: 68px !important;
+      border-radius: 50% !important;
+      background: linear-gradient(135deg, #feee97 0%, #ffd500 100%) !important;
+      color: #383838 !important;
+      font-weight: 800 !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      font-size: 1.45rem !important;
+      border: 2px solid #ffffff !important;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08) !important;
+      cursor: pointer;
+    }
+    .profile-card-body {
+      flex: 1 !important;
+      min-width: 0 !important;
+      padding-right: 4px;
+    }
+    #profile-name {
+      font-size: 1.15rem !important;
+      font-weight: 800 !important;
+      color: #0f172a !important;
+      margin: 0 0 4px 0 !important;
+    }
+    #profile-email {
+      font-size: 0.82rem !important;
+      color: #64748b !important;
+      margin: 0 !important;
+    }
+    .profile-edit-link {
+      border: 1px solid #e2e8f0 !important;
+      background: #ffffff !important;
+      color: #475569 !important;
+      border-radius: 8px !important;
+      padding: 6px 14px !important;
+      font-size: 0.82rem !important;
+      font-weight: 700 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      gap: 6px !important;
+      text-decoration: none !important;
+      transition: all 0.2s !important;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.02) !important;
+    }
+    .profile-edit-link:hover {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+    }
+
+    /* Stats Grid */
+    .noon-stats-grid {
+      display: grid;
+      gap: 12px;
+      width: 100%;
+    }
+    .noon-stat-card {
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: inherit;
+      border: 1px solid #f1f5f9;
+      transition: all 0.25s ease;
+      cursor: pointer;
+    }
+    .noon-stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      border-color: #e2e8f0;
+    }
+    .noon-stat-card .stat-icon {
+      font-size: 24px;
+      color: #ffd500;
+      background: #fffbeb;
+      padding: 8px;
+      border-radius: 10px;
+    }
+    .noon-stat-card .stat-info {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .noon-stat-card .stat-title {
+      font-size: 0.78rem;
+      color: #64748b;
+      font-weight: bold;
+    }
+    .noon-stat-card .stat-number {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+
+    /* Responsive Stats Grid */
+    @media (min-width: 769px) {
+      .noon-stats-grid {
+        grid-template-columns: repeat(4, 1fr);
+      }
+    }
+    @media (max-width: 768px) and (min-width: 481px) {
+      .noon-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 480px) {
+      .noon-stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Mobile-first responsive styles for account page */
+    @media (max-width: 768px) {
+      main.app-main {
+        padding: 12px !important;
+      }
+      .noon-account-container {
+        gap: 12px;
+      }
+      .profile-card {
+        padding: 16px !important;
+      }
+      .profile-card-top {
+        gap: 12px !important;
+      }
+      #profile-avatar {
+        width: 60px !important;
+        height: 60px !important;
+        font-size: 1.25rem !important;
+      }
+      #profile-name {
+        font-size: 1.05rem !important;
+      }
+      #profile-email {
+        font-size: 0.78rem !important;
+      }
+      .profile-edit-link {
+        padding: 6px 12px !important;
+        font-size: 0.78rem !important;
+      }
+      .noon-stats-grid {
+        gap: 8px;
+      }
+      .noon-stat-card {
+        padding: 12px;
+        gap: 8px;
+      }
+      .noon-stat-card .stat-icon {
+        font-size: 20px;
+        padding: 6px;
+      }
+      .noon-stat-card .stat-title {
+        font-size: 0.7rem;
+      }
+      .noon-stat-card .stat-number {
+        font-size: 1rem;
+      }
+      .noon-menu-card {
+        border-radius: 12px;
+      }
+      .noon-menu-item {
+        height: 54px;
+        padding: 0 12px;
+      }
+      .noon-menu-item-content {
+        gap: 10px;
+      }
+      .noon-menu-item-title {
+        font-size: 0.85rem;
+      }
+      .noon-menu-item-desc {
+        font-size: 0.68rem;
+      }
+      .noon-menu-item .menu-item-icon {
+        font-size: 20px;
+      }
+      .noon-menu-item .chevron-icon {
+        font-size: 18px;
+      }
+      .support-panel {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 0;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .profile-card-top {
+        flex-wrap: wrap !important;
+      }
+      .profile-card-body {
+        order: 2;
+        width: calc(100% - 76px);
+      }
+      .profile-edit-link {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+        margin-top: 8px;
+      }
+      .profile-progress-row {
+        width: 100%;
+        order: 4;
+        margin-top: 8px !important;
+      }
+      .noon-stats-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+      }
+      .noon-menu-item-title {
+        font-size: 0.8rem;
+      }
+      .noon-menu-item-desc {
+        font-size: 0.65rem;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .noon-stat-card {
+        padding: 10px;
+        gap: 6px;
+      }
+      .noon-stat-card .stat-icon {
+        font-size: 18px;
+        padding: 5px;
+      }
+      .noon-stat-card .stat-title {
+        font-size: 0.65rem;
+      }
+      .noon-stat-card .stat-number {
+        font-size: 0.9rem;
+      }
+      .noon-menu-item {
+        height: auto;
+        min-height: 50px;
+        padding: 10px 12px;
+      }
+      .noon-menu-item-content {
+        flex-wrap: wrap;
+      }
+      .noon-menu-item-text {
+        flex: 1 1 calc(100% - 40px);
+      }
+    }
+
+    /* Support drawer mobile improvements */
+    @media (max-width: 768px) {
+      .support-input-wrap {
+        padding-bottom: max(12px, env(safe-area-inset-bottom));
+      }
+      .support-messages {
+        padding-bottom: 80px;
+      }
+    }
+
+    /* Floating button safe area on mobile */
+    @supports (padding: max(0px)) {
+      @media (max-width: 768px) {
+        .noon-support-btn-wrapper {
+          bottom: max(90px, calc(90px + env(safe-area-inset-bottom)));
+        }
+      }
+    }
+
+    /* ===== Mobile Header Fixes (ensure home.css styles apply) ===== */
+    @media (max-width: 767px) {
+      .buda-header {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 100 !important;
+      }
+      .buda-header-top {
+        background: #faf75a !important;
+        padding: 6px 0 0 !important;
+      }
+      .buda-header-top-inner {
+        max-width: 1400px !important;
+        margin: 0 auto !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        padding: 6px 12px !important;
+        flex-wrap: wrap !important;
+      }
+      .buda-header-top-inner .header-start {
+        order: 1 !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
+        flex-shrink: 0 !important;
+      }
+      .buda-header-top-inner .menu-btn {
+        width: 36px !important;
+        height: 36px !important;
+        border: 0 !important;
+        background: transparent !important;
+        cursor: pointer !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        border-radius: 8px !important;
+        transition: background 180ms ease !important;
+      }
+      .buda-header-top-inner .menu-btn:hover {
+        background: rgba(0,0,0,0.06) !important;
+      }
+      .buda-header-top-inner .menu-icon,
+      .buda-header-top-inner .menu-icon::before,
+      .buda-header-top-inner .menu-icon::after {
+        display: block !important;
+        width: 20px !important;
+        height: 2.5px !important;
+        background: #1a2530 !important;
+        border-radius: 2px !important;
+      }
+      .buda-header-top-inner .menu-icon {
+        position: relative !important;
+      }
+      .buda-header-top-inner .menu-icon::before,
+      .buda-header-top-inner .menu-icon::after {
+        content: "" !important;
+        position: absolute !important;
+        right: 0 !important;
+      }
+      .buda-header-top-inner .menu-icon::before {
+        top: -6px !important;
+      }
+      .buda-header-top-inner .menu-icon::after {
+        top: 6px !important;
+      }
+      .buda-header-top-inner .brand-badge {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 6px !important;
+        background: #1a2530 !important;
+        color: #fff !important;
+        border-radius: 999px !important;
+        min-height: 30px !important;
+        padding: 0 10px !important;
+        font-size: 0.75rem !important;
+        font-weight: 800 !important;
+        white-space: nowrap !important;
+        letter-spacing: 0.5px !important;
+      }
+      .buda-search {
+        order: 2 !important;
+        flex: 1 !important;
+        max-width: 520px !important;
+        position: relative !important;
+        min-width: 0 !important;
+      }
+      .buda-search input {
+        width: 100% !important;
+        height: 38px !important;
+        border: 0 !important;
+        border-radius: 999px !important;
+        background: #fff !important;
+        padding: 0 36px 0 36px !important;
+        font-size: 0.8rem !important;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
+        outline: 0 !important;
+      }
+      .buda-search > .material-icons-outlined {
+        position: absolute !important;
+        left: 12px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        color: #666 !important;
+        font-size: 18px !important;
+        pointer-events: none !important;
+      }
+      .buda-search-clear {
+        display: none !important;
+        position: absolute !important;
+        right: 8px !important;
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+        width: 28px !important;
+        height: 28px !important;
+        border: 0 !important;
+        background: #e8e8e8 !important;
+        border-radius: 50% !important;
+        cursor: pointer !important;
+        align-items: center !important;
+        justify-content: center !important;
+        color: #666 !important;
+      }
+      .buda-search.has-text .buda-search-clear {
+        display: flex !important;
+      }
+      .buda-location {
+        display: flex !important;
+        order: 3 !important;
+        flex: 0 0 100% !important;
+        margin-top: 2px !important;
+        padding: 2px 4px !important;
+        align-items: center !important;
+        gap: 6px !important;
+        cursor: pointer !important;
+        border-radius: 8px !important;
+        transition: background 180ms ease !important;
+        flex-shrink: 0 !important;
+      }
+      .buda-location:hover {
+        background: rgba(0,0,0,0.05) !important;
+      }
+      .buda-location-icon {
+        font-size: 20px !important;
+        color: #1a2530 !important;
+      }
+      .buda-location-text {
+        display: flex !important;
+        flex-direction: column !important;
+        line-height: 1.2 !important;
+      }
+      .buda-location-label {
+        font-size: 0.65rem !important;
+        color: #5f5f5f !important;
+        font-weight: 500 !important;
+      }
+      .buda-location-value {
+        font-size: 0.75rem !important;
+        color: #1a2530 !important;
+        font-weight: 700 !important;
+        max-width: 90px !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        white-space: nowrap !important;
+      }
+      .buda-location-arrow {
+        font-size: 18px !important;
+        color: #666 !important;
+      }
+      .buda-lang {
+        display: none !important;
+      }
+      .buda-account {
+        display: none !important;
+      }
+      .buda-header-action {
+        display: none !important;
+      }
+
+    }
+
+    @media (max-width: 480px) {
+      .buda-header-top-inner {
+        padding: 4px 8px !important;
+        gap: 6px !important;
+      }
+      .buda-header-top-inner .brand-badge {
+        min-height: 28px !important;
+        padding: 0 8px !important;
+        font-size: 0.7rem !important;
+      }
+      .buda-search input {
+        height: 34px !important;
+        font-size: 0.75rem !important;
+      }
+    }
+
+    /* Menu List Group Card */
+    .noon-menu-card {
+      background: #ffffff;
+      border-radius: 14px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      border: 1px solid #f1f5f9;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .noon-menu-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      height: 58px;
+      border: none;
+      background: #ffffff;
+      width: 100%;
+      cursor: pointer;
+      text-align: right;
+      text-decoration: none;
+      color: inherit;
+      border-bottom: 1px solid #f8fafc;
+      transition: background 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .noon-menu-item:last-child {
+      border-bottom: none;
+    }
+    .noon-menu-item:hover {
+      background-color: #fafafa;
+    }
+    .noon-menu-item-content {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+    }
+    .noon-menu-item-text {
+      display: flex;
+      flex-direction: column;
+      text-align: right;
+      min-width: 0;
+    }
+    .noon-menu-item-title {
+      font-size: 0.9rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .noon-menu-item-desc {
+      font-size: 0.72rem;
+      color: #888888;
+      margin-top: 1px;
+    }
+    .noon-menu-item .menu-item-icon {
+      font-size: 22px;
+      color: #475569;
+    }
+    .noon-menu-item .chevron-icon {
+      font-size: 20px;
+      color: #94a3b8;
+      transition: transform 0.2s ease;
+    }
+    .noon-menu-item:hover .chevron-icon {
+      transform: translateX(-4px);
+    }
+
+    /* Ripple Effect (CSS only) */
+    .noon-menu-item::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 5px;
+      height: 5px;
+      background: rgba(0, 0, 0, 0.05);
+      opacity: 0;
+      border-radius: 100%;
+      transform: scale(1, 1) translate(-50%);
+      transform-origin: 50% 50%;
+    }
+    .noon-menu-item:active::after {
+      animation: noonRipple 0.3s ease-out;
+    }
+    @keyframes noonRipple {
+      0% { transform: scale(0, 0); opacity: 0.5; }
+      100% { transform: scale(80, 80); opacity: 0; }
+    }
+
+    /* Profile completion progress */
+    .profile-progress-row {
+      margin-top: 8px !important;
+    }
+    .profile-progress-bar-track {
+      background: #e2e8f0 !important;
+      height: 5px !important;
+      border-radius: 10px !important;
+    }
+    .profile-progress-bar-fill {
+      background: #22c55e !important;
+    }
+
+    #noon-support-badge {
+      box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3) !important;
+    }
+
+    /* ===== Account page skeleton ===== */
+    .account-page .skeleton-page-shell {
+      display: none !important;
+    }
+    .app-main.stack {
+      position: relative;
+    }
+    .skeleton-account {
+      position: absolute;
+      inset: 0;
+      padding: 16px;
+      background: #f8fafc;
+      z-index: 5;
+    }
+    .skeleton-account-card {
+      background: #fff;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      border: 1px solid #f1f5f9;
+    }
+    .skeleton-account-profile {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .skeleton-avatar-circle {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .skeleton-account-lines {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .skeleton-name-line {
+      height: 20px;
+      width: 140px;
+      border-radius: 4px;
+    }
+    .skeleton-email-line {
+      height: 14px;
+      width: 200px;
+      border-radius: 4px;
+    }
+    .skeleton-progress-line {
+      height: 8px;
+      width: 100%;
+      border-radius: 10px;
+    }
+    .skeleton-stats-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .skeleton-stat-card {
+      height: 80px;
+      border-radius: 14px;
+      background: #fff;
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .skeleton-menu-list {
+      background: #fff;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #f1f5f9;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+    .skeleton-menu-item {
+      height: 58px;
+      border-bottom: 1px solid #f8fafc;
+    }
+    .skeleton-menu-item:last-child {
+      border-bottom: none;
+    }
+    .skeleton-account-hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body class="app-shell account-page">
+          <!-- ========== HEADER - Noon Style (2 Rows) ========== -->
+        <header class="app-header buda-header">
+    <div class="buda-header-top">
+      <div class="buda-header-top-inner">
+        <div class="header-start">
+          <div class="brand-badge">Buda</div>
+        </div>
+
+        <div class="app-search search-left-icon buda-search">
+          <span class="material-icons-outlined">search</span>
+          <input id="home-search" type="text" data-search-target="search.html" placeholder="ابحث عن منتج أو فئة" autocomplete="off" />
+          </button>
+        </div>
+
+        <div class="buda-lang" id="budaLangTrigger">
+          <span class="buda-lang-text">EN</span>
+          <span class="material-icons-outlined buda-lang-globe">language</span>
+        </div>
+
+        <div class="buda-account" id="budaAccountTrigger">
+          <div class="buda-account-avatar" id="budaAccountAvatar">
+            <span class="material-icons-outlined">person</span>
+          </div>
+          <div class="buda-account-info">
+            <span class="buda-account-name" id="budaAccountName">حسابي</span>
+            <span class="material-icons-outlined buda-account-arrow">keyboard_arrow_down</span>
+          </div>
+          <div class="buda-account-dropdown" id="budaAccountDropdown">
+            <a href="ahsab.html" class="buda-dd-item"><span class="material-icons-outlined">person</span> حسابي</a>
+            <a href="my-orders.html" class="buda-dd-item"><span class="material-icons-outlined">receipt_long</span> طلباتي</a>
+            <a href="returns.html" class="buda-dd-item"><span class="material-icons-outlined">undo</span> الإرجاعات</a>
+            <a href="addresses.html" class="buda-dd-item"><span class="material-icons-outlined">location_on</span> العناوين</a>
+            <a href="wishlist.html" class="buda-dd-item"><span class="material-icons-outlined">favorite_border</span> المفضلة</a>
+            <a href="#" class="buda-dd-item" id="budaSupportBtn"><span class="material-icons-outlined">chat</span> الدعم</a>
+            <a href="edit-account.html" class="buda-dd-item"><span class="material-icons-outlined">settings</span> الإعدادات</a>
+            <div class="buda-dd-divider"></div>
+            <a href="logout-confirmation.html" class="buda-dd-item buda-dd-logout"><span class="material-icons-outlined">logout</span> تسجيل الخروج</a>
+          </div>
+        </div>
+
+        <a href="my-orders.html" class="buda-header-action" title="طلباتي">
+          <span class="material-icons-outlined">receipt_long</span>
+          <small>طلباتي</small>
+        </a>
+
+        <a href="wishlist.html" class="buda-header-action" title="المفضلة">
+          <span class="material-icons-outlined">favorite_border</span>
+          <small>المفضلة</small>
+        </a>
+
+        <a href="empty-cart.html" class="buda-header-action buda-header-cart" title="العربة">
+          <span class="material-icons-outlined">shopping_cart</span>
+          <small>العربة</small>
+          <span class="buda-cart-badge" id="budaCartBadge">0</span>
+        </a>
+      </div>
+    </div>
+
+  </header>
+  <main class="app-main stack">
+    <div class="skeleton-account" id="skeletonAccount">
+      <div class="skeleton-account-card">
+        <div class="skeleton-account-profile">
+          <div class="skeleton skeleton-avatar-circle"></div>
+          <div class="skeleton-account-lines">
+            <div class="skeleton skeleton-name-line"></div>
+            <div class="skeleton skeleton-email-line"></div>
+            <div class="skeleton skeleton-progress-line"></div>
+          </div>
+        </div>
+      </div>
+      <div class="skeleton-stats-grid">
+        <div class="skeleton skeleton-stat-card"></div>
+        <div class="skeleton skeleton-stat-card"></div>
+        <div class="skeleton skeleton-stat-card"></div>
+        <div class="skeleton skeleton-stat-card"></div>
+      </div>
+      <div class="skeleton-menu-list">
+        <div class="skeleton skeleton-menu-item"></div>
+        <div class="skeleton skeleton-menu-item"></div>
+        <div class="skeleton skeleton-menu-item"></div>
+        <div class="skeleton skeleton-menu-item"></div>
+        <div class="skeleton skeleton-menu-item"></div>
+        <div class="skeleton skeleton-menu-item"></div>
+      </div>
+    </div>
+    <script>document.addEventListener("DOMContentLoaded",function(){var e=document.getElementById("skeletonAccount");if(e)e.classList.add("skeleton-account-hidden")});</script>
+    <p id="account-status" class="status-note hidden" aria-live="polite"></p>
+
+    <section id="login-required" class="section-block center-empty hidden">
+      <h2>تسجيل الدخول مطلوب</h2>
+      <p>يجب تسجيل الدخول للوصول إلى صفحة الحساب.</p>
+      <div class="inline-actions" style="justify-content: center; margin-top: 10px;">
+        <a class="btn-primary" href="signin/login.html" style="display: inline-flex; align-items: center;">تسجيل الدخول</a>
+        <a class="btn-secondary" href="signup/index.html" style="display: inline-flex; align-items: center;">إنشاء حساب</a>
+      </div>
+    </section>
+
+
+    <div id="profile-content" class="noon-account-container">
+      <!-- Profile Card -->
+      <section class="profile-card">
+        <div class="profile-card-top">
+          <div class="profile-avatar-wrap">
+            <div id="profile-avatar">U</div>
+          </div>
+          <div class="profile-card-body">
+            <h2 id="profile-name">المستخدم</h2>
+            <p id="profile-email">user@example.com</p>
+            <div id="profileProgressRow" class="profile-progress-row">
+              <div class="profile-progress-bar-track">
+                <div class="profile-progress-bar-fill" id="profileProgressFill"></div>
+              </div>
+              <small class="profile-progress-label" id="profileProgressLabel">اكتملت بنسبة 0%</small>
+            </div>
+          </div>
+          <a class="profile-edit-link" href="edit-account.html">
+            <span class="material-icons-outlined" style="font-size: 16px;"></span>
+            <span data-i18n="تعديل">تعديل</span>
+          </a>
+        </div>
+      </section>
+
+      <script>
+        // فورًا: الاسم والإيميل من localStorage قبل أي async
+        (function(){
+          var n = document.getElementById("profile-name");
+          var e = document.getElementById("profile-email");
+          var a = document.getElementById("profile-avatar");
+          var name = localStorage.getItem("userFullName") || "المستخدم";
+          var email = localStorage.getItem("userEmail") || "";
+          if (n) n.textContent = name;
+          if (e) e.textContent = email;
+          if (a) {
+            var initials = name.split(" ").map(function(p){return p[0]}).slice(0,2).join("").toUpperCase() || "U";
+            a.textContent = initials;
+          }
+        })();
+      </script>
+
+      <!-- Stats Grid -->
+      <div class="noon-stats-grid">
+        <a href="my-orders.html" class="noon-stat-card">
+          <span class="material-icons-outlined stat-icon"></span>
+          <div class="stat-info">
+            <span class="stat-title">طلباتي</span>
+            <span class="stat-number" id="stat-orders-count"></span>
+          </div>
+        </a>
+        <a href="wishlist.html" class="noon-stat-card">
+          <span class="material-icons-outlined stat-icon"></span>
+          <div class="stat-info">
+            <span class="stat-title">المفضلة</span>
+            <span class="stat-number" id="stat-wishlist-count"></span>
+          </div>
+        </a>
+        <a href="addresses.html" class="noon-stat-card" id="stat-addresses-card">
+          <span class="material-icons-outlined stat-icon"></span>
+          <div class="stat-info">
+            <span class="stat-title">عناويني</span>
+            <span class="stat-number" id="stat-addresses-count"></span>
+          </div>
+        </a>
+        <a href="returns.html" class="noon-stat-card">
+          <span class="material-icons-outlined stat-icon"></span>
+          <div class="stat-info">
+            <span class="stat-title">المرتجعات</span>
+            <span class="stat-number" id="stat-returns-count"></span>
+          </div>
+        </a>
+      </div>
+
+      <!-- Menu List Card -->
+      <div class="noon-menu-card">
+        <a href="my-orders.html" class="noon-menu-item">
+          <div class="noon-menu-item-content">
+            <span class="material-icons-outlined menu-item-icon"></span>
+            <div class="noon-menu-item-text">
+              <span class="noon-menu-item-title" data-i18n="طلباتي">طلباتي</span>
+              <span class="noon-menu-item-desc">تابع طلباتك الحالية وتصفح السجل</span>
+            </div>
+          </div>
+          <span class="material-icons-outlined chevron-icon"></span>
+        </a>
+
+        <a href="wishlist.html" class="noon-menu-item">
+          <div class="noon-menu-item-content">
+            <span class="material-icons-outlined menu-item-icon"></span>
+            <div class="noon-menu-item-text">
+              <span class="noon-menu-item-title" data-i18n="المفضلة">المفضلة</span>
+              <span class="noon-menu-item-desc">قائمتك المفضلة للمنتجات المحفوظة</span>
+            </div>
+          </div>
+          <span class="material-icons-outlined chevron-icon"></span>
+        </a>
+
+        <button id="addresses-link" class="noon-menu-item" type="button">
+          <div class="noon-menu-item-content">
+            <span class="material-icons-outlined menu-item-icon"></span>
+            <div class="noon-menu-item-text">
+              <span class="noon-menu-item-title" data-i18n="العناوين">عناويني</span>
+              <span class="noon-menu-item-desc">إضافة وتعديل عناوين التوصيل الخاصة بك</span>
+            </div>
+          </div>
+          <span class="material-icons-outlined chevron-icon"></span>
+        </button>
+
+        <a href="returns.html" class="noon-menu-item">
+          <div class="noon-menu-item-content">
+            <span class="material-icons-outlined menu-item-icon"></span>
+            <div class="noon-menu-item-text">
+              <span class="noon-menu-item-title">المرتجعات</span>
+              <span class="noon-menu-item-desc">إرجاع المنتجات والطلبات المستلمة</span>
+            </div>
+          </div>
+          <span class="material-icons-outlined chevron-icon"></span>
+        </a>
+
+        <button id="support-link" class="noon-menu-item" type="button">
+          <div class="noon-menu-item-content">
+            <span class="material-icons-outlined menu-item-icon"></span>
+            <div class="noon-menu-item-text">
+              <span class="noon-menu-item-title" data-i18n="الدعم الفني">الدعم والمساعدة</span>
+              <span class="noon-menu-item-desc">تواصل معنا لحل أي مشكلة أو استفسار</span>
+            </div>
+            <span id="support-badge" class="support-badge hidden" style="margin-right: 8px;">0</span>
+          </div>
+          <span class="material-icons-outlined chevron-icon"></span>
+        </button>
+
+        <a href="edit-account.html" class="noon-menu-item">
+          <div class="noon-menu-item-content">
+            <span class="material-icons-outlined menu-item-icon"></span>
+            <div class="noon-menu-item-text">
+              <span class="noon-menu-item-title">الإعدادات</span>
+              <span class="noon-menu-item-desc">تعديل الاسم والبريد الإلكتروني والبيانات الشخصية</span>
+            </div>
+          </div>
+          <span class="material-icons-outlined chevron-icon"></span>
+        </a>
+
+        <button id="country-link" class="noon-menu-item" type="button">
+          <div class="noon-menu-item-content">
+            <span class="material-icons-outlined menu-item-icon"></span>
+            <div class="noon-menu-item-text">
+              <span class="noon-menu-item-title" data-i18n="الدولة">اللغة والدولة</span>
+              <span class="noon-menu-item-desc" id="selected-country-name">العربية</span>
+            </div>
+          </div>
+          <span class="material-icons-outlined chevron-icon"></span>
+        </button>
+
+        <a class="noon-menu-item" href="delete-account.html" style="color: #dc2626;">
+          <div class="noon-menu-item-content">
+            <span class="material-icons-outlined menu-item-icon" style="color: #dc2626;"></span>
+            <div class="noon-menu-item-text">
+              <span class="noon-menu-item-title" style="color: #dc2626;" data-i18n="حذف الحساب">حذف الحساب</span>
+              <span class="noon-menu-item-desc" style="color: #fca5a5;">حذف حسابك بشكل نهائي من موقعنا</span>
+            </div>
+          </div>
+          <span class="material-icons-outlined chevron-icon" style="color: #fca5a5;"></span>
+        </a>
+
+        <button id="sign-out-link" class="noon-menu-item" type="button">
+          <div class="noon-menu-item-content">
+            <span class="material-icons-outlined menu-item-icon" style="color: #94a3b8;"></span>
+            <div class="noon-menu-item-text">
+              <span class="noon-menu-item-title" style="color: #64748b;" data-i18n="تسجيل الخروج">تسجيل الخروج</span>
+              <span class="noon-menu-item-desc">الخروج الآمن من الحساب الحالي</span>
+            </div>
+          </div>
+          <span class="material-icons-outlined chevron-icon"></span>
+        </button>
+      </div>
+
+      <!-- Script to update stats -->
+      <script>
+        (function() {
+          function updateStats() {
+            // 1. Wishlist Count
+            try {
+              var wishlist = JSON.parse(localStorage.getItem("wishlist") || "[]");
+              var wishlistCount = Array.isArray(wishlist) ? wishlist.length : 0;
+              var wishlistCountEl = document.getElementById("stat-wishlist-count");
+              if (wishlistCountEl) wishlistCountEl.textContent = wishlistCount;
+            } catch(e) {}
+
+            // 2. Addresses Count
+            try {
+              var email = localStorage.getItem("userEmail") || "";
+              var addresses = [];
+              if (email) {
+                addresses = JSON.parse(localStorage.getItem("addresses_" + email.trim().toLowerCase()) || "[]");
+              }
+              var addressesCount = Array.isArray(addresses) ? addresses.length : 0;
+              var addressesCountEl = document.getElementById("");
+              if (addressesCountEl) addressesCountEl.textContent = addressesCount;
+            } catch(e) {}
+
+            // 3. Orders Count
+            try {
+              var email = localStorage.getItem("userEmail") || "";
+              var ordersKey = email ? "orders_" + email.trim().toLowerCase() : "orders";
+              var orders = JSON.parse(localStorage.getItem(ordersKey) || "[]");
+              var ordersCount = Array.isArray(orders) ? orders.length : 0;
+              var ordersCountEl = document.getElementById("stat-orders-count");
+              if (ordersCountEl) ordersCountEl.textContent = ordersCount;
+            } catch(e) {}
+          }
+          
+          updateStats();
+          setTimeout(updateStats, 100);
+          setTimeout(updateStats, 800);
+          document.addEventListener("DOMContentLoaded", updateStats);
+          window.addEventListener("load", updateStats);
+          window.addEventListener("storage", updateStats);
+        })();
+      </script>
+
+      <!-- Floating Support Button -->
+      <div class="noon-support-btn-wrapper" id="noon-support-wrapper">
+        <button class="noon-support-btn" id="noon-support-btn" aria-label="الدعم والمساعدة">
+          <span class="material-icons-outlined support-chat-icon"></span>
+          <span class="support-btn-text">الدعم والمساعدة</span>
+          <span id="noon-support-badge" class="noon-support-badge hidden">0</span>
+        </button>
+      </div>
+    </div>
+  </main>
+
+
+  <div id="countryModal" class="modal-backdrop">
+    <div class="modal-card" style="max-width: 320px; text-align: center;">
+      <h3 style="margin: 0 0 16px;">اختر الدولة</h3>
+      <div id="country-options" style="display: flex; flex-direction: column; gap: 8px;"></div>
+      <div class="inline-actions" style="margin-top: 16px; justify-content: center;">
+        <button id="cancel-country" class="btn-danger" type="button">إلغاء</button>
+      </div>
+    </div>
+  </div>
+
+  
+
+
+
+  <nav class="bottom-nav">
+    <a href="home.html" data-nav="home">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="الرئيسية">الرئيسية</small>
+    </a>
+    <a href="products.html" data-nav="products">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="الفئات">الفئات</small>
+    </a>
+    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="الرئيسية">
+      <img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" />
+    </button>
+    <a href="ahsab.html" data-nav="account">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="حسابي">حسابي</small>
+    </a>
+    <a href="empty-cart.html" data-nav="cart">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="العربة">العربة</small>
+      <span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span>
+    </a>
+  </nav>
+
+  <!-- Support Chat Drawer -->
+  <aside class="support-drawer" id="support-drawer" aria-hidden="true" role="dialog" aria-label="دعم العملاء" style="display:none;">
+    <div class="support-backdrop" id="support-backdrop"></div>
+    <div class="support-panel" id="support-panel">
+      <header class="support-header">
+        <button class="support-close" id="support-close" aria-label="إغلاق">
+          <span class="material-icons-outlined"></span>
+        </button>
+        <h2 class="support-title">الدعم والمساعدة</h2>
+      </header>
+      <div class="support-messages" id="support-messages">
+        <div class="support-empty" id="support-empty">
+          <span class="material-icons-outlined empty-icon"></span>
+          <h3 class="empty-title">ليس لديك أي محادثات حالياً</h3>
+          <p class="empty-desc">ابدأ بكتابة رسالتك وسنقوم بالرد عليك في أسرع وقت.</p>
+        </div>
+      </div>
+      <div class="support-input-wrap">
+        <textarea
+          class="support-input"
+          id="support-input"
+          placeholder="اكتب رسالتك..."
+          rows="1"
+          aria-label="اكتب رسالتك"
+        ></textarea>
+      </div>
+  </aside>
+
+  <!-- Client Support Image Lightbox -->
+  <div id="client-support-lightbox" class="client-lightbox">
+    <span class="client-lightbox-close" id="client-lightbox-close">&times;</span>
+    <img class="client-lightbox-img" id="client-lightbox-img" src="" alt="مرفق" />
+  </div>
+
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../assets/js/supabase-client.js?v=20260710"></script>
+  <script src="../assets/js/taager-integration.js?v=20260710"></script>
+  <script src="../assets/js/store.js?v=20260710"></script>
+  <script src="../assets/js/ahsab.js?v=20260630f"></script>
+  <script src="../assets/js/noon-shell.js?v=20260709"></script>
+  <script src="../assets/js/pricing-engine.js"></script>
+  <script src="../assets/js/cart.js?v=20260710"></script>
+  <script src="../assets/js/home.js?v=20260711a"></script>
+  <script>
+    // ===== Support Chat Drawer =====
+    document.addEventListener("DOMContentLoaded", function () {
+
+      const isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      if (!isLoggedIn) return;
+
+      const currentUserStr = localStorage.getItem("currentUser");
+      let currentUserId = null;
+      let currentUserEmail = null;
+      let currentUserFullName = null;
+      if (currentUserStr) {
+        try {
+          const parsed = JSON.parse(currentUserStr);
+          // Always convert to string — avoids UUID type mismatch in Supabase
+          currentUserId = parsed?.id != null ? String(parsed.id) : null;
+          currentUserEmail = parsed?.email || localStorage.getItem("userEmail") || null;
+          currentUserFullName = parsed?.user_metadata?.full_name || localStorage.getItem("userFullName") || "المستخدم";
+        } catch (e) {
+          console.error("[Support] Error parsing currentUser:", e);
+        }
+      }
+      // Fallback: try reading userId from supabase session
+      if (!currentUserId) {
+        currentUserEmail = localStorage.getItem("userEmail") || null;
+      }
+
+      // Elements — guaranteed to exist here because DOMContentLoaded fired
+      const drawer    = document.getElementById("support-drawer");
+      const backdrop  = document.getElementById("support-backdrop");
+      const closeBtn  = document.getElementById("support-close");
+      const messagesEl = document.getElementById("support-messages");
+      const emptyEl   = document.getElementById("support-empty");
+      const input     = document.getElementById("support-input");
+      const supportBtn = document.getElementById("noon-support-btn");
+      const supportBadge = document.getElementById("noon-support-badge");
+
+      if (!drawer || !input || !messagesEl) {
+        console.error("[Support] Critical elements missing from DOM");
+        return;
+      }
+
+      let currentConversation = null;
+      let allMessages = [];
+      let realtimeSub = null;
+      let isSending = false;
+
+      // ---- Open / Close ----
+      function openDrawer() {
+        drawer.style.display = "block";
+        // Trigger transition on next frame
+        requestAnimationFrame(function () {
+          requestAnimationFrame(function () {
+            drawer.classList.add("open-drawer");
+          });
+        });
+        drawer.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        markAllAsRead();
+        scrollToBottom();
+        setTimeout(function () { input.focus(); }, 320);
+        
+        // Mobile keyboard handling with Visual Viewport API
+        if (window.visualViewport) {
+          viewportHandler = handleViewportChange.bind(null, drawer, input);
+          window.visualViewport.addEventListener("resize", viewportHandler);
+          window.visualViewport.addEventListener("scroll", viewportHandler);
+        }
+      }
+
+      function closeDrawer() {
+        drawer.classList.remove("open-drawer");
+        drawer.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        // Clean up viewport handler
+        if (window.visualViewport && viewportHandler) {
+          window.visualViewport.removeEventListener("resize", viewportHandler);
+          window.visualViewport.removeEventListener("scroll", viewportHandler);
+          viewportHandler = null;
+        }
+        // Reset drawer position
+        const panel = document.getElementById("support-panel");
+        if (panel) {
+          panel.style.bottom = "";
+        }
+        setTimeout(function () {
+          drawer.style.display = "none";
+        }, 310);
+      }
+
+      let viewportHandler = null;
+      
+      function handleViewportChange(drawer, input) {
+        const viewport = window.visualViewport;
+        if (!viewport) return;
+        
+        // Calculate keyboard height
+        const keyboardHeight = window.innerHeight - viewport.height;
+        const panel = document.getElementById("support-panel");
+        
+        if (panel) {
+          if (keyboardHeight > 150) { // Keyboard is open (threshold to avoid false positives)
+            panel.style.bottom = keyboardHeight + "px";
+            // Ensure input is visible
+            setTimeout(() => {
+              if (input && document.activeElement === input) {
+                input.scrollIntoView({ behavior: "smooth", block: "end" });
+              }
+            }, 50);
+          } else {
+            panel.style.bottom = "";
+          }
+        }
+      }
+
+      function scrollToBottom() {
+        if (messagesEl) {
+          messagesEl.scrollTop = messagesEl.scrollHeight;
+        }
+      }
+
+      function formatTime(ts) {
+        try {
+          const d = new Date(ts);
+          return d.toLocaleTimeString("ar-EG", { hour: "2-digit", minute: "2-digit" });
+        } catch (_) {
+          return "";
+        }
+      }
+
+      function escapeHtml(str) {
+        const map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+        return String(str || '').replace(/[&<>"']/g, m => map[m]);
+      }
+
+      function renderMessages() {
+        if (!messagesEl) return;
+        
+        if (allMessages.length === 0) {
+          emptyEl.style.display = "flex";
+          const bubbles = messagesEl.querySelectorAll(".support-message");
+          bubbles.forEach(b => b.remove());
+          return;
+        }
+        
+        emptyEl.style.display = "none";
+        
+        const bubbles = messagesEl.querySelectorAll(".support-message");
+        bubbles.forEach(b => b.remove());
+        
+        allMessages.forEach(msg => {
+          const isOwn = msg.sender_type === "user";
+          const el = document.createElement("div");
+          el.className = "support-message" + (isOwn ? " own" : "");
+          el.dataset.msgId = msg.id;
+          
+          const timeStr = formatTime(msg.created_at);
+          let bodyHtml = "";
+
+          if (msg.message_type === "image") {
+            bodyHtml = `<img src="${escapeHtml(msg.message)}" alt="صورة" style="max-width: 100%; border-radius: 8px; cursor: pointer; display: block; max-height: 200px; object-fit: cover;" onclick="openClientLightbox('${escapeHtml(msg.message)}')" />`;
+          } else if (msg.message_type === "pdf") {
+            bodyHtml = `
+              <a href="${escapeHtml(msg.message)}" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; color: ${isOwn ? '#ffffff' : '#ef4444'}; text-decoration: none; font-weight: bold;">
+                <span class="material-icons-outlined" style="font-size: 20px;">picture_as_pdf</span>
+                <span>ملف PDF</span>
+              </a>`;
+          } else if (msg.message_type === "word") {
+            bodyHtml = `
+              <a href="${escapeHtml(msg.message)}" target="_blank" rel="noopener" style="display: flex; align-items: center; gap: 8px; color: ${isOwn ? '#ffffff' : '#3b82f6'}; text-decoration: none; font-weight: bold;">
+                <span class="material-icons-outlined" style="font-size: 20px;">description</span>
+                <span>ملف Word</span>
+              </a>`;
+          } else {
+            bodyHtml = escapeHtml(msg.message);
+          }
+          
+          el.innerHTML = `
+            <div class="support-bubble" style="${msg.message_type === 'image' ? 'padding: 4px;' : ''}">${bodyHtml}</div>
+            <div class="support-time">${timeStr}</div>
+          `;
+          messagesEl.appendChild(el);
+        });
+        
+        scrollToBottom();
+      }
+
+      async function loadChat() {
+        const client = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!client) {
+          // Retry after scripts finish loading
+          setTimeout(loadChat, 800);
+          return;
+        }
+        // Must have a user identifier
+        if (!currentUserId && !currentUserEmail) return;
+
+        try {
+          let query = client.from("support_conversations").select("*");
+
+          if (currentUserId) {
+            // user_id column is now VARCHAR — pass as plain string
+            query = query.eq("user_id", String(currentUserId));
+          } else {
+            query = query.eq("user_email", currentUserEmail);
+          }
+
+          const { data: convs, error: convError } = await query.order("created_at", { ascending: false });
+
+          if (convError) throw convError;
+
+          if (convs && convs.length > 0) {
+            currentConversation = convs[0];
+
+            const { data: msgs, error: msgError } = await client
+              .from("support_messages")
+              .select("*")
+              .eq("conversation_id", currentConversation.id)
+              .order("created_at", { ascending: true });
+
+            if (msgError) throw msgError;
+
+            allMessages = msgs || [];
+            renderMessages();
+            updateBadgeCount(currentConversation.unread_user_count || 0);
+
+            if (drawer.classList.contains("open-drawer")) {
+              markAllAsRead();
+            }
+          } else {
+            currentConversation = null;
+            allMessages = [];
+            renderMessages();
+            updateBadgeCount(0);
+          }
+
+          subscribeToRealtime();
+        } catch (err) {
+          console.error("[Support Chat] loadChat error:", err);
+        }
+      }
+
+      function subscribeToRealtime() {
+        const client = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!client) return;
+
+        if (realtimeSub) {
+          realtimeSub.unsubscribe();
+        }
+
+        realtimeSub = client
+          .channel("support-messages-realtime")
+          .on(
+            "postgres_changes",
+            {
+              event: "INSERT",
+              schema: "public",
+              table: "support_messages"
+            },
+            async function (payload) {
+              console.log("[Support Chat] Realtime new message:", payload);
+              const newMsg = payload.new;
+              
+              if (currentConversation && newMsg.conversation_id === currentConversation.id) {
+                if (!allMessages.some(m => m.id === newMsg.id)) {
+                  allMessages.push(newMsg);
+                  renderMessages();
+                  
+                  if (drawer.classList.contains("open-drawer")) {
+                    if (newMsg.sender_type === "admin") {
+                      await client
+                        .from("support_messages")
+                        .update({ is_read: true })
+                        .eq("id", newMsg.id);
+                        
+                      await client
+                        .from("support_conversations")
+                        .update({ unread_user_count: 0 })
+                        .eq("id", currentConversation.id);
+                    }
+                  } else {
+                    if (newMsg.sender_type === "admin") {
+                      const { data: convData } = await client
+                        .from("support_conversations")
+                        .select("unread_user_count")
+                        .eq("id", currentConversation.id)
+                        .single();
+                      if (convData) {
+                        updateBadgeCount(convData.unread_user_count || 0);
+                      } else {
+                        updateBadgeCount(parseInt(supportBadge.textContent || "0") + 1);
+                      }
+                    }
+                  }
+                }
+              } else if (!currentConversation) {
+                loadChat();
+              }
+            }
+          )
+          .subscribe();
+      }
+
+      function updateBadgeCount(count) {
+        if (!supportBadge) return;
+        if (count > 0) {
+          supportBadge.textContent = count > 99 ? "99+" : count;
+          supportBadge.classList.remove("hidden");
+          
+          const oldBadge = document.getElementById("support-badge");
+          if (oldBadge) {
+            oldBadge.textContent = count > 99 ? "99+" : count;
+            oldBadge.classList.remove("hidden");
+          }
+        } else {
+          supportBadge.classList.add("hidden");
+          const oldBadge = document.getElementById("support-badge");
+          if (oldBadge) oldBadge.classList.add("hidden");
+        }
+      }
+
+      async function markAllAsRead() {
+        if (!currentConversation) return;
+        const client = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!client) return;
+
+        try {
+          await client
+            .from("support_conversations")
+            .update({ unread_user_count: 0 })
+            .eq("id", currentConversation.id);
+
+          await client
+            .from("support_messages")
+            .update({ is_read: true })
+            .eq("conversation_id", currentConversation.id)
+            .eq("sender_type", "admin")
+            .eq("is_read", false);
+
+          updateBadgeCount(0);
+          
+          allMessages.forEach(m => {
+            if (m.sender_type === "admin") {
+              m.is_read = true;
+            }
+          });
+        } catch (err) {
+          console.error("[Support Chat] markAllAsRead error:", err);
+        }
+      }
+
+      async function sendMessage() {
+        const text = input.value.trim();
+        if (!text || isSending) return;
+
+        const client = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!client) return;
+
+        isSending = true;
+        input.value = "";
+        input.style.height = "auto";
+
+        try {
+          if (!currentConversation) {
+            const { data: newConv, error: convError } = await client
+              .from("support_conversations")
+              .insert([{
+                user_id: String(currentUserId),
+                user_name: currentUserFullName,
+                user_email: currentUserEmail,
+                status: "open",
+                last_message: text,
+                last_message_at: new Date().toISOString(),
+                unread_user_count: 0,
+                unread_admin_count: 1
+              }])
+              .select()
+              .single();
+
+            if (convError) throw convError;
+            currentConversation = newConv;
+            subscribeToRealtime();
+          }
+
+          const optimisticMsg = {
+            id: 'temp-' + Date.now(),
+            conversation_id: currentConversation.id,
+            sender_type: "user",
+            message: text,
+            message_type: "text",
+            is_read: true,
+            created_at: new Date().toISOString()
+          };
+
+          allMessages.push(optimisticMsg);
+          renderMessages();
+
+          const { data: insertedMsg, error: insertError } = await client
+            .from("support_messages")
+            .insert([{
+              conversation_id: currentConversation.id,
+              sender_type: "user",
+              message: text,
+              message_type: "text",
+              is_read: true
+            }])
+            .select()
+            .single();
+
+          if (insertError) throw insertError;
+
+          const tempIdx = allMessages.findIndex(m => m.id === optimisticMsg.id);
+          if (tempIdx !== -1) {
+            allMessages[tempIdx] = insertedMsg;
+          }
+
+          await client
+            .from("support_conversations")
+            .update({
+              last_message: text,
+              last_message_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              unread_admin_count: (currentConversation.unread_admin_count || 0) + 1,
+              status: "open"
+            })
+            .eq("id", currentConversation.id);
+
+          currentConversation.unread_admin_count = (currentConversation.unread_admin_count || 0) + 1;
+          currentConversation.last_message = text;
+          currentConversation.last_message_at = new Date().toISOString();
+
+        } catch (err) {
+          console.error("[Support Chat] sendMessage error:", err);
+          loadChat();
+        } finally {
+          isSending = false;
+        }
+      }
+
+      input.addEventListener("input", function () {
+        this.style.height = "auto";
+        this.style.height = Math.min(this.scrollHeight, 120) + "px";
+      });
+
+      input.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" && !e.shiftKey) {
+          e.preventDefault();
+          sendMessage();
+        }
+      });
+
+      // Mobile: ensure input stays visible when focused (keyboard opens)
+      input.addEventListener("focus", function () {
+        // Small delay to let keyboard animate
+        setTimeout(() => {
+          this.scrollIntoView({ behavior: "smooth", block: "end" });
+        }, 100);
+      });
+
+      // Handle orientation change
+      window.addEventListener("orientationchange", function () {
+        setTimeout(() => {
+          if (drawer.classList.contains("open-drawer")) {
+            scrollToBottom();
+            if (document.activeElement === input) {
+              input.scrollIntoView({ behavior: "smooth", block: "end" });
+            }
+          }
+        }, 300);
+      });
+
+      // ---- Bind all events ----
+      if (supportBtn) {
+        supportBtn.addEventListener("click", openDrawer);
+      } else {
+        console.warn("[Support] #noon-support-btn not found");
+      }
+
+      const listSupportBtn = document.getElementById("support-link");
+      if (listSupportBtn) {
+        listSupportBtn.addEventListener("click", function (e) {
+          e.preventDefault();
+          openDrawer();
+        });
+      }
+
+      if (closeBtn) closeBtn.addEventListener("click", closeDrawer);
+      if (backdrop)  backdrop.addEventListener("click", closeDrawer);
+
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape" && drawer.classList.contains("open-drawer")) {
+          closeDrawer();
+        }
+      });
+
+      // Load chat data after a short delay to let Supabase client initialise
+      setTimeout(loadChat, 700);
+
+      window.addEventListener("beforeunload", function () {
+        if (realtimeSub) realtimeSub.unsubscribe();
+      });
+
+      // Lightbox Bindings
+      const lightboxEl    = document.getElementById("client-support-lightbox");
+      const lightboxImgEl = document.getElementById("client-lightbox-img");
+      const lightboxCloseEl = document.getElementById("client-lightbox-close");
+
+      window.openClientLightbox = function (src) {
+        if (!lightboxEl || !lightboxImgEl) return;
+        lightboxImgEl.src = src;
+        lightboxEl.classList.add("open");
+      };
+
+      const closeLB = () => {
+        if (!lightboxEl) return;
+        lightboxEl.classList.remove("open");
+        setTimeout(() => { if (lightboxImgEl) lightboxImgEl.src = ""; }, 250);
+      };
+
+      if (lightboxCloseEl) lightboxCloseEl.addEventListener("click", closeLB);
+      if (lightboxEl) lightboxEl.addEventListener("click", closeLB);
+      document.addEventListener("keydown", e => { if (e.key === "Escape") closeLB(); });
+
+      window.supportDrawer = {
+        open: openDrawer,
+        close: closeDrawer,
+        refresh: loadChat
+      };
+
+    }); // end DOMContentLoaded
+    // ===== End Support Chat Drawer =====
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const user = localStorage.getItem("currentUser");
+      const loginRequired = document.getElementById("login-required");
+      const profileContent = document.getElementById("profile-content");
+
+      if (!user) {
+        profileContent.classList.add("hidden");
+        loginRequired.classList.remove("hidden");
+      } else {
+        profileContent.classList.remove("hidden");
+        loginRequired.classList.add("hidden");
+      }
+    });
+  </script>
+</body>
+</html>
+
+
+
+

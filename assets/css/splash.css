@@ -1,0 +1,18 @@
+.splash-bg {
+  background: linear-gradient(180deg, #051025 0%, #173868 100%);
+}
+.gradient-spinner {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: conic-gradient(#0078D7, #F25822, #00A651, #60399E, #0078D7);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff calc(100% - 3px + 0.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff calc(100% - 3px + 0.5px));
+  animation: spin 1s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+body {
+  min-height: max(884px, 100dvh);
+}

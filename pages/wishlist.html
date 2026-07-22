@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>المفضلة - Buda</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260630" rel="stylesheet" />
+  <link href="../assets/css/noon-components.css" rel="stylesheet" />
+  <link href="../assets/css/desktop-animations.css?v=20260709" rel="stylesheet" />
+  <link href="../assets/css/home.css" rel="stylesheet" />
+<link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="../assets/icons/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="../assets/icons/site.webmanifest">
+<meta name="theme-color" content="#FFD500">
+</head>
+<body class="app-shell">
+   <header class="app-header buda-header">
+    <div class="buda-header-top">
+      <div class="buda-header-top-inner">
+        <div class="header-start">
+          <div class="brand-badge">Buda</div>
+        </div>
+
+
+        <div class="app-search search-left-icon buda-search">
+          <span class="material-icons-outlined">search</span>
+          <input id="home-search" type="text" data-search-target="search.html" placeholder="ابحث عن منتج أو فئة" autocomplete="off" />
+          </button>
+          <div class="buda-search-dropdown" id="budaSearchDropdown">
+        </div>
+
+        <div class="buda-lang" id="budaLangTrigger">
+          <span class="buda-lang-text">EN</span>
+          <span class="material-icons-outlined buda-lang-globe">language</span>
+        </div>
+
+        <div class="buda-account" id="budaAccountTrigger">
+          <div class="buda-account-avatar" id="budaAccountAvatar">
+            <span class="material-icons-outlined">person</span>
+          </div>
+          <div class="buda-account-info">
+            <span class="buda-account-name" id="budaAccountName">حسابي</span>
+            <span class="material-icons-outlined buda-account-arrow">keyboard_arrow_down</span>
+          </div>
+          <div class="buda-account-dropdown" id="budaAccountDropdown">
+            <a href="ahsab.html" class="buda-dd-item"><span class="material-icons-outlined">person</span> حسابي</a>
+            <a href="my-orders.html" class="buda-dd-item"><span class="material-icons-outlined">receipt_long</span> طلباتي</a>
+            <a href="returns.html" class="buda-dd-item"><span class="material-icons-outlined">undo</span> الإرجاعات</a>
+            <a href="addresses.html" class="buda-dd-item"><span class="material-icons-outlined">location_on</span> العناوين</a>
+            <a href="wishlist.html" class="buda-dd-item"><span class="material-icons-outlined">favorite_border</span> المفضلة</a>
+            <a href="#" class="buda-dd-item" id="budaSupportBtn"><span class="material-icons-outlined">chat</span> الدعم</a>
+            <a href="edit-account.html" class="buda-dd-item"><span class="material-icons-outlined">settings</span> الإعدادات</a>
+            <div class="buda-dd-divider"></div>
+            <a href="logout-confirmation.html" class="buda-dd-item buda-dd-logout"><span class="material-icons-outlined">logout</span> تسجيل الخروج</a>
+          </div>
+        </div>
+
+        <a href="my-orders.html" class="buda-header-action" title="طلباتي">
+          <span class="material-icons-outlined">receipt_long</span>
+          <small>طلباتي</small>
+        </a>
+
+        <a href="wishlist.html" class="buda-header-action" title="المفضلة">
+          <span class="material-icons-outlined">favorite_border</span>
+          <small>المفضلة</small>
+        </a>
+
+        <a href="empty-cart.html" class="buda-header-action buda-header-cart" title="العربة">
+          <span class="material-icons-outlined">shopping_cart</span>
+          <small>العربة</small>
+          <span class="buda-cart-badge" id="budaCartBadge">0</span>
+        </a>
+      </div>
+    </div>
+
+  </header>
+
+  <main class="app-main stack">
+    <p id="wishlist-status" class="status-note hidden" aria-live="polite"></p>
+
+    <section class="section-block">
+      <div class="wishlist-header-row">
+        <h2 class="wishlist-heading" data-i18n="منتجاتك المفضلة">منتجاتك المفضلة</h2>
+        <span class="pill wishlist-count-pill">العناصر: <strong id="wishlist-count">0</strong></span>
+      </div>
+      <div id="wishlist-items" class="wishlist-items-wrap">
+        <div class="wishlist-grid" id="wishlist-grid"></div>
+      </div>
+      <div id="wishlist-empty" class="wishlist-empty hidden">
+        <div class="wishlist-empty-icon">
+          <span class="material-icons-outlined"></span>
+        </div>
+        <h2 data-i18n="قائمة المفضلة فارغة">قائمة المفضلة فارغة</h2>
+        <p data-i18n="ابدأ بإضافة منتجاتك">ابدأ بإضافة منتجاتك من صفحات المنتجات أو من بطاقة المنتج.</p>
+        <a href="home.html" class="btn-primary" style="margin-top:16px;display:inline-flex;">
+          <span class="material-icons-outlined" style="margin-left:8px;"></span>
+          <span data-i18n="تسوق الآن">تسوق الآن</span>
+        </a>
+      </div>
+    </section>
+
+    <section class="section-block wishlist-summary-section">
+      <div class="wishlist-summary">
+        <div class="wishlist-summary-row">
+          <span data-i18n="إجمالي المفضلة">إجمالي </span>
+          <strong id="wishlist-total">0.00 EGP</strong>
+        </div>
+      </div>
+      <div class="inline-actions wishlist-actions">
+        <button class="btn-primary" type="button" onclick="addAllToCart()" data-i18n="أضف الكل إلى السلة">أضف الكل إلى السلة</button>
+        <button class="btn-secondary" type="button" onclick="clearWishlist()" data-i18n="مسح المفضلة">مسح المفضلة</button>
+      </div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="home.html" data-nav="home">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="الرئيسية">الرئيسية</small>
+    </a>
+    <a href="products.html" data-nav="products">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="الفئات">الفئات</small>
+    </a>
+    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="الرئيسية">
+      <img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" />
+    </button>
+    <a href="ahsab.html" data-nav="account">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="حسابي">حسابي</small>
+    </a>
+    <a href="empty-cart.html" data-nav="cart">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="العربة">العربة</small>
+      <span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span>
+    </a>
+  </nav>
+
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../assets/js/supabase-client.js?v=20260327-1"></script>
+  <script src="../assets/js/auth.config.js?v=20260630"></script>
+  <script src="../assets/js/taager-integration.js?v=20260630d"></script>
+  <script src="../assets/js/store.js?v=20260630d"></script>
+  <script src="../assets/js/pricing-engine.js"></script>
+  <script src="../assets/js/wishlist.js"></script>
+  <script src="../assets/js/noon-shell.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
