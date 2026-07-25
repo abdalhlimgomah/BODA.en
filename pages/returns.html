@@ -19,7 +19,16 @@
   <link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
   <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
   <link rel="manifest" href="../assets/icons/site.webmanifest">
-  <meta name="`theme-color" content="#6D28D9`">
+  <meta name="robots" content="index, follow" />
+  <meta name="description" content="سياسة الإرجاع في Buda. تعرف على شروط وأحكام إرجاع المنتجات، مدة الإرجاع، وكيفية تقديم طلب إرجاع في مصر والسعودية." />
+  <link rel="canonical" href="https://buda-rho.vercel.app/pages/returns.html" />
+  <meta property="og:title" content="المرتجعات - Buda" />
+  <meta property="og:description" content="سياسة الإرجاع في Buda. تعرف على شروط وأحكام إرجاع المنتجات." />
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="Buda" />
+  <meta property="og:locale" content="ar_AR" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="theme-color" content="#6D28D9">
   <style>
     body {
       background-color: #f7f9fa !important;
@@ -284,7 +293,33 @@
 
 
       <div id="returns-content">
-        <!-- Content will be rendered here by JS -->
+        <section class="returns-seo-content" id="returns-seo">
+          <h1>سياسة الإرجاع والاستبدال - Buda</h1>
+          <p>في Buda، نسعى دائمًا لضمان رضاك عن مشترياتك. إذا لم تكن راضيًا عن منتج، يمكنك إرجاعه وفقًا للشروط التالية:</p>
+
+          <h2>مدة الإرجاع</h2>
+          <p>يمكن إرجاع المنتجات خلال 14 يومًا من تاريخ الاستلام للمنتجات غير التالفة وفي حالتها الأصلية.</p>
+
+          <h2>شروط الإرجاع</h2>
+          <ul>
+            <li>أن يكون المنتج في حالته الأصلية ولم يتم استخدامه</li>
+            <li>أن تكون العبوة الأصلية سليمة</li>
+            <li>إرفاق فاتورة الشراء</li>
+            <li>بعض المنتجات لا يمكن إرجاعها مثل المنتجات الرقمية والبطاقات</li>
+          </ul>
+
+          <h2>خطوات الإرجاع</h2>
+          <ol>
+            <li>سجل الدخول إلى حسابك</li>
+            <li>اذهب إلى صفحة طلباتي</li>
+            <li>اختر المنتج الذي تريد إرجاعه</li>
+            <li>اتبع التعليمات لإتمام عملية الإرجاع</li>
+          </ol>
+
+          <h2>الدول المتاحة</h2>
+          <p>خدمة الإرجاع متاحة حاليًا في: <strong>مصر</strong> و <strong>المملكة العربية السعودية</strong>.</p>
+        </section>
+
         <div class="returns-loading" style="text-align: center; padding: 40px 20px;">
           <div class="spinner" style="margin: 0 auto 12px;"></div>
           <p>جاري التحقق من حسابك...</p>
@@ -327,6 +362,8 @@
   <script>
     // ===== Returns Page - Egypt & Saudi Arabia (JawdaOnline & Damenkom iframes) =====
     document.addEventListener("DOMContentLoaded", function () {
+      const seoContent = document.getElementById("returns-seo");
+      if (seoContent) seoContent.remove();
       const returnsContent = document.getElementById("returns-content");
       const statusNote = document.getElementById("returns-status");
 
