@@ -1,4 +1,11 @@
 {
+  "redirects": [
+    {
+      "source": "/",
+      "destination": "/pages/home.html",
+      "permanent": true
+    }
+  ],
   "rewrites": [
     {
       "source": "/api/merchant-feed/:path*",
