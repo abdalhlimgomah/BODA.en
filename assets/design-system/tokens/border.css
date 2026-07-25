@@ -1,0 +1,15 @@
+/* ============================================
+   Buda Design System v2.0 — Border Tokens
+   ============================================ */
+
+:root {
+  --border-width-thin:   1px;
+  --border-width-medium: 2px;
+  --border-width-thick:  3px;
+
+  --border-default: var(--border-width-thin) solid var(--color-border);
+  --border-hover:   var(--border-width-thin) solid var(--color-border-hover);
+  --border-focus:   var(--border-width-medium) solid var(--color-border-focus);
+  --border-error:   var(--border-width-medium) solid var(--color-danger);
+  --border-success: var(--border-width-medium) solid var(--color-success);
+}
