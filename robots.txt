@@ -10,7 +10,6 @@ Disallow: /pages/delete-account.html
 Disallow: /pages/edit-account.html
 Disallow: /assets/
 Disallow: /tmp/
-Disallow: /nul
 
 Allow: /assets/js/
 Allow: /assets/css/
@@ -29,7 +28,6 @@ Allow: /api/merchant-feed/feed.xml
 
 Sitemap: https://buda-rho.vercel.app/api/merchant-feed/feed.xml
 
-Sitemap: https://buda-rho.vercel.app/sitemap_index.xml
 Sitemap: https://buda-rho.vercel.app/sitemap.xml
 
 # Buda - SEO Optimized
