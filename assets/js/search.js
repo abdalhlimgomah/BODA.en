@@ -53,499 +53,6 @@ function clearResults() {
   const resultsEl = document.getElementById("search-results");
   if (!resultsEl) return;
   resultsEl.innerHTML = "";
-  const sortBar = document.getElementById("search-sort-bar");
-  if (sortBar) sortBar.classList.add("hidden");
-}
-
-function formatMoney(value) {
-  return window.BudaStore
-    ? window.BudaStore.formatMoney(value)
-    : (Number(value) || 0).toFixed(2);
-}
-
-function resolvePrice(product) {
-  var supplierPrice = Number(product?.price) || 0;
-  var sellingPrice = supplierPrice;
-  if (window.PricingEngine && window.PricingEngine.tiersLoaded) {
-    sellingPrice = window.PricingEngine.calculate(supplierPrice);
-  }
-  if (window.BudaStore?.resolveProductPrice) {
-    var r = window.BudaStore.resolveProductPrice(product);
-    var basePrice = r.currentPrice > 0 ? r.currentPrice : supplierPrice;
-    var finalPrice = basePrice;
-    if (window.PricingEngine && window.PricingEngine.tiersLoaded) {
-      finalPrice = window.PricingEngine.calculate(basePrice);
-    }
-    var hasDiscount = r.hasDiscount || r.originalPrice > finalPrice;
-    var origPrice =
-      r.originalPrice > finalPrice
-        ? r.originalPrice
-        : hasDiscount
-          ? finalPrice * 1.25
-          : finalPrice;
-    return {
-      finalPrice: finalPrice,
-      originalPrice: origPrice,
-      hasDiscount: hasDiscount,
-      discountPercent: hasDiscount
-        ? Math.round(((origPrice - finalPrice) / origPrice) * 100)
-        : 0,
-    };
-  }
-  return {
-    finalPrice: sellingPrice,
-    originalPrice: sellingPrice,
-    hasDiscount: false,
-    discountPercent: 0,
-  };
-}
-
-function resolveRating(product) {
-  if (window.BudaStore?.resolveProductRating) {
-    var r = window.BudaStore.resolveProductRating(product);
-    return { rating: r.rating > 0 ? r.rating : 0, reviews: r.reviewCount };
-  }
-  return { rating: 0, reviews: 0 };
-}
-
-function isWishlistedProduct(productId) {
-  return window.BudaStore?.isInWishlist
-    ? window.BudaStore.isInWishlist(productId)
-    : false;
-}
-
-function navigateToProduct(pid) {
-  if (!pid) return;
-  var selected = window.BudaStore?.getProductById
-    ? window.BudaStore.getProductById(pid)
-    : null;
-  if (selected) {
-    try {
-      sessionStorage.setItem(
-        "selectedProduct",
-        encodeURIComponent(JSON.stringify(selected)),
-      );
-    } catch {}
-  }
-  window.location.href = "product.html?id=" + encodeURIComponent(pid);
-}
-
-// Arabic↔English transliteration for bilingual search
-const AR2EN = {
-  'ا':'a','أ':'a','إ':'a','آ':'a','ب':'b','ت':'t','ث':'th','ج':'g','ح':'h',
-  'خ':'kh','د':'d','ذ':'th','ر':'r','ز':'z','س':'s','ش':'sh','ص':'s','ض':'d',
-  'ط':'t','ظ':'z','ع':'a','غ':'gh','ف':'f','ق':'q','ك':'k','ل':'l','م':'m',
-  'ن':'n','ه':'h','و':'w','ي':'y','ة':'a','ى':'a','ئ':'a','ء':'a'
-};
-
-const EN2AR = {
-  'sh':'ش','kh':'خ','gh':'غ','th':'ث','dh':'ذ', 'ch':'ش',
-  'a':'ا','b':'ب','t':'ت','g':'ج','h':'ه','d':'د','r':'ر',
-  'z':'ز','s':'س','f':'ف','q':'ق','k':'ك','l':'ل','m':'م',
-  'n':'ن','w':'و','y':'ي','o':'و','e':'ي','i':'ي','u':'و',
-  'c':'ك','p':'ب','v':'ف','x':'س','j':'ج'
-};
-
-function latinizeArabic(text) {
-  return String(text).split('').map(ch => AR2EN[ch] || ch).join('');
-}
-
-function arabizeLatin(text) {
-  let result = '', i = 0;
-  text = String(text).toLowerCase();
-  while (i < text.length) {
-    let found = false;
-    for (let len = 2; len >= 1; len--) {
-      const chunk = text.substr(i, len);
-      if (EN2AR[chunk]) {
-        result += EN2AR[chunk];
-        i += len;
-        found = true;
-        break;
-      }
-    }
-    if (!found) { result += text[i]; i++; }
-  }
-  return result;
-}
-
-function hasArabic(text) { return /[\u0600-\u06FF]/.test(text); }
-function hasLatin(text) { return /[a-zA-Z]/.test(text); }
-
-// Arabic↔English translation dictionary for search (500+ entries)
-var AR2EN_DICT = {
-  // === Watches & Jewelry ===
-  "ساعة":"watch","ساعات":"watch","ساعه":"watch","ساعا":"watch","ساعتين":"watch","ساعات":"watches",
-  "سلسلة":"chain","سلسال":"necklace","خاتم":"ring","خواتم":"ring","اسوارة":"bracelet","أساور":"bracelet","دبلة":"ring",
-  "مجوهرات":"jewelry","اكسسوارات":"accessories","اكسسوار":"accessory","اكسسوارات":"accessory",
-  "ساعة":"watch","ساعات":"watches","ساعة ذكية":"smartwatch","ساعات ذكية":"smartwatch","ساعه ذكيه":"smartwatch",
-  "سوار":"band","استيك":"strap","سير":"strap",
-  // === Phones & Electronics ===
-  "موبايل":"mobile","موبيل":"mobile","جوال":"mobile","هاتف":"phone","تليفون":"phone","فون":"phone","تلفون":"phone",
-  "ايفون":"iphone","ايباد":"ipad","ايبود":"ipod","ماك":"mac","ماك بوك":"macbook",
-  "سامسونج":"samsung","سامسونغ":"samsung","نوكيا":"nokia","هواوي":"huawei","شاومي":"xiaomi","ابل":"apple",
-  "أبل":"apple","اوبو":"oppo","فيفو":"vivo","ون بلس":"oneplus","ون":"one","بلس":"plus",
-  "لينوفو":"lenovo","ديل":"dell","اتش بي":"hp","اتش":"h","بي":"p","اسوس":"asus","اسس":"asus",
-  "سوني":"sony","انكر":"anker","جوي":"joy","شاومي":"xiaomi","شاومي":"xiaomi",
-  "تاب":"tablet","تابلت":"tablet","لابتوب":"laptop","لاب":"laptop","لاب توب":"laptop","كمبيوتر":"computer",
-  "شاشة":"screen","شاشه":"screen","شاشات":"screen","شاشه":"monitor","شاشة":"monitor",
-  "كيبورد":"keyboard","كي بورد":"keyboard","ماوس":"mouse","موس":"mouse","ماوس":"mouse",
-  "سماعة":"headphone","سماعات":"headphone","سماعه":"headphone","سماعه":"earphone","سماعة":"earphone",
-  "سماعة":"headset","سماعات":"headset","سماعه":"headset",
-  "ايربودز":"airpods","ايربود":"airpods","اير":"air","بودز":"pods",
-  "شاحن":"charger","شواحن":"charger","شحن":"charging","شاحن":"charging",
-  "جراب":"case","جرابات":"case","غطا":"case","غطاء":"case","كفر":"cover",
-  "باوربانك":"powerbank","باور":"power","بانك":"bank",
-  "وصلة":"cable","وصلات":"cable","سلك":"cable","اسلاك":"cable","كابل":"cable","كابلات":"cable",
-  "باور":"power","بطارية":"battery","بطاريه":"battery","بطاريات":"battery",
-  "ذاكرة":"memory","فلاشة":"flash","فلاش":"flash","usb":"usb",
-  "راوتر":"router","واي فاي":"wifi","واي":"wi","فاي":"fi","راوتر":"modem",
-  "بروجيكتور":"projector","عارض":"projector",
-  "بلاي ستيشن":"playstation","بلاستيشن":"playstation","بي":"p","اس":"s","بيس":"ps","اكس":"x","بوكس":"box",
-  "ننتندو":"nintendo","سويتش":"switch",
-  // === Fashion & Clothing ===
-  "ملابس":"clothes","هدوم":"clothes","ازياء":"fashion","موضة":"fashion",
-  "بنطلون":"pants","بنطال":"pants","بنطلون":"trousers","جينز":"jeans",
-  "تيشرت":"t-shirt","تيشيرت":"t-shirt","تي":"t","شيرت":"shirt",
-  "فستان":"dress","فساتين":"dress","جاكيت":"jacket","جاكيت":"coat","بلوزة":"blouse","بلوزه":"blouse",
-  "حذاء":"shoes","احذية":"shoes","حذيه":"shoes","جزمة":"boots","جزمه":"boots","جزم":"boots",
-  "كوتشي":"sneakers","كوتشى":"sneakers","رياضي":"sneakers","سبورت":"sport",
-  "صنادل":"sandals","صندل":"sandals","شبشب":"slippers","شباشب":"slippers",
-  "طقم":"suit","بدلة":"suit","بدله":"suit",
-  "قميص":"shirt","قمصان":"shirt","بلوفر":"sweater","هودي":"hoodie","هود":"hoodie",
-  "بيجاما":"pajamas","بيجامه":"pajamas","نوم":"sleep",
-  "ملابس داخلية":"underwear","داخلي":"underwear",
-  "طرحه":"scarf","حجاب":"hijab","ايشارب":"scarf","شال":"shawl",
-  "قبعة":"hat","قبعه":"hat","كاب":"cap","طاقية":"cap",
-  "حزام":"belt","حزم":"belt",
-  "محفظة":"wallet","محفظه":"wallet",
-  "شمسية":"sunglasses","نظارة":"glasses","نظاره":"glasses",
-  "ساعة":"watch","ساعات":"watches",
-  // === Beauty & Personal Care ===
-  "كريم":"cream","كريمات":"cream","مكياج":"makeup","ميكاب":"makeup",
-  "بشرة":"skin","بشره":"skin","عناية":"care","تجميل":"beauty","جمال":"beauty",
-  "شعر":"hair","شامبو":"shampoo","بلسم":"conditioner","كونديشنر":"conditioner",
-  "صابون":"soap","صابونة":"soap","صابونه":"soap",
-  "مرطب":"moisturizer","مرطبات":"moisturizer",
-  "روج":"lipstick","روج":"lip","احمر":"red","شفايف":"lips",
-  "مسك":"musk","عطور":"perfume","عطر":"perfume","برفان":"perfume","برفيوم":"perfume",
-  "ماء ورد":"rose","ورد":"rose","فل":"jasmine","ياسمين":"jasmine",
-  "دهن":"oil","زيت":"oil","زيوت":"oil","سيروم":"serum",
-  "غسول":"wash","غسول":"cleanser","تونر":"toner","مقشر":"scrub",
-  "معجون":"paste","اسنان":"teeth","سنان":"tooth","فرشاة":"brush","فرشاه":"brush",
-  "ماكينة":"machine","ماكينه":"machine","حلاقة":"shave","حلاقه":"shave",
-  "مزيل":"remover","عرق":"sweat","ازالة":"remove",
-  "صبغة":"dye","صبغه":"dye","لون":"color",
-  "منشفة":"towel","منشفه":"towel","فوطة":"towel","فوطة":"towel",
-  "دبوس":"pin","مشط":"comb","ربط":"tie","استيك":"elastic",
-  // === Home & Kitchen ===
-  "مطبخ":"kitchen","منزل":"home","بيت":"home",
-  "اثاث":"furniture","مفروشات":"furniture","أثاث":"furniture",
-  "ديكور":"decor","ديكورات":"decor",
-  "خلاط":"blender","ميكرويف":"microwave","فرن":"oven","ثلاجة":"fridge","تلاجه":"fridge",
-  "غسالة":"washer","غساله":"washer","غسالة":"washing","نشاف":"dryer",
-  "مكنسة":"vacuum","مكنسه":"vacuum","مكانس":"vacuum",
-  "مكواة":"iron","مكواه":"iron","كاوي":"iron",
-  "مروحة":"fan","مروحه":"fan","مراوح":"fan","تكييف":"ac","تكيف":"ac",
-  "سخان":"heater","سخانات":"heater","دفاية":"heater","دفايه":"heater",
-  "شاشة":"tv","شاشه":"tv","تلفزيون":"tv","تلفاز":"tv",
-  "سماعات":"speaker","مكبر":"speaker","صوت":"sound","سبيكر":"speaker",
-  "ريسيفر":"receiver","رسيفر":"receiver",
-  "لمبة":"lamp","لمبه":"lamp","لمبات":"lamp","اضاءة":"lighting","اضاءه":"lighting",
-  "سجادة":"rug","سجاده":"rug","سجاد":"rug","موكيت":"carpet",
-  "مفرش":"tablecloth","مفارش":"tablecloth","شرشف":"sheet","شراشف":"sheet",
-  "وسادة":"pillow","وساده":"pillow","مخدة":"pillow","مخده":"pillow","وسائد":"pillow",
-  "لحاف":"blanket","بطانية":"blanket","بطانيه":"blanket",
-  "ستاير":"curtain","ستارة":"curtain","ستاره":"curtain",
-  "اطباق":"dishes","طبق":"dish","كوب":"cup","كاسة":"glass","كاسه":"glass",
-  "طنجرة":"pot","طنجره":"pot","حلة":"pot","حله":"pot","مقلاة":"pan","مقلاه":"pan",
-  "سكين":"knife","سكينة":"knife","سكينه":"knife","شوكة":"fork","شوكه":"fork","ملعقة":"spoon","ملعقه":"spoon",
-  // === Sports & Fitness ===
-  "رياضة":"sports","رياضه":"sports","جيم":"gym","نادي":"club",
-  "دمبل":"dumbbell","دمبلز":"dumbbell","اوزان":"weights","ثقل":"weight",
-  "ترابيز":"trap","بار":"bar","بنش":"bench",
-  "مقاومه":"resistance","مقاومة":"resistance",
-  "حبل":"rope","عقلة":"pullup","عقله":"pullup",
-  "كورة":"ball","كورة":"football","كرة":"ball","مرمى":"goal",
-  "دراجة":"bike","دراجه":"bike","بسكليت":"bicycle","عجلة":"bicycle",
-  "ترامبولين":"trampoline",
-  "يوغا":"yoga","تمارين":"exercise","تمرين":"exercise",
-  "لياقة":"fitness","لياقه":"fitness","تخسيس":"slimming","دايت":"diet",
-  "مشي":"walking","جري":"running","ركض":"running","عدو":"sprint",
-  "سباحة":"swimming"," swim":"swim",
-  // === Kids & Toys ===
-  "اطفال":"kids","طفل":"kids","اطفال":"children","رضع":"baby","رضيع":"baby",
-  "العاب":"games","لعبة":"game","لعبه":"game","العاب":"toys","لعبة":"toy",
-  "ليجو":"lego","مكعبات":"blocks","تركيب":"building",
-  "عروسة":"doll","عروسه":"doll","دمى":"doll","عرايس":"doll",
-  "سيارة":"car","عربية":"car","عربيات":"car",
-  "قطار":"train","طائرة":"plane","طياره":"plane",
-  "بازل":"puzzle","الغاز":"puzzle",
-  "تلوين":"coloring","رسم":"drawing","ألوان":"colors","الوان":"colors",
-  "مدرسة":"school","دراسة":"study","حقيبة":"backpack","شنطة":"bag","شنطه":"bag",
-  // === Groceries & Food ===
-  "قهوة":"coffee","قهوه":"coffee","بن":"beans",
-  "شاي":"tea","اعشاب":"herbs","ينسون":"anise","نعناع":"mint","كركديه":"hibiscus",
-  "ماء":"water","عصير":"juice","مشروب":"drink","غازية":"soda",
-  "شوكولاتة":"chocolate","شوكولاته":"chocolate","كاكاو":"cocoa",
-  "بسكويت":"biscuit","بسكوت":"biscuit","كوكيز":"cookies","حلوي":"candy","حلوى":"candy","سكاكر":"candy",
-  "ارز":"rice","رز":"rice","مكرونة":"pasta","معكرونه":"pasta","شعرية":"noodles",
-  "عدس":"lentils","فول":"beans","حمص":"chickpeas","فاصوليا":"beans",
-  "زيت":"oil","سمن":"ghee","زيتون":"olive","زيتون":"olives",
-  "سكر":"sugar","ملح":"salt","طحين":"flour","دقيق":"flour",
-  "بهارات":"spices","توابل":"spices","فلفل":"pepper","كمون":"cumin","كزبرة":"coriander",
-  "عسل":"honey","مربى":"jam","مربى":"jam",
-  "جبن":"cheese","جبنة":"cheese","جبنه":"cheese","زبدة":"butter","زبده":"butter",
-  "حليب":"milk","لبن":"yogurt","زبادي":"yogurt",
-  "لحم":"meat","دجاج":"chicken","فراخ":"chicken","سمك":"fish","جمبري":"shrimp",
-  "خضار":"vegetables","خضروات":"vegetables","فواكه":"fruit","فاكهة":"fruit",
-  "طبخ":"cooking","اكل":"food","طعام":"food","طبخ":"cook",
-  // === Pets ===
-  "قطط":"cat","قط":"cat","قطة":"cat","قطه":"cat","هر":"cat","بس":"cat",
-  "كلاب":"dog","كلب":"dog","عقاب":"dog",
-  "حيوان":"pet","حيوانات":"pet","طائر":"bird","سمك":"fish","سلحفاة":"turtle",
-  "طعام":"food","أكل":"food","دراي":"dry","جاف":"dry","رطب":"wet",
-  // === Office & Stationery ===
-  "مكتب":"office","قرطاسية":"stationery","ادوات":"supplies",
-  "قلم":"pen","اقلام":"pen","قلم":"pencil","رصاص":"pencil",
-  "دفتر":"notebook","دفتـر":"notebook","كشكول":"notebook","كراسة":"notebook",
-  "مسطرة":"ruler","مسطره":"ruler",
-  "ممحاة":"eraser","ممحاه":"eraser","استيكة":"eraser",
-  "مبراة":"sharpener","براية":"sharpener",
-  "دباسة":"stapler","دباس":"stapler",
-  "ورق":"paper","كارتون":"cardboard","مجلد":"folder",
-  "طباعة":"printing","طابعة":"printer","طابعه":"printer","حبر":"ink",
-  // === Automotive ===
-  "سيارة":"car","سياره":"car","عربية":"car","عربيه":"car",
-  "زيت":"oil","موتور":"engine","محرك":"engine",
-  "اطارات":"tires","عجلات":"tires","كاوتش":"tire","جنط":"rim",
-  "بطارية":"battery","بطاريه":"battery","بطاريات":"battery",
-  "ماسح":"wiper","مساحات":"wiper","زجاج":"glass",
-  "مكيف":"ac","تكييف":"ac","تكيف":"ac",
-  "لمبة":"bulb","لمبه":"bulb","زين":"headlight","نور":"light",
-  "فواحه":"air freshener","معطر":"freshener",
-  // === Books & Media ===
-  "كتب":"books","كتاب":"book","روايات":"novels","قصة":"story","قصص":"stories",
-  "مجلد":"magazine","مجلة":"magazine",
-  // === Seasons & Occasions ===
-  "صيف":"summer","شتاء":"winter","خريف":"fall","ربيع":"spring",
-  "عيد":"eid","ميلاد":"birthday","هدية":"gift","هديه":"gift","وليمة":"party",
-  "زواج":"wedding","فرح":"wedding","عروسة":"bride","عريس":"groom",
-  "مدرسة":"school","جامعة":"university","كلية":"college",
-  // === Colors & Sizes ===
-  "احمر":"red","ازرق":"blue","أزرق":"blue","اخضر":"green","أخضر":"green",
-  "اصفر":"yellow","أصفر":"yellow","ابيض":"white","أبيض":"white","اسود":"black","أسود":"black",
-  "بنى":"brown","بني":"brown","رمادي":"gray","رمادى":"gray","فضي":"silver","دهبي":"gold","ذهبي":"gold",
-  "صغير":"small","وسط":"medium","كبير":"large","ضخم":"xl"," كبير جدا":"xxl",
-  // === Common Verbs & Nouns ===
-  "بحث":"search","نتائج":"results","نتيجة":"result"," تصفح":"browse",
-  "قائمة":"list","مفضلة":"wishlist","عربة":"basket","عربه":"basket","عربيه":"basket","عربيات":"basket","سلة":"cart",
-  "طلبات":"order","طلب":"order","طلبك":"order","اوردر":"order",
-  "توصيل":"delivery","شحن":"shipping","شحن":"ship","رجوع":"return","مرتجع":"return","استبدال":"exchange",
-  "خصم":"discount","سعر":"price","كود":"code","قسط":"installment","ضريبة":"tax","ضريبه":"tax",
-  "تقييم":"rating","مراجعة":"review","نجمة":"star","نجمه":"star","تعليق":"comment",
-  "حجم":"size","مقاس":"size","لون":"color","نوع":"type","ماركة":"brand","ماركه":"brand","صنع":"made",
-  "جودة":"quality","جوده":"quality","ممتاز":"premium","رخيص":"cheap","غالي":"expensive",
-  "جديد":"new","قديم":"old","مستعمل":"used","مستخدم":"used","مخفض":"discounted",
-  "عنوان":"address","الاسم":"name","اسم":"name","بريد":"email","رقم":"number",
-  "كلمة":"word","مرور":"password","تسجيل":"register","دخول":"login",
-  "دفع":"payment","كاش":"cash","فيزا":"visa","بطاقة":"card","ائتمان":"credit",
-  // === Countries & Cities ===
-  "مصر":"egypt","القاهرة":"cairo","اسكندرية":"alexandria",
-  "سعودية":"saudi","السعودية":"saudi","رياض":"riyadh","جدة":"jeddah","مكة":"makkah","المدينة":"madinah",
-  "كويت":"kuwait","امارات":"uae","دبي":"dubai","ابوظبي":"abu dhabi","الشارقة":"sharjah",
-  "قطر":"qatar","البحرين":"bahrain","عمان":"oman",
-  // === Brands (expanded) ===
-  "ايفون":"iphone","سامسونج":"samsung","سامسونغ":"samsung","جالاكسي":"galaxy","نوت":"note",
-  "نوكيا":"nokia","هواوي":"huawei","شاومي":"xiaomi","ابل":"apple","أبل":"apple",
-  "اوبو":"oppo","فيفو":"vivo","ون بلس":"oneplus",
-  "لينوفو":"lenovo","ديل":"dell","اتش بي":"hp","اسوس":"asus","اسس":"asus",
-  "سوني":"sony","انكر":"anker","جوي":"joy",
-  "اديداس":"adidas","نايك":"nike","نايك":"nike","بوما":"puma","ريبوك":"reebok",
-  "زاكموس":"zackmoss","بوما":"puma","كونفرس":"converse","فان":"vans",
-  "زارا":"zara","اتش اند ام":"hm","مانجو":"mango",
-  "لوريال":"loreal","غارنييه":"garnier","نيفيا":"nivea","جونسون":"johnson","جونسون":"johnsons",
-  "اولاي":"olay","بانثينول":"panthenol","هيد":"head"," اند":"and","شولدرز":"shoulders",
-  "براون":"braun","فيليبس":"philips","باناسونيك":"panasonic",
-  "توشيبا":"toshiba","شارب":"sharp","ال جي":"lg","ال جي":"lg",
-  "بي تك":"btc","راية":"raya","سامح":"sameh",
-  "قطعة":"piece","حبة":"unit","حبه":"unit","زوج":"pair",
-  "رجالي":"men","رجال":"men","نسائي":"women","نساء":"women","ولادي":"boys","بناتي":"girls",
-  "محمول":"mobile","لاسلكي":"wireless","بلوتوث":"bluetooth",
-  "صحة":"health","عناية":"care",
-  "إلكترونيات":"electronics","الكترونيات":"electronics",
-  "منزل":"home","حديقة":"garden",
-};
-
-// Levenshtein distance for fuzzy matching
-function levenshtein(a, b) {
-  var alen = a.length, blen = b.length;
-  if (alen === 0) return blen;
-  if (blen === 0) return alen;
-  var prev = new Array(blen + 1), curr = new Array(blen + 1);
-  for (var i = 0; i <= blen; i++) prev[i] = i;
-  for (var i = 0; i < alen; i++) {
-    curr[0] = i + 1;
-    for (var j = 0; j < blen; j++) {
-      var cost = a[i] === b[j] ? 0 : 1;
-      curr[j + 1] = Math.min(curr[j] + 1, prev[j + 1] + 1, prev[j] + cost);
-    }
-    var tmp = prev; prev = curr; curr = tmp;
-  }
-  return prev[blen];
-}
-
-// Dictionary fuzzy match cache
-var _fuzzyCache = {};
-
-function fuzzyDictLookup(word, maxDist) {
-  maxDist = maxDist || 2;
-  if (word.length <= 3) maxDist = 1;
-  if (word.length <= 2) maxDist = 0;
-  var cacheKey = word + "|" + maxDist;
-  if (_fuzzyCache[cacheKey]) return _fuzzyCache[cacheKey];
-  var bestMatch = null, bestDist = Infinity;
-  for (var arWord in AR2EN_DICT) {
-    var dist = levenshtein(word, arWord);
-    if (dist < bestDist) { bestDist = dist; bestMatch = arWord; }
-  }
-  // Also search English values
-  for (var ar2 in AR2EN_DICT) {
-    var enVal = AR2EN_DICT[ar2];
-    if (typeof enVal === "string") {
-      var dist = levenshtein(word, enVal);
-      if (dist < bestDist) { bestDist = dist; bestMatch = enVal; }
-    }
-  }
-  if (bestDist <= maxDist && bestMatch) {
-    _fuzzyCache[cacheKey] = bestMatch;
-    return bestMatch;
-  }
-  _fuzzyCache[cacheKey] = null;
-  return null;
-}
-
-// Multi-word phrase translations (e.g. "سماعة بلوتوث" → "bluetooth headphone")
-var AR2EN_PHRASES = {
-  "سماعة بلوتوث":"bluetooth headphone","سماعه بلوتوث":"bluetooth headphone","سماعات بلوتوث":"bluetooth headphone",
-  "سماعة لاسلكية":"wireless headphone","سماعه لاسلكيه":"wireless headphone","سماعات لاسلكية":"wireless headphone",
-  "سماعة رأس":"headphone","سماعه رأس":"headphone","سماعات رأس":"headphone",
-  "ساعة ذكية":"smartwatch","ساعه ذكيه":"smartwatch","ساعات ذكية":"smartwatches",
-  "شاحن سريع":"fast charger","شاحن لاسلكي":"wireless charger",
-  "جراب موبايل":"phone case","جراب جوال":"phone case","كفر موبايل":"phone case",
-  "حماية شاشة":"screen protector","حمايه شاشه":"screen protector",
-  "باور بانك":"powerbank","باور بنك":"powerbank","باوربانك":"powerbank",
-  "سماعة ايفون":"iphone headphone","سماعه ايفون":"iphone headphone",
-  "شاحن ايفون":"iphone charger",
-  "سماعة ايربودز":"airpods","سماعه ايربودز":"airpods",
-  "غسول وجه":"face wash","غسول بشرة":"face wash","غسول وجه":"face cleanser",
-  "كريم مرطب":"moisturizer cream","كريم ترطيب":"moisturizer",
-  "كريم بشرة":"face cream","كريم وجه":"face cream",
-  "زيت شعر":"hair oil","زيت للشعر":"hair oil",
-  "شامبو شعر":"hair shampoo",
-  "ماكينة حلاقة":"shaver","ماكينه حلاقه":"shaver",
-  "ورق عنب":"grape leaves","ورق":"leaves","عنب":"grape",
-  "زيت زيتون":"olive oil",
-  "خل بلسمي":"balsamic vinegar",
-  "صوص طماطم":"tomato sauce","صلصة":"sauce","طماطم":"tomato",
-  "جبنة رومي":"cheese","جبنه رومى":"cheese",
-  "جبنة موزاريلا":"mozzarella cheese",
-  "جبنة شيدر":"cheddar cheese",
-  "عصير برتقال":"orange juice",
-  "عصير مانجو":"mango juice",
-  "ال جي":"lg","ال جي":"lg",
-  "ون بلس":"oneplus","ون":"one","بلس":"plus",
-  "اتش بي":"hp","اتش":"h","بي":"p",
-  "بي تك":"btc",
-};
-
-function generateBilingualKeys(text) {
-  const keys = new Set();
-  const s = String(text || '').toLowerCase().trim();
-  if (!s) return keys;
-  keys.add(s);
-  const norm = normalizeArabicText(s);
-  keys.add(norm);
-  if (hasArabic(s)) {
-    keys.add(latinizeArabic(norm));
-    keys.add(latinizeArabic(s));
-  }
-  if (hasLatin(s)) {
-    keys.add(arabizeLatin(s));
-    keys.add(arabizeLatin(norm));
-  }
-  // Add phrase translations (multi-word)
-  for (var phrase in AR2EN_PHRASES) {
-    var pval = AR2EN_PHRASES[phrase];
-    if (typeof pval === "string" && s.includes(phrase)) {
-      keys.add(pval);
-      keys.add(pval.toLowerCase());
-      var pwords = pval.split(/\s+/);
-      for (var pwi = 0; pwi < pwords.length; pwi++) {
-        if (pwords[pwi].length > 1) keys.add(pwords[pwi]);
-      }
-    }
-  }
-  // Add dictionary translations for each word
-  var words = s.split(/\s+/);
-  for (var wi = 0; wi < words.length; wi++) {
-    var w = words[wi];
-    if (!w || w.length < 1) continue;
-    if (hasArabic(w)) {
-      var en = AR2EN_DICT[w];
-      // Try stripping "ال" prefix for Arabic words
-      if (typeof en !== "string" && w.length > 3 && w.indexOf("ال") === 0) {
-        en = AR2EN_DICT[w.substring(2)];
-      }
-      if (typeof en === "string") { keys.add(en); keys.add(en.toLowerCase()); }
-      // Fuzzy fallback for Arabic words not in dictionary
-      if (typeof en !== "string" && w.length > 2) {
-        var fuzzy = fuzzyDictLookup(w, 1);
-        if (fuzzy) { keys.add(fuzzy); keys.add(fuzzy.toLowerCase()); }
-      }
-    } else if (hasLatin(w)) {
-      var arVersion = _EN2AR_LOOKUP[w];
-      if (arVersion) { keys.add(arVersion); keys.add(normalizeArabicText(arVersion)); }
-      // Fuzzy fallback for English words
-      if (!arVersion && w.length > 2) {
-        var fuzzy2 = fuzzyDictLookup(w, 2);
-        if (fuzzy2) { keys.add(fuzzy2); keys.add(fuzzy2.toLowerCase()); }
-      }
-    }
-  }
-  return keys;
-}
-
-// Pre-build reverse lookup for English→Arabic dictionary
-var _EN2AR_LOOKUP = {};
-(function buildReverseLookup() {
-  for (var ar in AR2EN_DICT) {
-    var en = AR2EN_DICT[ar];
-    if (typeof en === "string") { _EN2AR_LOOKUP[en.toLowerCase()] = ar; }
-  }
-})();
-
-// Precompute bilingual search keys for all products
-let _productSearchKeys = new Map();
-var _bilingualKeysCache = {};
-
-function buildProductSearchKeys(products) {
-  _productSearchKeys.clear();
-  _bilingualKeysCache = {};
-  for (let i = 0; i < products.length; i++) {
-    const p = products[i];
-    const id = String(p.id);
-    const fields = [p.name, p.title, p.category, p.brand, p.type, p.description];
-    if (Array.isArray(p.tags)) fields.push(...p.tags);
-    if (Array.isArray(p.categories)) fields.push(...p.categories);
-    const combined = fields.filter(Boolean).join(' ');
-    var cached = _bilingualKeysCache[combined];
-    if (!cached) {
-      cached = generateBilingualKeys(combined);
-      _bilingualKeysCache[combined] = cached;
-    }
-    _productSearchKeys.set(id, cached);
-  }
 }
 
 function renderSearchHistory() {
@@ -573,15 +80,10 @@ function renderSearchHistory() {
     .join("");
 
   historyEl.querySelectorAll("[data-term]").forEach((item) => {
-    item.addEventListener("click", (e) => {
-      e.stopPropagation();
+    item.addEventListener("click", () => {
       const term = item.getAttribute("data-term") || "";
       inputEl.value = term;
-      _suppressSuggestions = true;
-      var sug = document.getElementById("suggestions");
-      if (sug) { sug.innerHTML = ""; sug.classList.add("hidden"); }
-      setHistoryVisibility(false);
-      performSearch(term).finally(function(){ _suppressSuggestions = false; });
+      performSearch(term);
     });
   });
 }
@@ -613,6 +115,7 @@ let _extractedKeywords = new Set();
 function extractKeywordsFromProducts() {
   _extractedKeywords.clear();
 
+  // Add categories
   const categoriesList = [
     "ساعات", "موبايلات وملحقاتها", "إلكترونيات", "ملابس وأحذية", 
     "منتجات تجميل وعناية", "عطور", "منتجات رياضية", "منزل ومطبخ", 
@@ -622,8 +125,8 @@ function extractKeywordsFromProducts() {
 
   if (!_allSearchProducts || !_allSearchProducts.length) return;
 
-  for (let i = 0; i < _allSearchProducts.length; i++) {
-    const p = _allSearchProducts[i];
+  _allSearchProducts.forEach(p => {
+    // Add brands
     if (p.brand) {
       _extractedKeywords.add(p.brand.trim());
     }
@@ -631,99 +134,65 @@ function extractKeywordsFromProducts() {
       _extractedKeywords.add(p.category.trim());
     }
 
-    const name = (p.name || p.title || "").trim();
-    if (!name) continue;
+    const name = p.name || p.title || "";
+    if (!name) return;
 
-    const words = name.split(/\s+/).filter(w => w.length > 1);
-
-    // Add each individual word
-    words.forEach(w => _extractedKeywords.add(w));
-
-    // Add all word pairs (bigrams)
-    for (let wi = 0; wi < words.length - 1; wi++) {
-      _extractedKeywords.add(words[wi] + " " + words[wi + 1]);
+    // Extract meaningful phrases
+    const words = name.split(/\s+/).filter(w => w.length > 2);
+    
+    if (words.length >= 2) {
+      _extractedKeywords.add(words.slice(0, 2).join(" "));
     }
-
-    // Add first 3 words
     if (words.length >= 3) {
       _extractedKeywords.add(words.slice(0, 3).join(" "));
-      _extractedKeywords.add(words.slice(0, 4).join(" "));
     }
-
-    // Add brand + category combo
     if (p.brand && p.category) {
       _extractedKeywords.add(`${p.brand} ${p.category}`);
     }
-
-    // Add bilingual versions
-    const bilingual = generateBilingualKeys(name);
-    bilingual.forEach(k => { if (k.length > 1) _extractedKeywords.add(k); });
-  }
-}
-
-// Pre-normalized keyword index for fast suggestions
-let _keywordIndex = [];
-
-function rebuildKeywordIndex() {
-  _keywordIndex = Array.from(_extractedKeywords)
-    .filter(k => k && k.length > 1)
-    .map(k => ({ raw: k, norm: normalizeArabicText(k) }))
-    .sort((a, b) => a.raw.localeCompare(b.raw, "ar"));
+  });
 }
 
 async function fetchSuggestions(term) {
   if (!term) return [];
   const suggestions = new Set();
   const normTerm = normalizeArabicText(term);
-  const termKeys = generateBilingualKeys(term);
 
-  // 1. Category / synonym matches
+  // 1. Suggest exact category / synonym matches
   for (const [catName, synonyms] of Object.entries(CATEGORY_SYNONYMS)) {
-    const normCat = normalizeArabicText(catName);
-    if (normCat.includes(normTerm) || normTerm.includes(normCat)) suggestions.add(catName);
+    if (normalizeArabicText(catName).includes(normTerm)) {
+      suggestions.add(catName);
+    }
     for (const syn of synonyms) {
-      const normSyn = normalizeArabicText(syn);
-      if (normSyn.includes(normTerm) || normTerm.includes(normSyn)) suggestions.add(syn);
-    }
-  }
-
-  // 2. Match on keyword index (broad substring matching)
-  if (_keywordIndex.length) {
-    for (const { raw, norm } of _keywordIndex) {
-      if (suggestions.size >= 10) break;
-      if (norm.includes(normTerm) || normTerm.includes(norm)) {
-        suggestions.add(raw);
+      if (normalizeArabicText(syn).includes(normTerm)) {
+        suggestions.add(syn);
       }
     }
   }
 
-  // 3. Bilingual key matching (for transliterated/English terms)
-  if (suggestions.size < 6 && _keywordIndex.length) {
-    for (const { raw, norm } of _keywordIndex) {
-      if (suggestions.size >= 10) break;
-      for (const k of termKeys) {
-        if (norm.includes(k) || k.includes(norm)) {
-          suggestions.add(raw);
-          break;
-        }
+  // 2. Suggest matching phrases/words from extracted keywords
+  const keywordList = Array.from(_extractedKeywords);
+  for (const kw of keywordList) {
+    if (suggestions.size >= 8) break;
+    const normKw = normalizeArabicText(kw);
+    // Prefer words starting with term
+    if (normKw.startsWith(normTerm) || normKw.includes(" " + normTerm)) {
+      suggestions.add(kw);
+    }
+  }
+
+  // Fallback keyword scanning
+  if (suggestions.size < 6) {
+    for (const kw of keywordList) {
+      if (suggestions.size >= 8) break;
+      const normKw = normalizeArabicText(kw);
+      if (normKw.includes(normTerm)) {
+        suggestions.add(kw);
       }
     }
   }
 
-  // 4. Product name matching (direct from loaded products)
-  if (suggestions.size < 8 && _allSearchProducts.length) {
-    const seen = new Set();
-    for (const p of _allSearchProducts) {
-      if (suggestions.size >= 12) break;
-      const name = (p.name || p.title || "").trim();
-      if (!name || seen.has(name)) continue;
-      seen.add(name);
-      const normName = normalizeArabicText(name);
-      if (normName.includes(normTerm)) suggestions.add(name);
-    }
-  }
-
-  return Array.from(suggestions).slice(0, 10);
+  // Return max 6 unique suggestions
+  return Array.from(suggestions).filter(val => val && val.length > 1).slice(0, 6);
 }
 
 // Flag to suppress suggestions after Enter/search is triggered
@@ -764,28 +233,143 @@ async function renderSuggestions(term) {
     )
     .join("");
 
-  suggestionsEl.classList.add("noon-suggestions");
   suggestionsEl.classList.remove("hidden");
 
-  suggestionsEl.querySelectorAll("[data-value]").forEach(function(item) {
-    item.addEventListener("click", function() {
-      var val = item.getAttribute("data-value") || "";
-      inputEl.value = val;
+  suggestionsEl.querySelectorAll("[data-value]").forEach((item) => {
+    item.addEventListener("click", () => {
+      const value = item.getAttribute("data-value") || "";
+      inputEl.value = value;
       suggestionsEl.classList.add("hidden");
-      _suppressSuggestions = true;
-      performSearch(val).finally(function(){ _suppressSuggestions = false; });
+      performSearch(value);
     });
   });
 }
 
 // Variables for search results, filters and pagination
 let _allSearchProducts = [];
-let _keysBuilt = false;
 let _currentSearchResults = [];
 let _filteredSearchResults = [];
 let _currentPage = 1;
-const _PRODUCTS_PER_PAGE = 24;
-let _currentCategoryFilter = "الكل";
+const _PRODUCTS_PER_PAGE = 20;
+
+// State for new sidebar filters
+let _activeCategoryFilter = "الكل";
+let _activeBrandFilter = "الكل";
+let _activePriceFilter = null;
+
+function renderSidebarFilters() {
+  const catContainer = document.getElementById("category-filters");
+  const brandContainer = document.getElementById("brand-filters");
+  const priceSlider = document.getElementById('price-range-slider');
+  const priceMaxDisplay = document.getElementById('price-max-display');
+
+  if (!catContainer || !brandContainer || !priceSlider) return;
+
+  const categories = { "الكل": _currentSearchResults.length };
+  const brands = { "الكل": _currentSearchResults.length };
+  let maxPrice = 0;
+
+  _currentSearchResults.forEach(p => {
+    const cat = p.category ? String(p.category).trim() : "أخرى";
+    if (cat) categories[cat] = (categories[cat] || 0) + 1;
+
+    const brand = p.brand ? String(p.brand).trim() : "";
+    if (brand) brands[brand] = (brands[brand] || 0) + 1;
+
+    const price = p.price || 0;
+    if (price > maxPrice) maxPrice = price;
+  });
+
+  // Render Categories
+  const sortedCategories = Object.keys(categories).filter(k => k !== "الكل").sort((a, b) => categories[b] - categories[a]);
+  let catHtml = `<li><a href="#" class="active" data-category="الكل">الكل (${categories['الكل']})</a></li>`;
+  sortedCategories.forEach(cat => {
+    catHtml += `<li><a href="#" data-category="${escapeHtml(cat)}">${escapeHtml(cat)} (${categories[cat]})</a></li>`;
+  });
+  catContainer.innerHTML = catHtml;
+
+  // Render Brands
+  const sortedBrands = Object.keys(brands).filter(k => k !== "الكل").sort((a, b) => brands[b] - brands[a]);
+  let brandHtml = `<li><a href="#" class="active" data-brand="الكل">الكل (${brands['الكل']})</a></li>`;
+  sortedBrands.slice(0, 10).forEach(brand => { // Show top 10 brands
+    brandHtml += `<li><a href="#" data-brand="${escapeHtml(brand)}">${escapeHtml(brand)} (${brands[brand]})</a></li>`;
+  });
+  brandContainer.innerHTML = brandHtml;
+
+  // Setup Price Slider
+  maxPrice = Math.ceil(maxPrice / 100) * 100; // Round up to nearest 100
+  if (maxPrice > 0) {
+    priceSlider.max = maxPrice;
+    priceSlider.value = maxPrice;
+    if (priceMaxDisplay) priceMaxDisplay.value = maxPrice;
+    _activePriceFilter = maxPrice;
+  }
+
+  // Bind events
+  catContainer.querySelectorAll('a').forEach(a => a.addEventListener('click', handleFilterChange));
+  brandContainer.querySelectorAll('a').forEach(a => a.addEventListener('click', handleFilterChange));
+  priceSlider.addEventListener('input', handlePriceSliderChange);
+}
+
+function handleFilterChange(e) {
+  e.preventDefault();
+  const target = e.currentTarget;
+  const category = target.dataset.category;
+  const brand = target.dataset.brand;
+
+  if (category) {
+    _activeCategoryFilter = category;
+    document.querySelectorAll('#category-filters a').forEach(a => a.classList.remove('active'));
+    target.classList.add('active');
+  }
+
+  if (brand) {
+    _activeBrandFilter = brand;
+    document.querySelectorAll('#brand-filters a').forEach(a => a.classList.remove('active'));
+    target.classList.add('active');
+  }
+
+  applyAllFiltersAndRender();
+}
+
+function handlePriceSliderChange(e) {
+  const priceMaxDisplay = document.getElementById('price-max-display');
+  _activePriceFilter = Number(e.target.value);
+  if (priceMaxDisplay) priceMaxDisplay.value = _activePriceFilter;
+  
+  // Debounce rendering for better performance
+  clearTimeout(window._priceSliderTimeout);
+  window._priceSliderTimeout = setTimeout(() => {
+    applyAllFiltersAndRender();
+  }, 250);
+}
+
+function applyAllFiltersAndRender() {
+  _filteredSearchResults = _currentSearchResults.filter(p => {
+    // Category filter
+    if (_activeCategoryFilter !== "الكل") {
+      const cat = p.category ? String(p.category).trim() : "أخرى";
+      if (cat !== _activeCategoryFilter) return false;
+    }
+
+    // Brand filter
+    if (_activeBrandFilter !== "الكل") {
+      const brand = p.brand ? String(p.brand).trim() : "";
+      if (brand !== _activeBrandFilter) return false;
+    }
+
+    // Price filter
+    if (_activePriceFilter !== null) {
+      const price = p.price || 0;
+      if (price > _activePriceFilter) return false;
+    }
+
+    return true;
+  });
+
+  _currentPage = 1;
+  renderResultsPage();
+}
 
 // Normalizes Arabic text to handle variations in letters
 function normalizeArabicText(text) {
@@ -794,9 +378,201 @@ function normalizeArabicText(text) {
     .replace(/[أإآا]/g, "ا")
     .replace(/ة/g, "ه")
     .replace(/ى/g, "ي")
-    .replace(/[ًٌٍَُِّْ]/g, "") // remove diacritics
-    .replace(/\s+/g, " ")       // normalize spaces
+    .replace(/[ًٌٍَُِّْ]/g, "")
+    .replace(/\s+/g, " ")
     .trim();
+}
+
+// Light Arabic stemmer: strips plural suffixes, ال prefix, تاء مربوطة
+function stemArabic(word) {
+  var w = word.replace(/ات$/, "").replace(/ون$/, "").replace(/ين$/, "").replace(/ان$/, "").replace(/^ال/, "");
+  // Also strip trailing ة/ه for تاء مربوطة normalization
+  var w2 = w.replace(/[هة]$/, "");
+  if (w2.length >= 2) w = w2;
+  if (w.length < 2) w = word.replace(/^ال/, "");
+  return w;
+}
+
+// Bilingual dictionary for common marketplace terms (Arabic ↔ English)
+var BILINGUAL_DICT = {
+  "ساعه":"watch", "ساعة":"watch", "ساعات":"watches", "ساعتين":"watches",
+  "موبايل":"mobile", "موبيل":"mobile", "جوال":"mobile",
+  "ايفون":"iphone", "اي فون":"iphone",
+  "لاب توب":"laptop", "لابتوب":"laptop", "حاسوب":"computer", "كمبيوتر":"computer",
+  "سماعه":"headphones", "سماعة":"headphones", "سماعات":"headphones",
+  "شاحن":"charger",
+  "حذاء":"shoes", "جزمة":"shoes", "كوتشي":"sneakers",
+  "قميص":"shirt",
+  "بنطلون":"pants", "بنطال":"pants",
+  "فستان":"dress",
+  "جاكيت":"jacket",
+  "تيشرت":"t-shirt", "تي شيرت":"t-shirt",
+  "طقم":"set",
+  "عطر":"perfume",
+  "ميك اب":"makeup", "ميكب":"makeup",
+  "كريم":"cream",
+  "عسل":"honey",
+  "زيت":"oil",
+  "ارز":"rice",
+  "شاي":"tea",
+  "قهوه":"coffee", "قهوة":"coffee",
+  "سكر":"sugar",
+  "ملح":"salt",
+  "حليب":"milk",
+  "جبنه":"cheese", "جبنة":"cheese",
+  "خضار":"vegetables",
+  "فواكه":"fruits",
+  "لحم":"meat",
+  "دجاج":"chicken",
+  "سمك":"fish",
+  "بيض":"eggs",
+  "خبز":"bread",
+  "ماء":"water", "مياة":"water",
+  "عصير":"juice",
+  "كوك":"coke", "كولا":"cola",
+  "شوكولاته":"chocolate", "شوكولاتة":"chocolate",
+  "حلوي":"candy", "حلوى":"candy",
+  "بسكوت":"biscuit", "بسكويت":"biscuit",
+  "كيك":"cake",
+  "قهوة":"coffee", "قهوه":"coffee",
+  "شنطه":"bag", "شنطة":"bag", "حقيبه":"bag", "حقيبة":"bag",
+  "محفظه":"wallet", "محفظة":"wallet",
+  "نضاره":"glasses", "نظارة":"glasses",
+  "ساعه":"watch", "ساعة":"watch",
+  "خاتم":"ring",
+  "سلسله":"chain", "سلسلة":"chain",
+  "اسواره":"bracelet", "سوار":"bracelet",
+  "ذهب":"gold",
+  "فضه":"silver", "فضة":"silver",
+  "غرفه":"room", "غرفة":"room",
+  "اثاث":"furniture", "أثاث":"furniture",
+  "كرسي":"chair",
+  "طاوله":"table", "طاولة":"table",
+  "سرير":"bed",
+  "خزانه":"cabinet", "خزانة":"cabinet",
+  "ستاير":"curtains", "ستائر":"curtains",
+  "سجاده":"rug", "سجادة":"rug",
+  "لمبه":"lamp", "لمبة":"lamp",
+  "ثلاجه":"fridge", "ثلاجة":"fridge",
+  "غساله":"washer", "غسالة":"washer",
+  "مكنسه":"vacuum", "مكنسة":"vacuum",
+  "مكيف":"ac", "تكييف":"ac",
+  "دفايه":"heater", "دفاية":"heater",
+  "مروحه":"fan", "مروحة":"fan",
+  "فرن":"oven",
+  "ميكروويف":"microwave", "ميكرويف":"microwave",
+  "خلاط":"blender",
+  "غلايه":"kettle", "غلاية":"kettle",
+  "محمصه":"toaster", "محمصة":"toaster",
+  "كاميرا":"camera",
+  "طابعه":"printer", "طابعة":"printer",
+  "شاشه":"screen", "شاشة":"screen", "شاشات":"screens",
+  "ماوس":"mouse",
+  "كيبورد":"keyboard",
+  "بطاريه":"battery", "بطارية":"battery",
+  "تاب":"tablet", "تابلت":"tablet",
+  "سماعه":"headphone", "سماعة":"headphone",
+  "ميك":"mic", "ميكروفون":"microphone",
+  "سيرفر":"server",
+  "لعبه":"toy", "لعبة":"toy", "العاب":"toys", "ألعاب":"toys",
+  "هديه":"gift", "هدية":"gift", "هدايا":"gifts",
+  "ورق":"paper",
+  "قلم":"pen",
+  "دفتر":"notebook",
+  "كتاب":"book",
+  "مسطره":"ruler", "مسطرة":"ruler"
+};
+
+function getBilingualAlternatives(word) {
+  var alts = [];
+  // 1. Check hardcoded dictionary
+  var stem = stemArabic(word);
+  var keys = [word, stem].filter(function(k) { return k.length >= 2; });
+  keys.forEach(function(k) {
+    var val = BILINGUAL_DICT[k];
+    if (val && alts.indexOf(val) < 0) alts.push(val);
+    for (var ar in BILINGUAL_DICT) {
+      if (BILINGUAL_DICT[ar] === k.toLowerCase() && alts.indexOf(ar) < 0) alts.push(ar);
+    }
+  });
+  // 2. Check translation cache (populated by API)
+  if (window.__transCache) {
+    var cached = window.__transCache[word];
+    if (cached) {
+      cached.forEach(function(t) { if (alts.indexOf(t) < 0) alts.push(t); });
+    }
+  }
+  return alts;
+}
+
+// Async translation via MyMemory API (free, no key needed)
+// Results are cached so subsequent searches are instant
+var __transCache = {};
+var __transPending = {};
+
+function fetchTranslation(word, fromLang, toLang) {
+  if (__transPending[word]) return __transPending[word];
+  if (__transCache[word]) return Promise.resolve(__transCache[word]);
+  // Skip very short words and numbers
+  if (word.length < 3 || /^[\d\s]+$/.test(word)) return Promise.resolve([]);
+  __transPending[word] = new Promise(function(resolve) {
+    var url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(word) + "&langpair=" + fromLang + "|" + toLang + "&de=demo@example.com";
+    var timeout = setTimeout(function() { resolve([]); delete __transPending[word]; }, 3000);
+    fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+      clearTimeout(timeout);
+      var results = [];
+      if (data && data.responseData && data.responseData.translatedText) {
+        var t = data.responseData.translatedText.trim().toLowerCase();
+        if (t && t !== word.toLowerCase() && t.length >= 2) {
+          results.push(t);
+          // Also add individual words from phrase
+          t.split(" ").forEach(function(w) { if (w.length >= 2 && results.indexOf(w) < 0) results.push(w); });
+        }
+      }
+      __transCache[word] = results;
+      delete __transPending[word];
+      resolve(results);
+    }).catch(function() {
+      clearTimeout(timeout);
+      delete __transPending[word];
+      resolve([]);
+    });
+  });
+  return __transPending[word];
+}
+
+function fetchTranslations(words) {
+  var promises = [];
+  words.forEach(function(w) {
+    var isArabic = w.charCodeAt(0) > 127;
+    var p = fetchTranslation(w, isArabic ? "ar" : "en", isArabic ? "en" : "ar");
+    promises.push(p);
+  });
+  return Promise.all(promises);
+}
+
+// Skeleton loading for search results
+function showSearchSkeleton() {
+  var el = document.getElementById("search-results");
+  if (!el) return;
+  if (el.querySelector(".search-skeleton")) return;
+  var html = '<div class="search-skeleton" style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:4px 0">';
+  for (var i = 0; i < 6; i++) {
+    html += '<div style="background:#F2F3F5;border-radius:14px;overflow:hidden;padding:10px">' +
+      '<div class="skeleton" style="width:100%;aspect-ratio:3/4;border-radius:8px;margin-bottom:8px"></div>' +
+      '<div class="skeleton" style="height:16px;width:80%;border-radius:4px;margin:0 auto 6px"></div>' +
+      '<div class="skeleton" style="height:14px;width:50%;border-radius:4px;margin:0 auto"></div>' +
+      '</div>';
+  }
+  html += '</div>';
+  el.insertAdjacentHTML("afterbegin", html);
+}
+
+function hideSearchSkeleton() {
+  var el = document.getElementById("search-results");
+  if (!el) return;
+  var sk = el.querySelector(".search-skeleton");
+  if (sk) sk.remove();
 }
 
 // Preload all products (local store + Supabase/Taager)
@@ -807,154 +583,202 @@ async function loadAllSearchProducts() {
       _allSearchProducts = Object.values(window.BudaStore.getAllProducts()).filter(Boolean);
     }
     
-    // 2. Fetch from Supabase + Taager if online (only if it gives us MORE products than local store)
+    // 2. Fetch from Supabase + Taager if online
     const selectedCountry = window.TaagerIntegration ? window.TaagerIntegration.getSelectedCountry() : null;
     const countryCode = selectedCountry ? selectedCountry.code : null;
 
     if (window.supabaseClient && typeof window.supabaseClient.fetchAllProductsWithTaager === "function") {
       const remote = await window.supabaseClient.fetchAllProductsWithTaager(countryCode);
-      if (remote && remote.length > _allSearchProducts.length) {
-        _allSearchProducts = remote.map(p => 
-          window.BudaStore && typeof window.BudaStore.normalizeProductRecord === "function"
-            ? window.BudaStore.normalizeProductRecord(p)
-            : p
-        ).filter(Boolean);
+      if (remote && remote.length) {
+        _allSearchProducts = remote;
       }
     } else if (window.fetchSupabaseProducts) {
       const remote = await window.fetchSupabaseProducts("");
-      if (remote && remote.length > _allSearchProducts.length) {
-        _allSearchProducts = remote.map(p => 
-          window.BudaStore && typeof window.BudaStore.normalizeProductRecord === "function"
-            ? window.BudaStore.normalizeProductRecord(p)
-            : p
-        ).filter(Boolean);
+      if (remote && remote.length) {
+        _allSearchProducts = remote;
       }
     }
 
-    // Build search keys synchronously so search works immediately
-    buildProductSearchKeys(_allSearchProducts);
-    // Defer suggestion index building (not needed for search results)
-    setTimeout(() => {
-      extractKeywordsFromProducts();
-      rebuildKeywordIndex();
-      _keysBuilt = true;
-    }, 0);
+    // Extract search keywords index on startup
+    extractKeywordsFromProducts();
 
   } catch (error) {
     console.warn("Error loading products for search index:", error);
   }
 }
 
-// Local robust search matching logic with bilingual support
+// Local robust search matching logic with category synonym expansion
+function generateBilingualKeys(text) {
+  if (!text) return [text || ""].filter(Boolean);
+  var keys = [text];
+  var latin = latinizeArabic(text);
+  if (latin && latin !== text) keys.push(latin);
+  var latinSoft = latinizeArabicSoft(text);
+  if (latinSoft && latinSoft !== text && latinSoft !== latin) keys.push(latinSoft);
+  var arabic = arabizeLatin(text);
+  if (arabic && arabic !== text && arabic !== latin && arabic !== latinSoft) keys.push(arabic);
+  return keys.filter(Boolean);
+}
+
+// Generate multiple latin forms of Arabic text for better cross-script matching
+function latinizeArabic(text) {
+  // Standard: و→w, ي→y
+  var map = { "ا":"a","أ":"a","إ":"a","آ":"a","ب":"b","ت":"t","ث":"th","ج":"j","ح":"h","خ":"kh","د":"d","ذ":"dh","ر":"r","ز":"z","س":"s","ش":"sh","ص":"s","ض":"d","ط":"t","ظ":"z","ع":"a","غ":"gh","ف":"f","ق":"q","ك":"k","ل":"l","م":"m","ن":"n","ه":"h","و":"w","ي":"y","ة":"h","ى":"a","ئ":"a","ء":"a"," ":" " };
+  return String(text).split("").map(function(c) { return map[c] || c; }).join("").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function latinizeArabicSoft(text) {
+  // Soft: و→o, ي→i, ج→g, ع→e, ق→k — matches common Arabic→English spellings
+  var map = { "ا":"a","أ":"a","إ":"a","آ":"a","ب":"b","ت":"t","ث":"th","ج":"g","ح":"h","خ":"kh","د":"d","ذ":"z","ر":"r","ز":"z","س":"s","ش":"sh","ص":"s","ض":"d","ط":"t","ظ":"z","ع":"e","غ":"gh","ف":"f","ق":"k","ك":"k","ل":"l","م":"m","ن":"n","ه":"h","و":"o","ي":"i","ة":"h","ى":"a","ئ":"a","ء":"a"," ":" " };
+  return String(text).split("").map(function(c) { return map[c] || c; }).join("").replace(/\s+/g, " ").trim().toLowerCase();
+}
+
+function arabizeLatin(text) {
+  var map = { "a":"ا","b":"ب","t":"ت","th":"ث","j":"ج","h":"ح","kh":"خ","d":"د","dh":"ذ","r":"ر","z":"ز","s":"س","sh":"ش","c":"ك","ch":"تش","f":"ف","g":"ج","k":"ك","l":"ل","m":"م","n":"ن","p":"ب","q":"ق","w":"و","x":"كس","y":"ي" };
+  var result = "", i = 0;
+  text = String(text).toLowerCase();
+  while (i < text.length) {
+    var two = text.slice(i, i + 2);
+    if (two === "sh" || two === "kh" || two === "dh" || two === "th" || two === "ch") { result += map[two] || two; i += 2; continue; }
+    result += map[text[i]] || text[i]; i++;
+  }
+  return result.replace(/\s+/g, " ").trim();
+}
+
 function searchProductsLocal(query) {
   const normQuery = normalizeArabicText(query);
   if (!normQuery) return [];
 
-  const words = normQuery.split(" ").filter(Boolean);
-  const queryBilingualKeys = generateBilingualKeys(query);
-  const allQueryKeys = new Set();
-  queryBilingualKeys.forEach(k => {
-    allQueryKeys.add(k);
-    if (k.length > 2) {
-      for (let i = 1; i < k.length; i++) allQueryKeys.add(k.slice(0, i + 1));
-    }
-  });
+  var words = normQuery.split(" ").filter(Boolean);
+  if (!words.length) return [];
 
-  // Find if query matches any category synonyms
-  const matchedCategories = [];
-  for (const [catName, synonyms] of Object.entries(CATEGORY_SYNONYMS)) {
-    const matchesSynonym = synonyms.some(syn => {
-      const normSyn = normalizeArabicText(syn);
-      return words.some(word => normSyn.includes(word) || word.includes(normSyn));
-    });
-    if (matchesSynonym) {
-      matchedCategories.push(catName);
-    }
-  }
-
-  // Check if any products match the current country to avoid empty results
-  var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "EG";
-  var countryCode = currentCountry.toUpperCase();
-  var hasCountryMatch = _allSearchProducts.some(function (p) {
-    var pc = (p?.country || p?.country_code || "").toUpperCase();
-    return pc === countryCode;
-  });
-
-  return _allSearchProducts.filter(product => {
-    // Filter by country first (skip if no products match this country at all)
-    var pCountry = (product?.country || product?.country_code || "").toUpperCase();
-    if (hasCountryMatch && pCountry && pCountry !== countryCode) return false;
-
-    // 1. Check if product category matches the matched categories from query synonyms
-    if (product.category) {
-      const prodCatNorm = normalizeArabicText(product.category);
-      const matchesCategorySynonym = matchedCategories.some(cat => 
-        prodCatNorm.includes(normalizeArabicText(cat))
-      );
-      if (matchesCategorySynonym) return true;
-    }
-
-    // 2. Standard word matching in product text (fast pre-filter)
-    const fields = [
-      product.name, product.title, product.description,
-      product.category, product.brand, product.type
-    ];
-    if (Array.isArray(product.tags)) fields.push(...product.tags);
-    if (Array.isArray(product.categories)) fields.push(...product.categories);
-
-    const productText = normalizeArabicText(fields.filter(Boolean).join(" "));
-
-    if (words.some(word => productText.includes(word))) return true;
-
-    // 3. Bilingual key matching (slower, only for cross-language matches)
-    const pid = String(product.id);
-    const searchKeys = _productSearchKeys.get(pid);
-    if (searchKeys && searchKeys.size) {
-      for (const qKey of allQueryKeys) {
-        for (const pKey of searchKeys) {
-          if (pKey.includes(qKey) || qKey.includes(pKey)) return true;
+  // Find category synonyms
+  var matchedCategories = [];
+  for (var catName in CATEGORY_SYNONYMS) {
+    var synonyms = CATEGORY_SYNONYMS[catName];
+    for (var si = 0; si < synonyms.length; si++) {
+      var normSyn = normalizeArabicText(synonyms[si]);
+      for (var wi = 0; wi < words.length; wi++) {
+        if (normSyn.indexOf(words[wi]) >= 0 || words[wi].indexOf(normSyn) >= 0) {
+          matchedCategories.push(catName);
+          si = synonyms.length; break;
         }
       }
     }
+  }
 
-    return false;
+  return _allSearchProducts.filter(function(product) {
+    // Category synonym match
+    if (product.category) {
+      var prodCatNorm = normalizeArabicText(product.category);
+      for (var mc = 0; mc < matchedCategories.length; mc++) {
+        if (prodCatNorm.indexOf(normalizeArabicText(matchedCategories[mc])) >= 0) return true;
+      }
+    }
+
+    // Build product text
+    var fields = [product.name, product.title, product.description, product.category, product.brand, product.type];
+    if (Array.isArray(product.tags)) { for (var t = 0; t < product.tags.length; t++) fields.push(product.tags[t]); }
+    if (Array.isArray(product.categories)) { for (var c = 0; c < product.categories.length; c++) fields.push(product.categories[c]); }
+    var rawText = fields.filter(Boolean).join(" ");
+    var arabicText = normalizeArabicText(rawText);
+    var latinStd = latinizeArabic(rawText.substring(0, 500));
+    var latinSoft = latinizeArabicSoft(rawText.substring(0, 500));
+
+    // Check every query word
+    for (var wi = 0; wi < words.length; wi++) {
+      var word = words[wi];
+      if (!matchWord(word, arabicText, latinStd, latinSoft)) return false;
+    }
+    return true;
   });
 }
+
+function matchWord(word, arabicText, latinStd, latinSoft) {
+  // Collect all variations of this word
+  var vars = [word];
+  // Morphological (singular/plural)
+  if (word.endsWith("ات")) { addVar(vars, word.slice(0, -2) + "ه"); addVar(vars, word.slice(0, -2)); }
+  if (word.endsWith("ون") || word.endsWith("ين") || word.endsWith("ان")) addVar(vars, word.slice(0, -2));
+  if (word.endsWith("ه") || word.endsWith("ة")) { addVar(vars, word.slice(0, -1) + "ات"); addVar(vars, word.slice(0, -1)); }
+  // Bilingual alternatives
+  var alts = getBilingualAlternatives(word);
+  for (var ai = 0; ai < alts.length; ai++) addVar(vars, alts[ai]);
+
+  // Check all variations against Arabic text
+  for (var vi = 0; vi < vars.length; vi++) {
+    if (vars[vi] && arabicText.indexOf(vars[vi]) >= 0) return true;
+  }
+
+  // Direct Latin match
+  var wl = word.toLowerCase();
+  if (latinStd.indexOf(wl) >= 0 || latinSoft.indexOf(wl) >= 0) return true;
+
+  // Bilingual variations against Latin text
+  for (var vi = 0; vi < vars.length; vi++) {
+    if (vars[vi] !== word) {
+      var vl = vars[vi] ? vars[vi].toLowerCase() : "";
+      if (vl && (latinStd.indexOf(vl) >= 0 || latinSoft.indexOf(vl) >= 0)) return true;
+    }
+  }
+
+  // Latinize Arabic word and check
+  if (word.charCodeAt(0) > 127) {
+    var ws = latinizeArabic(word);
+    var wo = latinizeArabicSoft(word);
+    if (ws && (latinStd.indexOf(ws) >= 0 || latinSoft.indexOf(ws) >= 0)) return true;
+    if (wo && wo !== ws && (latinStd.indexOf(wo) >= 0 || latinSoft.indexOf(wo) >= 0)) return true;
+  }
+
+  return false;
+}
+
+function addVar(arr, v) { if (v && v.length >= 2 && arr.indexOf(v) < 0) arr.push(v); }
 
 // Render dynamic category filter chips based on matching products
 function renderCategoryFilters() {
   const filterContainer = document.getElementById("search-filter-container");
   if (!filterContainer) return;
 
-  if (!_currentSearchResults || !_currentSearchResults.length) {
+  const counts = {};
+
+  
+  _currentSearchResults.forEach(p => {
+    const cat = p.category ? String(p.category).trim() : "أخرى";
+    counts[cat] = (counts[cat] || 0) + 1;
+  });
+
+  const categories = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+
+    if (categories.length <= 1) {
     filterContainer.classList.add("hidden");
     return;
   }
 
-  var catMap = {};
-  _currentSearchResults.forEach(function(p) {
-    var cat = (p.category || "أخرى").trim();
-    if (!catMap[cat]) catMap[cat] = 0;
-    catMap[cat]++;
-  });
-
-  var cats = Object.keys(catMap).sort();
-  if (cats.length <= 1) {
-    filterContainer.classList.add("hidden");
-    return;
-  }
-
-  var html = '<button type="button" class="noon-filter-chip' + (_currentCategoryFilter === "الكل" ? " active" : "") + '" data-category="الكل">الكل</button>';
-  cats.forEach(function(c) {
-    html += '<button type="button" class="noon-filter-chip' + (_currentCategoryFilter === c ? " active" : "") + '" data-category="' + escapeHtml(c) + '">' + escapeHtml(c) + ' (' + catMap[c] + ')</button>';
-  });
-  filterContainer.innerHTML = html;
   filterContainer.classList.remove("hidden");
 
-  filterContainer.querySelectorAll(".noon-filter-chip").forEach(function(btn) {
-    btn.addEventListener("click", function() {
-      _currentCategoryFilter = btn.getAttribute("data-category");
+  let html = `<button type="button" class="filter-btn${_currentCategoryFilter === "الكل" ? " active" : ""}" data-category="الكل">
+    <span>الكل</span> <small style="opacity:0.75; margin-right:4px;">(${_currentSearchResults.length})</small>
+  </button>`;
+
+  categories.forEach(cat => {
+    html += `<button type="button" class="filter-btn${_currentCategoryFilter === cat ? " active" : ""}" data-category="${escapeHtml(cat)}">
+      <span>${escapeHtml(cat)}</span> <small style="opacity:0.75; margin-right:4px;">(${counts[cat]})</small>
+    </button>`;
+  });
+
+  filterContainer.innerHTML = html;
+
+  filterContainer.querySelectorAll(".filter-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const cat = btn.getAttribute("data-category");
+      _currentCategoryFilter = cat;
       _currentPage = 1;
+      
+      filterContainer.querySelectorAll(".filter-btn").forEach(b => {
+        b.classList.toggle("active", b.getAttribute("data-category") === cat);
+      });
+
       applyCategoryFilterAndRender();
     });
   });
@@ -974,757 +798,103 @@ function applyCategoryFilterAndRender() {
   renderResultsPage();
 }
 
-// Build a bilingual category group lookup from CATEGORY_SYNONYMS.
-// Returns: a Map where the key is normalizedArabicText(category/synonym)
-//          and the value is a Set of all normalized synonym forms (including English).
-function buildCategoryGroupMap() {
-  const map = new Map();
-  for (const [catName, synonyms] of Object.entries(CATEGORY_SYNONYMS)) {
-    const allForms = new Set([catName, ...synonyms].map(s => normalizeArabicText(s)));
-    // Every form of this group points to the same Set
-    allForms.forEach(form => map.set(form, allForms));
-  }
-  return map;
-}
-const _CATEGORY_GROUP_MAP = buildCategoryGroupMap();
-
-// Given any category string, return the Set of all equivalent category forms (bilingual).
-function getCategoryGroup(categoryStr) {
-  const norm = normalizeArabicText(categoryStr || "");
-  // Exact match
-  if (_CATEGORY_GROUP_MAP.has(norm)) return _CATEGORY_GROUP_MAP.get(norm);
-  // Partial match: find the group whose forms partially contain this norm
-  for (const [form, group] of _CATEGORY_GROUP_MAP.entries()) {
-    if (norm.includes(form) || form.includes(norm)) return group;
-  }
-  // No synonym group found — return single-element set (just itself)
-  return new Set([norm]);
-}
-
-// Returns true if two category strings belong to the same bilingual group
-function categoriesMatch(catA, catB) {
-  if (!catA || !catB) return false;
-  const normA = normalizeArabicText(catA);
-  const normB = normalizeArabicText(catB);
-  if (normA === normB) return true;
-  const groupA = getCategoryGroup(catA);
-  return groupA.has(normB);
-}
-
-// Get products similar or related to search results (Advanced Bilingual Similarity Scorer)
-function getSimilarProducts(exactMatches, query) {
-  const exactIds = new Set(exactMatches.map(p => String(p.id)));
-  const similar = [];
-
-  // 1. Analyze exact matches to extract bilingual category groups, brands, and title word patterns
-  const matchedCategoryGroups = new Set(); // normalized forms of matched categories (all synonyms)
-  const brands = new Set();
-  const titleWordsCount = {};
-
-  exactMatches.forEach(p => {
-    if (p.brand) brands.add(normalizeArabicText(p.brand));
-
-    // Expand category into its full bilingual group
-    if (p.category) {
-      const group = getCategoryGroup(p.category);
-      group.forEach(form => matchedCategoryGroups.add(form));
-    }
-
-    // Extract title words for text similarity scoring
-    const name = p.name || p.title || "";
-    const words = normalizeArabicText(name).split(/\s+/).filter(w => w.length > 2);
-    const fillers = new Set(["على", "من", "في", "مع", "الذي", "التي", "هذا", "هذه", "عن", "بين", "تحت", "فوق", "لكن", "او", "for", "and", "the", "with", "of"]);
-    words.forEach(w => {
-      if (!fillers.has(w)) {
-        titleWordsCount[w] = (titleWordsCount[w] || 0) + 1;
-      }
-    });
-  });
-
-  // Get most common title words (top 15 words)
-  const commonTitleWords = Object.keys(titleWordsCount)
-    .sort((a, b) => titleWordsCount[b] - titleWordsCount[a])
-    .slice(0, 15);
-
-  // 2. Score all other products in the store based on bilingual patterns
-  _allSearchProducts.forEach(p => {
-    const id = String(p.id);
-    if (exactIds.has(id)) return;
-
-    let score = 0;
-
-    // A. Bilingual category match score
-    if (p.category) {
-      const normPCat = normalizeArabicText(p.category);
-      if (matchedCategoryGroups.has(normPCat)) {
-        score += 15;
-      } else {
-        for (const groupForm of matchedCategoryGroups) {
-          if (normPCat.includes(groupForm) || groupForm.includes(normPCat)) {
-            score += 12;
-            break;
-          }
-        }
-      }
-    }
-
-    // B. Brand match score
-    if (p.brand && brands.has(normalizeArabicText(p.brand))) {
-      score += 8;
-    }
-
-    // C. Title keyword matching score
-    const pFullText = normalizeArabicText([p.name, p.title, p.description, p.brand, p.category].filter(Boolean).join(" "));
-    commonTitleWords.forEach(word => {
-      if (pFullText.includes(word)) {
-        score += 4 * (titleWordsCount[word] || 1);
-      }
-    });
-
-    if (score > 0) {
-      similar.push({ product: p, score: score });
-    }
-  });
-
-  // 3. If we have 0 exact matches, perform bilingual loose keyword matching on query
-  if (exactMatches.length === 0) {
-    const normQuery = normalizeArabicText(query);
-    if (normQuery) {
-      const words = normQuery.split(" ").filter(w => w.length > 2);
-      const queryGroups = new Set();
-      for (const [catName, synonyms] of Object.entries(CATEGORY_SYNONYMS)) {
-        const allForms = [catName, ...synonyms].map(s => normalizeArabicText(s));
-        if (allForms.some(f => words.some(w => f.includes(w) || w.includes(f)))) {
-          allForms.forEach(f => queryGroups.add(f));
-        }
-      }
-
-      if (words.length > 0) {
-        _allSearchProducts.forEach(p => {
-          const id = String(p.id);
-          const pCatNorm = normalizeArabicText(p.category || "");
-          const pFullText = normalizeArabicText([p.name, p.title, p.description, p.category, p.brand].filter(Boolean).join(" "));
-
-          let score = 0;
-
-          if (queryGroups.size > 0 && (queryGroups.has(pCatNorm) || [...queryGroups].some(g => pCatNorm.includes(g) || g.includes(pCatNorm)))) {
-            score += 18;
-          }
-
-          words.forEach(word => {
-            if (pFullText.includes(word)) score += 10;
-          });
-
-          if (score > 0) {
-            similar.push({ product: p, score: score });
-          }
-        });
-      }
-    }
-  }
-
-  // 4. Fillers: if we have fewer than 37 products, grab popular/random ones that aren't already included
-  if (similar.length < 37 && _allSearchProducts.length > 0) {
-    const seen = new Set([...exactIds, ...similar.map(s => String(s.product.id))]);
-    const candidates = _allSearchProducts.filter(p => !seen.has(String(p.id)));
-    const shuffled = candidates.sort(() => 0.5 - Math.random()).slice(0, 40 - similar.length);
-    shuffled.forEach(p => {
-      similar.push({ product: p, score: 0 });
-    });
-  }
-
-  // Sort by score descending and return the product objects (max 37)
-  return similar
-    .sort((a, b) => b.score - a.score)
-    .map(s => s.product)
-    .slice(0, 37);
-}
-
 // Render paginated search results
-function getSearchSuggestions(query) {
-  var suggestions = [];
-  var norm = normalizeArabicText(query);
-  if (!norm) return suggestions;
-  var words = norm.split(" ").filter(Boolean);
-  // 1. Match against CATEGORY_SYNONYMS
-  for (var _i = 0; _i < words.length; _i++) {
-    var word = words[_i];
-    if (word.length < 2) continue;
-    for (var cat in CATEGORY_SYNONYMS) {
-      var allForms = [cat].concat(CATEGORY_SYNONYMS[cat]);
-      for (var _j = 0; _j < allForms.length; _j++) {
-        var form = allForms[_j];
-        var normForm = normalizeArabicText(form);
-        if (normForm.includes(word) || word.includes(normForm)) {
-          suggestions.push(form);
-        }
-      }
-    }
-  }
-  // 2. Match against AR2EN_DICT (both Arabic keys and English values)
-  for (var _l = 0; _l < words.length; _l++) {
-    var w2 = words[_l];
-    if (w2.length < 2) continue;
-    for (var arWord in AR2EN_DICT) {
-      var enVal = AR2EN_DICT[arWord];
-      var normAr = normalizeArabicText(arWord);
-      if (normAr.includes(w2) || w2.includes(normAr)) suggestions.push(arWord);
-      if (typeof enVal === "string" && (enVal.includes(w2) || w2.includes(enVal))) suggestions.push(enVal);
-    }
-  }
-  // 3. Add fuzzy correction if no suggestions and query has no results
-  if (suggestions.length < 2 && window._isFuzzySearch) {
-    for (var _m = 0; _m < words.length; _m++) {
-      var w3 = words[_m];
-      if (w3.length < 2) continue;
-      var fuzzy = fuzzyDictLookup(w3, 2);
-      if (fuzzy) suggestions.push(fuzzy);
-    }
-  }
-  var unique = []; var seen = {};
-  for (var _k = 0; _k < suggestions.length; _k++) {
-    if (!seen[suggestions[_k]]) { seen[suggestions[_k]] = true; unique.push(suggestions[_k]); }
-  }
-  return unique.slice(0, 8);
-}
-
-const _SORT_OPTIONS = [
-  { key: "relevance", label: "الأكثر صلة" },
-  { key: "price_asc", label: "السعر: من الأقل" },
-  { key: "price_desc", label: "السعر: من الأعلى" },
-  { key: "rating", label: "التقييم" },
-  { key: "newest", label: "الأحدث" },
-  { key: "discount", label: "الخصم" },
-];
-let _currentSort = "relevance";
-
-function getImagesList(product) {
-  if (Array.isArray(product.images)) return product.images.filter(Boolean);
-  const imgs = [];
-  for (let i = 1; i <= 8; i++) {
-    const key = "image" + i;
-    if (product[key]) imgs.push(product[key]);
-  }
-  for (let i = 1; i <= 8; i++) {
-    const key = "img" + i;
-    if (product[key] && !imgs.includes(product[key])) imgs.push(product[key]);
-  }
-  for (let i = 1; i <= 8; i++) {
-    const key = "image_link" + i;
-    if (product[key] && !imgs.includes(product[key])) imgs.push(product[key]);
-  }
-  if (product.image && !imgs.includes(product.image)) imgs.push(product.image);
-  return imgs.length ? imgs : [];
-}
-
-function renderStars(rating) {
-  if (!rating || rating <= 0) return "";
-  const full = Math.floor(rating);
-  const half = rating - full >= 0.5;
-  let s = "";
-  for (let i = 0; i < 5; i++) {
-    if (i < full) s += "★";
-    else if (i === full && half) s += "★";
-    else s += "☆";
-  }
-  return s;
-}
-
-function buildNoonProductCard(product) {
-  const id = String(product.id);
-  const name = product.name || product.title || "منتج";
-  const images = getImagesList(product);
-  const hasMultipleImages = images.length > 1;
-  const rp = resolvePrice(product);
-  const rr = resolveRating(product);
-  const isWish = isWishlistedProduct(id);
-  const fb = "assets/images/unnamed.png";
-  const hasDiscount = rp.hasDiscount && rp.discountPercent > 0;
-
-  let imgsHtml = "";
-  if (images.length) {
-    for (let gi = 0; gi < images.length; gi++) {
-      imgsHtml += `<img class="noon-gallery-img${gi === 0 ? " active" : ""}" src="${escapeHtml(images[gi])}" alt="${escapeHtml(name)}" loading="lazy" onerror="this.onerror=null;this.closest('.noon-product-media-wrap')&&(this.src='${fb}')" />`;
-    }
-  } else {
-    imgsHtml = `<img class="noon-gallery-img active" src="${fb}" alt="${escapeHtml(name)}" />`;
-  }
-
-  let dotsHtml = "";
-  if (hasMultipleImages && images.length <= 8) {
-    for (let di = 0; di < images.length; di++) {
-      dotsHtml += `<span${di === 0 ? ' class="active"' : ''}></span>`;
-    }
-  }
-
-  let counterHtml = "";
-  if (hasMultipleImages) {
-    counterHtml = `<span class="noon-img-counter"><span class="noon-img-current">1</span>/<span class="noon-img-total">${images.length}</span></span>`;
-  }
-
-  let arrowsHtml = "";
-  if (hasMultipleImages) {
-    arrowsHtml = `<button class="noon-gallery-arrow noon-gallery-arrow-prev" type="button" aria-label="السابق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"/></svg></button><button class="noon-gallery-arrow noon-gallery-arrow-next" type="button" aria-label="التالي"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg></button>`;
-  }
-
-  let badges = "";
-  if (hasDiscount) {
-    badges += `<span class="noon-badge-discount">-${rp.discountPercent}%</span>`;
-  }
-  if (product.isOfficial) {
-    badges += `<span class="noon-badge-official">رسمي</span>`;
-  }
-  if (product.isTopProduct) {
-    badges += `<span class="noon-badge-top">الأفضل</span>`;
-  }
-
-  let starsHtml = "";
-  let ratingHtml = "";
-  if (rr.reviews > 0) {
-    starsHtml = `<span class="noon-stars">${renderStars(rr.rating)}</span>`;
-    ratingHtml = `<span class="noon-rating-value">${rr.rating.toFixed(1)}</span><span class="noon-rating-count">(${rr.reviews})</span>`;
-  } else {
-    ratingHtml = `<span class="noon-no-rating">لا توجد تقييمات</span>`;
-  }
-
-  let shippingHtml = "";
-  if (product.freeShipping || product.shipping === "free") {
-    shippingHtml = `<div class="noon-shipping"><span>🚚</span> شحن مجاني</div>`;
-  } else if (product.shipping === "tomorrow") {
-    shippingHtml = `<div class="noon-shipping"><span>🚚</span> يصل غدًا</div>`;
-  } else if (product.shipping) {
-    shippingHtml = `<div class="noon-shipping"><span>🚚</span> ${escapeHtml(product.shipping)}</div>`;
-  }
-
-  let stockHtml = "";
-  const qty = Number(product.quantity) || Number(product.stock) || 0;
-  if (qty <= 0) {
-    stockHtml = `<div class="noon-stock out">نفدت الكمية</div>`;
-  } else if (qty <= 3) {
-    stockHtml = `<div class="noon-stock">تبقى ${qty} فقط</div>`;
-  }
-
-  const isOutOfStock = qty <= 0;
-  const addBtnClass = "noon-add-square" + (isOutOfStock ? " disabled" : "");
-
-  return `<article class="noon-product-card" data-product-id="${escapeHtml(id)}">
-    <div class="noon-product-media-wrap">
-      <div class="noon-gallery-imgs">${imgsHtml}</div>
-      ${dotsHtml ? `<div class="noon-img-dots">${dotsHtml}</div>` : ""}
-      ${counterHtml}
-      ${arrowsHtml}
-      ${badges}
-      <button class="icon-btn noon-wishlist-btn ${isWish ? "is-active" : ""}" data-wishlist="${escapeHtml(id)}" aria-label="إضافة إلى المفضلة" aria-pressed="${isWish ? "true" : "false"}">
-        <span class="material-icons-outlined">${isWish ? "favorite" : "favorite_border"}</span>
-      </button>
-    </div>
-    <div class="noon-product-body">
-      <div class="noon-title" title="${escapeHtml(name)}">${escapeHtml(name)}</div>
-      <div class="noon-rating-row">${starsHtml} ${ratingHtml}</div>
-      <div class="noon-price-line">
-        <span class="noon-price">${formatMoney(rp.finalPrice)}</span>
-        ${hasDiscount ? `<span class="noon-old-price">${formatMoney(rp.originalPrice)}</span>` : ""}
-        ${hasDiscount ? `<span class="noon-discount-pill">-${rp.discountPercent}%</span>` : ""}
-      </div>
-      ${shippingHtml}
-      ${stockHtml}
-      <div class="noon-add-cart-wrap">
-        <button class="${addBtnClass}" data-add-to-cart="${escapeHtml(id)}" aria-label="إضافة إلى السلة"${isOutOfStock ? " disabled" : ""}>+</button>
-      </div>
-    </div>
-  </article>`;
-}
-
-function renderSortBar() {
-  const container = document.getElementById("search-sort-bar");
-  if (!container) return;
-  container.classList.remove("hidden");
-  let html = `<div class="noon-sort-bar"><div class="noon-sort-options">`;
-  _SORT_OPTIONS.forEach(opt => {
-    html += `<button type="button" class="noon-sort-btn${_currentSort === opt.key ? " active" : ""}" data-sort="${opt.key}">${opt.label}</button>`;
-  });
-  html += `</div></div>`;
-  container.innerHTML = html;
-  container.querySelectorAll(".noon-sort-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-      _currentSort = btn.getAttribute("data-sort");
-      sortAndRenderResults();
-    });
-  });
-}
-
-function sortResults(products) {
-  const sorted = [...products];
-  switch (_currentSort) {
-    case "price_asc": sorted.sort((a, b) => (a.price || 0) - (b.price || 0)); break;
-    case "price_desc": sorted.sort((a, b) => (b.price || 0) - (a.price || 0)); break;
-    case "rating": sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0)); break;
-    case "newest": sorted.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)); break;
-    case "discount": sorted.sort((a, b) => (b.discountPercent || 0) - (a.discountPercent || 0)); break;
-    default: break;
-  }
-  return sorted;
-}
-
-function sortAndRenderResults() {
-  _currentSearchResults = sortResults(_currentSearchResults);
-  _currentCategoryFilter = "الكل";
-  _currentPage = 1;
-  renderCategoryFilters();
-  applyCategoryFilterAndRender();
-}
-
-function renderSkeleton() {
-  const resultsEl = document.getElementById("search-results");
-  if (!resultsEl) return;
-  let html = '<div class="noon-skeleton-grid">';
-  for (let i = 0; i < 12; i++) {
-    html += `<div class="noon-skeleton-card"><div class="noon-skeleton-img"></div><div class="noon-skeleton-body"><div class="noon-skeleton-line w80 h12"></div><div class="noon-skeleton-line w60 h12"></div><div class="noon-skeleton-line w40 h16"></div><div class="noon-skeleton-line w80 h24"></div></div></div>`;
-  }
-  html += '</div>';
-  resultsEl.innerHTML = html;
-}
-
 function renderResultsPage() {
   const resultsEl = document.getElementById("search-results");
   if (!resultsEl) return;
+  hideSearchSkeleton();
 
   const start = (_currentPage - 1) * _PRODUCTS_PER_PAGE;
-  const pageItems = _filteredSearchResults.slice(start, start + _PRODUCTS_PER_PAGE);
+  const pageItems = (_filteredSearchResults || []).slice(start, start + _PRODUCTS_PER_PAGE);
 
-  if (_currentPage === 1) {
-    resultsEl.innerHTML = "";
-  }
-
-  if (!pageItems.length && _currentPage === 1) {
-    const inputEl2 = document.getElementById("search-input");
-    const q = inputEl2 ? inputEl2.value : "";
-    let emptyHtml = `<div class="noon-empty-state"><img src="../assets/images/empty-search.png" alt="" onerror="this.style.display='none'" /><h3>لا توجد نتائج</h3><p>لم نعثر على نتائج مطابقة لـ "${escapeHtml(q)}". جرب كلمات بحث أخرى.</p><a href="home.html" class="noon-empty-btn">العودة للرئيسية</a></div>`;
-    resultsEl.innerHTML = emptyHtml;
+  if (!pageItems.length) {
+    resultsEl.innerHTML = '<div class="search-empty-state">لا توجد نتائج مطابقة في هذا القسم.</div>';
+    renderPagination(_filteredSearchResults.length);
     return;
   }
 
-  if (!pageItems.length) return;
-
-  var isFuzzy = window._isFuzzySearch;
-  if (isFuzzy && _currentPage === 1) {
-    var notice = document.createElement("div");
-    notice.style.cssText = "padding:10px 14px;margin-bottom:12px;background:#fef3c7;border-radius:10px;color:#92400e;font-size:0.82rem;text-align:right;";
-    var inputEl2 = document.getElementById("search-input");
-    var q = inputEl2 ? inputEl2.value : "";
-    var spellCheck = fuzzyDictLookup(normalizeArabicText(q), 2);
-    var noticeMsg = "لم نعثر على نتائج مطابقة لـ \u201C" + q + "\u201D. إليك نتائج مشابهة:";
-    if (spellCheck && normalizeArabicText(spellCheck) !== normalizeArabicText(q)) {
-      noticeMsg = "\u201C" + q + "\u201D لم يعثر على نتائج. عرض نتائج مشابهة لـ \u201C" + spellCheck + "\u201D:";
-    }
-    notice.textContent = noticeMsg;
-    resultsEl.appendChild(notice);
-  }
-
-  if (_currentPage === 1) {
-    renderSortBar();
-  }
-
-  var grid = document.createElement("div");
-  grid.className = "noon-grid";
+  let html = '<div class="noon-grid">';
   for (let i = 0; i < pageItems.length; i++) {
-    grid.innerHTML += buildNoonProductCard(pageItems[i]);
+    html += typeof buildProductCard === "function" ? buildProductCard(pageItems[i]) : "<div>product</div>";
   }
-  resultsEl.appendChild(grid);
+  html += '</div>';
+  resultsEl.innerHTML = html;
 
-  if (_currentCategoryFilter === "الكل" && _currentPage === 1 && _allSearchProducts.length > 0) {
-    const inputEl = document.getElementById("search-input");
-    const queryVal = inputEl ? inputEl.value : "";
-
-    if (_currentSearchResults.length > 0 && !window._isFuzzySearch) {
-      var similarProducts = getSimilarProducts(_currentSearchResults, queryVal);
-      if (similarProducts.length > 0) {
-        var similarWrap = document.createElement("div");
-        similarWrap.className = "similar-products-wrap";
-        var similarTitle = document.createElement("h3");
-        similarTitle.style.cssText = "margin:20px 0 12px;font-size:1.05rem;font-weight:700;text-align:right;";
-        similarTitle.textContent = "منتجات قد تعجبك";
-        similarWrap.appendChild(similarTitle);
-        var similarGrid = document.createElement("div");
-        similarGrid.className = "noon-grid";
-        for (var si = 0; si < similarProducts.length; si++) {
-          similarGrid.innerHTML += buildNoonProductCard(similarProducts[si]);
-        }
-        similarWrap.appendChild(similarGrid);
-        resultsEl.appendChild(similarWrap);
-      }
-    }
-
-    var suggChips = getSearchSuggestions(queryVal);
-    if (suggChips.length > 0) {
-      var chipWrap = document.createElement("div");
-      chipWrap.style.cssText = "margin:16px 0 4px;text-align:right;";
-      var chipLabel = document.createElement("div");
-      chipLabel.style.cssText = "font-size:0.82rem;color:#6b7280;margin-bottom:8px;";
-      chipLabel.textContent = "هل تبحث عن:";
-      chipWrap.appendChild(chipLabel);
-      var chipRow = document.createElement("div");
-      chipRow.style.cssText = "display:flex;flex-wrap:wrap;gap:6px;";
-      for (var ci = 0; ci < suggChips.length; ci++) {
-        (function(term) {
-          var chip = document.createElement("button");
-          chip.type = "button";
-          chip.textContent = term;
-          chip.style.cssText = "padding:5px 12px;border:1px solid #e5e7eb;border-radius:20px;background:#fff;font-size:0.78rem;cursor:pointer;color:#1a1a1a;font-family:inherit;";
-          chip.addEventListener("click", function() {
-            if (inputEl) { inputEl.value = term; }
-            performSearch(term);
-          });
-          chipRow.appendChild(chip);
-        })(suggChips[ci]);
-      }
-      chipWrap.appendChild(chipRow);
-      resultsEl.appendChild(chipWrap);
-    }
+  if (typeof attachProductCardEvents === "function") {
+    attachProductCardEvents(resultsEl);
   }
 
-  attachCardEvents(resultsEl);
-  checkInfiniteScroll();
+  renderPagination(_filteredSearchResults.length);
 }
 
-function attachCardEvents(container) {
-  // Use event delegation - attach ONCE to container, not to each element
-  if (container.dataset.eventsAttached === "true") return;
-  container.dataset.eventsAttached = "true";
-
-  // Wishlist toggle
-  container.addEventListener("click", function(e) {
-    var wishBtn = e.target.closest("[data-wishlist]");
-    if (wishBtn) {
-      e.stopPropagation();
-      var pid = wishBtn.getAttribute("data-wishlist");
-      if (!window.BudaStore) return;
-      var active = window.BudaStore.toggleWishlist(pid);
-      wishBtn.classList.toggle("is-active", Boolean(active));
-      wishBtn.setAttribute("aria-pressed", active ? "true" : "false");
-      var icon = wishBtn.querySelector(".material-icons-outlined");
-      if (icon) icon.textContent = active ? "favorite" : "favorite_border";
-      return;
-    }
-
-    // Add to cart
-    var addBtn = e.target.closest("[data-add-to-cart]");
-    if (addBtn && !addBtn.disabled) {
-      e.stopPropagation();
-      var pid = addBtn.getAttribute("data-add-to-cart");
-      if (!window.BudaStore) return;
-      var p = window.BudaStore.getProductById(pid);
-      if (!p) return;
-      window.BudaStore.addToCart(p, 1);
-      window.BudaStore.updateCartCount();
-      addBtn.style.transform = "scale(0.8)";
-      setTimeout(function() { addBtn.style.transform = ""; }, 150);
-      return;
-    }
-
-    // Product card click (navigate) - but not if clicking gallery controls
-    var card = e.target.closest(".noon-product-card");
-    if (card && !e.target.closest("[data-wishlist]") && !e.target.closest("[data-add-to-cart]") && !e.target.closest(".noon-gallery-arrow") && !e.target.closest(".noon-img-dots")) {
-      var pid = card.getAttribute("data-product-id");
-      if (pid) navigateToProduct(pid);
-    }
-  });
-
-  function updateSearchCounter(wrap) {
-    var container2 = wrap && wrap.querySelector(".noon-gallery-imgs");
-    if (!container2) return;
-    var current = parseInt(container2.dataset.current || "0", 10);
-    var imgs = wrap.querySelectorAll(".noon-gallery-img");
-    if (!imgs.length) return;
-    var counterEl = wrap.querySelector(".noon-img-counter .noon-img-current");
-    if (counterEl) counterEl.textContent = Math.min(current + 1, imgs.length);
-  }
-
-  // Gallery controls - hover auto-slide (desktop) + touch swipe (mobile)
-  container.addEventListener("mouseenter", function(e) {
-    var wrap = e.target.closest(".noon-product-media-wrap");
-    if (!wrap) return;
-    var imgs = wrap.querySelectorAll(".noon-gallery-img");
-    if (imgs.length < 2) return;
-    if (window.matchMedia("(hover: none)").matches) return; // skip on touch devices
-    wrap.dataset.autoActive = "true";
-    var timer = setInterval(function() {
-      if (wrap.dataset.autoActive !== "true") {
-        clearInterval(timer);
-        return;
-      }
-      var container2 = wrap.querySelector(".noon-gallery-imgs");
-      if (!container2) return;
-      var current = parseInt(container2.dataset.current || "0", 10);
-      var next = (current + 1) % imgs.length;
-      container2.style.transform = "translateX(-" + (next * 100) + "%)";
-      container2.dataset.current = next;
-      var dots = wrap.querySelector(".noon-img-dots");
-      if (dots) {
-        dots.querySelectorAll("span").forEach(function(s, si) {
-          s.classList.toggle("active", si === next);
-        });
-      }
-      updateSearchCounter(wrap);
-    }, 1200);
-    wrap.dataset.autoTimer = timer;
-  });
-
-  container.addEventListener("mouseleave", function(e) {
-    var wrap = e.target.closest(".noon-product-media-wrap");
-    if (!wrap) return;
-    wrap.dataset.autoActive = "false";
-    var timer = wrap.dataset.autoTimer;
-    if (timer) {
-      clearInterval(timer);
-      wrap.dataset.autoTimer = "";
-    }
-    var container2 = wrap.querySelector(".noon-gallery-imgs");
-    if (container2) {
-      container2.style.transform = "translateX(0%)";
-      container2.dataset.current = "0";
-    }
-    var dots = wrap.querySelector(".noon-img-dots");
-    if (dots) {
-      updateSearchCounter(wrap);
-      dots.querySelectorAll("span").forEach(function(s, si) {
-        s.classList.toggle("active", si === 0);
-      });
-    }
-  });
-
-  // Gallery arrow clicks
-  container.addEventListener("click", function(e) {
-    var prevBtn = e.target.closest(".noon-gallery-arrow-prev");
-    var nextBtn = e.target.closest(".noon-gallery-arrow-next");
-    if (!prevBtn && !nextBtn) return;
-    e.stopPropagation();
-    var wrap = prevBtn ? prevBtn.closest(".noon-product-media-wrap") : nextBtn.closest(".noon-product-media-wrap");
-    if (!wrap) return;
-    var container2 = wrap.querySelector(".noon-gallery-imgs");
-    var imgs = wrap.querySelectorAll(".noon-gallery-img");
-    if (!container2 || imgs.length < 2) return;
-    var current = parseInt(container2.dataset.current || "0", 10);
-    var next = prevBtn ? current - 1 : current + 1;
-    if (next < 0) next = imgs.length - 1;
-    if (next >= imgs.length) next = 0;
-    container2.style.transform = "translateX(-" + (next * 100) + "%)";
-    container2.dataset.current = next;
-    var dots = wrap.querySelector(".noon-img-dots");
-    if (dots) {
-      dots.querySelectorAll("span").forEach(function(s, si) {
-        s.classList.toggle("active", si === next);
-      });
-    }
-    updateSearchCounter(wrap);
-  });
-
-  // Gallery dot clicks
-  container.addEventListener("click", function(e) {
-    var dot = e.target.closest(".noon-img-dots span");
-    if (!dot) return;
-    e.stopPropagation();
-    var wrap = dot.closest(".noon-product-media-wrap");
-    if (!wrap) return;
-    var container2 = wrap.querySelector(".noon-gallery-imgs");
-    var imgs = wrap.querySelectorAll(".noon-gallery-img");
-    var index = Array.from(dot.parentNode.children).indexOf(dot);
-    if (index >= 0 && index < imgs.length) {
-      container2.style.transform = "translateX(-" + (index * 100) + "%)";
-      container2.dataset.current = index;
-      dot.parentNode.querySelectorAll("span").forEach(function(s, si) {
-        s.classList.toggle("active", si === index);
-      });
-    }
-    updateSearchCounter(wrap);
-  });
-
-  // Touch swipe for mobile
-  container.addEventListener("touchstart", function(e) {
-    var wrap = e.target.closest(".noon-product-media-wrap");
-    if (!wrap) return;
-    wrap.dataset.touchStartX = e.changedTouches[0].screenX;
-  }, { passive: true });
-
-  container.addEventListener("touchend", function(e) {
-    var wrap = e.target.closest(".noon-product-media-wrap");
-    if (!wrap || !wrap.dataset.touchStartX) return;
-    var touchEndX = e.changedTouches[0].screenX;
-    var diff = wrap.dataset.touchStartX - touchEndX;
-    if (Math.abs(diff) > 30) {
-      var container2 = wrap.querySelector(".noon-gallery-imgs");
-      var imgs = wrap.querySelectorAll(".noon-gallery-img");
-      if (!container2 || imgs.length < 2) return;
-      var current = parseInt(container2.dataset.current || "0", 10);
-      var next = diff > 0 ? current + 1 : current - 1;
-      if (next < 0) next = imgs.length - 1;
-      if (next >= imgs.length) next = 0;
-      container2.style.transform = "translateX(-" + (next * 100) + "%)";
-      container2.dataset.current = next;
-      var dots = wrap.querySelector(".noon-img-dots");
-      if (dots) {
-        dots.querySelectorAll("span").forEach(function(s, si) {
-          s.classList.toggle("active", si === next);
-        });
-      }
-      updateSearchCounter(wrap);
-    }
-    delete wrap.dataset.touchStartX;
-  }, { passive: true });
-}
-
-// REMOVE the old setupGalleryControls function - replaced by delegation above
-// function setupGalleryControls(container) { ... }
-
-// Infinite scroll
-function checkInfiniteScroll() {
-  var loader = document.getElementById("infinite-loader");
-  if (loader) loader.remove();
-  var totalPages = Math.ceil(_filteredSearchResults.length / _PRODUCTS_PER_PAGE);
-  if (_currentPage >= totalPages) return;
-  var resultsEl = document.getElementById("search-results");
-  if (!resultsEl) return;
-  var sentinel = document.createElement("div");
-  sentinel.id = "infinite-loader";
-  sentinel.className = "noon-infinite-loader";
-  sentinel.textContent = "جاري تحميل المزيد...";
-  resultsEl.after(sentinel);
-  var observer = new IntersectionObserver(function(entries) {
-    if (entries[0].isIntersecting) {
-      observer.disconnect();
-      _currentPage++;
-      renderResultsPage();
-    }
-  }, { rootMargin: "200px" });
-  observer.observe(sentinel);
-}
-
-// Update renderPagination to use infinite scroll instead
+// Render pagination navigation controls
 function renderPagination(total) {
-  // Replaced by infinite scroll
+  const paginationEl = document.getElementById("pagination");
+  if (!paginationEl) return;
+
+  const totalPages = Math.ceil(total / _PRODUCTS_PER_PAGE);
+  if (totalPages <= 1) {
+    paginationEl.innerHTML = "";
+    return;
+  }
+
+  const parts = [];
+
+  parts.push('<button type="button" class="page-btn page-nav" data-page="1"' + (_currentPage === 1 ? ' disabled' : '') + '>«</button>');
+  parts.push('<button type="button" class="page-btn page-nav" data-page="' + (_currentPage - 1) + '"' + (_currentPage === 1 ? ' disabled' : '') + '>‹</button>');
+
+  const rangeStart = Math.max(1, _currentPage - 2);
+  const rangeEnd = Math.min(totalPages, _currentPage + 2);
+
+  if (rangeStart > 1) {
+    parts.push('<button type="button" class="page-btn" data-page="1">1</button>');
+    if (rangeStart > 2) {
+      parts.push('<span class="page-ellipsis">...</span>');
+    }
+  }
+
+  for (let p = rangeStart; p <= rangeEnd; p++) {
+    parts.push('<button type="button" class="page-btn' + (p === _currentPage ? ' active' : '') + '" data-page="' + p + '">' + p + '</button>');
+  }
+
+  if (rangeEnd < totalPages) {
+    if (rangeEnd < totalPages - 1) {
+      parts.push('<span class="page-ellipsis">...</span>');
+    }
+    parts.push('<button type="button" class="page-btn" data-page="' + totalPages + '">' + totalPages + '</button>');
+  }
+
+  parts.push('<button type="button" class="page-btn page-nav" data-page="' + (_currentPage + 1) + '"' + (_currentPage === totalPages ? ' disabled' : '') + '>›</button>');
+  parts.push('<button type="button" class="page-btn page-nav" data-page="' + totalPages + '"' + (_currentPage === totalPages ? ' disabled' : '') + '>»</button>');
+
+  paginationEl.innerHTML = parts.join("");
+
+  paginationEl.querySelectorAll(".page-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (btn.disabled) return;
+      _currentPage = parseInt(btn.getAttribute("data-page"), 10);
+      renderResultsPage();
+      const resultsEl = document.getElementById("search-results");
+      if (resultsEl) {
+        window.scrollTo({ top: resultsEl.offsetTop - 80, behavior: "smooth" });
+      }
+    });
+  });
 }
 
 // Global wrapper to prevent errors if called from external components
 window.renderProductsInContainer = function(container, products) {
-  _currentSearchResults = (products || []).map(p => 
-    window.BudaStore && typeof window.BudaStore.normalizeProductRecord === "function"
-      ? window.BudaStore.normalizeProductRecord(p)
-      : p
-  ).filter(Boolean);
+  _currentSearchResults = products || [];
   _currentCategoryFilter = "الكل";
   _currentPage = 1;
   renderCategoryFilters();
   applyCategoryFilterAndRender();
 };
 
-var _searchInProgress = false;
-var _searchDebounceTimer = null;
-var _suggestionDebounceTimer = null;
-
 async function performSearch(query) {
-  if (_searchInProgress) return Promise.resolve();
   const resultsEl = document.getElementById("search-results");
   if (!resultsEl) return;
+  const layoutEl = document.querySelector('.search-page-layout');
 
   const term = normalizeTerm(query);
   if (!term) {
@@ -1733,62 +903,104 @@ async function performSearch(query) {
     renderSearchHistory();
     const filterContainer = document.getElementById("search-filter-container");
     if (filterContainer) filterContainer.classList.add("hidden");
-    return Promise.resolve();
+    const paginationEl = document.getElementById("pagination");
+    if (paginationEl) paginationEl.innerHTML = "";
+    if (layoutEl) layoutEl.classList.remove('results-visible');
+    return;
   }
 
-  _searchInProgress = true;
-  if (_searchDebounceTimer) { clearTimeout(_searchDebounceTimer); _searchDebounceTimer = null; }
+  hideSuggestions();
+  setHistoryVisibility(false);
+  saveSearchHistory(term);
+  renderSearchHistory();
 
-  try {
-    hideSuggestions();
-    setHistoryVisibility(false);
-    saveSearchHistory(term);
-    renderSearchHistory();
-
-    renderSkeleton();
-
-    if (!_allSearchProducts.length) {
-      await loadAllSearchProducts();
-    }
-
-    _currentSearchResults = searchProductsLocal(term);
-    if (window.Analytics) Analytics.trackSearch(term, _currentSearchResults);
-    _currentCategoryFilter = "الكل";
-    _currentPage = 1;
-
-    if (!_currentSearchResults.length) {
-      window._isFuzzySearch = true;
-      var similarFallback = getSimilarProducts([], term);
-      if (similarFallback.length > 0) {
-        _currentSearchResults = similarFallback;
-      } else {
-        resultsEl.innerHTML = '<div class="search-empty-state">لا توجد نتائج مطابقة لهذا البحث.</div>';
-        const filterContainer = document.getElementById("search-filter-container");
-        if (filterContainer) filterContainer.classList.add("hidden");
-        const sortBar = document.getElementById("search-sort-bar");
-        if (sortBar) sortBar.classList.add("hidden");
-        return;
-      }
-    } else {
-      window._isFuzzySearch = false;
-    }
-
-    renderCategoryFilters();
-    applyCategoryFilterAndRender();
-  } finally {
-    _searchInProgress = false;
+  if (!_allSearchProducts.length) {
+    showSearchSkeleton();
+    await loadAllSearchProducts();
   }
+
+  // Initial search (instant, uses dictionary + morphological)
+  _currentSearchResults = searchProductsLocal(term);
+  _currentCategoryFilter = "الكل";
+  _currentPage = 1;
+
+  // Background translation via API for better results (non-blocking)
+  var apiWords = normalizeArabicText(term).split(" ").filter(Boolean);
+  var _searchTermAtFetch = term;
+  fetchTranslations(apiWords).then(function() {
+    if (_searchTermAtFetch !== normalizeTerm(document.getElementById("search-input")?.value || document.getElementById("buda-header-search-input")?.value || "")) return;
+    var enriched = searchProductsLocal(term);
+    if (enriched.length > (_currentSearchResults || []).length) {
+      _currentSearchResults = enriched;
+      _currentCategoryFilter = "الكل";
+      _currentPage = 1;
+      hideSearchSkeleton();
+      renderSidebarFilters();
+      applyAllFiltersAndRender();
+      if (layoutEl) layoutEl.classList.add('results-visible');
+    }
+  });
+
+  if (!_currentSearchResults.length) {
+    hideSearchSkeleton();
+    resultsEl.innerHTML = '<div class="search-empty-state">لا توجد نتائج مطابقة لهذا البحث.</div>';
+    const filterContainer = document.getElementById("search-filter-container");
+    if (filterContainer) filterContainer.classList.add("hidden");
+    const paginationEl = document.getElementById("pagination");
+    if (paginationEl) paginationEl.innerHTML = "";
+    if (layoutEl) layoutEl.classList.remove('results-visible');
+    return;
+  }
+
+  renderSidebarFilters();
+  applyAllFiltersAndRender();
+  if (layoutEl) layoutEl.classList.add('results-visible');
 }
 
-document.addEventListener("DOMContentLoaded", async () => {
-  const inputEl = document.getElementById("search-input");
+document.addEventListener("DOMContentLoaded", () => {
+  var mobileInput = document.getElementById("search-input");
+  var desktopInput = document.getElementById("buda-header-search-input");
+  // Pick the visible input
+  var inputEl = mobileInput || desktopInput;
+  if (mobileInput && desktopInput && mobileInput !== desktopInput) {
+    var mobileHidden = mobileInput.offsetParent === null;
+    var desktopHidden = desktopInput.offsetParent === null;
+    if (desktopHidden && !mobileHidden) inputEl = mobileInput;
+    else if (mobileHidden && !desktopHidden) inputEl = desktopInput;
+    // Sync values between both
+    mobileInput.addEventListener("input", function () { desktopInput.value = mobileInput.value; });
+    desktopInput.addEventListener("input", function () { mobileInput.value = desktopInput.value; });
+  }
   const clearBtn = document.getElementById("clear-button");
   const searchBtn = document.getElementById("search-button");
   const suggestionsEl = document.getElementById("suggestions");
 
   if (!inputEl) return;
 
-  // Check for ?q= query param from search redirect
+  // Attach keydown to both inputs
+  function attachSearchKeydown(el) {
+    if (!el) return;
+    el.addEventListener("keydown", function (event) {
+      if (event.key !== "Enter") return;
+      event.preventDefault();
+      _suppressSuggestions = true;
+      if (suggestionsEl) {
+        suggestionsEl.innerHTML = "";
+        suggestionsEl.classList.add("hidden");
+      }
+      setHistoryVisibility(false);
+      performSearch(el.value).finally(function () {
+        _suppressSuggestions = false;
+      });
+    });
+  }
+  attachSearchKeydown(mobileInput);
+  attachSearchKeydown(desktopInput);
+
+  // Load search index immediately
+  loadAllSearchProducts();
+
+  // Check for ?q= query param from search redirect with Enter key
   var urlParams = new URLSearchParams(window.location.search);
   var queryFromUrl = normalizeTerm(urlParams.get("q") || "");
   inputEl.value = queryFromUrl ? queryFromUrl : "";
@@ -1797,6 +1009,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   renderSearchHistory();
   setHistoryVisibility(true);
   clearResults();
+
+  if (queryFromUrl) {
+    performSearch(queryFromUrl);
+  }
 
   function toggleClear() {
     if (!clearBtn) return;
@@ -1810,20 +1026,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   });
 
-  inputEl.addEventListener("input", function() {
-    var term = normalizeTerm(inputEl.value);
+  inputEl.addEventListener("input", () => {
+    const term = normalizeTerm(inputEl.value);
+    renderSuggestions(term);
     toggleClear();
-
-    if (_suggestionDebounceTimer) {
-      clearTimeout(_suggestionDebounceTimer);
-      _suggestionDebounceTimer = null;
-    }
 
     if (term) {
       setHistoryVisibility(false);
-      _suggestionDebounceTimer = setTimeout(function() {
-        renderSuggestions(term);
-      }, 120);
       return;
     }
 
@@ -1831,33 +1040,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     clearResults();
     renderSearchHistory();
     setHistoryVisibility(true);
-    var filterContainer = document.getElementById("search-filter-container");
+    const filterContainer = document.getElementById("search-filter-container");
     if (filterContainer) filterContainer.classList.add("hidden");
-  });
-
-  inputEl.addEventListener("keydown", function(event) {
-    if (event.key !== "Enter") return;
-    event.preventDefault();
-    if (_searchDebounceTimer) { clearTimeout(_searchDebounceTimer); _searchDebounceTimer = null; }
-    if (_suggestionDebounceTimer) { clearTimeout(_suggestionDebounceTimer); _suggestionDebounceTimer = null; }
-    _suppressSuggestions = true;
-    if (suggestionsEl) {
-      suggestionsEl.innerHTML = "";
-      suggestionsEl.classList.add("hidden");
-    }
-    setHistoryVisibility(false);
-    performSearch(inputEl.value).finally(function() {
-      _suppressSuggestions = false;
-    });
+    const paginationEl = document.getElementById("pagination");
+    if (paginationEl) paginationEl.innerHTML = "";
   });
 
   inputEl.addEventListener("blur", () => {
     setTimeout(() => suggestionsEl?.classList.add("hidden"), 160);
   });
 
-  clearBtn?.addEventListener("click", function() {
-    if (_searchDebounceTimer) { clearTimeout(_searchDebounceTimer); _searchDebounceTimer = null; }
-    if (_suggestionDebounceTimer) { clearTimeout(_suggestionDebounceTimer); _suggestionDebounceTimer = null; }
+  clearBtn?.addEventListener("click", () => {
     inputEl.value = "";
     inputEl.focus();
 
@@ -1870,50 +1063,23 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderSearchHistory();
     setHistoryVisibility(true);
     toggleClear();
-    var filterContainer = document.getElementById("search-filter-container");
+    const filterContainer = document.getElementById("search-filter-container");
     if (filterContainer) filterContainer.classList.add("hidden");
-    var paginationEl = document.getElementById("pagination");
+    const paginationEl = document.getElementById("pagination");
     if (paginationEl) paginationEl.innerHTML = "";
   });
 
-  searchBtn?.addEventListener("click", function() {
-    if (_searchDebounceTimer) { clearTimeout(_searchDebounceTimer); _searchDebounceTimer = null; }
-    if (_suggestionDebounceTimer) { clearTimeout(_suggestionDebounceTimer); _suggestionDebounceTimer = null; }
+  searchBtn?.addEventListener("click", () => {
     _suppressSuggestions = true;
     if (suggestionsEl) {
       suggestionsEl.innerHTML = "";
       suggestionsEl.classList.add("hidden");
     }
     setHistoryVisibility(false);
-    performSearch(inputEl.value).finally(function() {
+    performSearch(inputEl.value).finally(() => {
       _suppressSuggestions = false;
     });
   });
 
   toggleClear();
-
-  // Load products in background, then perform initial search if query param exists
-  loadAllSearchProducts().then(function() {
-    if (queryFromUrl) {
-      performSearch(queryFromUrl);
-    }
-  });
-
-  // Reload search products when country changes
-  document.addEventListener("boda:country-changed", async function () {
-    _allSearchProducts = [];
-    _productSearchKeys.clear();
-    await loadAllSearchProducts();
-    // Re-run current search if there's a query
-    var q = normalizeTerm(inputEl.value);
-    if (q) {
-      performSearch(q);
-    } else {
-      hideSuggestions();
-      clearResults();
-      renderSearchHistory();
-      setHistoryVisibility(true);
-    }
-  });
-
 });

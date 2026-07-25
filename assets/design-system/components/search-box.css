@@ -1,0 +1,142 @@
+/* 
+ * Buda Design System v2.0 - Search Box Component
+ * Path: assets/design-system/components/search-box.css
+ */
+
+.buda-search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: var(--size-full, 100%);
+  height: var(--space-56, 56px); /* 8pt grid constraint satisfied */
+  background-color: var(--color-surface-primary, #ffffff);
+  border-radius: var(--radius-xl, 18px); /* Using an extended radius token */
+  border: var(--border-width-sm, 1px) solid var(--color-border-subtle, #e5e7eb);
+  font-family: var(--font-primary, inherit);
+  transition: opacity var(--duration-fast, 150ms) ease;
+}
+
+/* Focus State applied to wrapper via :focus-within */
+.buda-search-box:focus-within {
+  /* Creating a gradient border effect via box-shadow or linear-gradient border */
+  border-color: transparent;
+  background-clip: padding-box;
+  box-shadow: 0 0 0 var(--border-width-md, 2px) var(--color-primary, #007bff);
+}
+
+/* Input Area */
+.buda-search-box__input {
+  flex-grow: 1;
+  height: var(--size-full, 100%);
+  background: transparent;
+  border: none;
+  padding-block: var(--space-0, 0);
+  padding-inline-start: var(--space-16, 16px);
+  padding-inline-end: var(--space-16, 16px);
+  font-size: var(--font-size-md, 1rem);
+  color: var(--color-text-primary, #111827);
+  outline: none;
+}
+
+.buda-search-box__input::placeholder {
+  color: var(--color-text-muted, #9ca3af);
+}
+
+/* Icons Wrapper */
+.buda-search-box__icon-left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline-start: var(--space-24, 24px);
+  color: var(--color-icon-muted, #6b7280);
+}
+
+.buda-search-box__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8, 8px);
+  padding-inline-end: var(--space-16, 16px);
+}
+
+/* Buttons (Clear, Camera, Voice) */
+.buda-search-box__btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: var(--space-8, 8px);
+  color: var(--color-icon-muted, #6b7280);
+  cursor: pointer;
+  border-radius: var(--radius-circle, 50%);
+  outline: none;
+  transition: opacity var(--duration-fast, 150ms) ease, transform var(--duration-fast, 150ms) ease;
+}
+
+.buda-search-box__btn:hover {
+  opacity: var(--opacity-hover, 0.8);
+  color: var(--color-primary, #007bff);
+}
+
+.buda-search-box__btn:active {
+  transform: scale(var(--scale-active, 0.95));
+}
+
+.buda-search-box__btn:focus-visible {
+  box-shadow: 0 0 0 var(--border-width-lg, 2px) var(--color-focus-ring, #007bff);
+}
+
+/* Clear Button Visibility */
+.buda-search-box__clear {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.buda-search-box__input:not(:placeholder-shown) ~ .buda-search-box__actions .buda-search-box__clear {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Dropdown Results */
+.buda-search-box__results {
+  position: absolute;
+  top: calc(100% + var(--space-8, 8px));
+  inset-inline-start: var(--space-0, 0);
+  width: var(--size-full, 100%);
+  background-color: var(--color-surface-primary, #ffffff);
+  border-radius: var(--radius-lg, 12px);
+  box-shadow: var(--shadow-lg, 0 10px 15px -3px rgba(0, 0, 0, 0.1));
+  border: var(--border-width-sm, 1px) solid var(--color-border-subtle, #e5e7eb);
+  z-index: var(--z-index-dropdown, 100);
+  max-height: var(--size-dropdown-max, 320px);
+  overflow-y: auto;
+  opacity: 0;
+  transform: translateY(calc(var(--space-8, 8px) * -1));
+  pointer-events: none;
+  transition: opacity var(--duration-fast, 150ms) ease, transform var(--duration-fast, 150ms) ease;
+}
+
+.buda-search-box[data-expanded="true"] .buda-search-box__results {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* Dark Theme Adjustments */
+[data-theme="dark"] .buda-search-box,
+[data-theme="dark"] .buda-search-box__results {
+  background-color: var(--color-surface-dark, #1f2937);
+  border-color: var(--color-border-dark, #374151);
+}
+
+[data-theme="dark"] .buda-search-box__input {
+  color: var(--color-text-inverse, #f9fafb);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buda-search-box,
+  .buda-search-box__btn,
+  .buda-search-box__results {
+    transition: none;
+  }
+}

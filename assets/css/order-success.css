@@ -1,16 +1,16 @@
-/* ========================================================================
+﻿/* ========================================================================
    Order Success Page
    ======================================================================== */
 :root {
-  --os-blue: #3866df;
-  --os-blue-dark: #1e40af;
-  --os-blue-light: #eff6ff;
-  --os-success: #16a34a;
-  --os-text: #1a1a2e;
-  --os-muted: #6b7c93;
-  --os-border: #e8ecf3;
-  --os-bg: #f5f6fa;
-  --os-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  --os-blue: #6D28D9;
+  --os-blue-dark: #3B0A75;
+  --os-blue-light: #F3E8FF;
+  --os-success: #10B981;
+  --os-text: #111111;
+  --os-muted: #6B7280;
+  --os-border: #E5E7EB;
+  --os-bg: #FFFFFF;
+  --os-shadow: 0 1px 3px rgba(109,40,217,0.08);
 }
 
 body.app-shell--success {
@@ -132,9 +132,52 @@ body.app-shell--success {
   overflow: hidden;
 }
 
+.os-product-sku {
+  font-size: 0.65rem;
+  color: var(--os-muted);
+  display: block;
+  font-weight: 600;
+  direction: ltr;
+  text-align: left;
+}
 .os-product-meta {
   font-size: 0.75rem;
   color: var(--os-muted);
+  display: block;
+  margin-top: 2px;
+}
+
+/* Totals summary */
+.os-totals {
+  margin-bottom: 16px;
+  padding: 12px 16px;
+  background: #f9fafb;
+  border-radius: 12px;
+}
+.os-total-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 0;
+  font-size: 0.85rem;
+  color: var(--os-muted);
+}
+.os-total-row.os-grand-total-row {
+  font-size: 1rem;
+  color: var(--os-text);
+}
+.os-total-row.os-grand-total-row strong {
+  font-size: 1.15rem;
+  color: var(--os-blue);
+}
+.os-total-row.os-discount-row {
+  color: #16a34a;
+  font-weight: 600;
+}
+.os-total-divider {
+  height: 1px;
+  background: var(--os-border);
+  margin: 6px 0;
 }
 
 /* Delivery summary */
@@ -249,3 +292,4 @@ body.app-shell--success {
 @media (min-width: 768px) {
   .os-main { padding: 40px 16px; }
 }
+

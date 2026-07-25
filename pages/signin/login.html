@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
@@ -57,30 +57,13 @@
         لا تملك حسابًا؟ <a href="../signup/index.html">إنشاء حساب</a>
       </div>
 
-      <div class="google-wrap">
-        <div id="g_id_onload"
-          data-client_id="593904075909-i91gvs8n2lsloq8dn4bjtmbgmv9tg7kk.apps.googleusercontent.com"
-          data-context="signin"
-          data-ux_mode="popup"
-          data-callback="TFA"
-          data-auto_prompt="false">
-        </div>
-        <div class="g_id_signin"
-          data-type="standard"
-          data-shape="rectangular"
-          data-theme="outline"
-          data-text="continue_with"
-          data-size="large"
-          data-logo_alignment="left">
-        </div>
-      </div>
+      <div class="google-wrap" id="google-button-wrap"></div>
     </div>
   </div>
 
   <script src="../../assets/vendor/supabase/supabase-js@2.js"></script>
   <script src="../../assets/js/supabase-client.js?v=20260327-1"></script>
   <script src="../../assets/js/store.js?v=20260327-1"></script>
-  <script src="../../assets/js/noon-shell.js"></script>
   <script src="../../assets/js/security-utils.js"></script>
   <script src="../../assets/js/auth.config.js"></script>
   <script src="signin.js"></script>

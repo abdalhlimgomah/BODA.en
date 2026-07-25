@@ -1,7 +1,7 @@
 body.order-summary-shell {
   margin: 0;
   min-height: 100vh;
-  background: linear-gradient(180deg, #fffde9 0%, #f7f8fb 28%, #f7f8fb 100%);
+  background: linear-gradient(180deg, #fafbfd 0%, #f7f8fb 28%, #f7f8fb 100%);
   color: var(--noon-text, #102a43);
   padding-bottom: 0 !important;
   overflow-x: hidden;
@@ -180,6 +180,29 @@ body.order-summary-shell *::after {
 
 .summary-invoice button.is-disabled {
   opacity: 0.7;
+}
+
+.summary-invoice-text {
+  width: 100%;
+  min-height: 220px;
+  font-family: "Courier New", monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #102a43;
+  background: #f8fafd;
+  border: 1px solid #dbe4f3;
+  border-radius: 10px;
+  padding: 10px;
+  resize: vertical;
+  direction: ltr;
+  white-space: pre;
+  overflow-x: auto;
+  margin-bottom: 10px;
+  tab-size: 2;
+}
+
+.summary-invoice button {
+  margin-top: 4px;
 }
 
 .summary-product-row {

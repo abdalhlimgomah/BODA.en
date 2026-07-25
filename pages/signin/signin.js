@@ -507,11 +507,27 @@ function initGoogleSignIn() {
     return;
   }
 
-  const target = document.querySelector(".g_id_signin");
-  if (!target) return;
-  bindGoogleSignInIntent(target);
+  if (!window.__Buda_GOOGLE_INIT_DONE) {
+    google.accounts.id.initialize({
+      client_id: GOOGLE_CLIENT_ID,
+      callback: TFA,
+    });
+    window.__Buda_GOOGLE_INIT_DONE = true;
+  }
 
-  google.accounts.id.renderButton(target, {
+  const wrap = document.getElementById("google-button-wrap");
+  if (!wrap) return;
+
+  let btn = wrap.querySelector(".g_id_signin");
+  if (!btn) {
+    btn = document.createElement("div");
+    btn.className = "g_id_signin";
+    wrap.appendChild(btn);
+  }
+
+  bindGoogleSignInIntent(btn);
+
+  google.accounts.id.renderButton(btn, {
     theme: "outline",
     size: "large",
     text: "continue_with",

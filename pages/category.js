@@ -1,4 +1,4 @@
-console.log("[category.js] loaded");
+﻿console.log("[category.js] loaded");
 document.addEventListener("DOMContentLoaded", async function () {
   var catKey = new URLSearchParams(window.location.search).get("cat");
   if (!catKey) { window.location.href = "products.html"; return; }
@@ -97,10 +97,21 @@ document.addEventListener("DOMContentLoaded", async function () {
     "هدايا": ["هدية", "هدايا", "gift", "طقم هدايا", "gift set"],
   };
 
+  function findCategoryImg(catName) {
+    if (!window.HOME_CONFIG || !window.HOME_CONFIG.categories) return "";
+    for (var ci = 0; ci < window.HOME_CONFIG.categories.length; ci++) {
+      var c = window.HOME_CONFIG.categories[ci];
+      var mainName = c.name;
+      var altNames = [mainName, normalizeText(mainName)];
+      if (altNames.indexOf(normalizeText(catName)) !== -1) return c.img || "";
+      if (catName.indexOf(mainName) !== -1 || mainName.indexOf(catName) !== -1) return c.img || "";
+    }
+    return "";
+  }
+
   function applyCategoryFilter(selected) {
     currentPage = 1;
     if (selected === "الكل") {
-      // Use the full keyword map for this category
       var originalCatLabel = CATEGORY_LABEL_MAP[catKey.toLowerCase()] || null;
       if (originalCatLabel && CATEGORY_KEYWORDS_LOCAL[originalCatLabel]) {
         var kws = CATEGORY_KEYWORDS_LOCAL[originalCatLabel];
@@ -222,25 +233,31 @@ document.addEventListener("DOMContentLoaded", async function () {
   }
 
   function selectCategory(category) {
-    filterContainer.querySelectorAll(".filter-btn").forEach(function (btn) {
-      btn.classList.toggle("active", btn.textContent.trim() === category);
+    filterContainer.querySelectorAll(".cat-chip-btn").forEach(function (btn) {
+      btn.classList.toggle("active", btn.getAttribute("data-cat") === category);
     });
     if (sidebarCats) {
       sidebarCats.querySelectorAll(".sidebar-cat-btn").forEach(function (btn) {
-        btn.classList.toggle("active", btn.textContent.trim() === category);
+        btn.classList.toggle("active", btn.getAttribute("data-cat") === category);
       });
     }
     applyCategoryFilter(category);
   }
 
   function renderFilters() {
-    filterContainer.innerHTML = categories.map(function (c) {
-      return '<button type="button" class="filter-btn">' + c + "</button>";
+    var html = categories.map(function (c) {
+      var img = c === "الكل" ? "" : findCategoryImg(c);
+      var activeClass = c === "الكل" ? " active" : "";
+      if (img) {
+        return '<button type="button" class="cat-chip-btn' + activeClass + '" data-cat="' + c + '"><img src="' + img + '" alt="" loading="lazy" onerror="this.style.display=\'none\'"><span>' + c + "</span></button>";
+      }
+      return '<button type="button" class="cat-chip-btn' + activeClass + '" data-cat="' + c + '"><span>' + c + "</span></button>";
     }).join("");
+    filterContainer.innerHTML = html;
 
-    filterContainer.querySelectorAll(".filter-btn").forEach(function (btn) {
+    filterContainer.querySelectorAll(".cat-chip-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        selectCategory(btn.textContent.trim());
+        selectCategory(btn.getAttribute("data-cat"));
       });
     });
   }
@@ -248,11 +265,12 @@ document.addEventListener("DOMContentLoaded", async function () {
   function renderSidebar() {
     if (!sidebarCats) return;
     sidebarCats.innerHTML = categories.map(function (c) {
-      return '<button type="button" class="sidebar-cat-btn">' + c + "</button>";
+      var activeClass = c === "الكل" ? " active" : "";
+      return '<button type="button" class="sidebar-cat-btn' + activeClass + '" data-cat="' + c + '">' + c + "</button>";
     }).join("");
     sidebarCats.querySelectorAll(".sidebar-cat-btn").forEach(function (btn) {
       btn.addEventListener("click", function () {
-        selectCategory(btn.textContent.trim());
+        selectCategory(btn.getAttribute("data-cat"));
       });
     });
   }
@@ -268,90 +286,18 @@ document.addEventListener("DOMContentLoaded", async function () {
         console.warn("[category] fetch failed", e);
         allProducts = window.BudaStore ? Object.values(window.BudaStore.getAllProducts()) : [];
       }
-      renderFilters();
-      renderSidebar();
-      selectInitialCategory();
-      return;
-    }
-
-    if (window.supabaseClient && typeof window.supabaseClient.fetchAllProducts === "function") {
-      try {
-        allProducts = (await window.supabaseClient.fetchAllProducts()) || [];
-      } catch (e) {
-        console.warn("[category] fetch failed", e);
-        allProducts = window.BudaStore ? Object.values(window.BudaStore.getAllProducts()) : [];
-      }
-      if (window.TaagerIntegration) {
-        var tp = await window.TaagerIntegration.fetchTaagerProducts(countryCode);
-        window.TaagerIntegration.mergeTaagerIntoStore(tp);
-        allProducts = allProducts.concat(tp);
-      }
     } else {
       allProducts = window.BudaStore ? Object.values(window.BudaStore.getAllProducts()) : [];
     }
+    console.log("[category] loaded", allProducts.length, "products for catKey:", catKey);
 
-    renderFilters();
-    renderSidebar();
-    selectInitialCategory();
+    currentFiltered = allProducts.slice();
+    renderProducts(currentFiltered);
   }
 
-  function selectInitialCategory() {
-    var allBtns = filterContainer.querySelectorAll(".filter-btn");
-    var found = false;
-    allBtns.forEach(function (btn) {
-      if (btn.textContent.trim() === categoryLabel) {
-        selectCategory(categoryLabel);
-        found = true;
-      }
-    });
-    if (!found && allBtns.length) {
-      selectCategory(allBtns[0].textContent.trim());
-    }
-  }
-
-  document.addEventListener("boda:country-changed", function () { fetchProducts(); });
-  fetchProducts();
-  document.addEventListener("boda:wishlist-updated", function () {
-    productsGrid.querySelectorAll("[data-wishlist]").forEach(function (btn) {
-      var id = btn.getAttribute("data-wishlist");
-      if (!id || !window.BudaStore) return;
-      var active = window.BudaStore.isInWishlist(id);
-      var icon = btn.querySelector(".material-icons-outlined");
-      btn.classList.toggle("is-active", Boolean(active));
-      btn.setAttribute("aria-pressed", active ? "true" : "false");
-      if (icon) icon.textContent = active ? "favorite" : "favorite_border";
-    });
-  });
+  // Init
+  renderFilters();
+  renderSidebar();
+  await fetchProducts();
 });
 
-// Category URL param → Arabic label mapping (same as main.js)
-var CATEGORY_LABEL_MAP = {
-  phones: "موبايلات وملحقاتها",
-  mobile: "موبايلات وملحقاتها",
-  electronics: "إلكترونيات",
-  watches: "ساعات",
-  keyboards: "إلكترونيات",
-  headphones: "سماعات",
-  audio: "سماعات",
-  headset: "سماعات",
-  children: "ملابس وأحذية",
-  clothes: "ملابس وأحذية",
-  "beauty-and-care": "منتجات تجميل وعناية",
-  cosmetics: "عطور",
-  perfume: "عطور",
-  sports: "منتجات رياضية",
-  home: "منزل ومطبخ",
-  kitchen: "منزل ومطبخ",
-  toys: "ألعاب",
-  baby: "حفاضات وأطفال",
-  books: "كتب ومجلات",
-  pets: "حيوانات أليفة",
-  auto: "سيارات",
-  jewelry: "مجوهرات وإكسسوارات",
-  cameras: "كاميرات وتصوير",
-  gifts: "هدايا",
-  office: "مكتب ودراسة",
-  stationery: "مكتب ودراسة",
-  study: "مكتب ودراسة",
-  furniture: "مستلزمات المنزل",
-};

@@ -26,10 +26,66 @@ function ensureSkeletonAssets() {
   document.head.appendChild(cssLink);
 }
 
+function ensureSiteIdentity() {
+  // JSON-LD structured data for Google Site Name
+  if (document.getElementById("boda-schema")) return;
+  var schema = document.createElement("script");
+  schema.id = "boda-schema";
+  schema.type = "application/ld+json";
+  schema.textContent = JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "Buda",
+    "alternateName": "Buda",
+    "url": "https://buda-rho.vercel.app/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://buda-rho.vercel.app/pages/search.html?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  });
+  document.head.appendChild(schema);
+}
+
+function ensureAnalyticsAssets() {
+  // Insert GA4 gtag directly in <head> for Google detection
+  if (!document.getElementById("boda-gtag")) {
+    var gtagScript = document.createElement("script");
+    gtagScript.id = "boda-gtag";
+    gtagScript.async = true;
+    gtagScript.src = "https://www.googletagmanager.com/gtag/js?id=G-PRZGJW879Z";
+    document.head.insertBefore(gtagScript, document.head.firstChild);
+
+    var gtagInit = document.createElement("script");
+    gtagInit.innerHTML = "window.dataLayer = window.dataLayer || []; function gtag(){dataLayer.push(arguments);} gtag('js', new Date()); gtag('config', 'G-PRZGJW879Z');";
+    document.head.insertBefore(gtagInit, document.head.firstChild);
+  }
+
+  // Load analytics-manager.js for enhanced e-commerce events
+  if (document.getElementById("boda-analytics-script")) return;
+  const jsUrl = resolveAssetUrl("../js/seo/analytics-manager.js?v=20260725");
+  const script = document.createElement("script");
+  script.id = "boda-analytics-script";
+  script.src = jsUrl;
+  document.body.appendChild(script);
+}
+
 ensureSkeletonAssets();
+ensureAnalyticsAssets();
 
 function ensureHeaderCSS() {
   if (document.getElementById("boda-header-css")) return;
+
+  var nightCssId = "boda-night-css";
+  if (!document.getElementById(nightCssId)) {
+    var nightUrl = resolveAssetUrl("../css/noon.css?v=20260722");
+    var nightLink = document.createElement("link");
+    nightLink.id = nightCssId;
+    nightLink.rel = "stylesheet";
+    nightLink.href = nightUrl;
+    document.head.appendChild(nightLink);
+  }
+
   var exists = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some(function (link) { return link.href && link.href.indexOf('home.css') !== -1; });
   if (exists) return;
   var cssUrl = resolveAssetUrl("../css/home.css?v=20260711a");
@@ -41,83 +97,60 @@ function ensureHeaderCSS() {
 }
 
 function getNoonHeaderHTML() {
-  var userEmail = (localStorage.getItem("userEmail") || "").trim();
-  var userCountry = (localStorage.getItem("userCountry") || "EG");
-  var selectedAddr = "";
-  if (userEmail) {
-    var selId = localStorage.getItem('buda_selected_address_' + userEmail + '_' + userCountry);
-    if (!selId) selId = localStorage.getItem('buda_selected_address_' + userEmail);
-    selId = selId || '';
-    try { selId = JSON.parse(selId); } catch {}
-    if (selId) {
-      var all = [];
-      try { all = JSON.parse(localStorage.getItem('buda_saved_addresses_' + userEmail + '_' + userCountry) || '[]'); } catch {}
-      if (!all.length) {
-        try { all = JSON.parse(localStorage.getItem('buda_saved_addresses_' + userEmail) || '[]'); } catch {}
-      }
-      var found = all.find(function (a) { return String(a.id) === String(selId); });
-      if (found) selectedAddr = found.label || found.name || found.area || '';
-    }
-    if (!selectedAddr) {
-      selectedAddr = localStorage.getItem("selected_address_" + userEmail + '_' + userCountry);
-      if (!selectedAddr) selectedAddr = localStorage.getItem("selected_address_" + userEmail);
-      selectedAddr = selectedAddr || "";
-    }
-  }
-  var isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-  var userName = localStorage.getItem("userFullName") || localStorage.getItem("userEmail") || "حسابي";
-  var accountItems = isLoggedIn
-    ? '<a href="ahsab.html" class="buda-dd-item"><span class="material-icons-outlined">person</span> حسابي</a><a href="my-orders.html" class="buda-dd-item"><span class="material-icons-outlined">receipt_long</span> طلباتي</a><a href="returns.html" class="buda-dd-item"><span class="material-icons-outlined">undo</span> الإرجاعات</a><a href="addresses.html" class="buda-dd-item"><span class="material-icons-outlined">location_on</span> العناوين</a><a href="wishlist.html" class="buda-dd-item"><span class="material-icons-outlined">favorite_border</span> المفضلة</a><a href="#" class="buda-dd-item" id="budaSupportBtn"><span class="material-icons-outlined">chat</span> الدعم</a><a href="edit-account.html" class="buda-dd-item"><span class="material-icons-outlined">settings</span> الإعدادات</a><div class="buda-dd-divider"></div><a href="logout-confirmation.html" class="buda-dd-item buda-dd-logout"><span class="material-icons-outlined">logout</span> تسجيل الخروج</a>'
-    : '<a href="ahsab.html" class="buda-dd-item"><span class="material-icons-outlined">login</span> تسجيل الدخول</a>';
   return [
-    '<div class="buda-header-top">',
-    '  <div class="buda-header-top-inner">',
-    '    <div class="header-start">',
-    '      <button id="menu-toggle" class="menu-btn" type="button" aria-label="القائمة"><span class="menu-icon"></span></button>',
-    '      <div class="brand-badge">Buda</div>',
+    '<div class="buda-header__inner">',
+    '  <a href="home.html" class="buda-header__brand" id="budaHeaderBrand">',
+    '    <img class="buda-header__logo-img" src="../assets/images/logo.png" alt="Buda" />',
+    '    <span class="buda-header__brand-name">Buda</span>',
+    '  </a>',
+    '  <div class="buda-header__search-inline" id="budaHeaderSearch">',
+    '    <div class="buda-search-box" id="budaSearchDropdown">',
+    '      <span class="buda-search-icon">',
+    '        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
+    '      </span>',
+    '      <input id="buda-header-search-input" class="buda-search-box__input" type="text" data-search-target="search.html" placeholder="ابحث..." autocomplete="off" />',
     '    </div>',
-    '    <div class="buda-location" id="budaLocationTrigger">',
-    '      <span class="buda-location-icon material-icons-outlined">home</span>',
-    '      <div class="buda-location-text">',
-    '        <span class="buda-location-label">التوصيل إلى</span>',
-    '        <strong class="buda-location-value" id="deliver-to-text">' + (selectedAddr || "اختر عنوان التوصيل") + '</strong>',
-    '      </div>',
-    '      <span class="buda-location-arrow material-icons-outlined">keyboard_arrow_down</span>',
-    '    </div>',
-    '    <div class="app-search search-left-icon buda-search">',
-    '      <span class="material-icons-outlined">search</span>',
-    '      <input id="search-input" type="text" data-search-target="search.html" placeholder="ابحث عن منتج أو فئة" autocomplete="off" />',
-
-    '      <div class="buda-search-dropdown" id="budaSearchDropdown">',
-    '        <div class="buda-search-recent" id="budaSearchRecent">',
-    '          <div class="buda-search-dd-header"><span>عمليات البحث الأخيرة</span><button id="budaClearRecent" type="button">مسح</button></div>',
-    '          <div class="buda-search-dd-items" id="budaSearchRecentItems"></div>',
-    '        </div>',
-    '        <div class="buda-search-suggestions" id="budaSearchSuggestions">',
-    '          <div class="buda-search-dd-header"><span>اقتراحات</span></div>',
-    '          <div class="buda-search-dd-items" id="budaSearchSuggestionItems"></div>',
-    '        </div>',
-    '      </div>',
-    '    </div>',
-    '    <div class="buda-lang" id="budaLangTrigger">',
-    '      <span class="buda-lang-text">EN</span>',
-    '      <span class="material-icons-outlined buda-lang-globe">language</span>',
-    '    </div>',
-    '    <div class="buda-account" id="budaAccountTrigger">',
-    '      <div class="buda-account-avatar" id="budaAccountAvatar"><span class="material-icons-outlined">person</span></div>',
-    '      <div class="buda-account-info">',
-    '        <span class="buda-account-name" id="budaAccountName">حسابي</span>',
-    '        <span class="material-icons-outlined buda-account-arrow">keyboard_arrow_down</span>',
-    '      </div>',
-    '      <div class="buda-account-dropdown" id="budaAccountDropdown">' + accountItems + '</div>',
-    '    </div>',
-    '    <a href="my-orders.html" class="buda-header-action" title="طلباتي"><span class="material-icons-outlined">receipt_long</span><small>طلباتي</small></a>',
-    '    <a href="wishlist.html" class="buda-header-action" title="المفضلة"><span class="material-icons-outlined">favorite_border</span><small>المفضلة</small></a>',
-    '    <a href="empty-cart.html" class="buda-header-action buda-header-cart" title="العربة"><span class="material-icons-outlined">shopping_cart</span><small>العربة</small><span class="buda-cart-badge" id="budaCartBadge">0</span></a>',
     '  </div>',
-    '</div>',
-    '<nav class="taager-mega-bar" id="taagerMegaBar" role="navigation" aria-label="التصنيفات الرئيسية"></nav>'
+    '  <div class="buda-header__nav-group">',
+    '    <button class="buda-header__notif" type="button" aria-label="الإشعارات">',
+    '      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+    '      <span class="buda-header__badge" id="budaCartBadge">0</span>',
+    '    </button>',
+    '    <a href="wishlist.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> المفضلة</a>',
+    '    <a href="my-orders.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg> طلباتي</a>',
+    '    <a href="empty-cart.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> السلة</a>',
+    '    <div class="buda-desktop-account" id="budaDesktopAccount">',
+    '      <button class="buda-header__desktop-link buda-desktop-account-btn" id="budaDesktopAccountBtn">',
+    '        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <span id="budaDesktopAccountLabel">حسابي</span>',
+    '      </button>',
+    '      <div class="buda-desktop-account-dropdown" id="budaDesktopAccountDropdown"></div>',
+    '    </div>',
+    '    <button id="menu-toggle" class="buda-header__menu-btn" type="button" aria-label="القائمة">',
+    '      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>',
+    '    </button>',
+    '  </div>',
+    '</div>'
   ].join('\n');
+}
+
+function injectLegacyHiddenElements() {
+  var isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+  var accountItems = isLoggedIn
+    ? '<a href="ahsab.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> حسابي</a><a href="my-orders.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg> طلباتي</a><a href="returns.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg> الإرجاعات</a><a href="addresses.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg> العناوين</a><a href="wishlist.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> المفضلة</a><a href="#" id="budaSupportBtn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> الدعم</a><a href="edit-account.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> تعديل الحساب</a><a href="edit-account.html?tab=password"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> تغيير كلمة المرور</a><div class="buda-header__account-divider"></div><a href="#" id="budaLogoutBtn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg> تسجيل الخروج</a>'
+    : '<a href="ahsab.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> تسجيل الدخول</a>';
+  var legacyHTML =
+    '<div id="budaLocationTrigger" class="buda-v2-hidden"></div>' +
+    '<strong id="deliver-to-text" class="buda-v2-hidden"></strong>' +
+    '<button id="budaLangTrigger" class="buda-v2-hidden"></button>' +
+    '<div id="budaAccountTrigger" class="buda-v2-hidden"><div class="buda-header__account-dropdown" id="budaAccountDropdown">' + accountItems + '</div></div>' +
+    '<nav class="buda-header__nav buda-v2-hidden" id="budaHeaderNav" role="navigation" aria-label="التصنيفات الرئيسية"></nav>';
+  if (!document.getElementById('buda-legacy-container')) {
+    var c = document.createElement('div');
+    c.id = 'buda-legacy-container';
+    c.style.display = 'none';
+    c.innerHTML = legacyHTML;
+    document.body.appendChild(c);
+  }
 }
 
 function ensureSidebar() {
@@ -136,7 +169,7 @@ function ensureSidebar() {
       '<nav class="sidebar-nav">' +
       (isLoggedIn && userName ? '<a href="ahsab.html" class="sidebar-link"><span class="material-icons-outlined">person</span> ' + escapeHtml(userName) + '</a>' : '<a href="ahsab.html" class="sidebar-link"><span class="material-icons-outlined">login</span> تسجيل الدخول</a>') +
       '<a href="home.html" class="sidebar-link"><span class="material-icons-outlined">home</span> الرئيسية</a>' +
-      '<a href="products.html" class="sidebar-link"><span class="material-icons-outlined">category</span> المنتجات</a>' +
+      '<a href="sections.html" class="sidebar-link"><span class="material-icons-outlined">category</span> الأقسام</a>' +
       '<a href="my-orders.html" class="sidebar-link"><span class="material-icons-outlined">inventory_2</span> طلباتي</a>' +
       '<a href="wishlist.html" class="sidebar-link"><span class="material-icons-outlined">favorite</span> المفضلة</a>' +
       '<a href="ahsab.html" class="sidebar-link"><span class="material-icons-outlined">settings</span> الإعدادات</a>' +
@@ -176,29 +209,65 @@ function ensureModals() {
 }
 
 function injectDesktopElements() {
-  if (document.querySelector('.buda-header')) return;
   var header = document.querySelector('.app-header');
   if (!header) return;
+  if (header.querySelector('.buda-header__inner')) return;
   ensureHeaderCSS();
   header.innerHTML = getNoonHeaderHTML();
   header.classList.add('buda-header');
-  header.style.padding = '0';
-  header.style.borderRadius = '0';
-  header.style.border = 'none';
-  header.style.boxShadow = 'none';
   ensureModals();
+}
+
+function injectFloatingSearch() {
+  if (document.getElementById('buda-search-float')) return;
+  var header = document.querySelector('.app-header');
+  if (!header) return;
+  var wrap = document.createElement('div');
+  wrap.id = 'buda-search-float';
+  wrap.innerHTML =
+    '<div class="buda-search-box" id="budaSearchDropdownFloat">' +
+    '  <span class="buda-search-icon">' +
+    '    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>' +
+    '  </span>' +
+    '  <input id="search-input" class="buda-search-box__input" type="text" data-search-target="search.html" placeholder="ابحث عن منتجاتك المفضلة..." autocomplete="off" />' +
+    '</div>';
+  header.appendChild(wrap);
 }
 
 function injectStandardBottomNav() {
   var nav = document.querySelector('.bottom-nav');
   if (!nav) return;
   nav.innerHTML =
-    '<a href="home.html" data-nav="home"><span class="material-icons-outlined">home</span><small>الرئيسية</small></a>' +
-    '<a href="products.html" data-nav="products"><span class="material-icons-outlined">category</span><small>الفئات</small></a>' +
-    '<button class="nav-home-btn" id="nav-home-btn" type="button" aria-label="الرئيسية"><span class="material-icons-outlined" style="font-size:24px;">store</span></button>' +
-    '<a href="ahsab.html" data-nav="account"><span class="material-icons-outlined">person</span><small>حسابي</small></a>' +
-    '<a href="empty-cart.html" data-nav="cart"><span class="material-icons-outlined">shopping_cart</span><small>العربة</small><span class="nav-cart-count nav-cart-0" id="nav-cart-count">0</span></a>';
+    '<a href="home.html" data-nav="home">' +
+    '  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>' +
+    '  <small>الرئيسية</small>' +
+    '</a>' +
+    '<a href="sections.html" data-nav="sections">' +
+    '  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/></svg>' +
+    '  <small>الأقسام</small>' +
+    '</a>' +
+    '<a href="empty-cart.html" data-nav="cart">' +
+    '  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>' +
+    '  <small>السلة</small>' +
+    '  <span class="nav-cart-count nav-cart-0" id="nav-cart-count">0</span>' +
+    '</a>' +
+    '<a href="wishlist.html" data-nav="wishlist">' +
+    '  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>' +
+    '  <small>المفضلة</small>' +
+    '</a>' +
+    '<a href="ahsab.html" data-nav="account">' +
+    '  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
+    '  <small>الحساب</small>' +
+    '</a>';
   nav.style.opacity = '1';
+  // ensure nav-home-btn exists in DOM (for legacy JS)
+  if (!document.getElementById('nav-home-btn')) {
+    var legacy = document.createElement('button');
+    legacy.id = 'nav-home-btn';
+    legacy.className = 'buda-v2-hidden';
+    legacy.type = 'button';
+    document.body.appendChild(legacy);
+  }
 }
 
 function initNoonHeaderUI() {
@@ -229,34 +298,10 @@ function initNoonHeaderUI() {
   }
 
   // Search
-  var searchInput = document.getElementById('search-input') || document.getElementById('home-search');
-  var searchWrap = searchInput ? searchInput.closest('.buda-search') : null;
+  var searchInput = document.querySelector('#search-input:not([style*="display: none"]), #buda-header-search-input:not([style*="display: none"]), #home-search:not([style*="display: none"])') || document.getElementById('search-input') || document.getElementById('buda-header-search-input') || document.getElementById('home-search');
   if (searchInput) {
-    function renderRecentSearches() {
-      var recentEl = document.getElementById('budaSearchRecentItems');
-      if (!recentEl) return;
-      try {
-        var recent = JSON.parse(localStorage.getItem('budaRecentSearches') || '[]');
-        if (!recent.length) { recentEl.innerHTML = ''; return; }
-        recentEl.innerHTML = recent.map(function (s) {
-          return '<div class="buda-search-dd-item" data-search-term="' + s.replace(/"/g, '&quot;') + '"><span class="material-icons-outlined">schedule</span> ' + s.replace(/</g, '&lt;') + '</div>';
-        }).join('');
-        recentEl.querySelectorAll('[data-search-term]').forEach(function (el) {
-          el.addEventListener('click', function () {
-            var term = el.getAttribute('data-search-term');
-            if (term) window.location.href = 'search.html?q=' + encodeURIComponent(term);
-          });
-        });
-      } catch {}
-    }
-    searchInput.addEventListener('focus', function () {
-      if (window.location.pathname.toLowerCase().includes('/search.html')) return;
-      searchWrap && searchWrap.classList.add('active');
-      renderRecentSearches();
-    });
     searchInput.addEventListener('keydown', function (e) {
       if (e.key === 'Enter') {
-        // On search page, let search.js handle Enter
         if (window.location.pathname.toLowerCase().indexOf('/search.html') !== -1) return;
         var q = searchInput.value.trim();
         if (q) {
@@ -271,19 +316,10 @@ function initNoonHeaderUI() {
         }
       }
     });
-    document.addEventListener('click', function (e) { if (searchWrap && !searchWrap.contains(e.target)) searchWrap.classList.remove('active'); });
   }
 
-  var searchClear = document.getElementById('budaSearchClear');
-  if (searchClear) {
-    searchClear.addEventListener('click', function () {
-      if (!searchInput) return;
-      searchInput.value = '';
-      searchWrap && searchWrap.classList.remove('has-text', 'active');
-      searchInput.focus();
-    });
-  }
   if (searchInput) {
+    var searchWrap = searchInput.closest('.buda-search-box');
     searchInput.addEventListener('input', function () {
       var val = searchInput.value.trim();
       if (val) { searchWrap && searchWrap.classList.add('has-text'); } else { searchWrap && searchWrap.classList.remove('has-text'); }
@@ -301,7 +337,7 @@ function initNoonHeaderUI() {
 
   // Mega menu bar - populate if not already rendered by page-specific JS
   if (!window._megaMenuRendered) {
-    var megaBar = document.getElementById('taagerMegaBar');
+    var megaBar = document.getElementById('budaHeaderNav');
     if (megaBar && !megaBar.hasChildNodes()) {
       renderMegaMenu(megaBar);
     }
@@ -339,20 +375,6 @@ function initNoonHeaderUI() {
     if (supportClose) supportClose.addEventListener('click', closeSupport);
   }
 
-  // Cart badge
-  function updateCartBadge() {
-    var badge = document.getElementById('budaCartBadge');
-    if (!badge) return;
-    var count = window.BudaStore ? (typeof window.BudaStore.getCartCount === 'function' ? window.BudaStore.getCartCount() : 0) : 0;
-    badge.textContent = count;
-    badge.classList.toggle('hidden', count === 0);
-  }
-  updateCartBadge();
-  if (window.BudaStore && typeof window.BudaStore.updateCartCount === 'function') {
-    var origUpdate = window.BudaStore.updateCartCount;
-    window.BudaStore.updateCartCount = function () { origUpdate.call(window.BudaStore); updateCartBadge(); };
-  }
-
   // Language toggle
   var langTrigger = document.getElementById('budaLangTrigger');
   if (langTrigger) {
@@ -362,29 +384,68 @@ function initNoonHeaderUI() {
       else window.location.href = window.location.pathname.replace('/en/', '/ar/') + window.location.search;
     });
   }
+
 }
 function initDesktopLoginLabel() {
-  var accName = document.getElementById('budaAccountName');
-  if (accName) {
-    var isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-    var userName = localStorage.getItem("userFullName") || localStorage.getItem("userEmail") || "حسابي";
-    accName.textContent = isLoggedIn ? (userName.length > 10 ? userName.slice(0,10)+'...' : userName) : 'حسابي';
-  }
-  var dropdown = document.getElementById('budaAccountDropdown');
-  if (dropdown) {
-    var firstLink = dropdown.querySelector('.buda-dd-item');
-    if (firstLink) {
-      var isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
-      if (isLoggedIn) {
-        firstLink.innerHTML = '<span class="material-icons-outlined">person</span> حسابي';
-        firstLink.href = 'ahsab.html';
-      } else {
-        firstLink.innerHTML = '<span class="material-icons-outlined">login</span> تسجيل الدخول';
-        firstLink.href = 'ahsab.html';
-      }
+  var dropdown = document.getElementById('budaDesktopAccountDropdown');
+  var label = document.getElementById('budaDesktopAccountLabel');
+  if (!dropdown) return;
+
+  var rawUser = localStorage.getItem('currentUser');
+  var validUser = false;
+  var displayName = '';
+  try {
+    var parsed = JSON.parse(rawUser);
+    if (parsed && parsed.email && parsed.id) {
+      validUser = true;
+      displayName = parsed.name || parsed.email.split('@')[0] || 'حسابي';
     }
+  } catch(e) {}
+
+  if (validUser) {
+    if (label) label.textContent = displayName.length > 10 ? displayName.substring(0, 10) + '..' : displayName;
+    dropdown.innerHTML =
+      '<a href="ahsab.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> حسابي</a>' +
+      '<a href="sections.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> الأقسام</a>' +
+      '<a href="my-orders.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg> طلباتي</a>' +
+      '<a href="returns.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg> الإرجاعات</a>' +
+      '<a href="ahsab.html#support" id="budaDesktopSupportBtn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> الدعم</a>' +
+      '<div class="buda-divider"></div>' +
+      '<button id="budaDesktopLogout" class="buda-logout"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> تسجيل الخروج</button>';
+    var logoutBtn = document.getElementById('budaDesktopLogout');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', function() {
+        window.location.href = 'logout-confirmation.html';
+      });
+    }
+  } else {
+    // Clean up stale login state
+    if (localStorage.getItem('isLoggedIn') === 'true') {
+      localStorage.removeItem('isLoggedIn');
+    }
+    if (label) label.textContent = 'حسابي';
+    dropdown.innerHTML =
+      '<a href="ahsab.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><polyline points="10 17 15 12 10 7"/><line x1="15" y1="12" x2="3" y2="12"/></svg> تسجيل الدخول</a>' +
+      '<a href="sections.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> الأقسام</a>';
   }
-}function injectDesktopFooter() {
+
+  // Toggle on click
+  var btn = document.getElementById('budaDesktopAccountBtn');
+  var wrap = document.getElementById('budaDesktopAccount');
+  if (btn && wrap) {
+    btn.addEventListener('click', function(e) {
+      e.stopPropagation();
+      e.preventDefault();
+      wrap.classList.toggle('open');
+    });
+    document.addEventListener('click', function(e) {
+      if (!wrap.contains(e.target) && wrap.classList.contains('open')) {
+        wrap.classList.remove('open');
+      }
+    });
+  }
+}
+function injectDesktopFooter() {
   if (window.innerWidth < 1200) return;
 
   var grid = document.querySelector(".footer-grid");
@@ -442,9 +503,8 @@ function hideBottomNavOnDesktop() {
         active = true;
       }
       if (nav === "account" && (path.includes("/ahsab.html") || path.includes("/my-orders.html"))) active = true;
-      if (nav === "cart" && (path.includes("/empty-cart.html") || path.includes("/checkout.html"))) {
-        active = true;
-      }
+      if (nav === "cart" && (path.includes("/empty-cart.html") || path.includes("/checkout.html"))) active = true;
+      if (nav === "wishlist" && (path.includes("/wishlist.html"))) active = true;
 
       link.classList.toggle("is-active", active);
     });
@@ -522,7 +582,7 @@ function hideBottomNavOnDesktop() {
           window.location.href = url;
         }
       });
-      var searchWrap = input.closest('.app-search, .buda-search');
+      var searchWrap = input.closest('.app-search, .buda-header__search');
       if (searchWrap) {
         searchWrap.addEventListener("click", function (e) {
           if (e.target === input || input.contains(e.target)) return;
@@ -900,8 +960,9 @@ function hideBottomNavOnDesktop() {
   }
 
   function initBrandBadge() {
-    var badges = document.querySelectorAll(".brand-badge");
+    var badges = document.querySelectorAll(".brand-badge, .buda-logo");
     badges.forEach(function (el) {
+      if (el.tagName === 'A') return;
       el.style.cursor = "pointer";
       el.addEventListener("click", function () {
         window.location.href = "home.html";
@@ -909,8 +970,139 @@ function hideBottomNavOnDesktop() {
     });
   }
 
+  // Subscribe to support messages globally so the bell badge works on every page
+  function initSupportBadge() {
+    // Retry finding badge if header not injected yet
+    var badge = document.getElementById('budaCartBadge');
+    if (!badge) { setTimeout(initSupportBadge, 200); return; }
+    badge.classList.add('hidden');
+
+    // Clicking the bell opens the support chat
+    var bellBtn = document.querySelector('.buda-header__notif');
+    if (bellBtn) {
+      bellBtn.addEventListener('click', function () {
+        if (window.location.pathname.indexOf('ahsab.html') !== -1) {
+          if (typeof window.supportDrawer !== 'undefined' && window.supportDrawer.open) {
+            window.supportDrawer.open();
+          } else {
+            window.location.hash = '#support';
+          }
+          return;
+        }
+        var prefix = window.location.pathname.includes('/pages/') ? '' : 'pages/';
+        window.location.href = prefix + 'ahsab.html#support';
+      });
+    }
+
+    // Poll localStorage every 3s for badge updates (set by ahsab.html)
+    function readSupportCount() {
+      try {
+        var wn = parseInt(window.name.match(/_su=(\d+)/)?.[1] || "");
+        if (!isNaN(wn) && wn > 0) return wn;
+      } catch(e) {}
+      try {
+        var v = parseInt(localStorage.getItem("_supportUnread") || "");
+        if (!isNaN(v)) return v;
+      } catch(e) {}
+      try {
+        var m = document.cookie.match(/(?:^|;\s*)_supportUnread=(\d+)/);
+        if (m) return parseInt(m[1]);
+      } catch(e) {}
+      return 0;
+    }
+    function saveSupportCount(n) {
+      try { localStorage.setItem("_supportUnread", String(n)); } catch(e) {}
+      try { document.cookie = "_supportUnread=" + n + "; path=/"; } catch(e) {}
+      try {
+        var parts = window.name.split(';').filter(function(p) { return p.indexOf('_su=') !== 0; });
+        parts.push('_su=' + n);
+        window.name = parts.join(';');
+      } catch(e) {}
+    }
+    function pollFromStorage() {
+      try {
+        var saved = readSupportCount();
+        var cur = parseInt(badge.textContent || "0");
+        if (saved > 0 && saved !== cur) {
+          badge.textContent = saved > 99 ? "99+" : saved;
+          badge.classList.remove("hidden");
+        } else if (saved === 0 && cur > 0) {
+          badge.classList.add("hidden");
+        }
+      } catch (e) {}
+    }
+    pollFromStorage();
+    setInterval(pollFromStorage, 3000);
+
+    var isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+    if (!isLoggedIn) return;
+
+    // If this page has the full chat drawer (ahsab.html), skip subscription
+    var drawer = document.getElementById('support-drawer');
+    if (drawer && drawer.querySelector('.support-panel, .support-messages')) return;
+
+    var raw = localStorage.getItem("currentUser");
+    var userId = null;
+    var userEmail = null;
+    if (raw) {
+      try {
+        var p = JSON.parse(raw);
+        userId = p && p.id != null ? String(p.id) : null;
+        userEmail = p && p.email ? p.email : null;
+      } catch (e) {}
+    }
+    if (!userId) userEmail = localStorage.getItem("userEmail") || null;
+    if (!userId && !userEmail) return;
+
+    function doSubscribe() {
+      var client = null;
+      try { client = typeof getSupabaseClient === 'function' ? getSupabaseClient() : null; } catch (e) {
+        setTimeout(doSubscribe, 1500);
+        return;
+      }
+      if (!client) { setTimeout(doSubscribe, 1500); return; }
+
+      try {
+        var query = client.from("support_conversations").select("id,unread_user_count");
+        if (userId) query = query.eq("user_id", String(userId));
+        else query = query.eq("user_email", userEmail);
+        query.order("created_at", { ascending: false }).limit(1).then(function (r) {
+          if (r.error || !r.data || !r.data.length) return;
+          var conv = r.data[0];
+
+          if (conv.unread_user_count > 0) {
+            var c = conv.unread_user_count;
+            badge.textContent = c > 99 ? "99+" : c;
+            badge.classList.remove("hidden");
+            saveSupportCount(c);
+          }
+
+          client.channel("support-badge-global")
+            .on("postgres_changes", {
+              event: "INSERT", schema: "public", table: "support_messages"
+            }, function (pl) {
+              var m = pl.new;
+              if (m.conversation_id === conv.id && m.sender_type === "admin") {
+                var cur = parseInt(badge.textContent || "0");
+                var n = cur + 1;
+                badge.textContent = n > 99 ? "99+" : n;
+                badge.classList.remove("hidden");
+                saveSupportCount(n);
+              }
+            })
+            .subscribe();
+        });
+      } catch (e) {
+        setTimeout(doSubscribe, 1500);
+      }
+    }
+    doSubscribe();
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     injectDesktopElements();
+    injectFloatingSearch();
+    injectLegacyHiddenElements();
     ensureSidebar();
     injectDesktopFooter();
     injectStandardBottomNav();
@@ -921,6 +1113,7 @@ function hideBottomNavOnDesktop() {
     initSearchRedirect();
     initBrandBadge();
     initNoonHeaderUI();
+    initSupportBadge();
     if (window.BudaUI && window.BudaUI.refreshShell) window.BudaUI.refreshShell();
   });
   window.addEventListener("resize", function () {
@@ -933,21 +1126,21 @@ function hideBottomNavOnDesktop() {
     var css = document.createElement("style");
     css.id = "boda-mega-css";
     css.textContent =
-      '.taager-mega-bar{display:flex;align-items:stretch;background:#fff;border-bottom:1px solid #e8e8e8;direction:ltr;overflow:visible;position:relative;z-index:100;width:100%;padding:0;box-sizing:border-box}' +
+      '.buda-header__nav{display:flex;align-items:stretch;background:#fff;border-bottom:1px solid var(--color-border,#e5e7eb);overflow:visible;position:relative;z-index:var(--z-base,1);width:100%;padding:0;box-sizing:border-box}' +
       '.taager-mega-scroll{display:flex;align-items:stretch;gap:0;overflow-x:auto;overflow-y:hidden;scroll-behavior:smooth;-webkit-overflow-scrolling:touch;flex:1;padding:0;margin:0;direction:rtl}' +
       '.taager-mega-scroll::-webkit-scrollbar{display:none}' +
       '.taager-mega-item{position:relative;flex-shrink:0;display:flex;align-items:stretch}' +
-      '.taager-mega-trigger{display:flex;align-items:center;gap:6px;padding:10px 14px;border:none;background:transparent;font-size:13px;font-weight:500;color:#333;cursor:pointer;white-space:nowrap;transition:color .15s,border-bottom-color .15s;border-bottom:2px solid transparent;font-family:inherit}' +
-      '.taager-mega-trigger .material-icons-outlined{font-size:18px;color:#999;transition:color .15s}' +
-      '.taager-mega-trigger:hover,.taager-mega-item.is-open .taager-mega-trigger{color:#d4a84b;border-bottom-color:#d4a84b}' +
-      '.taager-mega-trigger:hover .material-icons-outlined,.taager-mega-item.is-open .taager-mega-trigger .material-icons-outlined{color:#d4a84b}' +
-      '.taager-mega-dropdown{position:fixed;z-index:9999;background:#fff;border:1px solid #e8e8e8;border-radius:10px;box-shadow:0 8px 30px rgba(0,0,0,.12);padding:8px;display:none;flex-direction:column;gap:2px;min-width:200px;pointer-events:none;opacity:0;transition:opacity .15s}' +
+      '.taager-mega-trigger{display:flex;align-items:center;gap:6px;padding:10px 14px;border:none;background:transparent;font-size:13px;font-weight:500;color:var(--color-text,#333);cursor:pointer;white-space:nowrap;transition:color .15s,border-bottom-color .15s;border-bottom:2px solid transparent;font-family:inherit}' +
+      '.taager-mega-trigger svg{width:18px;height:18px;color:var(--color-text-muted,#999);transition:color .15s}' +
+      '.taager-mega-trigger:hover,.taager-mega-item.is-open .taager-mega-trigger{color:var(--color-primary,#6D28D9);border-bottom-color:var(--color-primary,#6D28D9)}' +
+      '.taager-mega-trigger:hover svg,.taager-mega-item.is-open .taager-mega-trigger svg{color:var(--color-primary,#6D28D9)}' +
+      '.taager-mega-dropdown{position:fixed;z-index:9999;background:var(--color-surface,#fff);border:1px solid var(--color-border,#e5e7eb);border-radius:var(--radius-md,12px);box-shadow:var(--shadow-lg,0 8px 30px rgba(0,0,0,.12));padding:8px;display:none;flex-direction:column;gap:2px;min-width:200px;pointer-events:none;opacity:0;transition:opacity .15s}' +
       '.taager-mega-item:hover .taager-mega-dropdown,.taager-mega-item.is-open .taager-mega-dropdown{display:flex;pointer-events:auto;opacity:1}' +
-      '.taager-mega-sub{display:flex;align-items:center;gap:10px;padding:8px 12px;border:none;background:transparent;font-size:13px;color:#333;cursor:pointer;border-radius:8px;transition:background .15s,color .15s;text-decoration:none;font-family:inherit;text-align:start;width:100%}' +
-      '.taager-mega-sub .material-icons-outlined{font-size:17px;color:#999;transition:color .15s}' +
-      '.taager-mega-sub:hover{background:#fef7ec;color:#d4a84b}' +
-      '.taager-mega-sub:hover .material-icons-outlined{color:#d4a84b}' +
-      '@media(max-width:767px){.taager-mega-bar{padding:4px 0}.taager-mega-trigger{padding:8px 10px;font-size:12px}.taager-mega-trigger .material-icons-outlined{font-size:16px}.taager-mega-dropdown{left:8px!important;right:8px!important;width:auto!important;border-radius:8px}}' +
+      '.taager-mega-sub{display:flex;align-items:center;gap:10px;padding:8px 12px;border:none;background:transparent;font-size:13px;color:var(--color-text,#333);cursor:pointer;border-radius:var(--radius-xs,8px);transition:background .15s,color .15s;text-decoration:none;font-family:inherit;text-align:start;width:100%}' +
+      '.taager-mega-sub svg{width:17px;height:17px;color:var(--color-text-muted,#999);transition:color .15s}' +
+      '.taager-mega-sub:hover{background:var(--color-primary-50,#fef7ec);color:var(--color-primary,#6D28D9)}' +
+      '.taager-mega-sub:hover svg{color:var(--color-primary,#6D28D9)}' +
+      '@media(max-width:767px){.buda-header__nav{padding:4px 0}.taager-mega-trigger{padding:8px 10px;font-size:12px}.taager-mega-trigger svg{width:16px;height:16px}.taager-mega-dropdown{left:8px!important;right:8px!important;width:auto!important;border-radius:var(--radius-sm,8px)}}' +
       '@media(min-width:768px){.taager-mega-trigger{padding:10px 12px;font-size:12px}}' +
       '@media(min-width:1200px){.taager-mega-trigger{padding:12px 18px;font-size:14px}.taager-mega-dropdown{min-width:240px}}';
     document.head.appendChild(css);
@@ -1023,6 +1216,53 @@ function hideBottomNavOnDesktop() {
       {name:"مستلزمات تجارية",icon:"business_center",slug:"business"}]},
   ];
 
+  function megaIconSVG(name) {
+    var map = {
+      spa:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22c-4-3-8-6-8-11 0-4 8-9 8-9s8 5 8 9c0 5-4 8-8 11z"/></svg>',
+      smartphone:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>',
+      laptop:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 16V7a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v9m16 0-4 2H8l-4-2m16 0 2 3H2l2-3"/></svg>',
+      headphones:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>',
+      headset_mic:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v3a9 9 0 0 0 18 0v-3"/><path d="M21 12v3"/><path d="M3 12v3"/><path d="M12 2a7 7 0 0 0-7 7v4"/><path d="M5 13a7 7 0 0 0 14 0"/></svg>',
+      camera_alt:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+      watch:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="6"/><polyline points="12 10 12 12 13 13"/><path d="m16.13 7.66-.81-4.05a2 2 0 0 0-2-1.61h-2.68a2 2 0 0 0-2 1.61l-.81 4.05"/><path d="m7.88 16.34.81 4.05a2 2 0 0 0 2 1.61h2.68a2 2 0 0 0 2-1.61l.81-4.05"/></svg>',
+      smartwatch:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v13"/><path d="M9 18a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2"/><path d="M5 11h14"/></svg>',
+      home:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+      sports_soccer:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m6.5 7.5 5.5 3.5 5.5-3.5"/><path d="M12 11v10"/><path d="m6.5 16.5 5.5-3.5 5.5 3.5"/></svg>',
+      fitness_center:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6.5 6.5 17.5 17.5"/><path d="m6.5 17.5 11-11"/><path d="M2 8l2-2 4 4-2 2z"/><path d="M2 16l2 2 4-4-2-2z"/><path d="M20 8l-2-2-4 4 2 2z"/><path d="M20 16l-2 2-4-4 2-2z"/></svg>',
+      child_care:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12a4 4 0 0 0 8 0"/><path d="M9 10h.01"/><path d="M15 10h.01"/></svg>',
+      chair:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 16H7v-2a4 4 0 0 1 4-4h2a4 4 0 0 1 4 4v2z"/><path d="M7 21V4a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v17"/></svg>',
+      air:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/></svg>',
+      toys:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="12" r="2"/><line x1="2" y1="6" x2="12" y2="2"/><line x1="22" y1="6" x2="12" y2="2"/></svg>',
+      diamond:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.7 10.3a1 1 0 0 1 0-1.4l2.5-2.5a1 1 0 0 1 1.4 0l9.4 9.4a1 1 0 0 1 0 1.4l-2.5 2.5a1 1 0 0 1-1.4 0z"/><path d="m21 3-4 4"/><path d="M12 12 8 8"/></svg>',
+      card_giftcard:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="8" width="20" height="12" rx="2"/><path d="M12 8v8"/><path d="M6 12h12"/><path d="M7 8V5a2 2 0 0 1 2-2h1a2 2 0 0 1 2 2v3"/></svg>',
+      inventory_2:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"/><path d="M3 8h18"/><path d="M7 4h10"/><path d="M7 4a2 2 0 0 0-2 2"/><path d="M17 4a2 2 0 0 1 2 2"/></svg>',
+      face_retouching_natural:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/><path d="M12 2a3 3 0 0 1 3 3v1"/><path d="M9 8V6a3 3 0 0 1 3-3"/></svg>',
+      content_cut:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" y1="4" x2="8.12" y2="15.88"/><line x1="14.47" y1="14.48" x2="20" y2="20"/><line x1="8.12" y1="8.12" x2="12" y2="12"/></svg>',
+      bluetooth:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 7 18 13 12 17 12 1 18 5 6 11"/><line x1="12" y1="17" x2="12" y2="23"/><line x1="8" y1="21" x2="16" y2="21"/></svg>',
+      speaker:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2" ry="2"/><circle cx="12" cy="14" r="4"/><line x1="12" y1="6" x2="12.01" y2="6"/></svg>',
+      checkroom:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 9H3l3 4h12l3-4z"/><path d="M6 13v5h4"/><path d="M14 13v5h4"/></svg>',
+      medication:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.5 5h3"/><path d="M12 3v4"/><rect x="4" y="8" width="16" height="13" rx="2"/><path d="M8 14h8"/><path d="M12 10v8"/></svg>',
+      kitchen:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v6"/><path d="M18 2v6"/><path d="M3 8h18"/><path d="M4 8v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8"/></svg>',
+      palette:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r="2.5"/><circle cx="17.5" cy="12.5" r="2.5"/><circle cx="8.5" cy="10.5" r="2.5"/><path d="M3 12a9 9 0 1 0 9-9 9 9 0 0 0-9 9z"/></svg>',
+      bed:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4v16"/><path d="M22 4v16"/><path d="M2 12h20"/><path d="M4 8h4"/><path d="M16 8h4"/></svg>',
+      local_laundry_service:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 8h6"/><path d="M12 12v4"/><path d="M8 14a4 4 0 1 0 8 0"/></svg>',
+      baby_changing_station:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h8"/><path d="M12 3v4"/><rect x="3" y="11" width="18" height="10" rx="2"/></svg>',
+      school:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>',
+      videogame_asset:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 12h4"/><path d="M8 10v4"/><circle cx="15" cy="12" r="1"/><circle cx="18" cy="12" r="1"/></svg>',
+      videocam:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>',
+      camera:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
+      lightbulb:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14"/></svg>',
+      air_freshener:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h14"/><path d="M5 16h14"/><path d="M5 12h14"/><path d="M10 4v4"/><path d="M14 4v4"/></svg>',
+      local_florist:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v4"/><path d="M12 18v4"/><path d="m4.93 4.93 2.83 2.83"/><path d="m16.24 16.24 2.83 2.83"/><path d="M2 12h4"/><path d="M18 12h4"/><path d="m4.93 19.07 2.83-2.83"/><path d="m16.24 7.76 2.83-2.83"/></svg>',
+      celebration:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 13.5 9.5"/></svg>',
+      business_center:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>',
+      cable:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3v6a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z"/><path d="M8 7v10"/><path d="M16 7v10"/></svg>',
+      desk:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="14" width="20" height="4" rx="1"/><path d="M4 14V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8"/><line x1="8" y1="18" x2="8" y2="22"/><line x1="16" y1="18" x2="16" y2="22"/><line x1="12" y1="14" x2="12" y2="18"/></svg>',
+      living:'<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16"/><path d="M4 16h16"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>',
+    };
+    return map[name] || '<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>';
+  }
+
   function renderMegaMenu(bar) {
     if (window._megaMenuRendered) return;
     window._megaMenuRendered = true;
@@ -1038,7 +1278,7 @@ function hideBottomNavOnDesktop() {
       var trigger = document.createElement("a");
       trigger.className = "taager-mega-trigger";
       trigger.href = "products.html?category=" + item.slug;
-      trigger.innerHTML = '<span class="material-icons-outlined">' + item.icon + '</span><span>' + item.name + '</span>';
+      trigger.innerHTML = megaIconSVG(item.icon) + '<span>' + item.name + '</span>';
       itemDiv.appendChild(trigger);
 
       var dropdown = document.createElement("div");
@@ -1048,7 +1288,7 @@ function hideBottomNavOnDesktop() {
         var btn = document.createElement("a");
         btn.className = "taager-mega-sub";
         btn.href = "products.html?category=" + item.slug + "&sub=" + sub.slug;
-        btn.innerHTML = '<span class="material-icons-outlined">' + sub.icon + '</span><span>' + sub.name + '</span>';
+        btn.innerHTML = megaIconSVG(sub.icon) + '<span>' + sub.name + '</span>';
         dropdown.appendChild(btn);
       });
 
@@ -1114,7 +1354,7 @@ function hideBottomNavOnDesktop() {
 
   // Close mega menu on outside click
   document.addEventListener("click", function (e) {
-    var bar = document.getElementById("taagerMegaBar");
+    var bar = document.getElementById("budaHeaderNav");
     if (bar && !bar.contains(e.target)) closeAllMega();
   });
 
@@ -1126,9 +1366,36 @@ function hideBottomNavOnDesktop() {
   document.addEventListener("scroll", repositionMega, true);
   window.addEventListener("resize", function () { closeAllMega(); });
 
+  // Header scroll behavior - hide on scroll down, show on scroll up
+  var lastScrollY = window.scrollY;
+  var header = document.querySelector('.buda-header');
+  var headerScrollThreshold = 10; // minimum scroll before hiding
+
+  window.addEventListener('scroll', function () {
+    if (!header) return;
+    var currentScrollY = window.scrollY;
+    
+    if (currentScrollY < headerScrollThreshold) {
+      header.classList.remove('buda-header--scrolled-down');
+      header.classList.add('buda-header--scrolled-up');
+      return;
+    }
+
+    if (currentScrollY > lastScrollY && currentScrollY > headerScrollThreshold) {
+      // Scrolling down - hide header
+      header.classList.add('buda-header--scrolled-down');
+      header.classList.remove('buda-header--scrolled-up');
+    } else if (currentScrollY < lastScrollY) {
+      // Scrolling up - show header
+      header.classList.remove('buda-header--scrolled-down');
+      header.classList.add('buda-header--scrolled-up');
+    }
+    lastScrollY = currentScrollY;
+  }, { passive: true });
+  
   // Init mega menu on DOM ready
   ensureMegaMenuCSS();
-  var megaBar = document.getElementById("taagerMegaBar");
+  var megaBar = document.getElementById("budaHeaderNav");
   if (megaBar && !megaBar.hasChildNodes()) {
     renderMegaMenu(megaBar);
   }

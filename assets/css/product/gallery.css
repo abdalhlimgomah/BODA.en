@@ -1,4 +1,4 @@
-/* ============================================================
+﻿/* ============================================================
    ProductGallery
    Mobile: full-width swipeable stage + dots + "n/N" counter.
    Desktop (>=1200px): main stage + vertical thumbnail rail to the
@@ -14,7 +14,7 @@
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
-  background: #fff;
+  background: #f8fafc;
   border-radius: var(--pdp-radius);
   overflow: hidden;
   border: 1px solid var(--pdp-border);
@@ -39,6 +39,7 @@
   transition: opacity var(--pdp-fade) var(--pdp-ease);
   pointer-events: none;
   z-index: 1;
+  background: transparent;
 }
 .pdp-gallery-slide.is-active {
   opacity: 1;
@@ -55,6 +56,7 @@
   -webkit-user-drag: none;
   transition: transform var(--pdp-fade-fast) var(--pdp-ease);
   transform-origin: center center;
+  background: transparent;
 }
 
 /* Cursor-anchored hover zoom (desktop only, mouse-capable) */
@@ -144,7 +146,7 @@
   height: 60px;
   border-radius: 10px;
   border: 2px solid transparent;
-  background: #fff;
+  background: #f8fafc;
   padding: 2px;
   cursor: pointer;
   overflow: hidden;
@@ -156,6 +158,7 @@
   height: 100%;
   object-fit: contain;
   display: block;
+  background: #f8fafc;
 }
 .pdp-gallery-thumb.active {
   border-color: var(--pdp-blue);
@@ -224,6 +227,7 @@
   transition: transform var(--pdp-fade-fast) ease-out;
   user-select: none;
   -webkit-user-drag: none;
+  background: #f8fafc;
 }
 
 .pdp-lightbox-close,
@@ -268,3 +272,4 @@
   .pdp-lightbox-prev,
   .pdp-lightbox-next { width: 36px; height: 36px; }
 }
+

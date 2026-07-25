@@ -1,18 +1,18 @@
 ﻿:root {
-  --noon-bg: #f0f7fe;
+  --noon-bg: #f4f7fb;
   --noon-surface: #ffffff;
-  --noon-border: #cfe0f5;
-  --noon-text: #0b1e3a;
-  --noon-muted: #4f7199;
+  --noon-border: #d7e1ef;
+  --noon-text: #0f2445;
+  --noon-muted: #5f7391;
   --noon-yellow: #ffd447;
-  --noon-blue: #2b7be4;
-  --noon-blue-strong: #1a5fc7;
+  --noon-blue: #1f6feb;
+  --noon-blue-strong: #1256c8;
   --noon-danger: #dc2626;
   --noon-success: #16a34a;
-  --noon-heading: #0b2447;
+  --noon-heading: #13294b;
   --noon-radius: 16px;
   --noon-shadow: 0 14px 32px rgba(15, 23, 42, 0.08);
-  --noon-shell-width: 100%;
+  --noon-shell-width: 1200px;
   --noon-mobile-width: 720px;
 }
 
@@ -36,8 +36,8 @@ body {
 
 body {
   background:
-    radial-gradient(circle at 12% -8%, #fff3b4 0, rgba(255, 243, 180, 0) 34%),
-    radial-gradient(circle at 88% 2%, #dbe9ff 0, rgba(219, 233, 255, 0) 34%),
+    radial-gradient(circle at 12% -8%, #f5f5f4 0, rgba(255, 255, 255, 0.986) 34%),
+    radial-gradient(circle at 88% 2%, #fafcff 0, rgba(0, 0, 0, 0) 34%),
     var(--noon-bg);
   color: var(--noon-text);
   text-rendering: optimizeLegibility;

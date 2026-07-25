@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
@@ -11,7 +11,7 @@
   <link href="../assets/css/noon-shell.css" rel="stylesheet" />
   <link href="../assets/css/noon-components.css" rel="stylesheet" />
   <link href="../assets/css/home.css?v=20260711a" rel="stylesheet" />
-  <link href="../assets/css/account.css?v=20260630d" rel="stylesheet" />
+  <link href="../assets/css/account-v2.css?v=20260725" rel="stylesheet" />
   <link href="../assets/css/skeleton.css?v=20260701" rel="stylesheet" />
   <link href="../assets/css/desktop.css?v=20260709" rel="stylesheet" media="only screen and (min-width: 768px)" />
   <link href="../assets/css/desktop-animations.css?v=20260709" rel="stylesheet" media="only screen and (min-width: 768px)" />
@@ -22,7 +22,8 @@
   <link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
   <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
   <link rel="manifest" href="../assets/icons/site.webmanifest">
-  <meta name="theme-color" content="#FFD500">
+  <meta name="theme-color" content="#6D28D9">
+  <style>html { overflow-x: clip; }</style>
   <style>
     /* ===== Noon Support Floating Button ===== */
     .noon-support-btn-wrapper {
@@ -418,8 +419,8 @@
       width: 68px !important;
       height: 68px !important;
       border-radius: 50% !important;
-      background: linear-gradient(135deg, #feee97 0%, #ffd500 100%) !important;
-      color: #383838 !important;
+      background: linear-gradient(269deg, #b98dff 0%, #311758 100%) !important;
+      color: #000000 !important;
       font-weight: 800 !important;
       display: flex !important;
       align-items: center !important;
@@ -492,8 +493,8 @@
     }
     .noon-stat-card .stat-icon {
       font-size: 24px;
-      color: #ffd500;
-      background: #fffbeb;
+    color: #2b026b;
+    background: #341663;
       padding: 8px;
       border-radius: 10px;
     }
@@ -568,7 +569,7 @@
       }
       .noon-stat-card .stat-icon {
         font-size: 20px;
-        padding: 6px;
+        padding: 3px;
       }
       .noon-stat-card .stat-title {
         font-size: 0.7rem;
@@ -679,204 +680,6 @@
         .noon-support-btn-wrapper {
           bottom: max(90px, calc(90px + env(safe-area-inset-bottom)));
         }
-      }
-    }
-
-    /* ===== Mobile Header Fixes (ensure home.css styles apply) ===== */
-    @media (max-width: 767px) {
-      .buda-header {
-        position: sticky !important;
-        top: 0 !important;
-        z-index: 100 !important;
-      }
-      .buda-header-top {
-        background: #faf75a !important;
-        padding: 6px 0 0 !important;
-      }
-      .buda-header-top-inner {
-        max-width: 1400px !important;
-        margin: 0 auto !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 8px !important;
-        padding: 6px 12px !important;
-        flex-wrap: wrap !important;
-      }
-      .buda-header-top-inner .header-start {
-        order: 1 !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 6px !important;
-        flex-shrink: 0 !important;
-      }
-      .buda-header-top-inner .menu-btn {
-        width: 36px !important;
-        height: 36px !important;
-        border: 0 !important;
-        background: transparent !important;
-        cursor: pointer !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        border-radius: 8px !important;
-        transition: background 180ms ease !important;
-      }
-      .buda-header-top-inner .menu-btn:hover {
-        background: rgba(0,0,0,0.06) !important;
-      }
-      .buda-header-top-inner .menu-icon,
-      .buda-header-top-inner .menu-icon::before,
-      .buda-header-top-inner .menu-icon::after {
-        display: block !important;
-        width: 20px !important;
-        height: 2.5px !important;
-        background: #1a2530 !important;
-        border-radius: 2px !important;
-      }
-      .buda-header-top-inner .menu-icon {
-        position: relative !important;
-      }
-      .buda-header-top-inner .menu-icon::before,
-      .buda-header-top-inner .menu-icon::after {
-        content: "" !important;
-        position: absolute !important;
-        right: 0 !important;
-      }
-      .buda-header-top-inner .menu-icon::before {
-        top: -6px !important;
-      }
-      .buda-header-top-inner .menu-icon::after {
-        top: 6px !important;
-      }
-      .buda-header-top-inner .brand-badge {
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        gap: 6px !important;
-        background: #1a2530 !important;
-        color: #fff !important;
-        border-radius: 999px !important;
-        min-height: 30px !important;
-        padding: 0 10px !important;
-        font-size: 0.75rem !important;
-        font-weight: 800 !important;
-        white-space: nowrap !important;
-        letter-spacing: 0.5px !important;
-      }
-      .buda-search {
-        order: 2 !important;
-        flex: 1 !important;
-        max-width: 520px !important;
-        position: relative !important;
-        min-width: 0 !important;
-      }
-      .buda-search input {
-        width: 100% !important;
-        height: 38px !important;
-        border: 0 !important;
-        border-radius: 999px !important;
-        background: #fff !important;
-        padding: 0 36px 0 36px !important;
-        font-size: 0.8rem !important;
-        box-shadow: 0 1px 4px rgba(0,0,0,0.06) !important;
-        outline: 0 !important;
-      }
-      .buda-search > .material-icons-outlined {
-        position: absolute !important;
-        left: 12px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        color: #666 !important;
-        font-size: 18px !important;
-        pointer-events: none !important;
-      }
-      .buda-search-clear {
-        display: none !important;
-        position: absolute !important;
-        right: 8px !important;
-        top: 50% !important;
-        transform: translateY(-50%) !important;
-        width: 28px !important;
-        height: 28px !important;
-        border: 0 !important;
-        background: #e8e8e8 !important;
-        border-radius: 50% !important;
-        cursor: pointer !important;
-        align-items: center !important;
-        justify-content: center !important;
-        color: #666 !important;
-      }
-      .buda-search.has-text .buda-search-clear {
-        display: flex !important;
-      }
-      .buda-location {
-        display: flex !important;
-        order: 3 !important;
-        flex: 0 0 100% !important;
-        margin-top: 2px !important;
-        padding: 2px 4px !important;
-        align-items: center !important;
-        gap: 6px !important;
-        cursor: pointer !important;
-        border-radius: 8px !important;
-        transition: background 180ms ease !important;
-        flex-shrink: 0 !important;
-      }
-      .buda-location:hover {
-        background: rgba(0,0,0,0.05) !important;
-      }
-      .buda-location-icon {
-        font-size: 20px !important;
-        color: #1a2530 !important;
-      }
-      .buda-location-text {
-        display: flex !important;
-        flex-direction: column !important;
-        line-height: 1.2 !important;
-      }
-      .buda-location-label {
-        font-size: 0.65rem !important;
-        color: #5f5f5f !important;
-        font-weight: 500 !important;
-      }
-      .buda-location-value {
-        font-size: 0.75rem !important;
-        color: #1a2530 !important;
-        font-weight: 700 !important;
-        max-width: 90px !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
-        white-space: nowrap !important;
-      }
-      .buda-location-arrow {
-        font-size: 18px !important;
-        color: #666 !important;
-      }
-      .buda-lang {
-        display: none !important;
-      }
-      .buda-account {
-        display: none !important;
-      }
-      .buda-header-action {
-        display: none !important;
-      }
-
-    }
-
-    @media (max-width: 480px) {
-      .buda-header-top-inner {
-        padding: 4px 8px !important;
-        gap: 6px !important;
-      }
-      .buda-header-top-inner .brand-badge {
-        min-height: 28px !important;
-        padding: 0 8px !important;
-        font-size: 0.7rem !important;
-      }
-      .buda-search input {
-        height: 34px !important;
-        font-size: 0.75rem !important;
       }
     }
 
@@ -1077,127 +880,91 @@
 </head>
 <body class="app-shell account-page">
           <!-- ========== HEADER - Noon Style (2 Rows) ========== -->
-        <header class="app-header buda-header">
-    <div class="buda-header-top">
-      <div class="buda-header-top-inner">
-        <div class="header-start">
-          <div class="brand-badge">Buda</div>
-        </div>
-
-        <div class="app-search search-left-icon buda-search">
-          <span class="material-icons-outlined">search</span>
-          <input id="home-search" type="text" data-search-target="search.html" placeholder="ابحث عن منتج أو فئة" autocomplete="off" />
-          </button>
-        </div>
-
-        <div class="buda-lang" id="budaLangTrigger">
-          <span class="buda-lang-text">EN</span>
-          <span class="material-icons-outlined buda-lang-globe">language</span>
-        </div>
-
-        <div class="buda-account" id="budaAccountTrigger">
-          <div class="buda-account-avatar" id="budaAccountAvatar">
-            <span class="material-icons-outlined">person</span>
-          </div>
-          <div class="buda-account-info">
-            <span class="buda-account-name" id="budaAccountName">حسابي</span>
-            <span class="material-icons-outlined buda-account-arrow">keyboard_arrow_down</span>
-          </div>
-          <div class="buda-account-dropdown" id="budaAccountDropdown">
-            <a href="ahsab.html" class="buda-dd-item"><span class="material-icons-outlined">person</span> حسابي</a>
-            <a href="my-orders.html" class="buda-dd-item"><span class="material-icons-outlined">receipt_long</span> طلباتي</a>
-            <a href="returns.html" class="buda-dd-item"><span class="material-icons-outlined">undo</span> الإرجاعات</a>
-            <a href="addresses.html" class="buda-dd-item"><span class="material-icons-outlined">location_on</span> العناوين</a>
-            <a href="wishlist.html" class="buda-dd-item"><span class="material-icons-outlined">favorite_border</span> المفضلة</a>
-            <a href="#" class="buda-dd-item" id="budaSupportBtn"><span class="material-icons-outlined">chat</span> الدعم</a>
-            <a href="edit-account.html" class="buda-dd-item"><span class="material-icons-outlined">settings</span> الإعدادات</a>
-            <div class="buda-dd-divider"></div>
-            <a href="logout-confirmation.html" class="buda-dd-item buda-dd-logout"><span class="material-icons-outlined">logout</span> تسجيل الخروج</a>
+        <header class="app-header buda-header"></header>
+  <main class="app-main acc-v2-main">
+    <div class="skeleton-account" id="skeletonAccount" aria-hidden="true">
+      <div class="acc-v2-skeleton-grid">
+        <div class="acc-v2-skeleton-profile">
+          <div class="skeleton-pulse" style="width: 80px; height: 80px; border-radius: 50%;"></div>
+          <div style="width: 60%; display: flex; flex-direction: column; gap: 12px;">
+            <div class="skeleton-pulse" style="height: 24px; width: 70%; border-radius: 6px;"></div>
+            <div class="skeleton-pulse" style="height: 16px; width: 90%; border-radius: 4px;"></div>
           </div>
         </div>
-
-        <a href="my-orders.html" class="buda-header-action" title="طلباتي">
-          <span class="material-icons-outlined">receipt_long</span>
-          <small>طلباتي</small>
-        </a>
-
-        <a href="wishlist.html" class="buda-header-action" title="المفضلة">
-          <span class="material-icons-outlined">favorite_border</span>
-          <small>المفضلة</small>
-        </a>
-
-        <a href="empty-cart.html" class="buda-header-action buda-header-cart" title="العربة">
-          <span class="material-icons-outlined">shopping_cart</span>
-          <small>العربة</small>
-          <span class="buda-cart-badge" id="budaCartBadge">0</span>
-        </a>
+        <div class="acc-v2-skeleton-main">
+          <div class="skeleton-pulse" style="height: 120px; border-radius: 16px;"></div>
+          <div class="skeleton-pulse" style="height: 250px; border-radius: 16px;"></div>
+          <div class="skeleton-pulse" style="height: 100px; border-radius: 16px;"></div>
+        </div>
       </div>
     </div>
 
-  </header>
-  <main class="app-main stack">
-    <div class="skeleton-account" id="skeletonAccount">
-      <div class="skeleton-account-card">
-        <div class="skeleton-account-profile">
-          <div class="skeleton skeleton-avatar-circle"></div>
-          <div class="skeleton-account-lines">
-            <div class="skeleton skeleton-name-line"></div>
-            <div class="skeleton skeleton-email-line"></div>
-            <div class="skeleton skeleton-progress-line"></div>
-          </div>
-        </div>
-      </div>
-      <div class="skeleton-stats-grid">
-        <div class="skeleton skeleton-stat-card"></div>
-        <div class="skeleton skeleton-stat-card"></div>
-        <div class="skeleton skeleton-stat-card"></div>
-        <div class="skeleton skeleton-stat-card"></div>
-      </div>
-      <div class="skeleton-menu-list">
-        <div class="skeleton skeleton-menu-item"></div>
-        <div class="skeleton skeleton-menu-item"></div>
-        <div class="skeleton skeleton-menu-item"></div>
-        <div class="skeleton skeleton-menu-item"></div>
-        <div class="skeleton skeleton-menu-item"></div>
-        <div class="skeleton skeleton-menu-item"></div>
-      </div>
-    </div>
-    <script>document.addEventListener("DOMContentLoaded",function(){var e=document.getElementById("skeletonAccount");if(e)e.classList.add("skeleton-account-hidden")});</script>
     <p id="account-status" class="status-note hidden" aria-live="polite"></p>
 
-    <section id="login-required" class="section-block center-empty hidden">
-      <h2>تسجيل الدخول مطلوب</h2>
-      <p>يجب تسجيل الدخول للوصول إلى صفحة الحساب.</p>
-      <div class="inline-actions" style="justify-content: center; margin-top: 10px;">
-        <a class="btn-primary" href="signin/login.html" style="display: inline-flex; align-items: center;">تسجيل الدخول</a>
-        <a class="btn-secondary" href="signup/index.html" style="display: inline-flex; align-items: center;">إنشاء حساب</a>
+    <section id="login-required" class="section-block hidden" style="max-width:480px;margin:40px auto;padding:0;">
+      <div style="background:linear-gradient(135deg,#6D28D9,#A855F7);border-radius:20px 20px 0 0;padding:32px 24px 24px;text-align:center;color:#fff;">
+        <div style="width:64px;height:64px;margin:0 auto 16px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;">
+          <span class="material-icons-outlined" style="font-size:32px;color:#fff;">lock</span>
+        </div>
+        <h2 style="margin:0 0 6px;font-size:1.4rem;font-weight:700;color:#fff;">تسجيل الدخول مطلوب</h2>
+        <p style="margin:0;font-size:0.9rem;opacity:0.9;color:#fff;">يجب تسجيل الدخول لتتمكن من الوصول إلى حسابك وإدارة طلباتك.</p>
+      </div>
+      <div style="background:var(--color-surface,#fff);border:1px solid var(--color-border,#e5e7eb);border-top:0;border-radius:0 0 20px 20px;padding:24px;">
+        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
+          <div style="display:flex;align-items:center;gap:12px;font-size:0.88rem;color:var(--color-text-secondary,#6b7280);">
+            <span class="material-icons-outlined" style="font-size:20px;color:#6D28D9;">shopping_bag</span>
+            <span>متابعة طلباتك وتتبع الشحنات في الوقت الفعلي</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:0.88rem;color:var(--color-text-secondary,#6b7280);">
+            <span class="material-icons-outlined" style="font-size:20px;color:#6D28D9;">favorite</span>
+            <span>حفظ المنتجات المفضلة والوصول إليها بسرعة</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:0.88rem;color:var(--color-text-secondary,#6b7280);">
+            <span class="material-icons-outlined" style="font-size:20px;color:#6D28D9;">local_offer</span>
+            <span>الاستفادة من العروض والحصول على كوبونات الخصم</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:12px;font-size:0.88rem;color:var(--color-text-secondary,#6b7280);">
+            <span class="material-icons-outlined" style="font-size:20px;color:#6D28D9;">location_on</span>
+            <span>إدارة عناوين التوصيل وتحديد المفضل منها</span>
+          </div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <a class="btn-primary" href="signin/login.html" style="width:100%;padding:14px;border-radius:12px;font-size:1rem;font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span class="material-icons-outlined" style="font-size:20px;">login</span>
+            تسجيل الدخول
+          </a>
+          <a class="btn-secondary" href="signup/index.html" style="width:100%;padding:14px;border-radius:12px;font-size:1rem;font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;">
+            <span class="material-icons-outlined" style="font-size:20px;">person_add</span>
+            إنشاء حساب جديد
+          </a>
+        </div>
+        <p style="margin:16px 0 0;font-size:0.78rem;color:var(--color-text-muted,#9ca3af);text-align:center;">بالتسجيل أنت توافق على <a href="privacy.html" style="color:#6D28D9;text-decoration:underline;">سياسة الخصوصية</a> و <a href="terms.html" style="color:#6D28D9;text-decoration:underline;">شروط الاستخدام</a></p>
       </div>
     </section>
 
-
-    <div id="profile-content" class="noon-account-container">
-      <!-- Profile Card -->
-      <section class="profile-card">
-        <div class="profile-card-top">
-          <div class="profile-avatar-wrap">
-            <div id="profile-avatar">U</div>
+    <div id="profile-content" class="acc-v2-layout">
+      <!-- Sidebar / Profile Card -->
+      <aside class="acc-v2-sidebar">
+        <div class="acc-v2-profile-card">
+          <div id="profile-avatar" class="acc-v2-avatar">U</div>
+          <div class="acc-v2-name-row">
+            <h2 id="profile-name" class="acc-v2-name">المستخدم</h2>
+            <a href="edit-account.html" class="acc-v2-edit-icon-btn" aria-label="تعديل الملف الشخصي">
+              <span class="material-icons-outlined">edit</span>
+            </a>
           </div>
-          <div class="profile-card-body">
-            <h2 id="profile-name">المستخدم</h2>
-            <p id="profile-email">user@example.com</p>
-            <div id="profileProgressRow" class="profile-progress-row">
-              <div class="profile-progress-bar-track">
-                <div class="profile-progress-bar-fill" id="profileProgressFill"></div>
-              </div>
-              <small class="profile-progress-label" id="profileProgressLabel">اكتملت بنسبة 0%</small>
+          <p id="profile-email" class="acc-v2-email">user@example.com</p>
+          <div id="profileProgressRow" class="acc-v2-progress">
+            <div class="acc-v2-progress-text">
+              <span>إكمال الملف الشخصي</span>
+              <span id="profileProgressLabel">0%</span>
+            </div>
+            <div class="acc-v2-progress-bar">
+              <div id="profileProgressFill" class="acc-v2-progress-fill"></div>
             </div>
           </div>
-          <a class="profile-edit-link" href="edit-account.html">
-            <span class="material-icons-outlined" style="font-size: 16px;"></span>
-            <span data-i18n="تعديل">تعديل</span>
-          </a>
         </div>
-      </section>
+      </aside>
 
       <script>
         // فورًا: الاسم والإيميل من localStorage قبل أي async
@@ -1209,149 +976,68 @@
           var email = localStorage.getItem("userEmail") || "";
           if (n) n.textContent = name;
           if (e) e.textContent = email;
-          if (a) {
-            var initials = name.split(" ").map(function(p){return p[0]}).slice(0,2).join("").toUpperCase() || "U";
-            a.textContent = initials;
-          }
+          if (a && name) a.textContent = (name.split(" ").map(p => p[0]).slice(0,2).join("") || "U").toUpperCase();
         })();
       </script>
 
-      <!-- Stats Grid -->
-      <div class="noon-stats-grid">
-        <a href="my-orders.html" class="noon-stat-card">
-          <span class="material-icons-outlined stat-icon"></span>
-          <div class="stat-info">
-            <span class="stat-title">طلباتي</span>
-            <span class="stat-number" id="stat-orders-count"></span>
+      <!-- Main Content Area -->
+      <div class="acc-v2-main-content">
+        <!-- Stats Grid -->
+        <div class="acc-v2-stats-grid">
+          <a href="my-orders.html" class="acc-v2-stat-card" style="--card-accent: #3b82f6;">
+            <div class="acc-v2-stat-info">
+              <span class="acc-v2-stat-label">طلباتي</span>
+              <p class="acc-v2-stat-desc">تتبع، طلباتك، أو إعادة شراء طلباتك السابقة</p>
+            </div>
+          </a>
+          <a href="wishlist.html" class="acc-v2-stat-card" style="--card-accent: #ef4444;">
+            <div class="acc-v2-stat-info">
+              <span class="acc-v2-stat-label">المفضلة</span>
+              <p class="acc-v2-stat-desc">عرض قائمة المنتجات التي أضفتها </p>
+            </div>
+          </a>
+          <a href="addresses.html" class="acc-v2-stat-card" id="stat-addresses-card" style="--card-accent: #10b981;">
+            <div class="acc-v2-stat-info">
+              <span class="acc-v2-stat-label">عناويني</span>
+              <p class="acc-v2-stat-desc">إدارة عناوين الشحن المحفوظة لديك</p>
+            </div>
+          </a>
+          <a href="returns.html" class="acc-v2-stat-card">
+            <div class="acc-v2-stat-info">
+              <span class="acc-v2-stat-label">المرتجعات</span>
+              <p class="acc-v2-stat-desc">متابعة أو إنشاء طلبات الإرجاع</p>
+            </div>
+          </a>
+        </div>
+
+        <!-- Navigation List -->
+        <div class="acc-v2-card">
+          <h3 class="acc-v2-card-title">إدارة الحساب</h3>
+          <div class="acc-v2-nav-group">
+            <a href="my-orders.html" class="acc-v2-nav-item"><span class="acc-v2-nav-icon material-icons-outlined">inventory_2</span><span>طلباتي</span><span class="material-icons-outlined">chevron_left</span></a>
+            <a href="wishlist.html" class="acc-v2-nav-item"><span class="acc-v2-nav-icon material-icons-outlined">favorite_border</span><span>قائمة المفضلة</span><span class="material-icons-outlined">chevron_left</span></a>
+            <button id="addresses-link" type="button" class="acc-v2-nav-item"><span class="acc-v2-nav-icon material-icons-outlined">location_on</span><span>عناويني المحفوظة</span><span class="material-icons-outlined">chevron_left</span></button>
+            <a href="returns.html" class="acc-v2-nav-item"><span class="acc-v2-nav-icon material-icons-outlined">assignment_return</span><span>طلبات الإرجاع</span><span class="material-icons-outlined">chevron_left</span></a>
           </div>
-        </a>
-        <a href="wishlist.html" class="noon-stat-card">
-          <span class="material-icons-outlined stat-icon"></span>
-          <div class="stat-info">
-            <span class="stat-title">المفضلة</span>
-            <span class="stat-number" id="stat-wishlist-count"></span>
+        </div>
+
+        <div class="acc-v2-card">
+          <h3 class="acc-v2-card-title">الإعدادات والمساعدة</h3>
+          <div class="acc-v2-nav-group">
+            <a href="edit-account.html" class="acc-v2-nav-item"><span class="acc-v2-nav-icon material-icons-outlined">settings</span><span>إعدادات الحساب</span><span class="material-icons-outlined">chevron_left</span></a>
+            <button id="country-link" type="button" class="acc-v2-nav-item"><span class="acc-v2-nav-icon material-icons-outlined">language</span><span>الدولة واللغة</span><span id="selected-country-name" class="acc-v2-nav-meta">العربية</span><span class="material-icons-outlined">chevron_left</span></button>
+            <button id="support-link" type="button" class="acc-v2-nav-item"><span class="acc-v2-nav-icon material-icons-outlined">support_agent</span><span>الدعم والمساعدة</span><span id="support-badge" class="acc-v2-nav-badge hidden">0</span><span class="material-icons-outlined">chevron_left</span></button>
           </div>
-        </a>
-        <a href="addresses.html" class="noon-stat-card" id="stat-addresses-card">
-          <span class="material-icons-outlined stat-icon"></span>
-          <div class="stat-info">
-            <span class="stat-title">عناويني</span>
-            <span class="stat-number" id="stat-addresses-count"></span>
-          </div>
-        </a>
-        <a href="returns.html" class="noon-stat-card">
-          <span class="material-icons-outlined stat-icon"></span>
-          <div class="stat-info">
-            <span class="stat-title">المرتجعات</span>
-            <span class="stat-number" id="stat-returns-count"></span>
-          </div>
-        </a>
+        </div>
+
+        <div class="acc-v2-card acc-v2-danger-zone">
+          <a href="delete-account.html" class="acc-v2-nav-item danger"><span class="acc-v2-nav-icon material-icons-outlined">delete_outline</span><span>حذف الحساب</span><span class="material-icons-outlined">chevron_left</span></a>
+          <button id="sign-out-link" type="button" class="acc-v2-nav-item danger"><span class="acc-v2-nav-icon material-icons-outlined">logout</span><span>تسجيل الخروج</span><span class="material-icons-outlined">chevron_left</span></button>
+        </div>
       </div>
+    </div>
 
-      <!-- Menu List Card -->
-      <div class="noon-menu-card">
-        <a href="my-orders.html" class="noon-menu-item">
-          <div class="noon-menu-item-content">
-            <span class="material-icons-outlined menu-item-icon"></span>
-            <div class="noon-menu-item-text">
-              <span class="noon-menu-item-title" data-i18n="طلباتي">طلباتي</span>
-              <span class="noon-menu-item-desc">تابع طلباتك الحالية وتصفح السجل</span>
-            </div>
-          </div>
-          <span class="material-icons-outlined chevron-icon"></span>
-        </a>
-
-        <a href="wishlist.html" class="noon-menu-item">
-          <div class="noon-menu-item-content">
-            <span class="material-icons-outlined menu-item-icon"></span>
-            <div class="noon-menu-item-text">
-              <span class="noon-menu-item-title" data-i18n="المفضلة">المفضلة</span>
-              <span class="noon-menu-item-desc">قائمتك المفضلة للمنتجات المحفوظة</span>
-            </div>
-          </div>
-          <span class="material-icons-outlined chevron-icon"></span>
-        </a>
-
-        <button id="addresses-link" class="noon-menu-item" type="button">
-          <div class="noon-menu-item-content">
-            <span class="material-icons-outlined menu-item-icon"></span>
-            <div class="noon-menu-item-text">
-              <span class="noon-menu-item-title" data-i18n="العناوين">عناويني</span>
-              <span class="noon-menu-item-desc">إضافة وتعديل عناوين التوصيل الخاصة بك</span>
-            </div>
-          </div>
-          <span class="material-icons-outlined chevron-icon"></span>
-        </button>
-
-        <a href="returns.html" class="noon-menu-item">
-          <div class="noon-menu-item-content">
-            <span class="material-icons-outlined menu-item-icon"></span>
-            <div class="noon-menu-item-text">
-              <span class="noon-menu-item-title">المرتجعات</span>
-              <span class="noon-menu-item-desc">إرجاع المنتجات والطلبات المستلمة</span>
-            </div>
-          </div>
-          <span class="material-icons-outlined chevron-icon"></span>
-        </a>
-
-        <button id="support-link" class="noon-menu-item" type="button">
-          <div class="noon-menu-item-content">
-            <span class="material-icons-outlined menu-item-icon"></span>
-            <div class="noon-menu-item-text">
-              <span class="noon-menu-item-title" data-i18n="الدعم الفني">الدعم والمساعدة</span>
-              <span class="noon-menu-item-desc">تواصل معنا لحل أي مشكلة أو استفسار</span>
-            </div>
-            <span id="support-badge" class="support-badge hidden" style="margin-right: 8px;">0</span>
-          </div>
-          <span class="material-icons-outlined chevron-icon"></span>
-        </button>
-
-        <a href="edit-account.html" class="noon-menu-item">
-          <div class="noon-menu-item-content">
-            <span class="material-icons-outlined menu-item-icon"></span>
-            <div class="noon-menu-item-text">
-              <span class="noon-menu-item-title">الإعدادات</span>
-              <span class="noon-menu-item-desc">تعديل الاسم والبريد الإلكتروني والبيانات الشخصية</span>
-            </div>
-          </div>
-          <span class="material-icons-outlined chevron-icon"></span>
-        </a>
-
-        <button id="country-link" class="noon-menu-item" type="button">
-          <div class="noon-menu-item-content">
-            <span class="material-icons-outlined menu-item-icon"></span>
-            <div class="noon-menu-item-text">
-              <span class="noon-menu-item-title" data-i18n="الدولة">اللغة والدولة</span>
-              <span class="noon-menu-item-desc" id="selected-country-name">العربية</span>
-            </div>
-          </div>
-          <span class="material-icons-outlined chevron-icon"></span>
-        </button>
-
-        <a class="noon-menu-item" href="delete-account.html" style="color: #dc2626;">
-          <div class="noon-menu-item-content">
-            <span class="material-icons-outlined menu-item-icon" style="color: #dc2626;"></span>
-            <div class="noon-menu-item-text">
-              <span class="noon-menu-item-title" style="color: #dc2626;" data-i18n="حذف الحساب">حذف الحساب</span>
-              <span class="noon-menu-item-desc" style="color: #fca5a5;">حذف حسابك بشكل نهائي من موقعنا</span>
-            </div>
-          </div>
-          <span class="material-icons-outlined chevron-icon" style="color: #fca5a5;"></span>
-        </a>
-
-        <button id="sign-out-link" class="noon-menu-item" type="button">
-          <div class="noon-menu-item-content">
-            <span class="material-icons-outlined menu-item-icon" style="color: #94a3b8;"></span>
-            <div class="noon-menu-item-text">
-              <span class="noon-menu-item-title" style="color: #64748b;" data-i18n="تسجيل الخروج">تسجيل الخروج</span>
-              <span class="noon-menu-item-desc">الخروج الآمن من الحساب الحالي</span>
-            </div>
-          </div>
-          <span class="material-icons-outlined chevron-icon"></span>
-        </button>
-      </div>
-
-      <!-- Script to update stats -->
+    <!-- Script to update stats -->
       <script>
         (function() {
           function updateStats() {
@@ -1370,8 +1056,8 @@
               if (email) {
                 addresses = JSON.parse(localStorage.getItem("addresses_" + email.trim().toLowerCase()) || "[]");
               }
-              var addressesCount = Array.isArray(addresses) ? addresses.length : 0;
-              var addressesCountEl = document.getElementById("");
+              var addressesCount = Array.isArray(addresses) ? addresses.length : 0; 
+              var addressesCountEl = document.getElementById("stat-addresses-count");
               if (addressesCountEl) addressesCountEl.textContent = addressesCount;
             } catch(e) {}
 
@@ -1395,14 +1081,13 @@
         })();
       </script>
 
-      <!-- Floating Support Button -->
-      <div class="noon-support-btn-wrapper" id="noon-support-wrapper">
-        <button class="noon-support-btn" id="noon-support-btn" aria-label="الدعم والمساعدة">
-          <span class="material-icons-outlined support-chat-icon"></span>
-          <span class="support-btn-text">الدعم والمساعدة</span>
-          <span id="noon-support-badge" class="noon-support-badge hidden">0</span>
-        </button>
-      </div>
+    <!-- Floating Support Button -->
+    <div class="noon-support-btn-wrapper" id="noon-support-wrapper">
+      <button class="noon-support-btn" id="noon-support-btn" aria-label="الدعم والمساعدة">
+        <span class="material-icons-outlined support-chat-icon"></span>
+        <span class="support-btn-text">الدعم والمساعدة</span>
+        <span id="noon-support-badge" class="noon-support-badge hidden">0</span>
+      </button>
     </div>
   </main>
 
@@ -1421,28 +1106,7 @@
 
 
 
-  <nav class="bottom-nav">
-    <a href="home.html" data-nav="home">
-      <span class="material-icons-outlined"></span>
-      <small data-i18n="الرئيسية">الرئيسية</small>
-    </a>
-    <a href="products.html" data-nav="products">
-      <span class="material-icons-outlined"></span>
-      <small data-i18n="الفئات">الفئات</small>
-    </a>
-    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="الرئيسية">
-      <img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" />
-    </button>
-    <a href="ahsab.html" data-nav="account">
-      <span class="material-icons-outlined"></span>
-      <small data-i18n="حسابي">حسابي</small>
-    </a>
-    <a href="empty-cart.html" data-nav="cart">
-      <span class="material-icons-outlined"></span>
-      <small data-i18n="العربة">العربة</small>
-      <span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span>
-    </a>
-  </nav>
+  <nav class="bottom-nav" id="bottomNav" role="navigation" aria-label="الشريط السفلي"></nav>
 
   <!-- Support Chat Drawer -->
   <aside class="support-drawer" id="support-drawer" aria-hidden="true" role="dialog" aria-label="دعم العملاء" style="display:none;">
@@ -1483,10 +1147,27 @@
   <script src="../assets/js/taager-integration.js?v=20260710"></script>
   <script src="../assets/js/store.js?v=20260710"></script>
   <script src="../assets/js/ahsab.js?v=20260630f"></script>
-  <script src="../assets/js/noon-shell.js?v=20260709"></script>
+  <script src="../assets/js/noon-shell.js?v=20260711"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+      // Configure Header for Account Page
+      setTimeout(function() {
+        var menuBtn = document.querySelector('.buda-header__menu-btn');
+        var bellBtn = document.querySelector('.buda-header-bell');
+        var settingsBtn = document.querySelector('.buda-header-settings');
+        if (menuBtn) menuBtn.classList.add('hidden');
+        if (bellBtn) bellBtn.classList.remove('hidden');
+        if (settingsBtn) settingsBtn.classList.remove('hidden');
+        
+        // Ensure bottom nav active state is set
+        var activeNav = document.querySelector('.bottom-nav a[data-nav="account"]');
+        if (activeNav) activeNav.classList.add('is-active');
+      }, 100);
+    });
+  </script>
   <script src="../assets/js/pricing-engine.js"></script>
   <script src="../assets/js/cart.js?v=20260710"></script>
-  <script src="../assets/js/home.js?v=20260711a"></script>
+  <script src="../assets/js/home.js?v=20260711"></script>
   <script>
     // ===== Support Chat Drawer =====
     document.addEventListener("DOMContentLoaded", function () {
@@ -1792,6 +1473,13 @@
 
       function updateBadgeCount(count) {
         if (!supportBadge) return;
+        try {
+          localStorage.setItem("_supportUnread", String(count));
+          document.cookie = "_supportUnread=" + count + "; path=/";
+          var parts = window.name.split(';').filter(function(p) { return p.indexOf('_su=') !== 0; });
+          parts.push('_su=' + count);
+          window.name = parts.join(';');
+        } catch (e) {}
         if (count > 0) {
           supportBadge.textContent = count > 99 ? "99+" : count;
           supportBadge.classList.remove("hidden");
@@ -1801,10 +1489,19 @@
             oldBadge.textContent = count > 99 ? "99+" : count;
             oldBadge.classList.remove("hidden");
           }
+
+          var headerBadge = document.getElementById("budaCartBadge");
+          if (headerBadge) {
+            headerBadge.textContent = count > 99 ? "99+" : count;
+            headerBadge.classList.remove("hidden");
+          }
         } else {
           supportBadge.classList.add("hidden");
           const oldBadge = document.getElementById("support-badge");
           if (oldBadge) oldBadge.classList.add("hidden");
+
+          var headerBadge = document.getElementById("budaCartBadge");
+          if (headerBadge) headerBadge.classList.add("hidden");
         }
       }
 
@@ -2016,6 +1713,14 @@
         refresh: loadChat
       };
 
+      // Auto-open support drawer if URL ends with #support
+      if (window.location.hash === '#support') {
+        setTimeout(openDrawer, 300);
+      }
+      window.addEventListener('hashchange', function() {
+        if (window.location.hash === '#support') openDrawer();
+      });
+
     }); // end DOMContentLoaded
     // ===== End Support Chat Drawer =====
 
@@ -2032,10 +1737,16 @@
         loginRequired.classList.add("hidden");
       }
     });
+
+    // Hide skeleton after a short delay to allow content to render
+    function hideSkeleton() {
+      const skeleton = document.getElementById("skeletonAccount");
+      if (skeleton) {
+        skeleton.style.opacity = '0';
+        setTimeout(() => skeleton.style.display = 'none', 300);
+      }
+    }
+    setTimeout(hideSkeleton, 250);
   </script>
 </body>
 </html>
-
-
-
-

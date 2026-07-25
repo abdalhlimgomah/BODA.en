@@ -197,12 +197,13 @@ var HOME_CONFIG = {
     { type: "banner", index: 0 },
     { type: "hero" },
     { type: "categories" },
+    { type: "features" },
     { type: "mega-offers", id: "hm-mega-offers" },
     { type: "banner", index: 1 },
     {
       type: "shein-trend",
       id: "hm-trend-1",
-      title: "🔥 رائج الآن",
+      title: "اختيار الجميع",
       badge: "تريند",
     },
     { type: "banner", index: 2 },
@@ -221,11 +222,11 @@ var HOME_CONFIG = {
     {
       type: "shein-deal",
       id: "hm-sdeal-1",
-      title: "💥 صفقة اليوم",
+      title: "عرض مميز",
       discountFilter: 40,
     },
     { type: "banner", index: 3 },
-    { type: "shein-style", id: "hm-style-1", title: "الأكثر مبيعاً" },
+    { type: "shein-style", id: "hm-style-1", title: "تشكيلة مميزة" },
     {
       type: "category-products",
       id: "hm-beauty",
@@ -244,13 +245,13 @@ var HOME_CONFIG = {
     {
       type: "shein-trend",
       id: "hm-trend-2",
-      title: " الأكثر مبيعاً",
+      title: "الأكثر طلباً",
       badge: "مبيعاً",
     },
     {
       type: "shein-new",
       id: "hm-new-1",
-      title: "🆕 وصل حديثاً",
+      title: "جديدنا",
       badge: "جديد",
     },
     { type: "random", id: "hm-random", title: "مفاجآت تستحق التجربة" },
@@ -828,6 +829,7 @@ function buildProductCard(product) {
     dots = "",
     counter = "";
   for (var gi = 0; gi < images.length; gi++) {
+    var imgLoad = gi === 0 ? ' loading="eager" fetchpriority="high" decoding="async"' : ' loading="lazy" decoding="async"';
     imgs +=
       '<img class="noon-gallery-img' +
       (gi === 0 ? " active" : "") +
@@ -835,7 +837,7 @@ function buildProductCard(product) {
       images[gi] +
       '" alt="' +
       escapeHtml(product.name || "منتج") +
-      '" loading="lazy" onerror="this.onerror=null;this.src=\'' +
+      '"' + imgLoad + ' onerror="this.onerror=null;this.src=\'' +
       fb +
       "'\" />";
     if (images.length > 1)
@@ -1357,7 +1359,6 @@ HM.renderHero = function () {
   var temp = document.createElement("div");
   temp.innerHTML = html;
   HM.contentEl.appendChild(temp.firstElementChild);
-  HM.initHeroSlider();
 };
 
 HM.renderBanner = function (section) {
@@ -1474,10 +1475,14 @@ HM.renderCategories = function () {
   var html =
     '<div class="hm-cats-wrap hm-fade">' +
     '<div class="hm-cats-section">' +
-    '<div class="hm-cats-head"><h2>اشتري حسب الفئة</h2></div>' +
+    '<div class="hm-cats-head"></div>' +
     '<div class="hm-cats-body">' +
+    '<div class="hm-cats-scroll-wrap">' +
+    '<button class="hm-cats-btn prev" type="button" aria-label="السابق">❮</button>' +
     '<div class="hm-cats-scroll" id="hm-cats-scroll">' +
     pairsHtml +
+    "</div>" +
+    '<button class="hm-cats-btn next" type="button" aria-label="التالي">❯</button>' +
     "</div>" +
     indicatorHtml +
     "</div></div></div>";
@@ -1485,23 +1490,33 @@ HM.renderCategories = function () {
   temp.innerHTML = html;
   var el = temp.firstElementChild;
   HM.contentEl.appendChild(el);
-  // Update capsule indicator on scroll
+  // init arrows
+  var catsWrap = el.querySelector(".hm-cats-scroll-wrap");
   var scrollEl = el.querySelector(".hm-cats-scroll");
-  var dots = el.querySelectorAll(".hm-cats-indicator span");
-  if (scrollEl && dots.length) {
-    scrollEl.addEventListener("scroll", function () {
-      var pairElements = scrollEl.querySelectorAll(".hm-cats-pair");
-      if (!pairElements.length) return;
-      var scrollLeft = scrollEl.scrollLeft;
-      var totalWidth = scrollEl.scrollWidth - scrollEl.clientWidth;
-      var activeIdx = Math.min(
-        Math.round((scrollLeft / totalWidth) * (pairCount - 1)),
-        pairCount - 1,
-      );
-      dots.forEach(function (d, i) {
-        d.classList.toggle("active", i === activeIdx);
+  if (catsWrap && scrollEl) {
+    var prevBtn = catsWrap.querySelector(".prev");
+    var nextBtn = catsWrap.querySelector(".next");
+    if (prevBtn) prevBtn.addEventListener("click", function () { scrollEl.scrollBy({ left: -250, behavior: "smooth" }); });
+    if (nextBtn) nextBtn.addEventListener("click", function () { scrollEl.scrollBy({ left: 250, behavior: "smooth" }); });
+  }
+  // Update capsule indicator on scroll
+  if (scrollEl) {
+    var dots = el.querySelectorAll(".hm-cats-indicator span");
+    if (dots.length) {
+      scrollEl.addEventListener("scroll", function () {
+        var pairElements = scrollEl.querySelectorAll(".hm-cats-pair");
+        if (!pairElements.length) return;
+        var scrollLeft = scrollEl.scrollLeft;
+        var totalWidth = scrollEl.scrollWidth - scrollEl.clientWidth;
+        var activeIdx = Math.min(
+          Math.round((scrollLeft / totalWidth) * (pairCount - 1)),
+          pairCount - 1,
+        );
+        dots.forEach(function (d, i) {
+          d.classList.toggle("active", i === activeIdx);
+        });
       });
-    });
+    }
   }
 };
 
@@ -1532,6 +1547,34 @@ HM.renderBrands = function () {
   HM.contentEl.appendChild(temp.firstElementChild);
 };
 
+/** Features section — mobile card + desktop sidebar */
+HM.renderFeatures = function () {
+  if (!HM.contentEl) return;
+  var html =
+    '<div class="hm-features-wrap hm-fade" id="hm-features">' +
+    /* Mobile: single card with 4 horizontal items */
+    '<div class="hm-features-mobile">' +
+    '<div class="hm-f-card">' +
+    '<div class="hm-f-item"><div class="hm-f-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h-1a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1"/><path d="M20 6h1a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1"/><path d="M6 14h2v6H6z"/><path d="M16 14h2v6h-2z"/><path d="M6 14v-2a6 6 0 0 1 12 0v2"/></svg></div><div class="hm-f-info"><span class="hm-f-title">دعم 24/7</span><span class="hm-f-desc">خدمة عملاء</span></div></div>' +
+    '<div class="hm-f-divider"></div>' +
+    '<div class="hm-f-item"><div class="hm-f-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="hm-f-info"><span class="hm-f-title">دفع آمن</span><span class="hm-f-desc">حماية بياناتك</span></div></div>' +
+    '<div class="hm-f-divider"></div>' +
+    '<div class="hm-f-item"><div class="hm-f-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><div class="hm-f-info"><span class="hm-f-title">جودة مضمونة</span><span class="hm-f-desc">منتجات أصلية 100%</span></div></div>' +
+    '<div class="hm-f-divider"></div>' +
+    '<div class="hm-f-item"><div class="hm-f-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><polygon points="12 15 17 21 7 21 12 15"/><path d="M12 15V9"/></svg></div><div class="hm-f-info"><span class="hm-f-title">توصيل سريع</span><span class="hm-f-desc">إلى جميع المناطق</span></div></div>' +
+    '</div></div>' +
+    /* Desktop: stacked vertical cards */
+    '<div class="hm-features-desktop">' +
+    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><polygon points="12 15 17 21 7 21 12 15"/><path d="M12 15V9"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">توصيل سريع</span><span class="hm-fd-desc">إلى جميع المناطق</span></div></div>' +
+    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">دفع آمن</span><span class="hm-fd-desc">حماية بياناتك</span></div></div>' +
+    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h-1a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1"/><path d="M20 6h1a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1"/><path d="M6 14h2v6H6z"/><path d="M16 14h2v6h-2z"/><path d="M6 14v-2a6 6 0 0 1 12 0v2"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">دعم 24/7</span><span class="hm-fd-desc">دائماً لمساعدتك</span></div></div>' +
+    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">إرجاع سهل</span><span class="hm-fd-desc">ضمان استرجاع خلال 14 يوم</span></div></div>' +
+    '</div></div>';
+  var temp = document.createElement("div");
+  temp.innerHTML = html;
+  HM.contentEl.appendChild(temp.firstElementChild);
+};
+
 // ========== SMART CATEGORY SHOWCASE (4 premium cards) ==========
 HM.renderSmartCategories = function (section) {
   var cards = HOME_CONFIG._smartCategories || [];
@@ -1547,7 +1590,7 @@ HM.renderSmartCategories = function (section) {
     '<section class="hm-section hm-fade hm-smart-cats" id="sec-' + (section.id || 'hm-smart-cats') + '">' +
     '<div class="hm-section-head"><h2>' + escapeHtml(section.title || 'تسوق حسب الفئة') + '</h2>' +
     '<a href="category-landing.html?slug=clothes">استكشف الكل</a></div>' +
-    '<div class="hm-section-body"><div class="hm-smart-cats-grid">';
+    '<div class="hm-section-body"><div class="hm-cats-scroll-wrap"><button class="hm-cats-btn prev" type="button" aria-label="السابق">❮</button><div class="hm-smart-cats-grid">';
   cards.forEach(function (card, i) {
     html +=
       '<a class="hm-smart-cat-card" href="' + escapeHtml(card.link_url || '#') + '" style="--sc-gradient-from:' + (card.gradient_from || '#000') + ';--sc-gradient-to:' + (card.gradient_to || '#000') + '">' +
@@ -1561,10 +1604,22 @@ HM.renderSmartCategories = function (section) {
       '<span class="hm-smart-cat-btn">استكشف الآن <span class="material-icons-outlined">arrow_back</span></span>' +
       '</div></a>';
   });
-  html += '</div></div></section>';
+  html += '</div><button class="hm-cats-btn next" type="button" aria-label="التالي">❯</button></div></div></section>';
   var temp = document.createElement("div");
   temp.innerHTML = html;
-  if (HM.contentEl) HM.contentEl.appendChild(temp.firstElementChild);
+  if (HM.contentEl) {
+    var el2 = temp.firstElementChild;
+    HM.contentEl.appendChild(el2);
+    // init arrows
+    var scWrap = el2.querySelector(".hm-cats-scroll-wrap");
+    var scGrid = el2.querySelector(".hm-smart-cats-grid");
+    if (scWrap && scGrid) {
+      var pb = scWrap.querySelector(".prev");
+      var nb = scWrap.querySelector(".next");
+      if (pb) pb.addEventListener("click", function () { scGrid.scrollBy({ left: -250, behavior: "smooth" }); });
+      if (nb) nb.addEventListener("click", function () { scGrid.scrollBy({ left: 250, behavior: "smooth" }); });
+    }
+  }
 };
 
 HM.renderOffers = function (section) {
@@ -1667,6 +1722,16 @@ HM.renderTaagerExtra = function (section) {
 
 // ========== SHEIN-STYLE RENDERERS ==========
 
+function initSheinCarousel(sectionEl, gridSel, wrapSel) {
+  var grid = sectionEl.querySelector(gridSel);
+  var wrap = sectionEl.querySelector(wrapSel);
+  if (!grid || !wrap) return;
+  var prev = wrap.querySelector('.prev');
+  var next = wrap.querySelector('.next');
+  if (prev) prev.addEventListener('click', function(){ grid.scrollBy({ left: -155, behavior: 'smooth' }); });
+  if (next) next.addEventListener('click', function(){ grid.scrollBy({ left: 155, behavior: 'smooth' }); });
+}
+
 /** SHEIN Trend — Bold gradient header, large product cards with trend badge */
 HM.renderSheinTrend = function (section) {
   if (!HM.allProducts.length) return null;
@@ -1701,7 +1766,7 @@ HM.renderSheinTrend = function (section) {
     '<h2 class="hm-shein-title" style="color:' +
     pal[0] +
     '">' +
-    escapeHtml(section.title || "🔥 رائج الآن") +
+    escapeHtml(section.title || "رائج الآن") +
     "</h2>" +
     '<a class="hm-view-all" href="section.html?type=' +
     section.type +
@@ -1711,7 +1776,7 @@ HM.renderSheinTrend = function (section) {
     encodeURIComponent(section.title || "") +
     '">عرض الكل</a>' +
     "</div>" +
-    '<div class="hm-shein-trend-body"><div class="hm-shein-grid">';
+    '<div class="hm-shein-trend-body"><div class="hm-shein-grid-wrap"><button class="hm-shein-grid-btn prev" type="button" aria-label="السابق">❮</button><button class="hm-shein-grid-btn next" type="button" aria-label="التالي">❯</button><div class="hm-shein-grid">';
   pool.forEach(function (p) {
     var rp = resolvePrice(p);
     var rr = resolveRating(p);
@@ -1759,16 +1824,16 @@ HM.renderSheinTrend = function (section) {
       id +
       '">+ أضف للسلة</button></div></div>';
   });
-  html += "</div></div></section>";
+  html += "</div></div></div></section>";
   var temp = document.createElement("div");
   temp.innerHTML = html;
   var sectionEl = temp.firstElementChild;
   HM.contentEl.appendChild(sectionEl);
   attachProductCardEvents(sectionEl);
+  initSheinCarousel(sectionEl, '.hm-shein-grid', '.hm-shein-grid-wrap');
   return sectionEl;
 };
 
-/** SHEIN Style — Split layout: hero image + product row */
 HM.renderSheinStyle = function (section) {
   if (!HM.allProducts.length) return null;
   var pool = shuffleProducts([].concat(HM.allProducts)).slice(0, 8);
@@ -1791,7 +1856,7 @@ HM.renderSheinStyle = function (section) {
     '<h2 class="hm-shein-title" style="color:' +
     pal[0] +
     '">' +
-    escapeHtml(section.title || "✨ اختيارات المصمم") +
+    escapeHtml(section.title || "شاهد أيضاً") +
     "</h2>" +
     '<a class="hm-view-all" href="section.html?type=' +
     section.type +
@@ -1831,7 +1896,7 @@ HM.renderSheinStyle = function (section) {
     '<button class="hm-shein-add hm-shein-add-lg" data-add-to-cart="' +
     String(hero.id) +
     '">تسوق الآن</button></div></div>' +
-    '<div class="hm-shein-side">';
+    '<div class="hm-shein-side-wrap"><button class="hm-shein-side-btn prev" type="button" aria-label="السابق">❮</button><button class="hm-shein-side-btn next" type="button" aria-label="التالي">❯</button><div class="hm-shein-side">';
   rest.forEach(function (p) {
     var img = getImage(p);
     var pr = resolvePrice(p);
@@ -1850,12 +1915,13 @@ HM.renderSheinStyle = function (section) {
       formatMoney(pr.finalPrice) +
       "</span></div></div>";
   });
-  html += "</div></div></div></section>";
+  html += "</div></div></div></div></section>";
   var temp = document.createElement("div");
   temp.innerHTML = html;
   var sectionEl = temp.firstElementChild;
   HM.contentEl.appendChild(sectionEl);
   attachProductCardEvents(sectionEl);
+  initSheinCarousel(sectionEl, '.hm-shein-side', '.hm-shein-side-wrap');
   return sectionEl;
 };
 
@@ -1884,7 +1950,7 @@ HM.renderSheinDeal = function (section) {
     '">' +
     '<div class="hm-shein-deal-head">' +
     '<h2 class="hm-shein-title hm-shein-deal-title">' +
-    escapeHtml(section.title || "💥 صفقة اليوم") +
+    escapeHtml(section.title || "عرض مميز") +
     "</h2>" +
     '<span class="hm-shein-deal-tag">وفر ' +
     rp.discountPercent +
@@ -1921,7 +1987,7 @@ HM.renderSheinDeal = function (section) {
     '<button class="hm-shein-add hm-shein-add-lg" data-add-to-cart="' +
     String(hero.id) +
     '">احصل عليه الآن</button></div></div>' +
-    '<div class="hm-shein-deal-row">';
+    '<div class="hm-shein-deal-row-wrap"><button class="hm-shein-row-btn prev" type="button" aria-label="السابق">❮</button><button class="hm-shein-row-btn next" type="button" aria-label="التالي">❯</button><div class="hm-shein-deal-row">';
   rest.forEach(function (p) {
     var img = getImage(p);
     var pr = resolvePrice(p);
@@ -1942,12 +2008,13 @@ HM.renderSheinDeal = function (section) {
       formatMoney(pr.finalPrice) +
       "</span></div>";
   });
-  html += "</div></div></section>";
+  html += "</div></div></div></section>";
   var temp = document.createElement("div");
   temp.innerHTML = html;
   var sectionEl = temp.firstElementChild;
   HM.contentEl.appendChild(sectionEl);
   attachProductCardEvents(sectionEl);
+  initSheinCarousel(sectionEl, '.hm-shein-deal-row', '.hm-shein-deal-row-wrap');
   return sectionEl;
 };
 
@@ -1963,18 +2030,37 @@ HM.renderSheinNew = function (section) {
     );
   });
   var picks = pool.slice(0, 12);
+  var palettes = [
+    ["#ff6b9d", "#c44dff"],
+    ["#00d2ff", "#3a7bd5"],
+    ["#ff9a9e", "#fad0c4"],
+    ["#667eea", "#764ba2"],
+    ["#f093fb", "#f5576c"],
+    ["#4facfe", "#00f2fe"],
+  ];
+  var pal = palettes[Math.floor(Math.random() * palettes.length)];
   var html =
     '<section class="hm-section hm-fade hm-shein-trend" id="sec-' +
     section.id +
-    '" style="background:#f8fffe">' +
+    '" style="background:linear-gradient(135deg,' +
+    pal[0] +
+    "08," +
+    pal[1] +
+    '08)">' +
     '<div class="hm-shein-trend-head">' +
     (section.badge
-      ? '<span class="hm-shein-badge" style="background:#22c55e;color:#fff">' +
+      ? '<span class="hm-shein-badge" style="background:rgba(0,0,0,0.06);color:' +
+        pal[0] +
+        ";border:1px solid " +
+        pal[0] +
+        '40">' +
         escapeHtml(section.badge) +
         "</span>"
       : "") +
-    '<h2 class="hm-shein-title" style="color:#16a34a">' +
-    escapeHtml(section.title || "🆕 وصـل حديثاً") +
+    '<h2 class="hm-shein-title" style="color:' +
+    pal[0] +
+    '">' +
+    escapeHtml(section.title || "وصل حديثاً") +
     "</h2>" +
     '<a class="hm-view-all" href="section.html?type=' +
     section.type +
@@ -1984,7 +2070,7 @@ HM.renderSheinNew = function (section) {
     encodeURIComponent(section.title || "") +
     '">عرض الكل</a>' +
     "</div>" +
-    '<div class="hm-shein-trend-body"><div class="hm-shein-grid">';
+    '<div class="hm-shein-trend-body"><div class="hm-shein-grid-wrap"><button class="hm-shein-grid-btn prev" type="button" aria-label="السابق">❮</button><button class="hm-shein-grid-btn next" type="button" aria-label="التالي">❯</button><div class="hm-shein-grid">';
   picks.forEach(function (p) {
     var rp = resolvePrice(p);
     var rr = resolveRating(p);
@@ -2000,7 +2086,7 @@ HM.renderSheinNew = function (section) {
       '" alt="' +
       escapeHtml(p.name || "") +
       '" loading="lazy" onerror="this.style.display=\'none\'" />' +
-      '<span class="hm-shein-discount" style="background:#22c55e">جديد</span>' +
+      '<span class="hm-shein-discount">جديد</span>' +
       '<button class="hm-shein-wish ' +
       (isWish ? "active" : "") +
       '" data-wishlist="' +
@@ -2029,12 +2115,13 @@ HM.renderSheinNew = function (section) {
       id +
       '">+ أضف للسلة</button></div></div>';
   });
-  html += "</div></div></section>";
+  html += "</div></div></div></section>";
   var temp = document.createElement("div");
   temp.innerHTML = html;
   var sectionEl = temp.firstElementChild;
   HM.contentEl.appendChild(sectionEl);
   attachProductCardEvents(sectionEl);
+  initSheinCarousel(sectionEl, '.hm-shein-grid', '.hm-shein-grid-wrap');
   return sectionEl;
 };
 
@@ -2059,7 +2146,7 @@ HM.renderSheinBrands = function (section) {
     section.id +
     '">' +
     '<div class="hm-section-head"><h2>' +
-    escapeHtml(section.title || "🏷️ تسوق حسب الماركة") +
+    escapeHtml(section.title || "تسوق حسب الماركة") +
     "</h2></div>" +
     '<div class="hm-shein-brands-body"><div class="hm-shein-brands-grid">';
   brands.forEach(function (b, i) {
@@ -2102,6 +2189,8 @@ HM.renderSection = function (section) {
       return HM.renderBanner(section);
     case "categories":
       return HM.renderCategories();
+    case "features":
+      return HM.renderFeatures();
     case "brands":
       return HM.renderBrands();
     case "offers":
@@ -2172,6 +2261,7 @@ HM.renderInitialProgressively = function () {
   if (!skeletonEl) {
     document.body.classList.remove("home-loading");
     HM.renderAll();
+    HM.initHeroSlider();
     return Promise.resolve();
   }
 
@@ -2197,10 +2287,11 @@ HM.renderInitialProgressively = function () {
 
     function renderBatch() {
       if (index >= HOME_CONFIG.sections.length) {
-        HM.promoteHydratedSkeleton(skeletonEl);
-        document.body.classList.remove("home-hydrating");
-        document.body.classList.add("home-loaded");
-        resolve();
+HM.promoteHydratedSkeleton(skeletonEl);
+         document.body.classList.remove("home-hydrating");
+         document.body.classList.add("home-loaded");
+         HM.initHeroSlider();
+         resolve();
         return;
       }
 
@@ -2229,8 +2320,8 @@ HM.initHeroSlider = function () {
   if (!HM.heroSlideCount) return;
 
   // ── Config ──
-  var slidesPerView = 1.087; // shows ~8% of next slide
-  var gap = 10; // px between slides
+  var slidesPerView = 1; // full slide at a time
+  var gap = 0; // px between slides
   var transitionMs = 350;
   var autoInterval = 4000;
   var snapThreshold = 0.25; // 25% of slide width to snap
@@ -2668,9 +2759,9 @@ function initBudaUI() {
   if (window._budaHomeUIInited) return;
   window._budaHomeUIInited = true;
 
-  var searchInput = document.getElementById('home-search');
+  var searchInput = document.getElementById('search-input');
   var suggestionItems = document.getElementById('budaSearchSuggestionItems');
-  var searchWrap = searchInput ? searchInput.closest('.buda-search') : null;
+  var searchWrap = searchInput ? searchInput.closest('.buda-header__search') : null;
 
   function renderSuggestions(term) {
     if (!suggestionItems || !term.trim()) { if (suggestionItems) suggestionItems.innerHTML = ''; return; }
@@ -2681,7 +2772,7 @@ function initBudaUI() {
     if (!matched.length) { suggestionItems.innerHTML = ''; return; }
     suggestionItems.innerHTML = matched.map(function (p) {
       return '<div class="buda-search-dd-item" data-search-term="' + escapeHtml(p.name) + '">' +
-        '<span class="material-icons-outlined">search</span> ' + escapeHtml(p.name) + '</div>';
+        '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg> ' + escapeHtml(p.name) + '</div>';
     }).join('');
     suggestionItems.querySelectorAll('[data-search-term]').forEach(function (el) {
       el.addEventListener('click', function () {

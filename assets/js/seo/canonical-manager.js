@@ -62,10 +62,16 @@
   };
 
   CanonicalManager.enforcePreferredDomain = function (preferred) {
-    preferred = preferred || "https://www.buda.com";
+    preferred = preferred || "https://buda-rho.vercel.app";
     var host = window.location.hostname;
-    if (host === "buda.com" || host === "localhost" || host === "127.0.0.1") return;
-    if (preferred && host !== preferred.replace(/https?:\/\//, "")) {
+    var preferredHost = preferred.replace(/https?:\/\//, "");
+    if (host === preferredHost || host === "localhost" || host === "127.0.0.1") return;
+    // Redirect to preferred domain
+    if (preferred && host !== preferredHost) {
+      var newUrl = preferred + window.location.pathname + window.location.search;
+      if (window.location.href !== newUrl) {
+        window.location.replace(newUrl);
+      }
     }
   };
 

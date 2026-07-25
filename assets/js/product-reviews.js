@@ -1,7 +1,11 @@
-const REVIEW_TITLE_MARKER = "__buda_title__:";
+const reviewsMoneyFormatter = new Intl.NumberFormat("ar-EG", {
+  style: "currency",
+  currency: "EGP",
+  minimumFractionDigits: 2,
+  maximumFractionDigits: 2,
+});
 
-const MAX_REVIEW_IMAGES = 7;
-const MAX_IMAGE_SIZE_BYTES = 5 * 1024 * 1024;
+const REVIEW_TITLE_MARKER = "__buda_title__:";
 
 const reviewPageState = {
   product: null,
@@ -9,7 +13,6 @@ const reviewPageState = {
   primaryItem: null,
   rating: 0,
   submitting: false,
-  uploadedImages: [],
 };
 
 const getQueryParam = (key) => new URLSearchParams(window.location.search).get(key);
@@ -234,20 +237,6 @@ function buildStoredComment(title, body) {
   return `${REVIEW_TITLE_MARKER}${cleanTitle}\n${cleanBody}`;
 }
 
-function parseImagesField(value) {
-  if (!value) return [];
-  if (Array.isArray(value)) return value.filter((u) => typeof u === "string" && u.startsWith("http"));
-  if (typeof value === "string") {
-    try {
-      const parsed = JSON.parse(value);
-      if (Array.isArray(parsed)) return parsed.filter((u) => typeof u === "string" && u.startsWith("http"));
-    } catch {
-      return [];
-    }
-  }
-  return [];
-}
-
 function mapRatingsRows(rows = []) {
   return (Array.isArray(rows) ? rows : [])
     .map((row, index) => {
@@ -259,16 +248,9 @@ function mapRatingsRows(rows = []) {
         title: parsedComment.title,
         text: parsedComment.body,
         createdAt: row?.created_at || new Date().toISOString(),
-        user_email: String(row?.user_email || "").toLowerCase().trim(),
-        images: parseImagesField(row?.images),
       };
     })
     .filter((item) => item.rating > 0);
-}
-
-function hideComposeSection() {
-  const composeSection = document.getElementById("review-compose-section");
-  if (composeSection) composeSection.classList.add("hidden");
 }
 
 async function fetchRatings(productId) {
@@ -351,7 +333,7 @@ function renderProductCard(product, order, primaryItem, stats) {
       <h2 class="review-target-name">${escapeHtml(product.name || primaryItem?.name || "منتج")}</h2>
       ${product.description ? `<p class="review-target-description">${escapeHtml(String(product.description).slice(0, 160))}</p>` : ""}
       <p class="review-target-meta">${escapeHtml(orderStatusLine)}</p>
-      <p class="review-target-meta">${window.BudaStore ? window.BudaStore.formatMoney(currentPrice, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : escapeHtml((Number(currentPrice) || 0).toFixed(2) + " " + (window.BudaStore?.getCurrencyLabel?.() || "جنيه"))} • ${escapeHtml(avgText)}</p>
+      <p class="review-target-meta">${escapeHtml(reviewsMoneyFormatter.format(currentPrice))} • ${escapeHtml(avgText)}</p>
     </div>
     <div class="review-target-image">
       <img src="${image}" alt="${escapeHtml(product.name || "منتج")}" onerror="this.onerror=null;this.src='${fallback}'" />
@@ -380,82 +362,26 @@ function renderCommentsList(comments = []) {
     return;
   }
 
-  const currentEmail = getCurrentUserEmail();
-
   listEl.innerHTML = rows
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
     .map((comment) => {
       const commentDate = comment.createdAt ? new Date(comment.createdAt).toLocaleDateString("ar-EG") : "";
       const titleHtml = comment.title ? `<p class="comment-title">${escapeHtml(comment.title)}</p>` : "";
-      const imagesHtml = Array.isArray(comment.images) && comment.images.length
-        ? `<div class="comment-images">${comment.images.map((url) => `<div class="comment-image-item"><img src="${escapeHtml(url)}" alt="صورة التقييم" loading="lazy" onerror="this.parentElement.style.display='none'" /></div>`).join("")}</div>`
-        : "";
-      const isOwn = currentEmail && comment.user_email === currentEmail;
-      const createdDate = comment.createdAt || new Date().toISOString();
       return `
-        <article class="comment-item${isOwn ? " is-own-review" : ""}" data-review-email="${escapeHtml(comment.user_email)}" data-review-product="${escapeHtml(reviewPageState.product?.id || "")}" data-review-created="${escapeHtml(createdDate)}">
+        <article class="comment-item">
           <div class="comment-head">
             <div>
               <strong class="comment-author">${escapeHtml(comment.name || "عميل")}</strong>
               <div class="rating-stars">${renderStars(comment.rating || 0)}</div>
             </div>
             <span class="comment-date">${commentDate}</span>
-            ${isOwn ? '<button type="button" class="comment-delete-btn" aria-label="حذف التقييم"><span class="material-icons-outlined">close</span></button>' : ""}
           </div>
           ${titleHtml}
           <p class="comment-body">${escapeHtml(comment.text || "")}</p>
-          ${imagesHtml}
         </article>
       `;
     })
     .join("");
-
-  listEl.querySelectorAll(".comment-delete-btn").forEach((btn) => {
-    btn.addEventListener("click", async (e) => {
-      e.stopPropagation();
-      const article = btn.closest(".comment-item");
-      if (!article) return;
-      const productId = article.dataset.reviewProduct;
-      const userEmail = article.dataset.reviewEmail;
-
-      if (!productId || !userEmail) return;
-
-      // Check 9-day rule
-      var REVIEW_DELETE_DAYS = 9;
-      var createdStr = article.dataset.reviewCreated;
-      var daysLeft = 0;
-      if (createdStr) {
-        var createdDate = new Date(createdStr);
-        var elapsedDays = Math.floor((Date.now() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
-        daysLeft = REVIEW_DELETE_DAYS - elapsedDays;
-      }
-      if (daysLeft > 0) {
-        var msg = "يمكنك حذف التقييم بعد " + daysLeft + " " + (daysLeft === 1 ? "يوم" : "أيام") + ".";
-        reviewsNotify(msg, "error");
-        return;
-      }
-
-      if (!confirm("هل أنت متأكد من حذف هذا التقييم؟")) return;
-
-      btn.disabled = true;
-      btn.innerHTML = '<span class="material-icons-outlined" style="font-size:14px">hourglass_empty</span>';
-
-      const result = await deleteReview(productId, userEmail);
-
-      if (result.success) {
-        reviewsNotify("تم حذف التقييم.", "success");
-        const stats = await fetchRatings(productId);
-        renderSummary(stats);
-        renderCommentsList(stats.comments || []);
-        renderProductCard(reviewPageState.product, reviewPageState.order, reviewPageState.primaryItem, stats);
-        syncProductRatingCache(reviewPageState.product, stats);
-      } else {
-        reviewsNotify(result.message || "تعذر حذف التقييم.", "error");
-        btn.disabled = false;
-        btn.innerHTML = '<span class="material-icons-outlined">close</span>';
-      }
-    });
-  });
 }
 
 function syncProductRatingCache(product, stats) {
@@ -491,10 +417,6 @@ function getCurrentPublicName() {
   const parts = rawName.replace(/\s+/g, " ").split(" ").filter(Boolean);
   if (parts.length <= 1) return rawName;
   return `${parts[0]} ${parts[1].charAt(0)}.`;
-}
-
-function getCurrentUserEmail() {
-  return (localStorage.getItem("userEmail") || "").toString().trim().toLowerCase();
 }
 
 function isAnonymousReview() {
@@ -544,241 +466,6 @@ function cleanPayload(payload) {
   );
 }
 
-/* ===== Image Upload ===== */
-function getReviewStoragePath(productId) {
-  const email = (localStorage.getItem("userEmail") || "anonymous").replace(/[^a-z0-9]/gi, "_");
-  const ts = Date.now();
-  return `review-images/${String(productId).replace(/[^a-z0-9]/gi, "_")}/${email}_${ts}`;
-}
-
-async function uploadReviewImage(file, productId) {
-  const ext = file.name.split(".").pop().toLowerCase().replace(/[^a-z0-9]/g, "");
-  const storagePath = `${getReviewStoragePath(productId)}_${Date.now()}.${ext}`;
-
-  try {
-    const raw = window.supabaseClient.raw();
-    const { data, error } = await raw.storage.from("review-images").upload(storagePath, file, {
-      cacheControl: "3600",
-      upsert: false,
-      contentType: file.type,
-    });
-
-    if (error) throw error;
-
-    const { data: urlData } = await raw.storage.from("review-images").getPublicUrl(storagePath);
-    return urlData?.publicUrl || null;
-  } catch (err) {
-    console.warn("uploadReviewImage via lib failed, trying direct REST:", err);
-
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-
-      const supabaseUrl = window.SUPABASE_URL || "https://msgqzgzoslearaprgiqq.supabase.co";
-      const anonKey = window.SUPABASE_ANON_KEY || "";
-      const uploadUrl = `${supabaseUrl}/storage/v1/object/review-images/${storagePath}`;
-
-      const res = await fetch(uploadUrl, {
-        method: "POST",
-        headers: {
-          "Authorization": `Bearer ${anonKey}`,
-          "x-upsert": "false",
-        },
-        body: file,
-      });
-
-      if (!res.ok) {
-        const errText = await res.text().catch(() => "unknown");
-        console.error("direct REST upload failed:", res.status, errText);
-
-        if (res.status === 404) {
-          console.warn("Bucket may not exist. Create 'review-images' bucket in Supabase dashboard.");
-        }
-        return null;
-      }
-
-      const publicUrl = `${supabaseUrl}/storage/v1/object/public/review-images/${storagePath}`;
-      return publicUrl;
-    } catch (fallbackErr) {
-      console.error("direct REST upload fallback also failed:", fallbackErr);
-      return null;
-    }
-  }
-}
-
-function handleImageFiles(files) {
-  const errorEl = document.getElementById("review-image-error");
-  const previewsEl = document.getElementById("review-image-previews");
-
-  if (!files || !files.length) return;
-
-  const remaining = MAX_REVIEW_IMAGES - reviewPageState.uploadedImages.length;
-
-  if (remaining <= 0) {
-    if (errorEl) {
-      errorEl.textContent = `يمكنك إضافة ${MAX_REVIEW_IMAGES} صور فقط.`;
-      errorEl.classList.remove("hidden");
-    }
-    return;
-  }
-
-  const toAdd = Math.min(files.length, remaining);
-
-  for (let i = 0; i < toAdd; i++) {
-    const file = files[i];
-
-    if (!file.type.startsWith("image/")) {
-      if (errorEl) {
-        errorEl.textContent = "الرجاء اختيار صور فقط (JPG/PNG/WebP).";
-        errorEl.classList.remove("hidden");
-      }
-      continue;
-    }
-
-    if (file.size > MAX_IMAGE_SIZE_BYTES) {
-      if (errorEl) {
-        errorEl.textContent = "حجم الصورة كبير جداً. الحد الأقصى 5 ميجابايت.";
-        errorEl.classList.remove("hidden");
-      }
-      continue;
-    }
-
-    const preview = {
-      file,
-      blobUrl: URL.createObjectURL(file),
-      status: "pending",
-      url: null,
-    };
-
-    reviewPageState.uploadedImages.push(preview);
-    appendImagePreview(preview, previewsEl);
-  }
-
-  if (errorEl) errorEl.classList.add("hidden");
-  updateImageUploadVisibility();
-}
-
-function appendImagePreview(preview, container) {
-  if (!container) return;
-
-  const div = document.createElement("div");
-  div.className = "review-image-preview";
-  div.dataset.index = String(reviewPageState.uploadedImages.indexOf(preview));
-
-  const img = document.createElement("img");
-  img.src = preview.blobUrl;
-  img.alt = "صورة التقييم";
-  img.loading = "lazy";
-
-  const removeBtn = document.createElement("button");
-  removeBtn.type = "button";
-  removeBtn.className = "review-image-preview-remove";
-  removeBtn.innerHTML = "&times;";
-  removeBtn.setAttribute("aria-label", "إزالة الصورة");
-
-  removeBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    removeImagePreview(preview);
-  });
-
-  div.appendChild(img);
-  div.appendChild(removeBtn);
-  container.appendChild(div);
-}
-
-function removeImagePreview(preview) {
-  if (preview.blobUrl) URL.revokeObjectURL(preview.blobUrl);
-
-  const idx = reviewPageState.uploadedImages.indexOf(preview);
-  if (idx !== -1) reviewPageState.uploadedImages.splice(idx, 1);
-
-  renderImagePreviews();
-  updateImageUploadVisibility();
-}
-
-function renderImagePreviews() {
-  const container = document.getElementById("review-image-previews");
-  if (!container) return;
-  container.innerHTML = "";
-
-  reviewPageState.uploadedImages.forEach((preview) => {
-    appendImagePreview(preview, container);
-  });
-}
-
-function updateImageUploadVisibility() {
-  const uploadEl = document.getElementById("review-image-upload");
-  if (!uploadEl) return;
-
-  if (reviewPageState.uploadedImages.length >= MAX_REVIEW_IMAGES) {
-    uploadEl.style.display = "none";
-  } else {
-    uploadEl.style.display = "flex";
-  }
-}
-
-function clearImageUploads() {
-  reviewPageState.uploadedImages.forEach((preview) => {
-    if (preview.blobUrl) URL.revokeObjectURL(preview.blobUrl);
-  });
-  reviewPageState.uploadedImages = [];
-  renderImagePreviews();
-  updateImageUploadVisibility();
-}
-
-async function uploadPendingImages(productId) {
-  const pending = reviewPageState.uploadedImages.filter((p) => p.status === "pending");
-  if (!pending.length) return [];
-
-  const uploadEl = document.getElementById("review-image-upload");
-  if (uploadEl) uploadEl.classList.add("review-image-uploading");
-
-  const urls = [];
-
-  for (const preview of pending) {
-    preview.status = "uploading";
-    const url = await uploadReviewImage(preview.file, productId);
-    if (url) {
-      preview.status = "done";
-      preview.url = url;
-      urls.push(url);
-    } else {
-      preview.status = "failed";
-    }
-  }
-
-  if (uploadEl) uploadEl.classList.remove("review-image-uploading");
-  renderImagePreviews();
-  return urls;
-}
-
-function bindImageUpload() {
-  const uploadEl = document.getElementById("review-image-upload");
-  const inputEl = document.getElementById("review-image-input");
-
-  if (!uploadEl || !inputEl) return;
-
-  uploadEl.addEventListener("click", () => {
-    inputEl.click();
-  });
-
-  uploadEl.addEventListener("keydown", (e) => {
-    if (e.key === "Enter" || e.key === " ") {
-      e.preventDefault();
-      inputEl.click();
-    }
-  });
-
-  inputEl.addEventListener("change", () => {
-    if (inputEl.files && inputEl.files.length) {
-      handleImageFiles(inputEl.files);
-      inputEl.value = "";
-    }
-  });
-}
-
-/* ===== End Image Upload ===== */
-
 async function resolveSupabaseUserId() {
   try {
     const currentUser = JSON.parse(localStorage.getItem("currentUser") || "null");
@@ -806,65 +493,49 @@ async function resolveSupabaseUserId() {
   return "";
 }
 
-async function submitRating(productId, rating, title, body, reviewerName, imageUrls = []) {
-  const userEmail = (localStorage.getItem("userEmail") || "").toString().trim().toLowerCase();
+async function submitRating(productId, rating, title, body, reviewerName) {
+  const userId = await resolveSupabaseUserId();
 
-  const payload = cleanPayload({
+  const basePayload = cleanPayload({
     item_id: String(productId),
-    user_email: userEmail || undefined,
     rating: Number(rating),
-    comment: buildStoredComment(title, body) || undefined,
-    reviewer_name: String(reviewerName || "").trim() || undefined,
-    images: imageUrls.length ? JSON.stringify(imageUrls) : undefined,
+    comment: buildStoredComment(title, body),
+    reviewer_name: String(reviewerName || "").trim(),
+    user_id: userId || undefined,
   });
 
-  if (!payload.item_id || !payload.rating) {
-    return { success: false, message: "بيانات التقييم غير مكتملة." };
+  const attempts = [basePayload];
+  if (basePayload.reviewer_name) attempts.push(cleanPayload({ ...basePayload, reviewer_name: undefined }));
+  if (basePayload.comment) attempts.push(cleanPayload({ ...basePayload, comment: undefined }));
+  if (basePayload.user_id) attempts.push(cleanPayload({ ...basePayload, user_id: undefined }));
+  if (basePayload.user_id && basePayload.reviewer_name) {
+    attempts.push(cleanPayload({ ...basePayload, user_id: undefined, reviewer_name: undefined }));
+  }
+  if (basePayload.user_id && basePayload.comment) {
+    attempts.push(cleanPayload({ ...basePayload, user_id: undefined, comment: undefined }));
+  }
+  if (basePayload.reviewer_name && basePayload.comment) {
+    attempts.push(cleanPayload({ ...basePayload, reviewer_name: undefined, comment: undefined }));
+  }
+  if (basePayload.user_id && basePayload.reviewer_name && basePayload.comment) {
+    attempts.push(cleanPayload({ ...basePayload, user_id: undefined, reviewer_name: undefined, comment: undefined }));
   }
 
-  const { error } = await window.supabaseClient
-    .from("ratings")
-    .upsert(payload, { onConflict: ["user_email", "item_id"] });
+  const seen = new Set();
+  for (const payload of attempts) {
+    const key = JSON.stringify(payload);
+    if (seen.has(key)) continue;
+    seen.add(key);
 
-  if (error) {
-    if (String(error.code) === "23503") {
-      return { success: false, message: "معرف المنتج غير موجود في قاعدة البيانات. لا يمكن إضافة تقييم." };
-    }
-    if (String(error.code) === "23505") {
-      return { success: false, message: "لقد قمت بتقييم هذا المنتج بالفعل." };
-    }
-    if (String(error.code) === "22P02") {
-      return { success: false, message: "صيغة معرف المنتج غير صالحة. يرجى تحديث قاعدة البيانات (تشغيل SQL fix)." };
-    }
-    console.error("submitRating upsert error", error);
-    return { success: false, message: "تعذر إرسال التقييم الآن. حاول مرة أخرى." };
+    const request = payload.user_id
+      ? window.supabaseClient.from("ratings").upsert(payload, { onConflict: ["user_id", "item_id"] })
+      : window.supabaseClient.from("ratings").insert(payload);
+
+    const { error } = await request;
+    if (!error) return { success: true };
   }
 
-  return { success: true };
-}
-
-async function deleteReview(productId, userEmail) {
-  if (!productId || !userEmail) {
-    return { success: false, message: "بيانات الحذف غير مكتملة." };
-  }
-
-  try {
-    const { error } = await window.supabaseClient
-      .from("ratings")
-      .delete()
-      .eq("item_id", String(productId))
-      .eq("user_email", userEmail);
-
-    if (error) {
-      console.error("deleteReview error:", error);
-      return { success: false, message: "تعذر حذف التقييم. حاول مرة أخرى." };
-    }
-
-    return { success: true };
-  } catch (err) {
-    console.error("deleteReview catch:", err);
-    return { success: false, message: "تعذر حذف التقييم." };
-  }
+  return { success: false, message: "تعذر إرسال التقييم الآن. حاول مرة أخرى." };
 }
 
 function bindComposeForm() {
@@ -897,7 +568,6 @@ function bindComposeForm() {
 
   refreshCounters();
   updatePublishNote();
-  bindImageUpload();
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -925,12 +595,11 @@ function bindComposeForm() {
 
     reviewPageState.submitting = true;
     updateSubmitButtonState();
-    reviewsNotify("جاري رفع الصور وإرسال التقييم...", "info");
+    reviewsNotify("جاري إرسال التقييم...", "info");
 
     try {
-      const imageUrls = await uploadPendingImages(productId);
       const reviewerName = isAnonymousReview() ? "مجهول" : getCurrentPublicName();
-      const result = await submitRating(productId, reviewPageState.rating, title, body, reviewerName, imageUrls);
+      const result = await submitRating(productId, reviewPageState.rating, title, body, reviewerName);
 
       if (!result.success) {
         reviewsNotify(result.message || "تعذر إرسال التقييم.", "error");
@@ -938,12 +607,10 @@ function bindComposeForm() {
       }
 
       reviewsNotify("تم إرسال التقييم بنجاح.", "success");
-      hideComposeSection();
       titleInput.value = "";
       bodyInput.value = "";
       setSelectedRating(0);
       refreshCounters();
-      clearImageUploads();
 
       const stats = await fetchRatings(productId);
       renderSummary(stats);
@@ -1006,11 +673,6 @@ async function renderProductReviewsPage() {
   setupComposeSection(reviewPageState.order);
 
   const stats = await fetchRatings(product.id);
-  const userEmail = (localStorage.getItem("userEmail") || "").toString().trim().toLowerCase();
-  const alreadyReviewed = userEmail && stats.comments.some((c) => c.user_email === userEmail);
-  if (alreadyReviewed) {
-    hideComposeSection();
-  }
   renderSummary(stats);
   renderCommentsList(stats.comments || []);
   renderProductCard(product, reviewPageState.order, reviewPageState.primaryItem, stats);

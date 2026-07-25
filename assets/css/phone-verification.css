@@ -1,9 +1,9 @@
-/* ========================================================
+﻿/* ========================================================
    Phone Verification - Noon Simulation (100% Match)
    ======================================================== */
 
 :root {
-  --noon-yellow: #feee00;
+  --noon-yellow: #F59E0B;
   --noon-text: #1a1a1a;
   --noon-border: #e0e0e0;
   --whatsapp-green: #25d366;
@@ -534,7 +534,7 @@
 }
 
 .phone-edit-trigger {
-  color: #3866df;
+  color: #6D28D9;
   font-weight: 800;
   font-size: 0.85rem;
   cursor: pointer;
@@ -580,7 +580,7 @@
   }
 }
 
-/* ─── WhatsApp Help Trigger Button ──────────────────────────────── */
+/* ΓöÇΓöÇΓöÇ WhatsApp Help Trigger Button ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .otp-whatsapp-help-trigger {
   display: flex;
   align-items: center;
@@ -614,7 +614,7 @@
   50%       { opacity: 0.5; }
 }
 
-/* ─── WhatsApp Help Overlay & Popup ─────────────────────────────── */
+/* ΓöÇΓöÇΓöÇ WhatsApp Help Overlay & Popup ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ */
 .wa-help-overlay {
   position: fixed;
   inset: 0;
@@ -773,3 +773,4 @@
   justify-content: center;
   flex-shrink: 0;
 }
+

@@ -18,12 +18,111 @@
 }
 
 /* --- Search Shell --- */
-.search-shell {
-  padding: 0 8px 80px;
-  max-width: 1280px;
-  margin: 0 auto;
+.search-page-layout {
+  display: block; /* Mobile first: sidebar is hidden, content is full width */
 }
 
+.search-shell {
+  padding: 0; /* Remove default padding */
+  border: none;
+  box-shadow: none;
+  background: transparent;
+}
+
+.search-sidebar {
+  display: none; /* Hidden on mobile by default */
+}
+
+/* Desktop Layout for Search Page */
+@media (min-width: 992px) {
+  .search-page-layout.results-visible {
+      display: grid;
+      grid-template-columns: 280px 1fr; /* Sidebar width 280px, rest for content */
+      gap: 24px;
+      align-items: start;
+  }
+
+  .search-sidebar {
+      display: none; /* Hide by default */
+      background: var(--noon-card-bg, #fff);
+      border-radius: var(--noon-card-radius, 12px);
+      border: 1px solid var(--noon-border);
+      box-shadow: var(--noon-card-shadow, 0 1px 3px rgba(0,0,0,0.08));
+      padding: 16px;
+      height: fit-content; /* To make it stick to the top */
+      position: sticky;
+      top: 100px; /* Adjust based on header height */
+  }
+  
+  .search-page-layout.results-visible .search-sidebar {
+    display: block; /* Show only when results are visible */
+  }
+
+  .search-sidebar h3 {
+      font-size: 1rem;
+      font-weight: 900;
+      margin: 0 0 16px;
+      color: var(--noon-text);
+  }
+
+  .filter-group {
+      margin-bottom: 20px;
+      border-top: 1px solid var(--noon-border);
+      padding-top: 16px;
+  }
+  .filter-group:first-of-type {
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .filter-group h4 {
+      font-size: 0.85rem;
+      font-weight: 800;
+      margin: 0 0 10px;
+      color: var(--noon-text);
+  }
+
+  .filter-group ul { list-style: none; padding: 0; margin: 0; }
+  .filter-group li { margin-bottom: 8px; font-size: 0.82rem; }
+  .filter-group li a:hover { color: var(--noon-blue); }
+
+  .search-shell {
+    max-width: none; /* Remove max-width to fill the grid area */
+  }
+
+  /* Price Range Slider Styles */
+  .price-range-inputs {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-top: 8px;
+  }
+  .price-range-field {
+    flex: 1;
+    position: relative;
+  }
+  .price-range-field span {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 0.7rem;
+    color: var(--noon-text-secondary);
+    font-weight: 600;
+  }
+  .price-range-field input {
+    width: 100%;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--noon-border);
+    background: #f9fafb;
+    padding: 0 24px 0 8px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: var(--noon-text);
+  }
+}
 /* --- Sort Bar --- */
 .noon-sort-bar {
   display: flex;

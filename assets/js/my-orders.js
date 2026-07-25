@@ -3,6 +3,7 @@ const ordersState = {
   isAdmin: false,
   searchText: "",
   period: "3m",
+  statusTab: "all",
   openMenuOrderId: null,
 };
 
@@ -49,6 +50,19 @@ function buildSearchableOrderText(order) {
 function filteredOrders() {
   const keyword = String(ordersState.searchText || "").trim().toLowerCase();
   let rows = ordersState.all.filter(orderMatchesPeriod);
+
+  if (ordersState.statusTab !== "all") {
+    rows = rows.filter(order => {
+      const s = window.BudaOrders.normalizeStatusKey(order.status || order.order_status);
+      if (ordersState.statusTab === "pending") return s === "pending";
+      if (ordersState.statusTab === "shipped") return s === "shipped";
+      if (ordersState.statusTab === "on-way") return s === "in_transit";
+      if (ordersState.statusTab === "delivered") return s === "delivered";
+      if (ordersState.statusTab === "returns") return s === "returned";
+      return false;
+    });
+  }
+
   if (keyword) {
     rows = rows.filter((order) => buildSearchableOrderText(order).includes(keyword));
   }
@@ -158,9 +172,9 @@ function renderOrderCard(order) {
     price: Number(order.total_price || order.total || order.amount) || 0,
     brand: "",
   };
-  const lineTotal = (Number(primaryItem.price) || 0) * (Number(primaryItem.quantity) || 1);
   const fallbackTotal = Number(order.total_price || order.total || order.amount) || 0;
-  const displayPrice = lineTotal > 0 ? lineTotal : fallbackTotal;
+  const shipping = Number(order.shipping_cost ?? order.shipping_fee ?? order.shipping ?? 0);
+  const displayPrice = fallbackTotal > 0 ? fallbackTotal - shipping : 0;
   const moreCount = Math.max(0, items.length - 1);
   const isMenuOpen = ordersState.openMenuOrderId === orderId;
   const reviewProductId = resolveReviewProductId(order, primaryItem);
@@ -237,7 +251,6 @@ function renderOrderCard(order) {
       </div>
 
       <div class="noon-order-footer">
-        <span class="noon-express-pill">إكسبريس</span>
         <small class="noon-order-ref" title="معرف الطلب ${window.BudaOrders.escapeHtml(orderRef)}">
           معرف الطلب <span class="noon-order-ref-code">${window.BudaOrders.escapeHtml(compactOrderRef)}</span>
         </small>
@@ -501,6 +514,7 @@ function bindControls() {
   const searchInput = document.getElementById("orders-search-input");
   const periodSelect = document.getElementById("orders-period-select");
   const list = document.getElementById("orders-list");
+  const tabsContainer = document.querySelector(".orders-status-tabs");
 
   if (searchInput) {
     searchInput.addEventListener("input", () => {
@@ -513,6 +527,16 @@ function bindControls() {
     periodSelect.addEventListener("change", () => {
       ordersState.period = periodSelect.value || "3m";
       renderOrdersList();
+    });
+  }
+
+  if (tabsContainer) {
+    tabsContainer.addEventListener("click", (event) => {
+      const tab = event.target.closest("[data-status-tab]");
+      if (!tab) return;
+      ordersState.statusTab = tab.getAttribute("data-status-tab");
+      renderOrdersList();
+      updateStatusTabs();
     });
   }
 
@@ -532,6 +556,43 @@ function bindControls() {
   });
 }
 
+function updateStatusTabs() {
+  const tabsContainer = document.querySelector(".orders-status-tabs");
+  if (!tabsContainer) return;
+
+  const tabs = tabsContainer.querySelectorAll("[data-status-tab]");
+  const totalCount = ordersState.all.length;
+
+  const counts = { all: totalCount };
+  ordersState.all.forEach((order) => {
+    const s = window.BudaOrders.normalizeStatusKey(order.status || order.order_status);
+    if (s === "pending") counts.pending = (counts.pending || 0) + 1;
+    if (s === "shipped") counts.shipped = (counts.shipped || 0) + 1;
+    if (s === "in_transit") counts["on-way"] = (counts["on-way"] || 0) + 1;
+    if (s === "delivered") counts.delivered = (counts.delivered || 0) + 1;
+    if (s === "returned") counts.returns = (counts.returns || 0) + 1;
+  });
+
+  tabs.forEach((tab) => {
+    const tabKey = tab.getAttribute("data-status-tab");
+    const label = tab.textContent.trim();
+    const count = counts[tabKey] || 0;
+    let countSpan = tab.querySelector(".orders-tab-count");
+    if (!countSpan) {
+      countSpan = document.createElement("span");
+      countSpan.className = "orders-tab-count";
+      tab.appendChild(countSpan);
+    }
+    countSpan.textContent = count;
+
+    if (tabKey === ordersState.statusTab) {
+      tab.classList.add("active");
+    } else {
+      tab.classList.remove("active");
+    }
+  });
+}
+
 async function renderOrders() {
   const container = document.getElementById("orders-list");
   if (!container) return;
@@ -548,6 +609,7 @@ async function renderOrders() {
   if (!isAdmin && !email) {
     ordersState.all = [];
     renderOrdersList();
+    updateStatusTabs();
     return;
   }
 
@@ -556,6 +618,7 @@ async function renderOrders() {
     const hydratedOrders = await window.BudaOrders.hydrateOrdersWithOrderItems(rawOrders || []);
     ordersState.all = Array.isArray(hydratedOrders) ? hydratedOrders : [];
     renderOrdersList();
+    updateStatusTabs();
   } catch (error) {
     console.error("fetch orders failed", error);
     container.innerHTML = '<div class="my-order-filter-empty"><h3>تعذر تحميل الطلبات</h3><p>حدث خطأ أثناء تحميل بيانات الطلبات.</p></div>';

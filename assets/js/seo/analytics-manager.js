@@ -7,7 +7,7 @@
   // CONFIG — غيّر القيم هنا
   // ==============================
   Analytics.config = {
-    GA4_MEASUREMENT_ID: "G-XXXXXXXXXX",
+    GA4_MEASUREMENT_ID: "G-PRZGJW879Z",
     GSC_VERIFICATION: "google-site-verification-code-here",
     BING_VERIFICATION: "bing-verification-code-here",
     CLARITY_PROJECT_ID: "clarity-project-id-here",

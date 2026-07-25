@@ -1,0 +1,72 @@
+/**
+ * Icon Component
+ * Buda Design System v2.0
+ */
+
+.buda-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Enforcing Lucide SVG styles */
+.buda-icon svg {
+  width: 100%;
+  height: 100%;
+  stroke-width: var(--border-width-2);
+  fill: none;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Sizes */
+.buda-icon--sm {
+  width: var(--space-16);
+  height: var(--space-16);
+}
+
+.buda-icon--md {
+  width: var(--space-24); /* Using 24 instead of 22 to adhere to 8pt grid */
+  height: var(--space-24);
+}
+
+.buda-icon--lg {
+  width: var(--space-24);
+  height: var(--space-24);
+}
+
+.buda-icon--xl {
+  width: var(--space-32);
+  height: var(--space-32);
+}
+
+/* Circle Container */
+.buda-icon-circle {
+  width: var(--space-48); /* Adhering to 8pt grid, 44px not allowed */
+  height: var(--space-48);
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--duration-fast) ease-in-out;
+  cursor: pointer;
+  background-color: var(--color-surface);
+}
+
+.buda-icon-circle:hover {
+  background: var(--color-primary-gradient);
+  color: var(--color-background);
+}
+
+.buda-icon-circle:focus-visible {
+  box-shadow: 0 0 0 var(--space-2) var(--color-background), 0 0 0 var(--space-4) var(--color-primary);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buda-icon-circle {
+    transition: none;
+  }
+}

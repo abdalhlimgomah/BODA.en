@@ -1,4 +1,4 @@
-/* ===== Category Page — Hero Banner + Products ===== */
+﻿/* ===== Category Page ΓÇö Hero Banner + Products ===== */
 
 .cat-page {
   padding-bottom: 70px;
@@ -46,6 +46,73 @@
 /* ---------- Chips (mobile filters) ---------- */
 .cat-chips {
   padding: 0 10px;
+}
+
+.cat-chip-btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 14px 8px;
+  border: 1px solid #ede8e3;
+  border-radius: 12px;
+  background: #fff;
+  color: #2d2a26;
+  font-family: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 70px;
+}
+.cat-chip-btn img {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+.cat-chip-btn:hover {
+  border-color: #6D28D9;
+  background: #f5f3ff;
+}
+.cat-chip-btn.active {
+  border-color: #6D28D9;
+  background: #6D28D9;
+  color: #fff;
+}
+.cat-chip-btn.active img {
+  box-shadow: 0 0 0 2px #fff;
+}
+.cat-chip-btn span {
+  line-height: 1.2;
+  text-align: center;
+}
+
+/* Sidebar categories */
+.sidebar-cat-btn {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #2d2a26;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-align: right;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.sidebar-cat-btn:hover {
+  background: #f5f3ff;
+  color: #6D28D9;
+}
+.sidebar-cat-btn.active {
+  background: #6D28D9;
+  color: #fff;
 }
 
 /* ---------- Products layout (reuse products.css) ---------- */
@@ -118,3 +185,4 @@
     gap: 20px !important;
   }
 }
+

@@ -9,8 +9,8 @@ body {
   place-items: center;
   padding: 20px 14px;
   background:
-    radial-gradient(circle at 20% 12%, #fff4ad 0, rgba(255, 244, 173, 0) 40%),
-    radial-gradient(circle at 85% 18%, #dbe7ff 0, rgba(219, 231, 255, 0) 42%),
+    radial-gradient(circle at 20% 12%, #f8f8f7 0, rgba(255, 244, 173, 0) 40%),
+    radial-gradient(circle at 85% 18%, #fdfeff 0, rgba(219, 231, 255, 0) 42%),
     #f7f8fb;
 }
 
@@ -19,7 +19,7 @@ body {
   border: 1px solid #dfe5ef;
   border-radius: 18px;
   background: #fff;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 10px 30px rgba(244, 244, 245, 0.021);
   padding: 18px;
 }
 
@@ -28,8 +28,8 @@ body {
   align-items: center;
   gap: 6px;
   border-radius: 999px;
-  background: #ffe600;
-  color: #111827;
+  background: #082269;
+  color: #e4e8f0;
   padding: 6px 14px;
   font-weight: 900;
   font-size: 0.82rem;

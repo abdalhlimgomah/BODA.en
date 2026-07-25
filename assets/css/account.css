@@ -1,4 +1,4 @@
-/* ===== Account Profile Card ===== */
+﻿/* ===== Account Profile Card ===== */
 
 .profile-card-top {
   display: flex;
@@ -59,7 +59,7 @@
 .profile-progress-bar-fill {
   height: 100%;
   border-radius: 3px;
-  background: #f5a623;
+  background: var(--color-primary-500);
   transition: width 0.4s ease;
   width: 0%;
 }
@@ -142,8 +142,8 @@
 }
 
 .edit-field .add-phone-btn:hover {
-  border-color: var(--noon-yellow);
-  background: #fffbe6;
+  border-color: var(--color-primary-500);
+  background: var(--color-primary-50);
 }
 
 .birthday-selects {
@@ -187,12 +187,12 @@
 }
 
 .gender-option:hover {
-  border-color: var(--noon-yellow);
+  border-color: var(--color-primary-500);
 }
 
 .gender-option.active {
-  border-color: var(--noon-yellow);
-  background: #fffbe6;
+  border-color: var(--color-primary-500);
+  background: var(--color-primary-50);
 }
 
 .gender-option input[type="radio"] {
@@ -211,15 +211,13 @@
 }
 
 .edit-submit-btn {
-  display: block;
   width: 100%;
-  padding: 14px;
-  border: none;
+  padding: 10px;
   border-radius: 10px;
-  background: var(--noon-yellow);
-  color: #1a1a1a;
+  background: var(--color-primary-600);
+  color: #000000;
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 200;
   cursor: pointer;
   transition: opacity 0.15s;
   margin-top: 24px;
@@ -261,3 +259,4 @@
   font-size: 11px;
   letter-spacing: 0.5px;
 }
+

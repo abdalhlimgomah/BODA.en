@@ -1,0 +1,56 @@
+/* ============================================
+   Buda Design System v2.0 — Typography Tokens
+   Plus Jakarta Sans + Manrope Fallback
+   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* ─── Font Families ─── */
+  --font-primary:  'Plus Jakarta Sans', 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-fallback: 'Manrope', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:     'Manrope', 'Courier New', monospace;
+
+  /* ─── Typography Scale (8pt Aligned) ─── */
+  --text-display:    48px;   /* Hero headlines */
+  --text-heading-xl: 40px;   /* Page titles */
+  --text-heading-lg: 32px;   /* Section titles */
+  --text-heading-md: 24px;   /* Card titles, modals */
+  --text-heading-sm: 20px;   /* Sub-headings */
+  --text-body-lg:    18px;   /* Large body, lead text */
+  --text-body:       16px;   /* Default body text */
+  --text-body-sm:    14px;   /* Secondary, meta, captions */
+  --text-caption:    12px;   /* Badges, labels, footnotes */
+
+  /* ─── Font Weights ─── */
+  --weight-light:     300;
+  --weight-regular:   400;
+  --weight-medium:    500;
+  --weight-semibold:  600;
+  --weight-bold:      700;
+  --weight-extrabold: 800;
+
+  /* ─── Line Heights ─── */
+  --leading-tight:    1.2;   /* Headlines */
+  --leading-snug:     1.35;  /* Sub-headings */
+  --leading-normal:   1.5;   /* Body text */
+  --leading-relaxed:  1.75;  /* Long paragraphs */
+
+  /* ─── Letter Spacing ─── */
+  --tracking-tight:   -0.02em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.02em;
+
+  /* ─── Brand Text Sizes ─── */
+  --brand-logo-desktop: 36px;
+  --brand-logo-mobile:  28px;
+  --brand-icon-desktop: 44px;
+  --brand-icon-mobile:  34px;
+}
+
+/* ─── Global Reset ─── */
+*,
+*::before,
+*::after {
+  font-family: var(--font-primary);
+}

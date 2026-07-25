@@ -27,10 +27,10 @@ Allow: /pages/offers.html
 Allow: /pages/offer.html
 Allow: /api/merchant-feed/feed.xml
 
-Sitemap: https://buda.com/api/merchant-feed/feed.xml
+Sitemap: https://buda-rho.vercel.app/api/merchant-feed/feed.xml
 
-Sitemap: https://buda.com/sitemap_index.xml
-Sitemap: https://buda.com/sitemap.xml
+Sitemap: https://buda-rho.vercel.app/sitemap_index.xml
+Sitemap: https://buda-rho.vercel.app/sitemap.xml
 
 # Buda - SEO Optimized
 # Last updated: 2026-07-19

@@ -1049,6 +1049,10 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
     var sellerEmail = String(item.seller_email || item.owner_email || "").trim().toLowerCase();
     var ownerEmail = String(item.owner_email || item.seller_email || "").trim().toLowerCase();
 
+    var itemCouponDiscount = totals.subtotal > 0 ? Math.round((itemTotal / totals.subtotal) * totals.couponDiscount * 100) / 100 : 0;
+    var discountedTotal = Math.max(itemTotal - itemCouponDiscount, 0);
+    var grandTotal = discountedTotal + totals.shipping + CHECKOUT_TAX;
+
     var singleOrder = {
       user_name: fields.name,
       user_email: fields.email,
@@ -1056,11 +1060,13 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
       address: fields.address,
       governorate: fields.governorate,
       status: "قيد المراجعة",
-      total_price: itemTotal,
-      discount: 0,
+      total_price: grandTotal,
+      discount: itemCouponDiscount,
+      coupon_code: totals.couponCode || null,
       payment_method: selectedPayment,
       shipping_method: "standard",
       shipping_cost: totals.shipping,
+      tax: CHECKOUT_TAX,
       user_id: getCurrentUserId(),
       items_json: JSON.stringify([item]),
       order_source: "taager",
@@ -1190,7 +1196,8 @@ async function applyCoupon() {
       try {
         localStorage.setItem(COUPON_STORAGE_KEY, JSON.stringify({ code: savedCode, rate: rate }));
       } catch {}
-      statusEl.textContent = "تم تطبيق الكود! خصم " + (rate * 100) + "%";
+      var displayPct = rate > 1 ? rate : Math.round(rate * 100);
+      statusEl.textContent = "تم تطبيق الكود! خصم " + displayPct + "%";
       statusEl.className = "ch-coupon-status success";
       if (toggleText) toggleText.textContent = "كود الخصم: " + savedCode;
       input.value = "";
@@ -1216,8 +1223,17 @@ function removeCoupon() {
   localStorage.removeItem(COUPON_STORAGE_KEY);
   var statusEl = document.getElementById("ch-coupon-status");
   var toggleText = document.getElementById("ch-coupon-toggle-text");
-  if (statusEl) { statusEl.textContent = "تم إزالة الكود."; statusEl.className = "ch-coupon-status info"; }
+  if (statusEl) { statusEl.textContent = "تم إزالة الكود."; statusEl.className = "ch-coupon-status info"; statusEl.style.display = "block"; }
   if (toggleText) toggleText.textContent = "هل لديك كود خصم؟";
+  var couponBody = document.getElementById("ch-coupon-body");
+  if (couponBody) couponBody.classList.remove("hidden");
+  var couponToggle = document.getElementById("ch-coupon-toggle");
+  if (couponToggle) {
+    var arrow = couponToggle.querySelector(".ch-coupon-arrow");
+    if (arrow) arrow.style.display = "";
+  }
+  var removeBtn = document.getElementById("ch-coupon-remove");
+  if (removeBtn) removeBtn.classList.add("hidden");
   renderCheckoutTotals();
 }
 
@@ -1276,11 +1292,16 @@ document.addEventListener("DOMContentLoaded", () => {
     var activeCoupon = getActiveCoupon();
     if (activeCoupon) {
       var toggleText = document.getElementById("ch-coupon-toggle-text");
-      if (toggleText) toggleText.textContent = "كود الخصم: " + activeCoupon.code;
+      if (toggleText) toggleText.textContent = "تم إضافة كوبون " + activeCoupon.code;
+      if (couponBody) couponBody.classList.add("hidden");
+      var arrow = couponToggle && couponToggle.querySelector(".ch-coupon-arrow");
+      if (arrow) arrow.style.display = "none";
+      var removeBtn = document.getElementById("ch-coupon-remove");
+      if (removeBtn) removeBtn.classList.remove("hidden");
       if (couponBody) couponBody.classList.remove("hidden");
       if (couponToggle) couponToggle.classList.add("open");
       var statusEl = document.getElementById("ch-coupon-status");
-      if (statusEl) { statusEl.textContent = "خصم " + (activeCoupon.rate * 100) + "% مطبق"; statusEl.className = "ch-coupon-status success"; }
+      if (statusEl) { var cp = activeCoupon.rate; var dp = cp > 1 ? cp : Math.round(cp * 100); statusEl.textContent = "خصم " + dp + "% مطبق"; statusEl.className = "ch-coupon-status success"; }
     }
 
     // Receiver modal

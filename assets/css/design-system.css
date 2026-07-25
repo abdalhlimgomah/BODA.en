@@ -1,15 +1,18 @@
-﻿/* Design System */
+﻿/* Design System — New tokens (ch-*, cart-*, pl-*, pd-*, etc.) */
+@import url('../design-system/index.css');
+
+/* Design System */
 @import url('design-system.css');
 
 /* ============================================
-   Buda Design System v2.0 â€” Single Source of Truth
+   Buda Design System v2.0 — Single Source of Truth
    Purple Premium Identity
    ============================================ */
 
-/* â”€â”€â”€â”€â”€ Fonts â”€â”€â”€â”€â”€ */
+/* ———— Fonts ———— */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap');
 
-/* â”€â”€â”€â”€â”€ Design Tokens â”€â”€â”€â”€â”€ */
+/* ———— Design Tokens ———— */
 :root {
   /* Brand Colors */
   --buda-primary: #6D28D9;
@@ -38,7 +41,7 @@
   --buda-radius-dialog: 22px;
   --buda-radius-sheet: 24px;
 
-  /* Shadows â€” soft purple only */
+  /* Shadows — soft purple only */
   --buda-shadow-sm: 0 1px 3px rgba(109,40,217,0.08);
   --buda-shadow-md: 0 4px 20px rgba(109,40,217,0.12);
   --buda-shadow-lg: 0 8px 32px rgba(109,40,217,0.16);
@@ -48,7 +51,7 @@
   --buda-font: 'Plus Jakarta Sans', 'Manrope', sans-serif;
   --buda-font-mono: 'Manrope', monospace;
 
-  /* Transitions â€” only fade/scale/slide */
+  /* Transitions — only fade/scale/slide */
   --buda-transition: 250ms cubic-bezier(0.4,0,0.2,1);
   --buda-transition-fast: 200ms ease-out;
   --buda-transition-slow: 300ms ease-out;
@@ -94,7 +97,7 @@
   --noon-shell-width: 100%;
   --noon-mobile-width: 720px;
 
-  /* â”€â”€â”€â”€â”€ BACKWARD-COMPATIBLE ALIASES â”€â”€â”€â”€â”€ */
+  /* ———— BACKWARD-COMPATIBLE ALIASES ———— */
   /* noon-* prefix */
   --noon-bg: #F9FAFB;
   --noon-surface: #FFFFFF;
@@ -247,7 +250,7 @@
   --pv-radius: var(--buda-radius);
 }
 
-/* â”€â”€â”€â”€â”€ RESET â”€â”€â”€â”€â”€ */
+/* ———— RESET ———— */
 .design-system, .design-system *,
 .buda-header, .buda-header *,
 .hm-page, .hm-page *,
@@ -255,7 +258,7 @@
   font-family: var(--buda-font);
 }
 
-/* â”€â”€â”€â”€â”€ GLOBAL BASE â”€â”€â”€â”€â”€ */
+/* ———— GLOBAL BASE ———— */
 body, .app-shell, .hm-page {
   font-family: var(--buda-font) !important;
   background: var(--noon-bg) !important;
@@ -287,18 +290,16 @@ body, .app-shell, .hm-page {
   font-feature-settings: 'liga' !important;
 }
 
-/* â”€â”€â”€â”€â”€ BUTTONS (Global Override) â”€â”€â”€â”€â”€ */
+/* ———— BUTTONS (Global Override) ———— */
 .btn-primary, .btn-secondary, .btn-danger,
 .auth-btn, button[type="submit"].auth-btn,
 .buda-btn, .buda-btn-primary, .buda-btn-secondary, .buda-btn-outline,
 .btn, button.btn,
 button:not(.icon-btn):not(.menu-btn):not(.support-close):not(.buda-modal-close):not(.buda-address-action):not(.noon-gallery-overlay-close):not(.hm-carousel-nav):not(.buda-nav-arrow):not(.wishlist-remove-btn):not(.noon-wishlist-btn):not(.noon-gallery-arrow):not(.search-clear-btn):not(.noon-add-square):not(.nav-home-btn) {
-  display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;
-  height: var(--buda-btn-height) !important;
-  padding: 0 28px !important;
+  padding: 0 8px !important;
   border: none !important;
   border-radius: var(--buda-radius-btn) !important;
   font-size: var(--buda-btn-font-size) !important;
@@ -313,7 +314,6 @@ button:not(.icon-btn):not(.menu-btn):not(.support-close):not(.buda-modal-close):
   line-height: 1 !important;
   min-height: var(--buda-btn-height) !important;
   min-width: 0 !important;
-  width: auto !important;
   box-shadow: none !important;
   outline: none !important;
 }
@@ -373,7 +373,7 @@ button:disabled {
   pointer-events: none !important;
 }
 
-/* â”€â”€â”€â”€â”€ INPUTS (Global Override) â”€â”€â”€â”€â”€ */
+/* ———— INPUTS (Global Override) ———— */
 input[type="text"], input[type="email"], input[type="password"], input[type="tel"], input[type="number"], input[type="search"], input[type="url"],
 textarea, select, .auth-input, .buda-input {
   width: 100% !important;
@@ -425,7 +425,7 @@ select {
   margin-bottom: 6px !important;
 }
 
-/* â”€â”€â”€â”€â”€ CARDS (Global Override) â”€â”€â”€â”€â”€ */
+/* ———— CARDS (Global Override) ———— */
 .buda-card, .account-card, .noon-summary,
 .auth-card, .hm-section,
 .boda-confirm-card, .modal-card,
@@ -449,7 +449,7 @@ select {
   transform: translateY(-2px) !important;
 }
 
-/* â”€â”€â”€â”€â”€ STATUS NOTES â”€â”€â”€â”€â”€ */
+/* ———— STATUS NOTES ———— */
 .status-note {
   border-radius: var(--buda-radius-sm) !important;
   padding: 10px 14px !important;
@@ -474,7 +474,7 @@ select {
   color: #5B21B6 !important;
 }
 
-/* â”€â”€â”€â”€â”€ SECTIONS â”€â”€â”€â”€â”€ */
+/* ———— SECTIONS ———— */
 .hm-section {
   overflow: hidden !important;
   margin: 0 16px 12px !important;
@@ -498,7 +498,7 @@ select {
   padding: 12px 16px 16px !important;
 }
 
-/* â”€â”€â”€â”€â”€ PRODUCT CARDS â”€â”€â”€â”€â”€ */
+/* ———— PRODUCT CARDS ———— */
 .noon-product-card {
   border-radius: var(--buda-radius-card) !important;
   overflow: hidden !important;
@@ -578,7 +578,7 @@ select {
   border-color: var(--buda-primary) !important;
 }
 
-/* â”€â”€â”€â”€â”€ SIDEWAYS LISTS â”€â”€â”€â”€â”€ */
+/* ———— SIDEWAYS LISTS ———— */
 .home-sideways-list .noon-product-card {
   border-radius: var(--buda-radius-card) !important;
 }
@@ -594,7 +594,7 @@ select {
   background: #E9D5FF !important;
 }
 
-/* â”€â”€â”€â”€â”€ BADGES â”€â”€â”€â”€â”€ */
+/* ———— BADGES ———— */
 .pill, .buda-badge, .chip, .filter-btn {
   border-radius: 999px !important;
   background: #F3E8FF !important;
@@ -619,17 +619,17 @@ select {
   color: #92400E !important;
 }
 
-/* â”€â”€â”€â”€â”€ LINKS â”€â”€â”€â”€â”€ */
-.buda-link, a:not(.buda-header-action):not(.buda-nav-item):not(.hm-footer-col a):not(.hm-brand):not(.home-category-tile):not(.buda-dd-item):not(.auth-footer a):not(.footer-links a) {
-  color: var(--buda-primary) !important;
+/* ———— LINKS ———— */
+.buda-link, a:not(.buda-header-action):not(.buda-header__action):not(.buda-nav-item):not(.buda-header__nav-item):not(.hm-footer-col a):not(.hm-brand):not(.home-category-tile):not(.buda-dd-item):not(.buda-header__account-dropdown a):not(.auth-footer a):not(.footer-links a) {
+  color: #030206 !important;
   font-weight: 600 !important;
   transition: color var(--buda-transition) !important;
 }
-.buda-link:hover, a:not(.buda-header-action):not(.buda-nav-item):not(.hm-footer-col a):not(.hm-brand):not(.home-category-tile):not(.buda-dd-item):not(.auth-footer a):not(.footer-links a):hover {
+.buda-link:hover, a:not(.buda-header-action):not(.buda-header__action):not(.buda-nav-item):not(.buda-header__nav-item):not(.hm-footer-col a):not(.hm-brand):not(.home-category-tile):not(.buda-dd-item):not(.buda-header__account-dropdown a):not(.auth-footer a):not(.footer-links a):hover {
   color: var(--buda-dark) !important;
 }
 
-/* â”€â”€â”€â”€â”€ AUTH SHELL â”€â”€â”€â”€â”€ */
+/* ———— AUTH SHELL ———— */
 .auth-shell {
   min-height: 100vh !important;
   display: grid !important;
@@ -703,7 +703,7 @@ select {
   font-weight: 700 !important;
 }
 
-/* â”€â”€â”€â”€â”€ HEADER BAR â”€â”€â”€â”€â”€ */
+/* ———— HEADER BAR ———— */
 .brand-badge {
   display: inline-flex !important;
   align-items: center !important;
@@ -735,7 +735,7 @@ select {
   color: var(--buda-primary) !important;
 }
 
-/* â”€â”€â”€â”€â”€ SPINNER â”€â”€â”€â”€â”€ */
+/* ———— SPINNER ———— */
 .buda-spinner, .spinner {
   border: 3px solid #F3E8FF !important;
   border-top-color: var(--buda-primary) !important;
@@ -748,7 +748,7 @@ select {
 .buda-spinner-sm { width: 24px !important; height: 24px !important; border-width: 2px !important; }
 .buda-spinner { width: 40px !important; height: 40px !important; }
 
-/* â”€â”€â”€â”€â”€ PROGRESS BAR â”€â”€â”€â”€â”€ */
+/* ———— PROGRESS BAR ———— */
 .buda-progress {
   background: #F3E8FF !important;
   border-radius: 999px !important;
@@ -759,7 +759,7 @@ select {
   border-radius: 999px !important;
 }
 
-/* â”€â”€â”€â”€â”€ TOAST â”€â”€â”€â”€â”€ */
+/* ———— TOAST ———— */
 .boda-toast-root { z-index: 9999 !important; }
 .boda-toast {
   border-radius: var(--buda-radius-sm) !important;
@@ -781,19 +781,19 @@ select {
   color: #5B21B6 !important;
 }
 
-/* â”€â”€â”€â”€â”€ DIALOG â”€â”€â”€â”€â”€ */
+/* ———— DIALOG ———— */
 .boda-confirm-card, .buda-dialog {
   border-radius: var(--buda-radius-dialog) !important;
   box-shadow: var(--buda-shadow-lg) !important;
 }
 
-/* â”€â”€â”€â”€â”€ RATING STARS â”€â”€â”€â”€â”€ */
+/* ———— RATING STARS ———— */
 .noon-rating-stars, .hm-rating-stars, .wishlist-rating-stars,
 [class*="rating"] [class*="star"] {
   color: var(--buda-star) !important;
 }
 
-/* â”€â”€â”€â”€â”€ HEADING â”€â”€â”€â”€â”€ */
+/* ———— HEADING ———— */
 h1, h2, h3, h4, h5, h6,
 .buda-h1, .buda-h2, .buda-h3, .buda-h4,
 .hm-section-head h2, .hm-section-head h3 {
@@ -801,7 +801,7 @@ h1, h2, h3, h4, h5, h6,
   color: var(--buda-text) !important;
 }
 
-/* â”€â”€â”€â”€â”€ ANIMATIONS â”€â”€â”€â”€â”€ */
+/* ———— ANIMATIONS ———— */
 @keyframes budaFadeIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes budaFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes budaScaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
@@ -815,13 +815,13 @@ h1, h2, h3, h4, h5, h6,
 
 .hm-fade { animation: budaFadeUp 300ms ease both !important; }
 
-/* â”€â”€â”€â”€â”€ SCROLLBAR â”€â”€â”€â”€â”€ */
+/* ———— SCROLLBAR ———— */
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: #9CA3AF; }
 
-/* â”€â”€â”€â”€â”€ TABLE â”€â”€â”€â”€â”€ */
+/* ———— TABLE ———— */
 table.noon-table th {
   font-weight: 700 !important;
   color: var(--buda-text) !important;
@@ -831,7 +831,7 @@ table.noon-table td {
   color: var(--buda-text-secondary) !important;
 }
 
-/* â”€â”€â”€â”€â”€ SUMMARY BOX â”€â”€â”€â”€â”€ */
+/* ———— SUMMARY BOX ———— */
 .noon-summary {
   padding: 16px !important;
 }
@@ -846,7 +846,7 @@ table.noon-table td {
   border-top-color: var(--buda-border) !important;
 }
 
-/* â”€â”€â”€â”€â”€ WISHLIST â”€â”€â”€â”€â”€ */
+/* ———— WISHLIST ———— */
 .wishlist-product-card:hover {
   box-shadow: var(--buda-shadow-md) !important;
 }
@@ -863,13 +863,19 @@ table.noon-table td {
   color: var(--buda-dark) !important;
 }
 
-/* â”€â”€â”€â”€â”€ RIPPLE â”€â”€â”€â”€â”€ */
+/* ———— HEADER LOGO ———— */
+.buda-desktop-logo {
+  height: 36px;
+  width: auto;
+}
+
+/* ———— RIPPLE ———— */
 .buda-ripple {
   position: relative;
   overflow: hidden;
 }
 
-/* â”€â”€â”€â”€â”€ RESPONSIVE â”€â”€â”€â”€â”€ */
+/* ———— RESPONSIVE ———— */
 @media (max-width: 768px) {
   :root {
     --buda-btn-height: 50px;

@@ -92,6 +92,7 @@
     if (normalized === "cancelled" || normalized === "canceled") return "cancelled";
     if (normalized === "onhold" || normalized === "on_hold" || normalized === "on-hold") return "onhold";
     if (normalized === "returned") return "returned";
+    if (normalized === "in_transit" || normalized === "in-transit" || normalized === "on_way" || normalized === "on-way" || normalized === "onway" || normalized === "atway" || normalized === "في_الطريق" || normalized === "في الطريق") return "in_transit";
 
     if (raw.includes("إلغاء") || raw.includes("الغاء") || raw.includes("ملغ")) return "cancelled";
     if (raw.includes("تأكيد")) return "confirmed";
@@ -101,6 +102,7 @@
     if (raw.includes("شحن")) return "shipped";
     if (raw.includes("تجهيز")) return "preparing";
     if (raw.includes("مراجعة") || raw.includes("قيد")) return "pending";
+    if (raw.includes("في الطريق") || raw.includes("في_الطريق") || raw.includes("قيد التوصيل") || raw.includes("قيد_التوصيل") || raw.includes("عبر_الشاحن") || raw.includes("عبر الشاحن")) return "in_transit";
 
     return "pending";
   }
@@ -131,6 +133,14 @@
         step: 3,
         isFinished: false,
         linePrefix: "تم الشحن في",
+      },
+      in_transit: {
+        key: "in_transit",
+        label: "في الطريق",
+        icon: "move_to_inbox",
+        step: 3,
+        isFinished: false,
+        linePrefix: "الطلب في الطريق منذ",
       },
       delivered: {
         key: "delivered",
@@ -646,6 +656,16 @@
     const matchedProduct = resolveProductById(record);
     const quantity = Math.max(1, Number(record?.quantity ?? record?.qty ?? 1) || 1);
     const price = Number(record?.price ?? record?.unit_price ?? record?.amount ?? matchedProduct?.price ?? 0) || 0;
+    const currentPrice = Number(
+      record?.currentPrice ??
+        record?.price_after_discount ??
+        record?.discountPrice ??
+        record?.discount_price ??
+        matchedProduct?.price_after_discount ??
+        matchedProduct?.discountPrice ??
+        matchedProduct?.discount_price ??
+        0
+    ) || price;
     return {
       id: record?.id ?? record?.product_id ?? record?.productId ?? record?.seller_id ?? record?.sellerId ?? `unknown_${index}`,
       product_id:
@@ -659,6 +679,7 @@
       name: resolveItemName(record, matchedProduct),
       quantity,
       price,
+      currentPrice,
       image: resolveItemImage(record),
       brand: record?.brand || record?.vendor || record?.store_name || matchedProduct?.brand || "",
     };

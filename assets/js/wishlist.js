@@ -4,11 +4,11 @@ function formatWishlistMoney(value) {
 
 function escapeHtml(value) {
   return String(value ?? "")
-    .replaceAll("&", "&")
-    .replaceAll("<", "<")
-    .replaceAll(">", ">")
-    .replaceAll('"', '"')
-    .replaceAll("'", "&#039;");
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#39;");
 }
 
 function wishlistNotify(message, type = "info") {
@@ -16,7 +16,7 @@ function wishlistNotify(message, type = "info") {
     window.BudaUI.notify(message, { type, target: "#wishlist-status" });
     return;
   }
-
+ 
   const status = document.getElementById("wishlist-status");
   if (!status) return;
   status.textContent = message;
@@ -86,22 +86,28 @@ function renderWishlist() {
   const grid = document.getElementById("wishlist-grid");
   const emptyState = document.getElementById("wishlist-empty");
   const countEl = document.getElementById("wishlist-count");
-  const totalEl = document.getElementById("wishlist-total");
 
   if (countEl) countEl.textContent = String(wishlist.length);
-  if (totalEl) {
-    const total = wishlist.reduce((sum, item) => {
-      const { currentPrice } = resolveWishlistPrice(item);
-      return sum + currentPrice;
-    }, 0);
-    totalEl.innerHTML = formatWishlistMoney(total);
-  }
-
   if (!grid) return;
 
   if (!wishlist.length) {
     grid.innerHTML = "";
     emptyState?.classList.remove("hidden");
+    if (emptyState) {
+      emptyState.innerHTML = `
+        <div class="wishlist-empty-content">
+          <div class="wishlist-empty-animation">
+            <span class="material-icons-outlined animated-heart">favorite_border</span>
+          </div>
+          <h2 class="wishlist-empty-title">قائمة المفضلة فارغة</h2>
+          <p class="wishlist-empty-text">ابدأ بإضافة منتجاتك المفضلة لتظهر هنا. تصفح آلاف المنتجات الرائعة!</p>
+          <a href="home.html" class="btn-primary wishlist-empty-cta">
+            <span class="material-icons-outlined">shopping_bag</span>
+            تسوق الآن
+          </a>
+        </div>
+      `;
+    }
     return;
   }
 
@@ -122,7 +128,7 @@ function renderWishlist() {
           var dotsHtml = "";
           for (var gi = 0; gi < imgs.length; gi++) {
             var imgPath = window.BudaStore.getImagePath(imgs[gi] || "assets/images/unnamed.png");
-            galleryImgs += '<img class="wishlist-gallery-img' + (gi === 0 ? " active" : "") + '" src="' + imgPath + '" alt="' + escapeHtml(item.name || "منتج") + '" loading="lazy" onerror="this.onerror=null;this.src=\'' + fallbackImage + '\'" />';
+            galleryImgs += '<img class="noon-gallery-img' + (gi === 0 ? " active" : "") + '" src="' + imgPath + '" alt="' + escapeHtml(item.name || "منتج") + '" loading="lazy" onerror="this.onerror=null;this.src=\'' + fallbackImage + '\'" />';
             if (imgs.length > 1) {
               dotsHtml += '<span' + (gi === 0 ? ' class="active"' : "") + ' data-index="' + gi + '"></span>';
             }
@@ -130,31 +136,35 @@ function renderWishlist() {
           const { currentPrice, originalPrice, hasDiscount, discountPercent } = resolveWishlistPrice(item);
           const { rating, reviews } = resolveWishlistRating(item);
 
+          // Noon-style card structure
           return `
-            <article class="wishlist-product-card noon-reveal">
-              <div class="wishlist-product-media-wrap">
-                <button class="icon-btn wishlist-remove-btn is-active" data-remove="${id}" aria-label="إزالة من المفضلة" aria-pressed="true">
-                  <span class="material-icons-outlined" style="font-size:20px;">favorite</span>
+            <article class="noon-product-card" data-product-id="${id}">
+              <div class="noon-product-media-wrap">
+                ${hasDiscount ? `<span class="buda-badge">-${discountPercent}%</span>` : ""}
+                <button class="icon-btn noon-wishlist-btn is-active" data-remove="${id}" aria-label="إزالة من المفضلة" aria-pressed="true">
+                  <span class="material-icons-outlined" style="font-size:18px;">favorite</span>
                 </button>
-                <button class="wishlist-product-media" data-view="${id}" aria-label="عرض المنتج">
+                <button class="noon-product-media" data-view="${id}" aria-label="عرض المنتج">
                   ${galleryImgs}
-                  <span class="wishlist-img-dots">${dotsHtml}</span>
+                  ${dotsHtml ? `<span class="noon-img-dots">${dotsHtml}</span>` : ""}
                 </button>
-                <button class="wishlist-add-to-cart" data-add="${id}" aria-label="إضافة إلى السلة">
-                  <span class="material-icons-outlined">add_shopping_cart</span>
-                </button>
+                <button class="noon-add-square" data-add="${id}" aria-label="إضافة إلى السلة">+</button>
               </div>
-              <div class="wishlist-product-body">
-                <h3 class="wishlist-product-title">${escapeHtml(item.name || "منتج")}</h3>
+              <div class="noon-product-body">
+                <h3 class="noon-title">${escapeHtml(item.name || "منتج")}</h3>
                 ${
                   reviews > 0
-                    ? `<div class="wishlist-rating"><span class="wishlist-rating-stars">${renderRatingStars(rating)}</span> <span>${rating.toFixed(1)}</span> <span class="wishlist-rating-count">(${reviews})</span></div>`
+                    ? `<div class="noon-rating-pill">
+                         <span class="noon-rating-stars">★</span> 
+                         <span>${rating.toFixed(1)}</span> 
+                         <span class="noon-rating-count">(${reviews})</span>
+                       </div>`
                     : ""
                 }
-                <div class="wishlist-price-line">
-                  <p class="wishlist-price">${formatWishlistMoney(currentPrice)}</p>
-                  ${hasDiscount ? `<p class="wishlist-old-price">${formatWishlistMoney(originalPrice)}</p>` : ""}
-                  ${hasDiscount ? `<span class="wishlist-discount-badge">${discountPercent}%</span>` : ""}
+                <div class="noon-price-line">
+                  <p class="noon-price">${formatWishlistMoney(currentPrice)}</p>
+                  ${hasDiscount ? `<p class="noon-old-price">${formatWishlistMoney(originalPrice)}</p>` : ""}
+                  ${hasDiscount ? `<span class="noon-discount-pill">${discountPercent}%</span>` : ""}
                 </div>
               </div>
             </article>
@@ -163,6 +173,14 @@ function renderWishlist() {
         .join("")}
     </div>
   `;
+
+  // Attach events for the new card structure
+  attachProductCardEvents(grid);
+}
+
+function attachProductCardEvents(container) {
+  // This function can be expanded from home.js or noon-shell.js if needed
+  // For now, it's a placeholder to show where to add event logic for the new cards.
 }
 
 // Use event delegation on the grid (works even after re-render)
@@ -170,7 +188,7 @@ function setupWishlistEvents(grid) {
   if (!grid) return;
   
   // Remove old listeners by cloning (simple way)
-  const newGrid = grid.cloneNode(true);
+  let newGrid = grid.cloneNode(true);
   grid.parentNode.replaceChild(newGrid, grid);
   
   newGrid.addEventListener("click", async function(e) {
@@ -212,7 +230,7 @@ function setupWishlistEvents(grid) {
     const viewBtn = e.target.closest("[data-view]");
     if (viewBtn && !e.target.closest(".wishlist-img-dots")) {
       e.preventDefault();
-      e.stopPropagation();
+      e.stopPropagation(); // Stop propagation to prevent card click
       const productId = viewBtn.getAttribute("data-view");
       const wishlist = window.BudaStore.getWishlist();
       const selected = wishlist.find((item) => String(item?.id) === String(productId));
@@ -227,13 +245,14 @@ function setupWishlistEvents(grid) {
   });
 
   // Gallery dots
-  newGrid.addEventListener("click", function(e) {
-    const dot = e.target.closest(".wishlist-img-dots span");
+  newGrid.addEventListener("click", function (e) {
+    const dot = e.target.closest(".noon-img-dots span");
     if (!dot) return;
     e.preventDefault();
     e.stopPropagation();
-    const dots = dot.parentNode;
-    const imgs = dots.parentNode.querySelectorAll(".wishlist-gallery-img");
+    const dots = dot.parentElement;
+    const mediaButton = dots.closest(".noon-product-media") || dots.closest(".noon-product-media-wrap");
+    const imgs = mediaButton.querySelectorAll(".noon-gallery-img");
     const idx = parseInt(dot.getAttribute("data-index"), 10);
     if (isNaN(idx)) return;
     dots.querySelectorAll("span").forEach(s => s.classList.remove("active"));

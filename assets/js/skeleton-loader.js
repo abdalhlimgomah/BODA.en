@@ -12,9 +12,9 @@ const SKELETON_CONFIG = {
   animationDuration: 1.5,
   cacheDuration: 45000,
   enabled: true,
-  skeletonClass: "skeleton",
-  loadedClass: "skeleton-loaded",
-  skeletonSelector: "[data-skeleton-container]",
+  skeletonClass: 'skeleton',
+  loadedClass: 'skeleton-loaded',
+  skeletonSelector: '[data-skeleton-container]',
   performanceThreshold: 500,
 };
 
@@ -22,21 +22,8 @@ class SkeletonLoader {
   constructor() {
     this.cache = new Map();
     this.observers = [];
-    this.animationDisabled = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    this.animationDisabled = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     this.init();
-  }
-
-  usesInlineHomeSkeleton(container) {
-    return (
-      container === document.body &&
-      Boolean(
-        document.body?.classList.contains("home-loading") ||
-        document.body?.classList.contains("home-hydrating") ||
-        document.getElementById("hm-skeleton"),
-      )
-    );
   }
 
   init() {
@@ -47,26 +34,22 @@ class SkeletonLoader {
 
     const needsPageSkeleton = Boolean(
       document.querySelector(
-        "[data-skeleton-container], #productsGrid, #search-results, #wishlist-items, .products-main, .app-main, .page-hero, #home-search, #for-you-products, #product-gallery, .checkout-shell, .orders-shell, .account-shell",
-      ),
+        '[data-skeleton-container], #productsGrid, #search-results, #wishlist-items, .products-main, .app-main, .page-hero, #home-search, #for-you-products, #product-gallery, .checkout-shell, .orders-shell, .account-shell'
+      )
     );
 
-    if (needsPageSkeleton && !this.usesInlineHomeSkeleton(document.body)) {
-      this.showSkeleton(document.body, {
-        type: "page",
-        autoHide: true,
-        timeout: 2600,
-      });
+    if (needsPageSkeleton) {
+      this.showSkeleton(document.body, { type: 'page', autoHide: true, timeout: 2600 });
     }
 
-    window.addEventListener("load", () => {
+    window.addEventListener('load', () => {
       this.hideSkeleton(document.body);
     });
 
-    console.log("[SkeletonLoader] initialized");
+    console.log('[SkeletonLoader] initialized');
   }
 
-  cacheKey(url, method = "GET") {
+  cacheKey(url, method = 'GET') {
     return `${method}:${url}`;
   }
 
@@ -78,16 +61,9 @@ class SkeletonLoader {
   }
 
   buildSkeletonMarkup(container, options = {}) {
-    const type =
-      options.type || container.getAttribute("data-skeleton-type") || "";
-    const isProductGrid =
-      type === "products-grid" ||
-      container.id === "productsGrid" ||
-      container.id === "search-results";
-    const isProductDetail =
-      type === "product-detail" ||
-      container.id === "product-gallery" ||
-      container.classList.contains("product-detail");
+    const type = options.type || container.getAttribute('data-skeleton-type') || '';
+    const isProductGrid = type === 'products-grid' || container.id === 'productsGrid' || container.id === 'search-results';
+    const isProductDetail = type === 'product-detail' || container.id === 'product-gallery' || container.classList.contains('product-detail');
 
     if (isProductDetail) {
       return `
@@ -107,9 +83,7 @@ class SkeletonLoader {
       return `
         <div class="skeleton-page-section">
           <div class="skeleton-page-row">
-            ${Array.from(
-              { length: 6 },
-              () => `
+            ${Array.from({ length: 6 }, () => `
               <div class="skeleton-page-card skeleton-product-card">
                 <div class="skeleton skeleton-product-image"></div>
                 <div class="skeleton skeleton-product-title"></div>
@@ -119,8 +93,7 @@ class SkeletonLoader {
                   <div class="skeleton skeleton-product-old-price"></div>
                 </div>
               </div>
-            `,
-            ).join("")}
+            `).join('')}
           </div>
         </div>`;
     }
@@ -132,22 +105,17 @@ class SkeletonLoader {
       <div class="skeleton-page-section">
         <div class="skeleton skeleton-section-header"></div>
         <div class="skeleton-category-scroll-container">
-          ${Array.from(
-            { length: 8 },
-            () => `
+          ${Array.from({ length: 8 }, () => `
             <div class="skeleton-category-scroll-item">
               <div class="skeleton skeleton-cat-circle"></div>
               <div class="skeleton skeleton-cat-label"></div>
             </div>
-          `,
-          ).join("")}
+          `).join('')}
         </div>
       </div>
       <div class="skeleton-page-section">
         <div class="skeleton-page-row">
-          ${Array.from(
-            { length: 4 },
-            () => `
+          ${Array.from({ length: 4 }, () => `
             <div class="skeleton-page-card skeleton-product-card">
               <div class="skeleton skeleton-product-image"></div>
               <div class="skeleton skeleton-product-title"></div>
@@ -157,36 +125,30 @@ class SkeletonLoader {
                 <div class="skeleton skeleton-product-old-price"></div>
               </div>
             </div>
-          `,
-          ).join("")}
+          `).join('')}
         </div>
       </div>`;
   }
 
   showSkeleton(container, options = {}) {
-    if (
-      !container ||
-      !SKELETON_CONFIG.enabled ||
-      this.animationDisabled ||
-      this.usesInlineHomeSkeleton(container)
-    ) {
+    if (!container || !SKELETON_CONFIG.enabled || this.animationDisabled || container.hasAttribute('data-no-skeleton')) {
       return false;
     }
 
-    const existing = container.querySelector(".skeleton-page-shell");
+    const existing = container.querySelector('.skeleton-page-shell');
     if (existing) {
       existing.remove();
     }
 
-    const shell = document.createElement("div");
-    shell.className = "skeleton-page-shell";
+    const shell = document.createElement('div');
+    shell.className = 'skeleton-page-shell';
     shell.innerHTML = this.buildSkeletonMarkup(container, options);
-    shell.setAttribute("aria-hidden", "true");
+    shell.setAttribute('aria-hidden', 'true');
 
     container.prepend(shell);
 
     requestAnimationFrame(() => {
-      shell.classList.add("is-visible");
+      shell.classList.add('is-visible');
     });
 
     if (options.autoHide !== false) {
@@ -208,11 +170,11 @@ class SkeletonLoader {
       window.clearTimeout(timer);
     }
 
-    const shell = container.querySelector(".skeleton-page-shell");
+    const shell = container.querySelector('.skeleton-page-shell');
     if (!shell) return;
 
-    shell.classList.remove("is-visible");
-    shell.classList.add("is-hiding");
+    shell.classList.remove('is-visible');
+    shell.classList.add('is-hiding');
 
     window.setTimeout(() => {
       shell.remove();
@@ -221,7 +183,7 @@ class SkeletonLoader {
   }
 
   async apiCall(url, options = {}) {
-    const method = options.method || "GET";
+    const method = options.method || 'GET';
     const key = this.cacheKey(url, method);
 
     if (this.isCacheValid(key) && !options.forceRefresh) {
@@ -233,11 +195,7 @@ class SkeletonLoader {
     if (options.showSkeleton && options.containerSelector) {
       skeletonContainer = document.querySelector(options.containerSelector);
       if (skeletonContainer) {
-        this.showSkeleton(skeletonContainer, {
-          type: options.type || "products-grid",
-          autoHide: true,
-          timeout: 2600,
-        });
+        this.showSkeleton(skeletonContainer, { type: options.type || 'products-grid', autoHide: true, timeout: 2600 });
       }
     }
 
@@ -259,7 +217,7 @@ class SkeletonLoader {
 
       return data;
     } catch (error) {
-      console.error("[SkeletonLoader] API call failed:", error);
+      console.error('[SkeletonLoader] API call failed:', error);
       if (skeletonContainer) {
         this.hideSkeleton(skeletonContainer);
       }
@@ -268,29 +226,24 @@ class SkeletonLoader {
   }
 
   initSkeletons() {
-    const sections = document.querySelectorAll(
-      SKELETON_CONFIG.skeletonSelector,
-    );
+    const sections = document.querySelectorAll(SKELETON_CONFIG.skeletonSelector);
 
     sections.forEach((section) => {
-      section.setAttribute("data-skeleton-enabled", "true");
+      section.setAttribute('data-skeleton-enabled', 'true');
       this.showSkeleton(section, {
-        type: section.getAttribute("data-skeleton-type") || "section",
+        type: section.getAttribute('data-skeleton-type') || 'section',
         autoHide: false,
       });
 
       const observer = new MutationObserver((mutations) => {
         const shouldHide = mutations.some((mutation) => {
-          if (mutation.type !== "childList" || !mutation.addedNodes.length)
-            return false;
+          if (mutation.type !== 'childList' || !mutation.addedNodes.length) return false;
           return Array.from(mutation.addedNodes).some((node) => {
             if (!(node instanceof HTMLElement)) return false;
             return Boolean(
-              node.classList?.contains("noon-product-card") ||
+              node.classList?.contains('noon-product-card') ||
               node.textContent?.trim().length > 20 ||
-              node.querySelector(
-                ".noon-product-card, .product-card, .search-row",
-              ),
+              node.querySelector('.noon-product-card, .product-card, .search-row')
             );
           });
         });
@@ -308,18 +261,15 @@ class SkeletonLoader {
   setupMutationObserver() {
     const bodyObserver = new MutationObserver((mutations) => {
       const shouldHide = mutations.some((mutation) => {
-        if (mutation.type !== "childList" || !mutation.addedNodes.length)
-          return false;
+        if (mutation.type !== 'childList' || !mutation.addedNodes.length) return false;
         return Array.from(mutation.addedNodes).some((node) => {
           if (!(node instanceof HTMLElement)) return false;
           return Boolean(
-            node.classList?.contains("noon-grid") ||
-            node.classList?.contains("home-category-scroll") ||
-            node.classList?.contains("search-results-grid") ||
-            node.querySelector(
-              ".noon-product-card, .product-card, .search-row, .section-block",
-            ) ||
-            node.textContent?.trim().length > 20,
+            node.classList?.contains('noon-grid') ||
+            node.classList?.contains('home-category-scroll') ||
+            node.classList?.contains('search-results-grid') ||
+            node.querySelector('.noon-product-card, .product-card, .search-row, .section-block') ||
+            node.textContent?.trim().length > 20
           );
         });
       });
@@ -370,7 +320,7 @@ class SkeletonLoader {
     this.observers.forEach((observer) => observer.disconnect());
     this.observers = [];
     this.cache.clear();
-    console.log("[SkeletonLoader] destroyed");
+    console.log('[SkeletonLoader] destroyed');
   }
 
   getCacheStatus() {

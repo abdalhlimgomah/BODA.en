@@ -1,8 +1,8 @@
 .my-orders-noon-shell {
-  --orders-bg: linear-gradient(180deg, #fffde9 0%, #f7f8fb 28%, #f7f8fb 100%);
+  --orders-bg: linear-gradient(180deg, #fafbfd 0%, #f7f8fb 28%, #f7f8fb 100%);
   --orders-card-border: var(--noon-border, #e4e8f0);
   --orders-card-shadow: 0 10px 22px rgba(15, 23, 42, 0.08);
-  --orders-text: var(--noon-text, #102a43);
+  --orders-text: var(--noon-text, #102c43);
   --orders-muted: var(--noon-muted, #6b7c93);
   --orders-separator: #e6ebf3;
   --orders-express: var(--noon-yellow, #ffe600);
@@ -56,6 +56,65 @@
   background: #ffffff;
   padding: 8px;
   box-shadow: 0 8px 18px rgba(56, 102, 223, 0.08);
+}
+
+.orders-status-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 4px 0;
+  scrollbar-width: none;
+}
+
+.orders-status-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.orders-tab {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid #dbe4f3;
+  border-radius: 18px;
+  background: #ffffff;
+  color: #4a5568;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.orders-tab:hover {
+  background: #edf3ff;
+  border-color: #c8d6f0;
+}
+
+.orders-tab.active {
+  background: #3866df;
+  color: #ffffff;
+  border-color: #3866df;
+}
+
+.orders-tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.08);
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0 4px;
+}
+
+.orders-tab.active .orders-tab-count {
+  background: rgba(255, 255, 255, 0.25);
 }
 
 .status-note {
@@ -338,7 +397,8 @@
 
 .noon-order-state-icon.is-pending,
 .noon-order-state-icon.is-preparing,
-.noon-order-state-icon.is-shipped {
+.noon-order-state-icon.is-shipped,
+.noon-order-state-icon.is-in_transit {
   background: #e7efff;
   color: var(--orders-accent);
 }
@@ -440,6 +500,27 @@
   color: #6e7990;
   font-size: 0.76rem;
   font-weight: 800;
+}
+
+.noon-old-price {
+  margin: 2px 0 0;
+  color: #94a3b8;
+  font-size: 0.82rem;
+  font-weight: 500;
+  text-decoration: line-through;
+  text-decoration-color: #cbd5e1;
+}
+
+.noon-discount-pill {
+  display: inline-block;
+  margin-top: 3px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: #fee2e2;
+  color: #b91c1c;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.3px;
 }
 
 .noon-order-footer {

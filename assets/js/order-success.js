@@ -2,7 +2,7 @@
    Order Success Page
    ======================================================================== */
 function escapeHtml(v) {
-  return String(v ?? "").replaceAll("&", "&").replaceAll("<", "<").replaceAll(">", ">").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
+  return String(v ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
 }
 
 function formatOrderMoney(value) {
@@ -33,6 +33,7 @@ function renderOrderSuccess() {
 
   var cart = data.cart;
   var fields = data.fields;
+  var totals = data.totals || {};
   var productsEl = document.getElementById("os-products");
   var nameEl = document.getElementById("os-name");
   var phoneEl = document.getElementById("os-phone");
@@ -43,6 +44,9 @@ function renderOrderSuccess() {
   if (phoneEl) phoneEl.textContent = fields.phone || "---";
   if (addressEl) addressEl.textContent = fields.address || "---";
   if (deliveryEl) deliveryEl.textContent = getDeliveryEstimate();
+
+  var subtotal = Number(totals.subtotal) || cart.reduce(function (s, item) { return s + (Number(item.price) || 0) * (Number(item.quantity) || 1); }, 0);
+  var couponDiscount = Number(totals.couponDiscount) || 0;
 
   if (productsEl) {
     productsEl.innerHTML = cart.map(function (item) {
@@ -56,6 +60,10 @@ function renderOrderSuccess() {
       img = window.BudaStore ? window.BudaStore.getImagePath(img) : img;
       var name = item.name || item.title || "منتج";
       var qty = Number(item.quantity) || 1;
+      var itemTotal = (Number(item.price) || 0) * qty;
+      var itemDiscount = subtotal > 0 ? Math.round((itemTotal / subtotal) * couponDiscount * 100) / 100 : 0;
+      var itemDiscounted = Math.max(itemTotal - itemDiscount, 0);
+      var showOriginal = itemDiscount > 0;
       return '<div class="os-product">' +
         '<div class="os-product-img-wrap">' +
           '<img class="os-product-img" src="' + img + '" alt="' + escapeHtml(name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'../assets/images/unnamed.png\'" />' +
@@ -63,14 +71,37 @@ function renderOrderSuccess() {
         '</div>' +
         '<div class="os-product-info">' +
           '<p class="os-product-name">' + escapeHtml(name) + '</p>' +
-          '<span class="os-product-meta">' + formatOrderMoney(item.price || 0) + '</span>' +
+          '<span class="os-product-meta"' + (showOriginal ? ' style="text-decoration:line-through;color:#9CA3AF;margin-left:6px"' : '') + '>' + formatOrderMoney(itemTotal) + '</span>' +
+          (showOriginal ? '<span class="os-product-meta" style="color:#16a34a;font-weight:700">' + formatOrderMoney(itemDiscounted) + '</span>' : '') +
         '</div>' +
       '</div>';
     }).join("");
   }
 
-  // Clear session data
-  try { sessionStorage.removeItem("orderSuccessData"); } catch {}
+  // Render totals summary
+  var deliverySummary = document.getElementById("os-delivery-summary");
+  if (deliverySummary && totals) {
+    var shipping = Number(totals.shipping) || 0;
+    var grandTotal = Number(totals.total) || (subtotal + shipping - couponDiscount);
+    var html = '';
+    if (couponDiscount > 0) {
+      html += '<div class="os-totals">' +
+        '<div class="os-total-row"><span>المجموع الفرعي</span><span>' + formatOrderMoney(subtotal) + '</span></div>' +
+        '<div class="os-total-row os-discount-row"><span>الخصم</span><span>- ' + formatOrderMoney(couponDiscount) + '</span></div>' +
+        '<div class="os-total-row"><span>الشحن</span><span>' + formatOrderMoney(shipping) + '</span></div>' +
+        '<div class="os-total-divider"></div>' +
+        '<div class="os-total-row os-grand-total-row"><strong>الإجمالي</strong><strong>' + formatOrderMoney(grandTotal) + '</strong></div>' +
+      '</div>';
+    } else {
+      html += '<div class="os-totals">' +
+        '<div class="os-total-row"><span>المجموع الفرعي</span><span>' + formatOrderMoney(subtotal) + '</span></div>' +
+        '<div class="os-total-row"><span>الشحن</span><span>' + formatOrderMoney(shipping) + '</span></div>' +
+        '<div class="os-total-divider"></div>' +
+        '<div class="os-total-row os-grand-total-row"><strong>الإجمالي</strong><strong>' + formatOrderMoney(grandTotal) + '</strong></div>' +
+      '</div>';
+    }
+    deliverySummary.insertAdjacentHTML("beforebegin", html);
+  }
 }
 
 document.addEventListener("DOMContentLoaded", renderOrderSuccess);

@@ -1,4 +1,4 @@
-// the inâ€‘memory database is initially hardâ€‘coded for offline/demo mode.
+﻿// the inâ€‘memory database is initially hardâ€‘coded for offline/demo mode.
 // we declare it with `var` so it persists globally and survives script reloads.
 if (typeof window.productsDatabase === 'undefined') {
   window.productsDatabase = {};
@@ -645,7 +645,18 @@ const getImagePath = (path) => {
     return source;
   }
 
-  let normalized = source.replace(/^\.{1,2}\//, "").replace(/^\//, "");
+  // If path already starts with ../, it's likely correct for a sub-page
+  if (source.startsWith("../")) {
+    return source;
+  }
+
+  // Check if the path already seems correct (e.g., "assets/images/...")
+  if (source.startsWith("assets/")) {
+    const prefix = window.location.pathname.includes("/pages/") ? "../" : "./";
+    return prefix + source;
+  }
+
+  let normalized = source.replace(/^\.?\.\//, "").replace(/^\//, "");
   if (isFile) {
     const prefix = window.location.pathname.includes("/pages/") ? "../" : "";
     return prefix + normalized;
@@ -830,13 +841,21 @@ async function loadCartFromSupabase() {
 let _cartLoadedFromSupabase = false;
 let _wishlistLoadedFromSupabase = false;
 
-async function syncWishlistToSupabase(wishlist) {
+async function syncWishlistToSupabase(wishlist, metadata = {}) {
   const client = getSupabaseForCart();
   const email = getCartUserEmail();
   if (!client || !email) return;
 
   const items = Array.isArray(wishlist) ? wishlist : [];
   
+  // If a specific product was removed, delete it directly
+  if (metadata.productId && !metadata.isInWishlist) {
+    try {
+      await client.from("wishlist_items").delete().match({ user_email: email, product_id: String(metadata.productId) });
+    } catch (e) {
+      console.warn("syncWishlistToSupabase (delete) error:", e);
+    }
+  }
   // Don't sync empty wishlist - would wipe Supabase
   if (!items.length) {
     console.log("syncWishlistToSupabase: skipping empty wishlist sync");
@@ -972,10 +991,9 @@ const saveWishlist = (wishlist, metadata = {}) => {
   localStorage.setItem(getWishlistKey(), JSON.stringify(normalizedWishlist));
 
   // Sync to Supabase if user is logged in (has email)
-  // Don't sync empty wishlist - would wipe Supabase
   const email = getCartUserEmail();
-  if (email && normalizedWishlist.length) {
-    syncWishlistToSupabase(normalizedWishlist);
+  if (email) {
+    syncWishlistToSupabase(normalizedWishlist, metadata);
   }
 
   document.dispatchEvent(

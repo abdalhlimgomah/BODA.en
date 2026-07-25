@@ -1,0 +1,109 @@
+/* 
+ * Buda Design System v2.0 - Quantity Selector Component
+ * Path: assets/design-system/components/qty-selector.css
+ */
+
+.buda-qty {
+  display: inline-flex;
+  align-items: center;
+  border: var(--border-width-sm, 1px) solid var(--color-border-subtle, #e5e7eb);
+  border-radius: var(--radius-lg, 12px);
+  background-color: var(--color-surface-primary, #ffffff);
+  height: var(--space-40, 40px);
+  overflow: hidden;
+  font-family: var(--font-primary, inherit);
+}
+
+/* Buttons */
+.buda-qty__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-40, 40px);
+  height: var(--size-full, 100%);
+  background: transparent;
+  border: none;
+  color: var(--color-icon-primary, #374151);
+  cursor: pointer;
+  outline: none;
+  transition: opacity var(--duration-fast, 150ms) ease;
+}
+
+.buda-qty__btn:hover:not(:disabled) {
+  background-color: var(--color-surface-hover, #f3f4f6);
+}
+
+.buda-qty__btn:active:not(:disabled) {
+  opacity: var(--opacity-active, 0.7);
+}
+
+.buda-qty__btn:focus-visible {
+  box-shadow: inset 0 0 0 var(--border-width-md, 2px) var(--color-focus-ring, #007bff);
+}
+
+.buda-qty__btn:disabled {
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+  color: var(--color-icon-muted, #9ca3af);
+}
+
+/* Number Input/Display */
+.buda-qty__input {
+  width: var(--space-48, 48px);
+  height: var(--size-full, 100%);
+  border: none;
+  border-inline: var(--border-width-sm, 1px) solid var(--color-border-subtle, #e5e7eb);
+  background: transparent;
+  text-align: center;
+  font-size: var(--font-size-md, 1rem);
+  font-weight: var(--font-weight-semibold, 600);
+  color: var(--color-text-primary, #111827);
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+/* Hide increment/decrement arrows on WebKit */
+.buda-qty__input::-webkit-outer-spin-button,
+.buda-qty__input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: var(--space-0, 0);
+}
+
+.buda-qty__input:focus-visible {
+  box-shadow: inset 0 0 0 var(--border-width-md, 2px) var(--color-focus-ring, #007bff);
+}
+
+.buda-qty__input:disabled {
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+  background-color: var(--color-surface-muted, #f9fafb);
+}
+
+/* Dark Mode Adjustments */
+[data-theme="dark"] .buda-qty {
+  background-color: var(--color-surface-dark, #1f2937);
+  border-color: var(--color-border-dark, #374151);
+}
+
+[data-theme="dark"] .buda-qty__btn {
+  color: var(--color-icon-inverse, #f9fafb);
+}
+
+[data-theme="dark"] .buda-qty__btn:hover:not(:disabled) {
+  background-color: var(--color-surface-dark-hover, #374151);
+}
+
+[data-theme="dark"] .buda-qty__input {
+  border-color: var(--color-border-dark, #374151);
+  color: var(--color-text-inverse, #f9fafb);
+}
+
+[data-theme="dark"] .buda-qty__input:disabled {
+  background-color: var(--color-surface-dark-muted, #111827);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buda-qty__btn {
+    transition: none;
+  }
+}
