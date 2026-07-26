@@ -511,11 +511,6 @@ function initGoogleSignIn() {
   var wrap = document.getElementById("google-button-wrap");
   if (!wrap) return;
 
-  if (!window.crossOriginIsolated) {
-    wrap.innerHTML = '<p style="text-align:center;color:#64748b;font-size:13px;padding:12px;">تسجيل الدخول عبر Google غير متاح حالياً. يرجى استخدام البريد الإلكتروني وكلمة المرور.</p>';
-    return;
-  }
-
   detectAdBlocker().then(function(adBlocked) {
     if (adBlocked) {
       wrap.innerHTML = '<p style="text-align:center;color:#ef4444;font-size:13px;padding:12px;">يبدو أن لديك مانع إعلانات مفعّل. يرجى تعطيله للمتابعة باستخدام تسجيل الدخول عبر Google.</p>';
