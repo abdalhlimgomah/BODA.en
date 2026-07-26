@@ -876,6 +876,7 @@ function buildProductCard(product) {
     "</span></button>" +
     '<button class="noon-product-media" data-view-product="' + id +
     '" aria-label="عرض المنتج">' +
+    '<div class="buda-pulse-dot" data-pulse-dot="' + id + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div>' +
     imgs +
     (dots ? '<span class="noon-img-dots">' + dots + "</span>" : "") +
     (counter) +
