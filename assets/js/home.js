@@ -2991,20 +2991,7 @@ HM.init = async function () {
   // Render dynamic sections from Supabase
   renderSupabaseSections();
 
-  // Random rotation
-  if (randomProductsRotationTimer) clearInterval(randomProductsRotationTimer);
-  randomProductsRotationTimer = setInterval(function () {
-    var sec = HOME_CONFIG.sections.find(function (s) {
-      return s.type === "random";
-    });
-    if (sec) {
-      var el = document.getElementById("sec-" + sec.id);
-      if (el) el.remove();
-      HM.renderRandom(sec);
-    }
-  }, RANDOM_PRODUCTS_ROTATION_MS);
-
-  // Taager extra rotation (every 15 seconds)
+  // Taager extra — render once, no auto-rotation
   function refreshTaagerExtraSections() {
     taagerExtraRotationOffset++;
     HOME_CONFIG.sections.forEach(function (sec) {
@@ -3015,17 +3002,6 @@ HM.init = async function () {
       }
     });
   }
-  if (taagerExtraRotationTimer) clearInterval(taagerExtraRotationTimer);
-  taagerExtraRotationTimer = setInterval(
-    refreshTaagerExtraSections,
-    TAAGER_EXTRA_ROTATION_MS,
-  );
-
-  // Refresh on page visibility change and window focus
-  document.addEventListener("visibilitychange", function () {
-    if (document.visibilityState === "visible") refreshTaagerExtraSections();
-  });
-  window.addEventListener("focus", refreshTaagerExtraSections);
 
   // Wishlist sync
   document.addEventListener("boda:wishlist-updated", function () {
