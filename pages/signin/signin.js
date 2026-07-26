@@ -496,6 +496,13 @@ function bindGoogleSignInIntent(target) {
 }
 
 function initGoogleSignIn() {
+  if (!window.crossOriginIsolated) {
+    var el = document.getElementById("google-button-wrap");
+    if (el) {
+      el.innerHTML = '<p style="text-align:center;color:#64748b;font-size:13px;padding:12px;">تسجيل الدخول عبر Google غير متاح حالياً. يرجى استخدام البريد الإلكتروني وكلمة المرور.</p>';
+    }
+    return;
+  }
   if (!window.google || !google.accounts || !google.accounts.id) {
     setTimeout(initGoogleSignIn, 300);
     return;
