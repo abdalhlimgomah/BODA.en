@@ -38,7 +38,7 @@
       var img = (U.getProductImages(item.product) || [])[0] || U.fallbackImage();
       var pid = String(item.product.id || item.product.product_id || item.product.sku || "");
       html += '<div class="pdp-bt-item" data-bt-index="' + i + '" data-bt-product="' + pid + '">';
-      html += '<div class="pdp-bt-item-imgwrap"><img src="' + img + '" alt="' + U.escapeHtml(name) + '" loading="lazy" decoding="async">';
+      html += '<div class="pdp-bt-item-imgwrap"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + img + '" alt="' + U.escapeHtml(name) + '" loading="lazy" decoding="async">';
       html += '<div class="pdp-bt-checkbox' + (item.checked ? ' is-checked' : '') + (item.locked ? ' is-locked' : '') + '" data-bt-check="' + i + '"><span class="material-icons-outlined">check</span></div></div>';
       html += '<div class="pdp-bt-item-name">' + U.escapeHtml(name) + '</div>';
       html += '<div class="pdp-bt-item-price">' + U.money(price) + '</div>';
@@ -60,7 +60,7 @@
     if (galleryImages.length > 1) {
       html += '<div class="pdp-bt-gallery">';
       galleryImages.forEach(function (img, gi) {
-        html += '<div class="pdp-bt-gallery-item' + (gi === 0 ? ' is-active' : '') + '"><img src="' + img + '" alt="صورة المنتج" loading="lazy" onerror="this.style.display=\'none\'" /></div>';
+        html += '<div class="pdp-bt-gallery-item' + (gi === 0 ? ' is-active' : '') + '"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + img + '" alt="صورة المنتج" loading="lazy" onerror="this.style.display=\'none\'" /></div>';
       });
       html += '</div>';
     }

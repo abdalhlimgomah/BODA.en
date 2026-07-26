@@ -1340,11 +1340,11 @@ HM.renderHero = function () {
       '<a href="' +
       escapeHtml(s.link || "#") +
       '">' +
-      '<img src="' +
+      '<div class="hm-hero-slide-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' +
       s.img +
       '" alt="" loading="' +
       (si === 0 ? "eager" : "lazy") +
-      '" />' +
+      '" /></div>' +
       "</a></div>";
   }
   var html =
@@ -1374,7 +1374,7 @@ HM.renderBanner = function (section) {
     if (dyn && dyn.type === 'image_banner' && banner.url) {
       html = '<div class="hm-banner-top-wrap hm-fade" style="padding:0 16px 6px;">' +
         '<a href="' + escapeHtml(banner.link || '#') + '" style="display:block;border-radius:10px;overflow:hidden;">' +
-        '<img src="' + banner.url + '" style="width:100%;display:block;border-radius:10px;" onerror="this.style.display=\'none\'" />' +
+        '<div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + banner.url + '" style="width:100%;display:block;border-radius:10px;" onerror="this.style.display=\'none\'" /></div>' +
         '</a></div>';
     } else if (dyn && dyn.type === 'icon_banner') {
       html = '<div class="hm-banner-top-wrap hm-fade">' +
@@ -1405,7 +1405,7 @@ HM.renderBanner = function (section) {
     var html =
       '<div class="hm-banner-wrap hm-fade">' +
       '<div class="hm-banner ' + sizeClass + '">' +
-      '<a href="' + escapeHtml(ad.link_url || "#") + '"><img src="' + ad.image_url + '" alt="" loading="lazy" /></a>' +
+      '<a href="' + escapeHtml(ad.link_url || "#") + '"><div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + ad.image_url + '" alt="" loading="lazy" /></div></a>' +
       '<span class="ad-badge">' + escapeHtml(ad.badge_text || 'مدفوع') + '</span>' +
       "</div></div>";
     var temp = document.createElement("div");
@@ -1420,9 +1420,9 @@ HM.renderBanner = function (section) {
     '">' +
     '<a href="' +
     escapeHtml(banner.link || "#") +
-    '"><img src="' +
+    '"><div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' +
     banner.url +
-    '" alt="" loading="lazy" /></a>' +
+    '" alt="" loading="lazy" /></div></a>' +
     '<span class="ad-badge">مدفوع</span>' +
     "</div></div>";
   var temp = document.createElement("div");
@@ -1788,7 +1788,7 @@ HM.renderSheinTrend = function (section) {
       '<div class="hm-shein-card" data-view-product="' +
       id +
       '">' +
-      '<div class="hm-shein-card-img"><img src="' +
+      '<div class="hm-shein-card-img"><div class="buda-pulse-dot" data-pulse-dot="' + id + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' +
       img +
       '" alt="' +
       escapeHtml(p.name || "") +
@@ -1874,11 +1874,11 @@ HM.renderSheinStyle = function (section) {
     "08," +
     pal[1] +
     '08)">' +
-    '<img src="' +
+    '<div class="hm-shein-hero-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' +
     heroImg +
     '" alt="' +
     escapeHtml(hero.name || "") +
-    '" loading="lazy" onerror="this.style.display=\'none\'" />' +
+    '" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
     '<div class="hm-shein-hero-overlay" style="background:linear-gradient(transparent, rgba(0,0,0,0.15))"><span class="hm-shein-hero-label" style="color:' +
     pal[0] +
     '">اختيار المحرر</span>' +
@@ -1906,9 +1906,9 @@ HM.renderSheinStyle = function (section) {
       '<div class="hm-shein-side-card" data-view-product="' +
       pid +
       '">' +
-      '<img src="' +
+      '<div class="hm-shein-side-img"><div class="buda-pulse-dot" data-pulse-dot="' + pid + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' +
       img +
-      '" alt="" loading="lazy" onerror="this.style.display=\'none\'" />' +
+      '" alt="" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
       "<div><h4>" +
       escapeHtml((p.name || "").slice(0, 20)) +
       "</h4>" +
@@ -1968,7 +1968,7 @@ HM.renderSheinDeal = function (section) {
     '<div class="hm-shein-deal-body"><div class="hm-shein-deal-hero" data-view-product="' +
     String(hero.id) +
     '">' +
-    '<div class="hm-shein-deal-hero-img"><img src="' +
+    '<div class="hm-shein-deal-hero-img"><div class="buda-pulse-dot" data-pulse-dot="' + String(hero.id) + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' +
     heroImg +
     '" alt="' +
     escapeHtml(hero.name || "") +
@@ -1997,9 +1997,9 @@ HM.renderSheinDeal = function (section) {
       '<div class="hm-shein-deal-mini" data-view-product="' +
       pid +
       '">' +
-      '<img src="' +
+      '<div class="hm-shein-deal-mini-img"><div class="buda-pulse-dot" data-pulse-dot="' + pid + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' +
       img +
-      '" alt="" loading="lazy" onerror="this.style.display=\'none\'" />' +
+      '" alt="" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
       (pr.hasDiscount
         ? '<span class="hm-shein-discount hm-shein-discount-sm">-' +
           pr.discountPercent +
@@ -2082,7 +2082,7 @@ HM.renderSheinNew = function (section) {
       '<div class="hm-shein-card" data-view-product="' +
       id +
       '">' +
-      '<div class="hm-shein-card-img"><img src="' +
+      '<div class="hm-shein-card-img"><div class="buda-pulse-dot" data-pulse-dot="' + id + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' +
       img +
       '" alt="' +
       escapeHtml(p.name || "") +
@@ -2700,7 +2700,7 @@ HM.renderMegaOffers = function (section) {
     html +=
       '<div class="buda-mega-product" data-view-product="' + String(p.id) + '">' +
       (rp.hasDiscount ? '<span class="buda-mega-product-badge">-' + rp.discountPercent + '%</span>' : '') +
-      '<img class="buda-mega-product-img" src="' + img + '" alt="' + escapeHtml(p.name || '') + '" loading="lazy" onerror="this.style.display=\'none\'" />' +
+      '<div class="buda-mega-product-img-wrap"><div class="buda-pulse-dot" data-pulse-dot="' + String(p.id) + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img class="buda-mega-product-img" src="' + img + '" alt="' + escapeHtml(p.name || '') + '" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
       '<div class="buda-mega-product-info">' +
       '<p class="buda-mega-product-name">' + escapeHtml((p.name || '').slice(0, 25)) + '</p>' +
       '<span class="buda-mega-product-price">' + formatMoney(rp.finalPrice) + '</span>' +
@@ -2718,7 +2718,7 @@ HM.renderMegaOffers = function (section) {
     html +=
       '<div class="buda-mega-product" data-view-product="' + String(p.id) + '">' +
       (rp.hasDiscount ? '<span class="buda-mega-product-badge">-' + rp.discountPercent + '%</span>' : '') +
-      '<img class="buda-mega-product-img" src="' + img + '" alt="' + escapeHtml(p.name || '') + '" loading="lazy" onerror="this.style.display=\'none\'" />' +
+      '<div class="buda-mega-product-img-wrap"><div class="buda-pulse-dot" data-pulse-dot="' + String(p.id) + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img class="buda-mega-product-img" src="' + img + '" alt="' + escapeHtml(p.name || '') + '" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
       '<div class="buda-mega-product-info">' +
       '<p class="buda-mega-product-name">' + escapeHtml((p.name || '').slice(0, 25)) + '</p>' +
       '<span class="buda-mega-product-price">' + formatMoney(rp.finalPrice) + '</span>' +
@@ -2739,7 +2739,7 @@ HM.renderMegaOffers = function (section) {
   banners.forEach(function (b) {
     html +=
       '      <a class="buda-mega-banner" href="' + escapeHtml(b.link_url || '#') + '">' +
-      '        <img src="' + b.image_url + '" alt="" loading="lazy" onerror="this.parentElement.style.display=\'none\'" />' +
+      '        <div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + b.image_url + '" alt="" loading="lazy" onerror="this.closest(\'.buda-mega-banner\').style.display=\'none\'" /></div>' +
       '        <div class="buda-mega-banner-overlay"><strong>' + escapeHtml(b.title || '') + '</strong><span>' + escapeHtml(b.subtitle || '') + '</span></div>' +
       '      </a>';
   });

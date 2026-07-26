@@ -74,7 +74,7 @@
     var html = '<div class="noon-product-card" data-view-product="' + escapeHtml(id) + '">';
     html += '<div class="noon-product-media-wrap">';
     html += '<button class="icon-btn noon-wishlist-btn' + (isWish ? ' is-active' : '') + '" data-wishlist="' + escapeHtml(id) + '" aria-label="\u0625\u0636\u0627\u0641\u0629 \u0625\u0644\u0649 \u0627\u0644\u0645\u0641\u0636\u0644\u0629" aria-pressed="' + (isWish ? 'true' : 'false') + '"><span class="material-icons-outlined" style="font-size:18px;">' + (isWish ? 'favorite' : 'favorite_border') + '</span></button>';
-    html += '<div class="noon-product-media">' + imgs;
+    html += '<div class="noon-product-media"><div class="buda-pulse-dot" data-pulse-dot="' + id + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div>' + imgs;
     if (dots) html += '<span class="noon-img-dots">' + dots + '</span>';
     html += '</div>';
     html += '<button class="noon-add-square" data-add-to-cart="' + escapeHtml(id) + '" aria-label="\u0625\u0636\u0627\u0641\u0629 \u0625\u0644\u0649 \u0627\u0644\u0633\u0644\u0629">+</button>';

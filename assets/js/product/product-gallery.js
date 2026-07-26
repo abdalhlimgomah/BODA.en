@@ -51,7 +51,7 @@
             '<div class="pdp-gallery-slide" data-index="' +
             i +
             '">' +
-            '<img src="' +
+            '<div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' +
             s.poster +
             '" alt="' +
             U.escapeHtml(vm.name) +
@@ -64,7 +64,7 @@
           '<div class="pdp-gallery-slide" data-index="' +
           i +
           '">' +
-          '<img class="pdp-zoomable" src="' +
+          '<div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img class="pdp-zoomable" src="' +
           s.src +
           '" alt="' +
           U.escapeHtml(vm.name) +
