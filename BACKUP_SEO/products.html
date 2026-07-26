@@ -1,0 +1,172 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>المنتجات - Buda</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+  <link href="../assets/css/noon-components.css" rel="stylesheet" />
+  <link href="../assets/css/products.css?v=20260719a" rel="stylesheet" />
+  <link href="../assets/css/skeleton.css?v=20260701" rel="stylesheet" />
+  <link href="../assets/css/home.css?v=20260711a" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260709" rel="stylesheet" />
+  <link href="../assets/css/desktop-animations.css?v=20260709" rel="stylesheet" />
+<link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="../assets/icons/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="../assets/icons/site.webmanifest">
+<meta name="`theme-color" content="#6D28D9`">
+</head>
+<body class="app-shell">
+    <header class="app-header buda-header">
+    <div class="buda-header-top">
+      <div class="buda-header-top-inner">
+        <div class="header-start">
+          <div class="brand-badge">Buda</div>
+        </div>
+
+
+        <div class="app-search search-left-icon buda-search">
+          <span class="material-icons-outlined">search</span>
+          <input id="home-search" type="text" data-search-target="search.html" placeholder="ابحث عن منتج أو فئة" autocomplete="off" />
+          <button class="buda-search-clear" id="budaSearchClear" type="button" aria-label="مسح"></button>
+        </div>
+
+        <div class="buda-lang" id="budaLangTrigger">
+          <span class="buda-lang-text">EN</span>
+          <span class="material-icons-outlined buda-lang-globe">language</span>
+        </div>
+
+        <div class="buda-account" id="budaAccountTrigger">
+          <div class="buda-account-avatar" id="budaAccountAvatar"><span class="material-icons-outlined">person</span></div>
+          <div class="buda-account-info">
+            <span class="buda-account-name" id="budaAccountName">حسابي</span>
+            <span class="material-icons-outlined buda-account-arrow">keyboard_arrow_down</span>
+          </div>
+          <div class="buda-account-dropdown" id="budaAccountDropdown">
+            <a href="ahsab.html" class="buda-dd-item"><span class="material-icons-outlined">person</span> حسابي</a>
+            <a href="my-orders.html" class="buda-dd-item"><span class="material-icons-outlined">receipt_long</span> طلباتي</a>
+            <a href="returns.html" class="buda-dd-item"><span class="material-icons-outlined">undo</span> الإرجاعات</a>
+            <a href="addresses.html" class="buda-dd-item"><span class="material-icons-outlined">location_on</span> العناوين</a>
+            <a href="wishlist.html" class="buda-dd-item"><span class="material-icons-outlined">favorite_border</span> المفضلة</a>
+            <a href="#" class="buda-dd-item" id="budaSupportBtn"><span class="material-icons-outlined">chat</span> الدعم</a>
+            <a href="edit-account.html" class="buda-dd-item"><span class="material-icons-outlined">settings</span> الإعدادات</a>
+            <div class="buda-dd-divider"></div>
+            <a href="logout-confirmation.html" class="buda-dd-item buda-dd-logout"><span class="material-icons-outlined">logout</span> تسجيل الخروج</a>
+          </div>
+        </div>
+
+        <a href="my-orders.html" class="buda-header-action" title="طلباتي"><span class="material-icons-outlined">receipt_long</span><small>طلباتي</small></a>
+        <a href="wishlist.html" class="buda-header-action" title="المفضلة"><span class="material-icons-outlined">favorite_border</span><small>المفضلة</small></a>
+        <a href="empty-cart.html" class="buda-header-action buda-header-cart" title="العربة"><span class="material-icons-outlined">shopping_cart</span><small>العربة</small><span class="buda-cart-badge" id="budaCartBadge">0</span></a>
+      </div>
+    </div>
+  </header>
+
+  <main class="products-page">
+    <!-- Mobile: horizontal chips -->
+    <section class="section-block products-cats-mobile">
+      <div class="section-head">
+        <h2 data-i18n="الأقسام">الأقسام</h2>
+      </div>
+      <div id="filterContainer" class="chip-row"></div>
+    </section>
+
+    <!-- Desktop: sidebar + grid -->
+    <div class="products-layout">
+      <aside class="products-sidebar" id="productsSidebar">
+        <h3 class="sidebar-title" data-i18n="الأقسام">الأقسام</h3>
+        <div class="sidebar-cats" id="sidebarCats"></div>
+      </aside>
+      <section class="products-main">
+        <div class="section-head">
+          <h2 data-i18n="نتائج المنتجات">نتائج المنتجات</h2>
+        </div>
+        <div id="productsGrid" class="stagger-grid">
+          <div class="skeleton-products-grid">
+            <div class="skeleton skeleton-product-card">
+              <div class="skeleton skeleton-product-image"></div>
+              <div class="skeleton skeleton-product-title"></div>
+              <div class="skeleton skeleton-product-rating"></div>
+              <div class="skeleton skeleton-product-price"></div>
+            </div>
+            <div class="skeleton skeleton-product-card">
+              <div class="skeleton skeleton-product-image"></div>
+              <div class="skeleton skeleton-product-title"></div>
+              <div class="skeleton skeleton-product-rating"></div>
+              <div class="skeleton skeleton-product-price"></div>
+            </div>
+            <div class="skeleton skeleton-product-card">
+              <div class="skeleton skeleton-product-image"></div>
+              <div class="skeleton skeleton-product-title"></div>
+              <div class="skeleton skeleton-product-rating"></div>
+              <div class="skeleton skeleton-product-price"></div>
+            </div>
+            <div class="skeleton skeleton-product-card">
+              <div class="skeleton skeleton-product-image"></div>
+              <div class="skeleton skeleton-product-title"></div>
+              <div class="skeleton skeleton-product-rating"></div>
+              <div class="skeleton skeleton-product-price"></div>
+            </div>
+            <div class="skeleton skeleton-product-card">
+              <div class="skeleton skeleton-product-image"></div>
+              <div class="skeleton skeleton-product-title"></div>
+              <div class="skeleton skeleton-product-rating"></div>
+              <div class="skeleton skeleton-product-price"></div>
+            </div>
+            <div class="skeleton skeleton-product-card">
+              <div class="skeleton skeleton-product-image"></div>
+              <div class="skeleton skeleton-product-title"></div>
+              <div class="skeleton skeleton-product-rating"></div>
+              <div class="skeleton skeleton-product-price"></div>
+            </div>
+          </div>
+        </div>
+        <div id="pagination" class="noon-pagination"></div>
+      </section>
+    </div>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="home.html" data-nav="home">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="الرئيسية">الرئيسية</small>
+    </a>
+    <a href="products.html" data-nav="products">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="الفئات">الفئات</small>
+    </a>
+    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="الرئيسية">
+      <img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" />
+    </button>
+    <a href="ahsab.html" data-nav="account">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="حسابي">حسابي</small>
+    </a>
+    <a href="empty-cart.html" data-nav="cart">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="العربة">العربة</small>
+      <span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span>
+    </a>
+  </nav>
+
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../assets/js/supabase-client.js?v=20260712f"></script>
+  <script src="../assets/js/auth.config.js?v=20260630"></script>
+  <script src="../assets/js/taager-integration.js?v=20260630d"></script>
+  <script src="../assets/js/store.js?v=20260712a"></script>
+  <script src="../assets/js/pricing-engine.js"></script>
+  <script src="../assets/js/desktop-effects.js?v=20260709"></script>
+  <script src="../assets/js/noon-shell.js?v=20260719a"></script>
+  <script src="../assets/js/skeleton-loader.js"></script>
+  <script src="../assets/js/home.js?v=20260712a"></script>
+  <script src="main.js?v=20260712a"></script>
+</body>
+</html>
