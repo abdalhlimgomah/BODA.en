@@ -495,51 +495,67 @@ function bindGoogleSignInIntent(target) {
   });
 }
 
+function detectAdBlocker() {
+  return new Promise((resolve) => {
+    const s = document.createElement('script');
+    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+    s.onload = () => resolve(false);
+    s.onerror = () => resolve(true);
+    s.type = 'text/javascript';
+    document.head.appendChild(s);
+    setTimeout(() => resolve(true), 3000);
+  });
+}
+
 function initGoogleSignIn() {
-  if (!window.crossOriginIsolated) {
-    var el = document.getElementById("google-button-wrap");
-    if (el) {
-      el.innerHTML = '<p style="text-align:center;color:#64748b;font-size:13px;padding:12px;">تسجيل الدخول عبر Google غير متاح حالياً. يرجى استخدام البريد الإلكتروني وكلمة المرور.</p>';
-    }
-    return;
-  }
-  if (!window.google || !google.accounts || !google.accounts.id) {
-    setTimeout(initGoogleSignIn, 300);
-    return;
-  }
-
-  const GOOGLE_CLIENT_ID = getGoogleClientId();
-  if (!GOOGLE_CLIENT_ID) {
-    console.warn("Missing Google client ID. Set window.__Buda_GOOGLE_CLIENT_ID.");
-    return;
-  }
-
-  if (!window.__Buda_GOOGLE_INIT_DONE) {
-    google.accounts.id.initialize({
-      client_id: GOOGLE_CLIENT_ID,
-      callback: TFA,
-    });
-    window.__Buda_GOOGLE_INIT_DONE = true;
-  }
-
-  const wrap = document.getElementById("google-button-wrap");
+  var wrap = document.getElementById("google-button-wrap");
   if (!wrap) return;
 
-  let btn = wrap.querySelector(".g_id_signin");
-  if (!btn) {
-    btn = document.createElement("div");
-    btn.className = "g_id_signin";
-    wrap.appendChild(btn);
+  if (!window.crossOriginIsolated) {
+    wrap.innerHTML = '<p style="text-align:center;color:#64748b;font-size:13px;padding:12px;">تسجيل الدخول عبر Google غير متاح حالياً. يرجى استخدام البريد الإلكتروني وكلمة المرور.</p>';
+    return;
   }
 
-  bindGoogleSignInIntent(btn);
+  detectAdBlocker().then(function(adBlocked) {
+    if (adBlocked) {
+      wrap.innerHTML = '<p style="text-align:center;color:#ef4444;font-size:13px;padding:12px;">يبدو أن لديك مانع إعلانات مفعّل. يرجى تعطيله للمتابعة باستخدام تسجيل الدخول عبر Google.</p>';
+      return;
+    }
+    if (!window.google || !google.accounts || !google.accounts.id) {
+      setTimeout(initGoogleSignIn, 300);
+      return;
+    }
 
-  google.accounts.id.renderButton(btn, {
-    theme: "outline",
-    size: "large",
-    text: "continue_with",
-    shape: "rectangular",
-    logo_alignment: "left",
+    const GOOGLE_CLIENT_ID = getGoogleClientId();
+    if (!GOOGLE_CLIENT_ID) {
+      console.warn("Missing Google client ID. Set window.__Buda_GOOGLE_CLIENT_ID.");
+      return;
+    }
+
+    if (!window.__Buda_GOOGLE_INIT_DONE) {
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: TFA,
+      });
+      window.__Buda_GOOGLE_INIT_DONE = true;
+    }
+
+    let btn = wrap.querySelector(".g_id_signin");
+    if (!btn) {
+      btn = document.createElement("div");
+      btn.className = "g_id_signin";
+      wrap.appendChild(btn);
+    }
+
+    bindGoogleSignInIntent(btn);
+
+    google.accounts.id.renderButton(btn, {
+      theme: "outline",
+      size: "large",
+      text: "continue_with",
+      shape: "rectangular",
+      logo_alignment: "left",
+    });
   });
 }
 
