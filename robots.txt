@@ -29,6 +29,7 @@ Allow: /api/merchant-feed/feed.xml
 Sitemap: https://buda-rho.vercel.app/api/merchant-feed/feed.xml
 
 Sitemap: https://buda-rho.vercel.app/sitemap.xml
+Sitemap: https://buda-rho.vercel.app/sitemap-products.xml
 
 # Buda - SEO Optimized
 # Last updated: 2026-07-19
