@@ -593,6 +593,29 @@
 .buda-pulse-dot.is-loaded {
   opacity: 0;
   transform: translate(-50%, -50%) scale(0.4);
+  pointer-events: none;
+}
+
+/* Product image loading state — prevent white flash */
+.noon-product-media img {
+  background: #f1f5f9;
+  transition: opacity 0.3s ease;
+}
+
+.noon-product-media img:not([src*="data:image/gif"]) {
+  opacity: 0;
+}
+
+.noon-product-media img.loaded {
+  opacity: 1;
+  background: none;
+}
+
+/* Pulse dot keeps spinning until image renders */
+.noon-product-media.has-image .buda-pulse-dot {
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(0.4);
+  pointer-events: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

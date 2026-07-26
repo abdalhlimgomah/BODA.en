@@ -358,13 +358,19 @@
         <script>
         document.addEventListener("load", function(e) {
           if (e.target.tagName === "IMG") {
+            e.target.classList.add("loaded");
             var card = e.target.closest(".noon-product-media");
-            if (card) {
-              var dot = card.querySelector(".buda-pulse-dot");
-              if (dot) dot.classList.add("is-loaded");
-            }
+            if (card) card.classList.add("has-image");
           }
         }, true);
+        var imgs = document.querySelectorAll(".noon-product-media img");
+        for (var i = 0; i < imgs.length; i++) {
+          if (imgs[i].complete && imgs[i].naturalWidth > 0) {
+            imgs[i].classList.add("loaded");
+            var c = imgs[i].closest(".noon-product-media");
+            if (c) c.classList.add("has-image");
+          }
+        }
         </script>
         <script>
         (function() {

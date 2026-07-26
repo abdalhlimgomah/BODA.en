@@ -339,3 +339,23 @@ window.showSkeleton = function (sectionId) {
 window.hideSkeleton = function (sectionId) {
   return window.skeletonLoader.hideSectionSkeleton(sectionId);
 };
+
+// Pulse dot handler — hide dot when image loads, prevent white flash
+document.addEventListener("load", function(e) {
+  if (e.target.tagName === "IMG") {
+    e.target.classList.add("loaded");
+    var card = e.target.closest(".noon-product-media");
+    if (card) card.classList.add("has-image");
+  }
+}, true);
+
+(function initLoadedImages() {
+  var imgs = document.querySelectorAll(".noon-product-media img");
+  for (var i = 0; i < imgs.length; i++) {
+    if (imgs[i].complete && imgs[i].naturalWidth > 0) {
+      imgs[i].classList.add("loaded");
+      var c = imgs[i].closest(".noon-product-media");
+      if (c) c.classList.add("has-image");
+    }
+  }
+})();

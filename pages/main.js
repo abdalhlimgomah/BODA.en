@@ -264,6 +264,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         '<button class="icon-btn noon-wishlist-btn' + (isWishlisted ? ' is-active' : '') + '" data-wishlist="' + id + '" aria-label="إضافة إلى المفضلة" aria-pressed="' + (isWishlisted ? 'true' : 'false') + '">' +
         '<span class="material-icons-outlined" style="font-size:18px;">' + (isWishlisted ? 'favorite' : 'favorite_border') + '</span></button>' +
         '<button class="noon-product-media" data-view="' + id + '" aria-label="عرض المنتج">' +
+        '<div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div>' +
         '<img src="' + imgSrc + '" alt="' + escapeHtml(product.name || 'منتج') + '"' + loadAttr + ' onerror="this.onerror=null;this.src=\'' + fallbackImage + '\'" /></button>' +
         '<button class="noon-add-square" data-add="' + id + '" aria-label="إضافة إلى السلة">+</button>' +
         '</div>' +
