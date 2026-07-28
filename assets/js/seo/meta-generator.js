@@ -8,7 +8,7 @@
     opts = opts || {};
     var siteName = "Buda";
     var title = opts.title || siteName;
-    var description = opts.description || "Buda هي منصة تجارة إلكترونية متعددة البائعين تجمع علامات تجارية ومتاجر مختلفة في مكان واحد.";
+    var description = opts.description || "BudoQ هي منصة تجارة إلكترونية متعددة البائعين تجمع علامات تجارية ومتاجر مختلفة في مكان واحد.";
     var url = opts.url || window.location.href;
     var image = opts.image || U.getFullUrl("assets/icons/apple-touch-icon.png");
     var type = opts.type || "website";
@@ -16,7 +16,7 @@
 
     U.setTitle(title);
     U.updateMetaTag("description", description);
-    U.updateMetaTag("keywords", opts.keywords || "تسوق, متجر, إلكترونيات, موضة, عطور, Buda");
+    U.updateMetaTag("keywords", opts.keywords || "تسوق, متجر, إلكترونيات, موضة, عطور, BudoQ");
 
     U.updateMetaTag("og:title", title, "og:title");
     U.updateMetaTag("og:description", description, "og:description");
@@ -45,9 +45,9 @@
 
   MetaGenerator.forHomePage = function () {
     MetaGenerator.applyDefaults({
-      title: "Buda - منصة التجارة الإلكترونية المتعددة | تسوق آمن وسهل",
-      description: "Buda هي منصة تجارة إلكترونية متعددة البائعين. تسوق آلاف المنتجات من علامات تجارية ومتاجر مختلفة في مكان واحد. أفضل الأسعار، عروض حصرية، وتوصيل سريع.",
-      keywords: "تسوق, متجر إلكتروني, Buda, تسوق أونلاين, عروض, تخفيضات, مصر, السعودية",
+      title: "BudoQ - منصة التجارة الإلكترونية المتعددة | تسوق آمن وسهل",
+      description: "BudoQ هي منصة تجارة إلكترونية متعددة البائعين. تسوق آلاف المنتجات من علامات تجارية ومتاجر مختلفة في مكان واحد. أفضل الأسعار، عروض حصرية، وتوصيل سريع.",
+      keywords: "تسوق, متجر إلكتروني, BudoQ, تسوق أونلاين, عروض, تخفيضات, مصر, السعودية",
       type: "website",
       url: U.getSiteUrl() + "/",
     });
@@ -65,7 +65,7 @@
 
     var title = name;
     if (brand) title = name + " | " + brand;
-    title += " | اشتري بأفضل سعر | Buda";
+    title += " | اشتري بأفضل سعر | BudoQ";
 
     var metaDesc = name;
     if (brand) metaDesc += " " + brand;
@@ -83,7 +83,7 @@
     MetaGenerator.applyDefaults({
       title: U.truncate(title, 70),
       description: U.truncate(metaDesc, 160),
-      keywords: [name, brand, category, "تسوق", "شراء", "Buda"].filter(Boolean).join(", "),
+      keywords: [name, brand, category, "تسوق", "شراء", "BudoQ"].filter(Boolean).join(", "),
       url: U.getFullUrl("pages/product.html?id=" + encodeURIComponent(id)),
       image: imgUrl || undefined,
       type: "product",
@@ -93,12 +93,12 @@
   MetaGenerator.forCategoryPage = function (category) {
     if (!category) return;
     var name = category.name || category.slug || "قسم";
-    var desc = category.description || "تسوق أفضل منتجات " + name + " في Buda. تشكيلة واسعة من المنتجات الأصلية بأسعار تنافسية.";
+    var desc = category.description || "تسوق أفضل منتجات " + name + " في BudoQ. تشكيلة واسعة من المنتجات الأصلية بأسعار تنافسية.";
 
     MetaGenerator.applyDefaults({
-      title: name + " | تسوق بأفضل الأسعار | Buda",
+      title: name + " | تسوق بأفضل الأسعار | BudoQ",
       description: U.truncate(desc, 160),
-      keywords: [name, "تسوق", "منتجات", "Buda", "عروض"].join(", "),
+      keywords: [name, "تسوق", "منتجات", "BudoQ", "عروض"].join(", "),
       url: U.getFullUrl("pages/category-landing.html?cat=" + encodeURIComponent(category.slug || category.id || "")),
       type: "website",
     });
@@ -107,12 +107,12 @@
   MetaGenerator.forBrandPage = function (brand) {
     if (!brand) return;
     var name = brand.name || brand.slug || "براند";
-    var desc = brand.description || "تسوق جميع منتجات " + name + " الأصلية في Buda. أفضل العروض والأسعار.";
+    var desc = brand.description || "تسوق جميع منتجات " + name + " الأصلية في BudoQ. أفضل العروض والأسعار.";
 
     MetaGenerator.applyDefaults({
-      title: name + " | جميع المنتجات الأصلية | Buda",
+      title: name + " | جميع المنتجات الأصلية | BudoQ",
       description: U.truncate(desc, 160),
-      keywords: [name, "براند", "منتجات أصلية", "Buda"].join(", "),
+      keywords: [name, "براند", "منتجات أصلية", "BudoQ"].join(", "),
       url: U.getFullUrl("pages/brand-landing.html?brand=" + encodeURIComponent(brand.slug || brand.id || "")),
       type: "website",
     });
@@ -121,12 +121,12 @@
   MetaGenerator.forSectionPage = function (section) {
     if (!section) return;
     var title = section.title || "قسم";
-    var desc = section.description || "تصفح " + title + " في Buda. أفضل المنتجات بأسعار مميزة.";
+    var desc = section.description || "تصفح " + title + " في BudoQ. أفضل المنتجات بأسعار مميزة.";
 
     MetaGenerator.applyDefaults({
-      title: title + " | Buda",
+      title: title + " | BudoQ",
       description: U.truncate(desc, 160),
-      keywords: [title, "Buda"].join(", "),
+      keywords: [title, "BudoQ"].join(", "),
       type: "website",
     });
   };
@@ -137,9 +137,9 @@
     var desc = article.description || article.excerpt || "";
 
     MetaGenerator.applyDefaults({
-      title: title + " | مدونة Buda",
+      title: title + " | مدونة BudoQ",
       description: U.truncate(desc || title, 160),
-      keywords: [title, "مدونة", "مقال", "Buda", "تسوق"].join(", "),
+      keywords: [title, "مدونة", "مقال", "BudoQ", "تسوق"].join(", "),
       url: article.url || undefined,
       image: article.image || undefined,
       type: "article",

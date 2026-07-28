@@ -11,7 +11,7 @@
   function render(root, vm, actions) {
     var s = vm.seller;
     var nameEl = U.qs(".pdp-seller-name", root);
-    if (nameEl) nameEl.innerHTML = '<span class="pdp-seller-name-text">' + U.escapeHtml(s.name) + '</span>' + (s.isOfficial ? '<span class="material-icons-outlined" title="متجر رسمي">verified</span>' : "") + (s.yearsWithBuda > 0 ? '<span class="pdp-seller-badge">' + s.yearsWithBuda + ' سنوات مع Buda</span>' : "");
+    if (nameEl) nameEl.innerHTML = '<span class="pdp-seller-name-text">' + U.escapeHtml(s.name) + '</span>' + (s.isOfficial ? '<span class="material-icons-outlined" title="متجر رسمي">verified</span>' : "") + (s.yearsWithBuda > 0 ? '<span class="pdp-seller-badge">' + s.yearsWithBuda + ' سنوات مع BudoQ</span>' : "");
 
     var statsEl = U.qs(".pdp-seller-stats", root);
     if (statsEl) {

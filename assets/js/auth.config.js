@@ -1,6 +1,6 @@
 // Central auth config to avoid mismatched client IDs across pages.
 window.__Buda_GOOGLE_CLIENT_ID =
-  "593904075909-i91gvs8n2lsloq8dn4bjtmbgmv9tg7kk.apps.googleusercontent.com";
+  "768837122951-kk6i57qs3hkpjnvavhfes0h51j774q3s.apps.googleusercontent.com";
 
 // Taager API configuration
 // Verified working API: merchant.api.taager.com/api

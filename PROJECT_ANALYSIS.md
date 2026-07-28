@@ -1,4 +1,4 @@
-# 📦 مشروع Buda - تحليل كامل (Full Project Analysis)
+# 📦 مشروع BudoQ - تحليل كامل (Full Project Analysis)
 
 > **التاريخ:** 2025-07-11  
 > **المسار:** `C:\Users\BODa\Documents\Date bsnas Home BODA\موقع الخاص بك`  

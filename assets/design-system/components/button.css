@@ -135,7 +135,7 @@
 
 /* Ghost Button */
 .buda-btn-ghost {
-  background: transparent;
+      background: #040101;
   color: var(--color-text-secondary);
 }
 .buda-btn-ghost:hover {
@@ -168,7 +168,6 @@
   block-size: var(--btn-size-icon, var(--space-40)); /* closest to 44px via tokens, fallback var */
   inline-size: var(--btn-size-icon, var(--space-40));
   padding: 0;
-  border-radius: var(--radius-circle);
 }
 
 /* FAB Button (56px Circle + Shadow) */

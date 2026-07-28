@@ -38,14 +38,14 @@
       if (searchQuery) {
         global.MetaGenerator.forStaticPage({
           title: "بحث: " + searchQuery + " | Buda",
-          description: "نتائج البحث عن " + searchQuery + " في Buda. تصفح المنتجات المتاحة.",
+          description: "نتائج البحث عن " + searchQuery + " في oQ. تصفح المنتجات المتاحة.",
           keywords: searchQuery + ", بحث, Buda",
           noindex: true,
         });
       } else {
         global.MetaGenerator.forStaticPage({
-          title: "بحث - Buda",
-          description: "ابحث عن منتجاتك المفضلة في Buda. آلاف المنتجات من علامات تجارية مختلفة.",
+          title: "بحث - BudoQ",
+          description: "ابحث عن منتجاتك المفضلة في BudoQ. آلاف المنتجات من علامات تجارية مختلفة.",
         });
       }
       return;

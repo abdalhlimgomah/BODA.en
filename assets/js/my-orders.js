@@ -264,7 +264,7 @@ function renderOrdersEmptyState() {
     <article class="my-order-empty">
       <h3>لا توجد طلبات حتى الآن</h3>
       <p>ابدأ الشراء الآن، وبعد إتمام الطلب ستظهر التفاصيل هنا.</p>
-      <a class="btn-primary" href="products.html">تصفح المنتجات</a>
+      <a class="btn-primary" href="sections.html">تصفح المنتجات</a>
     </article>
   `;
 }
@@ -274,7 +274,6 @@ function renderFilterEmptyState() {
     <article class="my-order-filter-empty">
       <h3>لا توجد نتائج مطابقة</h3>
       <p>غيّر نص البحث أو اختر فترة زمنية مختلفة.</p>
-      <button type="button" class="btn-secondary" data-clear-order-filters>عرض كل الطلبات</button>
     </article>
   `;
 }

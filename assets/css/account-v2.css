@@ -277,3 +277,244 @@
   .acc-v2-skeleton-profile { width: 320px; flex-direction: column; }
   .acc-v2-skeleton-main { flex: 1; }
 }
+
+/* ===== Buda Rewards & Contest Entry ===== */
+.buda-rewards-entry {
+  border-radius: 16px;
+  overflow: hidden;
+  position: relative;
+  contain: layout style;
+}
+
+.buda-rewards-bg {
+  overflow: hidden;
+  border-radius: var(--radius-xl);
+  text-align: center;
+}
+
+.buda-rewards-img {
+  display: block;
+  width: 100%;
+  margin: 0 auto;
+  cursor: pointer;
+  border-radius: var(--radius-xl);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 30px rgb(237 226 255);
+}
+.buda-rewards-img:hover {
+  transform: scale(1.03);
+  box-shadow: 0 12px 40px rgba(109,40,217,0.4);
+}
+
+.buda-rewards-decor {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.buda-rewards-decor .material-icons-outlined {
+  position: absolute;
+  color: rgba(255, 255, 255, 0.12);
+  font-size: 24px;
+}
+.buda-rewards-decor .rd-s1 { top: 8%; right: 8%; font-size: 22px; transform: rotate(-15deg); }
+.buda-rewards-decor .rd-s2 { top: 18%; left: 12%; font-size: 14px; transform: rotate(25deg); }
+.buda-rewards-decor .rd-s3 { bottom: 35%; right: 4%; font-size: 16px; transform: rotate(10deg); }
+.buda-rewards-decor .rd-s4 { bottom: 12%; left: 8%; font-size: 12px; transform: rotate(-20deg); }
+.buda-rewards-decor .rd-s5 { top: 42%; right: 32%; font-size: 10px; transform: rotate(45deg); }
+
+.buda-rewards-body {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.buda-rewards-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.buda-rewards-icon-wrap {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  backdrop-filter: blur(4px);
+}
+.buda-rewards-icon-wrap .material-icons-outlined {
+  font-size: 24px;
+  color: #fff;
+}
+
+.buda-rewards-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+}
+.buda-rewards-subtitle {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.82);
+  margin: 2px 0 0;
+  line-height: 1.4;
+}
+
+.buda-rewards-prizes {
+  display: flex;
+  gap: 8px;
+}
+.buda-rewards-prize {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  padding: 12px 8px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  backdrop-filter: blur(4px);
+  transition: background 0.2s;
+}
+.buda-rewards-prize:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.buda-rewards-prize-icon {
+  font-size: 20px;
+}
+.buda-rewards-prize-icon.gold { color: #FCD34D; }
+.buda-rewards-prize-icon.silver { color: #E2E8F0; }
+.buda-rewards-prize-icon.bronze { color: #D4A574; }
+
+.buda-rewards-prize-label {
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 600;
+}
+.buda-rewards-prize-value {
+  font-size: 0.85rem;
+  color: #fff;
+  font-weight: 800;
+}
+
+.buda-rewards-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: #fff;
+  color: #6D28D9;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  border: none;
+  font-family: inherit;
+}
+.buda-rewards-cta:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.18);
+}
+.buda-rewards-cta:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+.buda-rewards-cta .cta-arrow {
+  font-size: 20px;
+  transition: transform 0.2s;
+}
+.buda-rewards-cta:hover .cta-arrow {
+  transform: translateX(4px);
+}
+
+/* --- Rewards: Responsive --- */
+@media (max-width: 600px) {
+  .buda-rewards-bg {
+    padding: 0px 16px;
+  }
+  .buda-rewards-header {
+    gap: 10px;
+  }
+  .buda-rewards-icon-wrap {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+  }
+  .buda-rewards-icon-wrap .material-icons-outlined {
+    font-size: 20px;
+  }
+  .buda-rewards-title {
+    font-size: 1rem;
+  }
+  .buda-rewards-subtitle {
+    font-size: 0.75rem;
+  }
+  .buda-rewards-prizes {
+    gap: 6px;
+  }
+  .buda-rewards-prize {
+    padding: 10px 6px;
+    border-radius: 10px;
+  }
+  .buda-rewards-prize-icon {
+    font-size: 18px;
+  }
+  .buda-rewards-prize-label {
+    font-size: 0.62rem;
+  }
+  .buda-rewards-prize-value {
+    font-size: 0.78rem;
+  }
+  .buda-rewards-cta {
+    padding: 12px 20px;
+    font-size: 0.85rem;
+    border-radius: 10px;
+  }
+}
+
+@media (max-width: 390px) {
+  .buda-rewards-prizes {
+    flex-direction: column;
+    gap: 6px;
+  }
+  .buda-rewards-prize {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 10px 14px;
+  }
+  .buda-rewards-prize-icon {
+    font-size: 18px;
+  }
+}
+
+/* --- Desktop: keep natural width inside main content --- */
+@media (min-width: 1024px) {
+  .buda-rewards-bg {
+    padding: 28px 28px 24px;
+  }
+  .buda-rewards-prizes {
+    gap: 12px;
+  }
+  .buda-rewards-prize {
+    padding: 14px 12px;
+  }
+  .buda-rewards-prize-icon {
+    font-size: 22px;
+  }
+  .buda-rewards-cta {
+    padding: 16px 28px;
+    font-size: 1rem;
+  }
+}

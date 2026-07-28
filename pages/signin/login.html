@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>تسجيل الدخول - Buda</title>
+  <title>تسجيل الدخول - BudoQ</title>
   <link rel="stylesheet" href="../../assets/vendor/fontawesome/css/all.min.css" />
   <link href="../../assets/fonts/cairo.css" rel="stylesheet" />
   <link href="../../assets/fonts/inter.css" rel="stylesheet" />
@@ -18,7 +18,7 @@
 <link rel="icon" type="image/png" sizes="64x64" href="../../assets/icons/favicon-64x64.png">
 <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="../../assets/icons/site.webmanifest">
-<meta name="theme-color" content="#FFD500">
+  <meta name="theme-color" content="#FFD500">
   <meta property="og:image" content="https://buda-rho.vercel.app/assets/images/og-image.png" />
   <meta name="twitter:image" content="https://buda-rho.vercel.app/assets/images/og-image.png" />
 </head>
@@ -27,7 +27,7 @@
     <div class="auth-card">
       <a class="auth-brand" href="../home.html">
         <span class="material-icons-outlined"></span>
-        Buda
+        BudoQ
       </a>
       <h1 class="auth-title">تسجيل الدخول</h1>
       <p class="auth-subtitle">أدخل بياناتك للوصول إلى حسابك وطلباتك.</p>
@@ -59,7 +59,12 @@
         لا تملك حسابًا؟ <a href="../signup/index.html">إنشاء حساب</a>
       </div>
 
-      <div class="google-wrap" id="google-button-wrap"></div>
+      <div class="google-wrap">
+        <button id="google-signin-btn" class="google-btn" onclick="startGoogleOAuth()">
+          <svg width="20" height="20" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59A14.5 14.5 0 0 1 9.5 24c0-1.59.28-3.14.76-4.59l-7.98-6.19A23.99 23.99 0 0 0 0 24c0 3.77.87 7.35 2.56 10.56l7.97-5.97z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 5.97C6.51 42.62 14.62 48 24 48z"/></svg>
+          <span>Google</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -69,7 +74,5 @@
   <script src="../../assets/js/security-utils.js"></script>
   <script src="../../assets/js/auth.config.js"></script>
   <script src="signin.js"></script>
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
 </body>
 </html>

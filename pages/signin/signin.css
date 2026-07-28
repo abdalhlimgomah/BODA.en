@@ -149,3 +149,25 @@ body {
 .google-wrap {
   margin-top: 14px;
 }
+
+.google-btn {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid #d9e2ec;
+  border-radius: 12px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #334155;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+
+.google-btn:hover {
+  background: #f7f8fb;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}

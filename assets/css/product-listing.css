@@ -276,10 +276,7 @@
 }
 
 #plSortSelect {
-  padding: var(--gap-text);
-  border: var(--border-width-thin) solid var(--color-border);
   border-radius: var(--radius-xs);
-  background: var(--color-surface);
   font-size: var(--text-body-sm);
   outline: none;
   cursor: pointer;

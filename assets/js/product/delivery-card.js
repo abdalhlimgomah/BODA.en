@@ -48,9 +48,9 @@
       var items = [
         { icon: "local_shipping", label: vm.badges.freeShipping ? "توصيل مجاني" : "توصيل سريع" },
         { icon: "verified", label: "ضمان لمدة عام" },
-        { icon: "published_with_changes", label: "إرجاع مجاني 13 يوم" },
+        { icon: "published_with_changes", label: "إرجاع مجاني 14 يوم" },
         { icon: "lock", label: "مدفوعات آمنة" },
-        { icon: "storefront", label: "استلام من نقاط Buda" },
+        { icon: "storefront", label: "استلام من نقاط BudoQ" },
       ];
       trustEl.innerHTML = items.map(function (it) {
         return '<div class="pdp-trust-item"><span class="material-icons-outlined">' + it.icon + "</span><span>" + it.label + "</span></div>";

@@ -241,7 +241,7 @@ serve(async (req) => {
       let fallbackUsed = false;
       let sentOk = false;
 
-      const whatsappBody = `متجر Buda\nرمز التحقق الخاص بك هو: ${otp}\nصالح لمدة 5 دقائق.\nلا تشارك هذا الرمز مع أي شخص.`;
+      const whatsappBody = `متجر BudoQ\nرمز التحقق الخاص بك هو: ${otp}\nصالح لمدة 5 دقائق.\nلا تشارك هذا الرمز مع أي شخص.`;
       const smsBody = `Your verification code is ${otp}. Valid for 5 minutes. Never share this code.`;
 
       // Log request

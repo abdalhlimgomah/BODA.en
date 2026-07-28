@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مقارنة - Buda</title>
+  <title>مقارنة - BudoQ</title>
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="">
   <meta property="og:locale" content="ar_AR">
@@ -84,13 +84,13 @@
         if (contentEl) contentEl.innerHTML = comparison.content_html || comparison.content || '';
         KnowledgeCenter.renderLandingFAQ(comparison, 'comparison-faq');
 
-        document.title = (comparison.meta_title || comparison.title) + ' | مقارنة | Buda';
+        document.title = (comparison.meta_title || comparison.title) + ' | مقارنة | BudoQ';
         var canon = document.querySelector('link[rel="canonical"]');
         if (canon) canon.href = window.location.href;
 
         if (window.MetaGenerator) {
           MetaGenerator.forStaticPage({
-            title: comparison.meta_title || comparison.title + ' | مقارنة | Buda',
+            title: comparison.meta_title || comparison.title + ' | مقارنة | BudoQ',
             description: comparison.meta_description || comparison.subtitle || '',
             image: comparison.image || '',
           });

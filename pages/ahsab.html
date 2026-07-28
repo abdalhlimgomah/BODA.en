@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>حسابي - Buda</title>
+  <title>حسابي - BudoQ</title>
   <link href="../assets/fonts/cairo.css" rel="stylesheet" />
   <link href="../assets/fonts/inter.css" rel="stylesheet" />
   <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
@@ -11,7 +11,7 @@
   <link href="../assets/css/noon-shell.css" rel="stylesheet" />
   <link href="../assets/css/noon-components.css" rel="stylesheet" />
   <link href="../assets/css/home.css?v=20260711a" rel="stylesheet" />
-  <link href="../assets/css/account-v2.css?v=20260725" rel="stylesheet" />
+  <link href="../assets/css/account-v2.css?v=20260725b" rel="stylesheet" />
   <link href="../assets/css/skeleton.css?v=20260701" rel="stylesheet" />
   <link href="../assets/css/desktop.css?v=20260709" rel="stylesheet" media="only screen and (min-width: 768px)" />
   <link href="../assets/css/desktop-animations.css?v=20260709" rel="stylesheet" media="only screen and (min-width: 768px)" />
@@ -419,7 +419,7 @@
       width: 68px !important;
       height: 68px !important;
       border-radius: 50% !important;
-      background: linear-gradient(269deg, #b98dff 0%, #311758 100%) !important;
+      background: linear-gradient(182deg, #ffffff 0%, #c4c4c4 100%) !important;
       color: #000000 !important;
       font-weight: 800 !important;
       display: flex !important;
@@ -940,7 +940,7 @@
             إنشاء حساب جديد
           </a>
         </div>
-        <p style="margin:16px 0 0;font-size:0.78rem;color:var(--color-text-muted,#9ca3af);text-align:center;">بالتسجيل أنت توافق على <a href="privacy.html" style="color:#6D28D9;text-decoration:underline;">سياسة الخصوصية</a> و <a href="terms.html" style="color:#6D28D9;text-decoration:underline;">شروط الاستخدام</a></p>
+        <p style="margin:16px 0 0;font-size:0.78rem;color:var(--color-text-muted,#9ca3af);text-align:center;">بالتسجيل أنت توافق على <a href="privacy.html" style="color:#6D28D9;text-decoration:underline;">سياسة الخصوصية</a> 
       </div>
     </section>
 
@@ -1012,6 +1012,15 @@
           </a>
         </div>
 
+        <!-- Rewards & Contest Entry -->
+        <div class="buda-rewards-entry">
+          <div class="buda-rewards-bg">
+            <a href="contest.html" class="buda-rewards-img-link">
+              <img src="\assets\images\categories\mosabcka.png" alt="المسابقات والجوائز" class="buda-rewards-img" onerror="this.style.display='none'" />
+            </a>
+          </div>
+        </div>
+
         <!-- Navigation List -->
         <div class="acc-v2-card">
           <h3 class="acc-v2-card-title">إدارة الحساب</h3>
@@ -1035,6 +1044,20 @@
         <div class="acc-v2-card acc-v2-danger-zone">
           <a href="delete-account.html" class="acc-v2-nav-item danger"><span class="acc-v2-nav-icon material-icons-outlined">delete_outline</span><span>حذف الحساب</span><span class="material-icons-outlined">chevron_left</span></a>
           <button id="sign-out-link" type="button" class="acc-v2-nav-item danger"><span class="acc-v2-nav-icon material-icons-outlined">logout</span><span>تسجيل الخروج</span><span class="material-icons-outlined">chevron_left</span></button>
+        </div>
+
+        <!-- Contest Messages -->
+        <div id="contestMessagesSection" class="acc-v2-card hidden">
+          <h3 class="acc-v2-card-title" style="display:flex;align-items:center;gap:8px;">
+            <span class="material-icons-outlined" style="font-size:20px;color:#6D28D9;">emoji_events</span>
+            جوائزي ورسائلي
+          </h3>
+          <div id="accountContestMessages" class="acc-v2-nav-group">
+            <div class="contest-empty-state" style="text-align:center;padding:20px;color:#64748b;">
+              <span class="material-icons-outlined" style="font-size:36px;color:#cbd5e1;display:block;margin-bottom:8px;">mail_outline</span>
+              <p style="margin:0;font-size:0.85rem;">لا توجد رسائل جديدة</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1170,6 +1193,68 @@
   <script src="../assets/js/pricing-engine.js"></script>
   <script src="../assets/js/cart.js?v=20260710"></script>
   <script src="../assets/js/home.js?v=20260711"></script>
+  <script>
+    /* Load contest messages for account page */
+    document.addEventListener("DOMContentLoaded", function() {
+      var isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+      if (!isLoggedIn) return;
+
+      var user = null;
+      try { user = JSON.parse(localStorage.getItem("currentUser")); } catch(e) {}
+      var userId = user && user.id ? String(user.id) : null;
+      var email = localStorage.getItem("userEmail");
+
+      if (!userId && !email) return;
+
+      var msgSection = document.getElementById("contestMessagesSection");
+      var msgContainer = document.getElementById("accountContestMessages");
+      if (!msgSection || !msgContainer) return;
+
+      /* Load campaign then messages */
+      setTimeout(function() {
+        var client = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!client) return;
+
+        client.from("contest_campaigns").select("id").eq("status", "active").order("created_at", { ascending: false }).limit(1).maybeSingle()
+          .then(function(campResult) {
+            if (campResult.error || !campResult.data) return;
+            var campaignId = campResult.data.id;
+
+            return client.from("contest_messages").select("*").eq("user_id", userId).eq("campaign_id", campaignId).order("created_at", { ascending: false });
+          })
+          .then(function(msgResult) {
+            if (!msgResult || msgResult.error || !msgResult.data || msgResult.data.length === 0) return;
+
+            msgSection.classList.remove("hidden");
+            var formatDate = function(d) {
+              try { return new Date(d).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }); } catch(e) { return ''; }
+            };
+            msgContainer.innerHTML = msgResult.data.map(function(m) {
+              var unread = !m.is_read;
+              return '<div class="acc-v2-nav-item" style="flex-direction:column;align-items:flex-start;gap:2px;padding:12px 8px;' + (unread ? 'background:#f5f3ff;border-right:3px solid #6D28D9;' : '') + '">' +
+                '<span style="font-size:0.85rem;font-weight:700;color:#0f172a;">' + escapeHtml(m.title) + '</span>' +
+                '<span style="font-size:0.75rem;color:#64748b;">' + escapeHtml(m.message) + '</span>' +
+                '<span style="font-size:0.65rem;color:#94a3b8;">' + formatDate(m.created_at) + '</span>' +
+                '</div>';
+            }).join('');
+
+            if (!window.escapeHtml) {
+              window.escapeHtml = function(str) {
+                var map = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' };
+                return String(str || '').replace(/[&<>"']/g, function(m) { return map[m]; });
+              };
+            }
+            if (!window.formatDate) {
+              window.formatDate = function(d) {
+                try { return new Date(d).toLocaleDateString('ar-EG', { year: 'numeric', month: 'short', day: 'numeric' }); }
+                catch(e) { return ''; }
+              };
+            }
+          })
+          .catch(function(err) { console.error("[Account] Contest messages error:", err); });
+      }, 500);
+    });
+  </script>
   <script>
     // ===== Support Chat Drawer =====
     document.addEventListener("DOMContentLoaded", function () {

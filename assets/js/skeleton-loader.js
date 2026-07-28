@@ -344,18 +344,26 @@ window.hideSkeleton = function (sectionId) {
 document.addEventListener("load", function(e) {
   if (e.target.tagName === "IMG") {
     e.target.classList.add("loaded");
-    var card = e.target.closest(".noon-product-media");
-    if (card) card.classList.add("has-image");
+    var parent = e.target.closest(".noon-product-media, .hm-shein-card-img, .hm-shein-deal-hero-img, .hm-shein-deal-mini-img, .hm-shein-side-img, .hm-shein-hero-img, .buda-mega-product, .hm-hero-slide-img, .hm-banner-img, .pdp-gallery-slide, .pdp-bt-item-imgwrap, .pdp-bt-gallery-item");
+    if (parent) {
+      parent.classList.add("has-image");
+      var dot = parent.querySelector(".buda-pulse-dot");
+      if (dot) dot.classList.add("is-loaded");
+    }
   }
 }, true);
 
 (function initLoadedImages() {
-  var imgs = document.querySelectorAll(".noon-product-media img");
+  var imgs = document.querySelectorAll(".noon-product-media img, .hm-shein-card-img img, .hm-shein-deal-hero-img img, .hm-shein-deal-mini-img img, .hm-shein-side-img img, .hm-shein-hero-img img, .buda-mega-product img, .hm-hero-slide-img img, .hm-banner-img img, .pdp-gallery-slide img, .pdp-bt-item-imgwrap img, .pdp-bt-gallery-item img");
   for (var i = 0; i < imgs.length; i++) {
     if (imgs[i].complete && imgs[i].naturalWidth > 0) {
       imgs[i].classList.add("loaded");
-      var c = imgs[i].closest(".noon-product-media");
-      if (c) c.classList.add("has-image");
+      var parent = imgs[i].closest(".noon-product-media, .hm-shein-card-img, .hm-shein-deal-hero-img, .hm-shein-deal-mini-img, .hm-shein-side-img, .hm-shein-hero-img, .buda-mega-product, .hm-hero-slide-img, .hm-banner-img, .pdp-gallery-slide, .pdp-bt-item-imgwrap, .pdp-bt-gallery-item");
+      if (parent) {
+        parent.classList.add("has-image");
+        var dot = parent.querySelector(".buda-pulse-dot");
+        if (dot) dot.classList.add("is-loaded");
+      }
     }
   }
 })();

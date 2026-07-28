@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>دعواتي ومكافآتي - BudoQ Rewards</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/design-system/index.css" rel="stylesheet" />
+  <link href="../assets/css/contest-dashboard.css" rel="stylesheet" />
+  <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+  <meta name="theme-color" content="#6D28D9">
+  <style>html { overflow-x: clip; }</style>
+  <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+</head>
+<body>
+  <div id="rdSkeleton" class="rd-skeleton">
+    <div class="rd-skel-header"></div>
+    <div class="rd-skel-hero"></div>
+    <div class="rd-skel-card"></div>
+    <div class="rd-skel-row"><div class="rd-skel-metric"></div><div class="rd-skel-metric"></div><div class="rd-skel-metric"></div></div>
+  </div>
+
+  <div id="rdContent" class="rd-content hidden">
+
+    <header class="rd-header">
+      <div class="rd-header-inner">
+        <div class="rd-header-start">
+          <button class="buda-btn buda-btn-icon buda-btn-ghost" id="rdBackBtn" aria-label="رجوع">
+            <i data-lucide="arrow-right" class="buda-icon"></i>
+          </button>
+          <a href="../index.html" class="rd-logo" aria-label="Buda">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+              <rect width="32" height="32" rx="8" fill="#6D28D9"/>
+              <text x="16" y="22" text-anchor="middle" fill="white" font-size="18" font-weight="800" font-family="sans-serif">B</text>
+            </svg>
+            <span class="rd-logo-text">Buda</span>
+          </a>
+        </div>
+        <div class="rd-header-end">
+          <button class="buda-btn buda-btn-icon buda-btn-ghost" id="rdNotifBtn" aria-label="الإشعارات">
+            <i data-lucide="bell" class="buda-icon"></i>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="rd-container">
+
+      <!-- 1. Profile Hero -->
+      <section class="rd-profile-hero" id="rdProfileHero">
+        <div class="rd-hero-banner">
+          <img src="https://iili.io/CeSzs0G.png" alt="Buda Rewards Banner" class="rd-hero-banner-img" onerror="this.style.display='none'" />
+          <div class="rd-hero-banner-overlay"></div>
+        </div>
+        <div class="rd-profile-avatar-wrap">
+          <div class="rd-profile-avatar" id="rdAvatar">B</div>
+        </div>
+        <div class="rd-profile-info">
+          <p class="rd-profile-greeting">مرحباً بك</p>
+          <h1 class="rd-profile-name" id="rdUserName">—</h1>
+          <div class="rd-profile-email-wrap">
+            <i data-lucide="mail" class="buda-icon" style="width:16px;height:16px;color:#fff"></i>
+            <span class="rd-profile-email" id="rdUserEmail">—</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Referral Card -->
+      <section class="rd-referral-card" id="rdReferralCard">
+        <div class="rd-referral-main">
+          <div class="rd-referral-header">
+            <div class="rd-referral-icon">
+              <i data-lucide="share-2" class="buda-icon"></i>
+            </div>
+            <h2 class="rd-referral-title">رابط دعوتك الخاص</h2>
+            <p class="rd-referral-sub">شارك رابطك مع أصدقائك واربح جوائز مميزة!</p>
+          </div>
+
+          <div class="rd-referral-code-box">
+            <span class="rd-referral-code" id="rdRefCode">——</span>
+            <button class="buda-btn buda-btn-icon buda-btn-ghost" id="rdCopyCodeBtn" aria-label="نسخ الكود" style="color:#fff;flex-shrink:0;background:rgba(255,255,255,0.15)">
+              <i data-lucide="copy" class="buda-icon" style="width:18px;height:18px"></i>
+            </button>
+          </div>
+
+          <div class="rd-referral-url-box" id="rdRefUrlBox">
+            <span class="rd-referral-url" id="rdRefUrl">—</span>
+            <button class="buda-btn buda-btn-icon buda-btn-ghost" id="rdCopyUrlBtn" aria-label="نسخ الرابط" style="color:#fff;flex-shrink:0;background:rgba(255,255,255,0.1)">
+              <i data-lucide="link" class="buda-icon" style="width:18px;height:18px"></i>
+            </button>
+          </div>
+
+          <div class="rd-referral-actions">
+            <button class="buda-btn buda-btn-primary" id="rdCopyLinkBtn" style="flex:1">
+              <i data-lucide="copy" class="buda-icon"></i>
+              نسخ الرابط
+            </button>
+            <button class="buda-btn buda-btn-outline" id="rdShareBtn" style="flex:1">
+              <i data-lucide="share-2" class="buda-icon"></i>
+              مشاركة الرابط
+            </button>
+          </div>
+
+          <div class="rd-copy-feedback hidden" id="rdCopyFeedback">تم نسخ رابط الدعوة بنجاح</div>
+        </div>
+
+        <div class="rd-referral-qr">
+          <p class="rd-qr-label">شارك عبر QR Code</p>
+          <div class="rd-qr-container" id="rdQrContainer"></div>
+          <p class="rd-qr-hint" id="rdQrHint">امسح الكود للدخول إلى رابط الدعوة</p>
+        </div>
+      </section>
+
+      <!-- 3. Referral Statistics -->
+      <section class="rd-section">
+        <h2 class="rd-section-title">إحصائيات دعوتك</h2>
+        <div class="rd-stats-grid">
+          <div class="buda-card rd-stat-card">
+            <div class="rd-stat-body">
+              <span class="rd-stat-num" id="rdStatInvited">0</span>
+              <span class="rd-stat-label">إجمالي الأشخاص المدعوين</span>
+            </div>
+          </div>
+          <div class="buda-card rd-stat-card">
+            <div class="rd-stat-body">
+              <span class="rd-stat-num" id="rdStatRegistered">0</span>
+              <span class="rd-stat-label">أصدقاء تم تسجيلهم</span>
+            </div>
+          </div>
+          <div class="buda-card rd-stat-card">
+            <div class="rd-stat-body">
+              <span class="rd-stat-num" id="rdStatRate">0%</span>
+              <span class="rd-stat-label">نسبة التسجيل من الدعوات</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. Progress / Goal -->
+      <section class="rd-progress-card" id="rdProgressCard">
+        <div class="rd-progress-content">
+          <h2 class="rd-progress-title" id="rdProgressTitle">ابدأ دعوة أصدقائك!</h2>
+          <p class="rd-progress-desc" id="rdProgressDesc">ادعُ أصدقائك وسجّلوا عبر رابطك لتحقيق المكافأة</p>
+
+          <div class="rd-progress-bar-wrap">
+            <div class="rd-progress-bar">
+              <div class="rd-progress-fill" id="rdProgressFill" style="width:0%"></div>
+            </div>
+            <div class="rd-progress-text">
+              <span class="rd-progress-current" id="rdProgressCurrent">0</span>
+              <span class="rd-progress-slash">/</span>
+              <span class="rd-progress-goal">50</span>
+            </div>
+          </div>
+
+          <p class="rd-progress-target" id="rdProgressTarget">الهدف: 50 صديقاً</p>
+          <div id="rdProgressCelebration" class="rd-progress-celebration rd-hidden">
+            <i data-lucide="trophy" class="buda-icon" style="width:20px;height:20px;color:#92400e"></i>
+            مبروك! وصلت إلى الهدف 🎉
+          </div>
+          <div id="rdProgressMilestone" class="rd-progress-milestone rd-hidden">
+            <i data-lucide="zap" class="buda-icon" style="width:20px;height:20px;color:#6D28D9"></i>
+            <span id="rdMilestoneText"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Incoming Messages -->
+      <section class="rd-section" id="rdMessagesSection">
+        <h2 class="rd-section-title">رسائلي</h2>
+        <div id="rdMessagesList">
+          <div class="rd-empty">
+            <i data-lucide="mail" class="buda-icon" style="width:40px;height:40px;color:var(--color-text-muted)"></i>
+            <p>لا توجد رسائل حتى الآن</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. How Rewards Work -->
+      <section class="buda-card rd-how-card">
+        <div class="buda-card-body" style="padding:var(--pad-lg)">
+          <h2 class="rd-section-title">كيف تعمل المكافآت؟</h2>
+          <div class="rd-how-grid">
+            <div class="rd-how-step">
+              <div class="rd-how-img-wrap">
+                <img src="https://iili.io/CevCThb.jpg" alt="شارك رابطك" class="rd-how-img" onerror="this.style.display='none'" />
+              </div>
+              <h3 class="rd-how-step-title">شارك رابطك</h3>
+              <p class="rd-how-step-desc">أرسل رابط الدعوة لأصدقائك عبر الواتساب أو السوشيال ميديا.</p>
+            </div>
+            <div class="rd-how-step">
+              <div class="rd-how-img-wrap">
+                <img src="https://iili.io/CevoHWG.jpg" alt="يسجل صديقك" class="rd-how-img" onerror="this.style.display='none'" />
+              </div>
+              <h3 class="rd-how-step-title">يسجل صديقك</h3>
+              <p class="rd-how-step-desc">يقوم صديقك بالتسجيل من خلال رابطك.</p>
+            </div>
+            <div class="rd-how-step">
+              <div class="rd-how-img-wrap">
+                <img src="https://iili.io/Cevop2V.jpg" alt="احصل على المكافأة" class="rd-how-img" onerror="this.style.display='none'" />
+              </div>
+              <h3 class="rd-how-step-title">احصل على المكافأة</h3>
+              <p class="rd-how-step-desc">بعد استيفاء شروط المسابقة، تُحتسب المكافأة.</p>
+            </div>
+          </div>
+          <p class="rd-how-note">ملاحظة: يتم احتساب الدعوات والمكافآت بعد تأكيد التسجيل واستيفاء شروط المسابقة.</p>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <script src="../assets/js/contest-dashboard.js"></script>
+</body>
+</html>
