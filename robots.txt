@@ -26,10 +26,10 @@ Allow: /pages/offers.html
 Allow: /pages/offer.html
 Allow: /api/merchant-feed/feed.xml
 
-Sitemap: https://buda-rho.vercel.app/api/merchant-feed/feed.xml
+Sitemap: https://budoq.vercel.app/api/merchant-feed/feed.xml
 
-Sitemap: https://buda-rho.vercel.app/sitemap.xml
-Sitemap: https://buda-rho.vercel.app/sitemap-products.xml
+Sitemap: https://budoq.vercel.app/sitemap.xml
+Sitemap: https://budoq.vercel.app/sitemap-products.xml
 
 # BudoQ - SEO Optimized
 # Last updated: 2026-07-19

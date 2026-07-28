@@ -37,10 +37,10 @@ function ensureSiteIdentity() {
     "@type": "WebSite",
     "name": "Buda",
     "alternateName": "Buda",
-    "url": "https://buda-rho.vercel.app/",
+    "url": "https://budoq.vercel.app/",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://buda-rho.vercel.app/pages/search.html?q={search_term_string}",
+      "target": "https://budoq.vercel.app/pages/search.html?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   });
