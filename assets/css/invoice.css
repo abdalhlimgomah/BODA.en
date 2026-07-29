@@ -1,0 +1,97 @@
+:root {
+  --inv-radius: 16px;
+  --inv-accent: #6D28D9;
+  --inv-bg: #fff;
+  --inv-text: #111;
+  --inv-muted: #6B7280;
+  --inv-border: #E5E7EB;
+}
+.invoice-main {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 16px 40px;
+}
+.invoice-shell .bottom-nav { display: none !important; }
+.invoice-shell .invoice-main { padding-bottom: 40px; }
+.invoice-back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--inv-accent);
+  text-decoration: none;
+  font-weight: 600;
+  margin-bottom: 16px;
+}
+.invoice-back-link:hover { opacity: 0.8; }
+.inv-card {
+  background: var(--inv-bg);
+  border-radius: var(--inv-radius);
+  box-shadow: 0 1px 4px rgba(109,40,217,0.08);
+  overflow: hidden;
+}
+.inv-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, var(--inv-accent), #3B0A75);
+  color: #fff;
+}
+.inv-title {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+.inv-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.inv-download-btn:hover { background: rgba(255,255,255,0.25); }
+.inv-download-btn .material-icons-outlined { font-size: 18px; }
+.inv-text {
+  padding: 20px 24px;
+  margin: 0;
+  font-family: "Courier New", monospace;
+  font-size: 0.8rem;
+  line-height: 1.7;
+  color: var(--inv-text);
+  direction: ltr;
+  text-align: left;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #fafafa;
+  border-radius: 0 0 var(--inv-radius) var(--inv-radius);
+}
+.inv-empty {
+  background: var(--inv-bg);
+  border: 1px dashed var(--inv-border);
+  border-radius: var(--inv-radius);
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--inv-muted);
+}
+.inv-empty h3 { margin: 0 0 8px; color: var(--inv-text); font-size: 1rem; }
+.inv-empty p { margin: 0; font-size: 0.85rem; }
+
+body.dark-mode .invoice-main { background: transparent; }
+body.dark-mode .inv-card { background: #1e293b; box-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+body.dark-mode .inv-text { background: #0f172a; color: #e2e8f0; }
+body.dark-mode .inv-empty { background: #1e293b; border-color: #334155; }
+body.dark-mode .inv-empty h3 { color: #e2e8f0; }
+
+@media (max-width: 480px) {
+  .invoice-main { padding: 12px 12px 24px; }
+  .inv-header { flex-direction: column; gap: 12px; align-items: flex-start; }
+  .inv-text { padding: 16px; font-size: 0.72rem; }
+}
