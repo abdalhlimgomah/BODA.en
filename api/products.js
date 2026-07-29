@@ -20,7 +20,10 @@ export default async function handler(req, res) {
     });
 
     if (!response.ok) {
-      throw new Error(`Supabase error: ${response.status}`);
+      console.error("api/products: Supabase error", response.status);
+      res.setHeader("Cache-Control", "public, max-age=0, s-maxage=300, stale-while-revalidate=1800");
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      return res.status(200).json([]);
     }
 
     const data = await response.json();
@@ -32,6 +35,8 @@ export default async function handler(req, res) {
     res.status(200).json(data);
   } catch (err) {
     console.error("api/products error:", err.message);
-    res.status(502).json({ error: "Failed to fetch products" });
+    res.setHeader("Cache-Control", "public, max-age=0, s-maxage=300");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.status(200).json([]);
   }
 }
