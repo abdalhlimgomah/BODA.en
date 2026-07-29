@@ -1,0 +1,14 @@
+/* ============================================
+   Buda Design System v2.0 — Opacity Tokens
+   ============================================ */
+
+:root {
+  --opacity-disabled:  0.5;
+  --opacity-hover:     0.8;
+  --opacity-subtle:    0.12;
+  --opacity-overlay:   0.4;
+  --opacity-backdrop:  0.6;
+  --opacity-full:      1;
+  --opacity-muted:     0.6;
+  --opacity-ghost:     0.08;
+}

@@ -1,0 +1,124 @@
+/* 
+ * Buda Design System v2.0 - Dropdown Component
+ * Path: assets/design-system/components/dropdown.css
+ */
+
+.buda-dropdown {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-primary, inherit);
+}
+
+/* Trigger Button */
+.buda-dropdown__trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8, 8px);
+  padding-block: var(--space-8, 8px);
+  padding-inline: var(--space-16, 16px);
+  background-color: var(--color-surface-primary, #ffffff);
+  border: var(--border-width-sm, 1px) solid var(--color-border-subtle, #e5e7eb);
+  border-radius: var(--radius-md, 8px);
+  font-size: var(--font-size-md, 1rem);
+  color: var(--color-text-primary, #111827);
+  cursor: pointer;
+  outline: none;
+  transition: opacity var(--duration-fast, 150ms) ease;
+}
+
+.buda-dropdown__trigger:hover:not(:disabled) {
+  opacity: var(--opacity-hover, 0.8);
+}
+
+.buda-dropdown__trigger:focus-visible {
+  box-shadow: 0 0 0 var(--border-width-lg, 2px) var(--color-focus-ring, #007bff);
+}
+
+.buda-dropdown__trigger:disabled {
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+}
+
+/* Dropdown Menu (Floating) */
+.buda-dropdown__menu {
+  position: absolute;
+  top: calc(100% + var(--space-8, 8px));
+  inset-inline-start: var(--space-0, 0);
+  min-width: var(--size-dropdown-min, 200px);
+  background-color: var(--color-surface-primary, #ffffff);
+  border: var(--border-width-sm, 1px) solid var(--color-border-subtle, #e5e7eb);
+  border-radius: var(--radius-md, 8px);
+  box-shadow: var(--shadow-dropdown, 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05));
+  padding-block: var(--space-8, 8px);
+  margin: var(--space-0, 0);
+  list-style: none;
+  z-index: var(--z-index-dropdown, 100);
+  
+  /* Initial state for GPU animation */
+  opacity: 0;
+  transform: scale(0.95) translateY(calc(var(--space-8, 8px) * -1));
+  pointer-events: none;
+  transform-origin: top start;
+  transition: opacity var(--duration-fast, 150ms) ease, transform var(--duration-fast, 150ms) ease;
+}
+
+/* Open State */
+.buda-dropdown[data-state="open"] .buda-dropdown__menu {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+/* Dropdown Item */
+.buda-dropdown__item {
+  display: flex;
+  align-items: center;
+  width: var(--size-full, 100%);
+  padding-block: var(--space-8, 8px);
+  padding-inline: var(--space-16, 16px);
+  background: transparent;
+  border: none;
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-primary, #111827);
+  text-align: start;
+  cursor: pointer;
+  outline: none;
+  transition: opacity var(--duration-fast, 150ms) ease;
+}
+
+.buda-dropdown__item:hover,
+.buda-dropdown__item:focus-visible {
+  background-color: var(--color-surface-hover, #f3f4f6);
+}
+
+.buda-dropdown__item[aria-selected="true"] {
+  background-color: var(--color-primary-light, #eff6ff);
+  color: var(--color-primary, #007bff);
+  font-weight: var(--font-weight-medium, 500);
+}
+
+/* Dark Mode Adjustments */
+[data-theme="dark"] .buda-dropdown__trigger,
+[data-theme="dark"] .buda-dropdown__menu {
+  background-color: var(--color-surface-dark, #1f2937);
+  border-color: var(--color-border-dark, #374151);
+  color: var(--color-text-inverse, #f9fafb);
+}
+
+[data-theme="dark"] .buda-dropdown__item {
+  color: var(--color-text-inverse, #f9fafb);
+}
+
+[data-theme="dark"] .buda-dropdown__item:hover,
+[data-theme="dark"] .buda-dropdown__item:focus-visible {
+  background-color: var(--color-surface-dark-hover, #374151);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buda-dropdown__trigger,
+  .buda-dropdown__menu,
+  .buda-dropdown__item {
+    transition: none;
+  }
+}

@@ -1,0 +1,56 @@
+/* ============================================
+   Buda Design System v2.0 — Container & Breakpoint Tokens
+   Fluid Responsive System
+   ============================================ */
+
+:root {
+  /* ─── Breakpoints ─── */
+  --bp-mobile:   390px;
+  --bp-tablet:   768px;
+  --bp-laptop:   1280px;
+  --bp-desktop:  1440px;
+
+  /* ─── Container Max Widths ─── */
+  --container-sm:   640px;
+  --container-md:   768px;
+  --container-lg:   1024px;
+  --container-xl:   1280px;
+  --container-2xl:  1440px;
+
+  /* ─── Container Padding (responsive) ─── */
+  --container-pad:  clamp(16px, 4vw, 32px);
+
+  /* ─── Content Widths ─── */
+  --content-narrow:  640px;
+  --content-default: 1200px;
+  --content-wide:    1400px;
+
+  /* ─── Header Dimensions ─── */
+  --header-h-desktop: 84px;
+  --header-h-mobile:  72px;
+
+  /* ─── Search Dimensions ─── */
+  --search-width:  620px;
+  --search-height: 56px;
+
+  /* ─── Hero Dimensions ─── */
+  --hero-h-desktop: 430px;
+  --hero-h-tablet:  320px;
+  --hero-h-mobile:  210px;
+
+  /* ─── Product Card Image ─── */
+  --product-img-desktop: 220px;
+  --product-img-mobile:  150px;
+
+  /* ─── Product Card Width ─── */
+  --product-card-desktop: 240px;
+  --product-card-mobile:  170px;
+
+  /* ─── Icon Container ─── */
+  --icon-circle:  44px;
+  --icon-size:    22px;
+
+  /* ─── Button Height ─── */
+  --btn-height:   56px;
+  --btn-height-m: 48px;
+}
