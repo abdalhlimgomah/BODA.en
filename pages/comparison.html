@@ -3,13 +3,13 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>مقارنة - Buda</title>
+  <title>مقارنة - BudoQ</title>
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="">
   <meta property="og:locale" content="ar_AR">
   <meta name="twitter:card" content="summary_large_image">
-  <meta property="og:image" content="https://buda-rho.vercel.app/assets/images/og-image.png" />
-  <meta name="twitter:image" content="https://buda-rho.vercel.app/assets/images/og-image.png" />
+  <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
   <link rel="icon" type="image/png" href="../assets/icons/favicon.png">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
   <link rel="stylesheet" href="../assets/css/blog.css">
@@ -84,13 +84,13 @@
         if (contentEl) contentEl.innerHTML = comparison.content_html || comparison.content || '';
         KnowledgeCenter.renderLandingFAQ(comparison, 'comparison-faq');
 
-        document.title = (comparison.meta_title || comparison.title) + ' | مقارنة | Buda';
+        document.title = (comparison.meta_title || comparison.title) + ' | مقارنة | BudoQ';
         var canon = document.querySelector('link[rel="canonical"]');
         if (canon) canon.href = window.location.href;
 
         if (window.MetaGenerator) {
           MetaGenerator.forStaticPage({
-            title: comparison.meta_title || comparison.title + ' | مقارنة | Buda',
+            title: comparison.meta_title || comparison.title + ' | مقارنة | BudoQ',
             description: comparison.meta_description || comparison.subtitle || '',
             image: comparison.image || '',
           });

@@ -3,10 +3,7 @@ function getConfig(key) {
 }
 
 function getGoogleClientId() {
-  const fromWindow = window.__Buda_GOOGLE_CLIENT_ID || window.Buda_GOOGLE_CLIENT_ID;
-  if (fromWindow) return fromWindow;
-  const fromDom = document.getElementById("g_id_onload")?.getAttribute("data-client_id");
-  return String(fromDom || "").trim();
+  return window.__Buda_GOOGLE_CLIENT_ID || window.Buda_GOOGLE_CLIENT_ID || "";
 }
 
 function getHomePath() {
@@ -30,8 +27,6 @@ const SIGNUP_SESSION_KEYS = [
   "resend_countdown",
   "resend_attempts",
 ];
-
-let googleAuthUserIntent = false;
 
 function clearLocalAuthState() {
   localStorage.removeItem("currentUser");
@@ -407,151 +402,108 @@ async function handleLogIn(event) {
   }
 }
 
-window.TFA = async function TFA(response) {
-  if (!googleAuthUserIntent) {
-    // Ignore implicit/automatic callbacks to avoid accidental login.
-    console.warn("Ignored Google callback without explicit user intent.");
+function startGoogleOAuth() {
+  var clientId = getGoogleClientId();
+  if (!clientId) {
+    authNotify("تسجيل الدخول عبر Google غير متاح حالياً.");
     return;
   }
-  googleAuthUserIntent = false;
 
-  let decodedToken = null;
+  var redirectUri = window.location.origin + "/pages/signin/login.html";
+  var scope = "openid email profile";
+  var state = Math.random().toString(36).slice(2, 15);
+
+  var authUrl = "https://accounts.google.com/o/oauth2/v2/auth?" +
+    "client_id=" + encodeURIComponent(clientId) +
+    "&redirect_uri=" + encodeURIComponent(redirectUri) +
+    "&response_type=code" +
+    "&scope=" + encodeURIComponent(scope) +
+    "&state=" + encodeURIComponent(state);
+
+  window.location.href = authUrl;
+}
+
+async function handleGoogleCallback() {
+  var params = new URLSearchParams(window.location.search);
+  var code = params.get("code");
+  if (!code) return;
+
+  var edgeUrl = window.TAAGER_EDGE_FUNCTION_URL
+    ? window.TAAGER_EDGE_FUNCTION_URL.replace("taager-proxy", "google-oauth")
+    : "https://msgqzgzoslearaprgiqq.supabase.co/functions/v1/google-oauth";
+
+  var redirectUri = window.location.origin + "/pages/signin/login.html";
+
   try {
-    decodedToken = jwt_decode(response?.credential || "");
-  } catch (error) {
-    console.error("google decode error", error);
-    authNotify("تعذر التحقق من تسجيل الدخول عبر Google.");
-    return;
-  }
+    var response = await fetch(edgeUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code: code, redirect_uri: redirectUri }),
+    });
 
-  const email = normalizeEmail(decodedToken?.email);
-  const name = String(decodedToken?.name || "مستخدم Google").trim() || "مستخدم Google";
-  if (!isValidEmail(email)) {
-    authNotify("تعذر قراءة البريد الإلكتروني من Google.");
-    return;
-  }
-
-  const googleUser = {
-    id: `google_${decodedToken.sub}`,
-    email,
-    name,
-    provider: "google",
-    loginTime: new Date().toISOString(),
-  };
-
-  localStorage.setItem("currentUser", JSON.stringify(googleUser));
-  localStorage.setItem("isLoggedIn", "true");
-  localStorage.setItem("userEmail", email);
-  localStorage.setItem("userFullName", name);
-
-  // Load user's saved country from profile for Google login
-  try {
-    var client = getSupabaseClient();
-    var { data: profileData } = await client.from("profiles").select("country_code").eq("email", email).limit(1);
-    var profileCountry = null;
-    if (Array.isArray(profileData) && profileData.length && profileData[0].country_code) {
-      profileCountry = profileData[0].country_code;
+    var userData = await response.json();
+    if (!response.ok || !userData.email) {
+      authNotify("فشل تسجيل الدخول عبر Google.");
+      return;
     }
-    if (profileCountry && profileCountry !== "EG") {
-      localStorage.setItem("userCountry", profileCountry);
-      if (window.TaagerIntegration) {
-        var countryObj = null;
-        var countries = window.TaagerIntegration.getAvailableCountries();
-        for (var ci = 0; ci < countries.length; ci++) {
-          if (countries[ci].code === profileCountry) {
-            countryObj = countries[ci];
-            break;
+
+    var googleUser = {
+      id: "google_" + userData.id,
+      email: userData.email,
+      name: userData.name || "مستخدم Google",
+      picture: userData.picture || "",
+      provider: "google",
+      loginTime: new Date().toISOString(),
+    };
+
+    localStorage.setItem("currentUser", JSON.stringify(googleUser));
+    localStorage.setItem("isLoggedIn", "true");
+    localStorage.setItem("userEmail", userData.email);
+    localStorage.setItem("userFullName", userData.name || "مستخدم Google");
+
+    if (userData.picture) {
+      localStorage.setItem("userAvatar", userData.picture);
+    }
+
+    try {
+      var client = getSupabaseClient();
+      var { data: profileData } = await client.from("profiles").select("country_code").eq("email", userData.email).limit(1);
+      var profileCountry = null;
+      if (Array.isArray(profileData) && profileData.length && profileData[0].country_code) {
+        profileCountry = profileData[0].country_code;
+      }
+      if (profileCountry && profileCountry !== "EG") {
+        localStorage.setItem("userCountry", profileCountry);
+        if (window.TaagerIntegration) {
+          var countryObj = null;
+          var countries = window.TaagerIntegration.getAvailableCountries();
+          for (var ci = 0; ci < countries.length; ci++) {
+            if (countries[ci].code === profileCountry) {
+              countryObj = countries[ci];
+              break;
+            }
+          }
+          if (countryObj) {
+            window.TaagerIntegration.setSelectedCountry(countryObj);
           }
         }
-        if (countryObj) {
-          window.TaagerIntegration.setSelectedCountry(countryObj);
-        }
       }
-    }
-  } catch (_e) {
-    console.warn("Failed to load user country for Google login", _e);
+    } catch (_e) {}
+
+    params.delete("code");
+    params.delete("state");
+    var cleanQuery = params.toString();
+    var cleanUrl = window.location.pathname + (cleanQuery ? "?" + cleanQuery : "") + window.location.hash;
+    window.history.replaceState({}, "", cleanUrl);
+
+    authNotify("مرحبًا " + (userData.name || "مستخدم Google"), "success");
+    setTimeout(function () {
+      window.location.href = getHomePath();
+    }, 350);
+  } catch (error) {
+    console.error("Google OAuth error:", error);
+    authNotify("فشل الاتصال بخدمة Google.");
   }
-
-  authNotify(`مرحبًا ${name}`, "success");
-  setTimeout(() => {
-    window.location.href = getHomePath();
-  }, 350);
-};
-
-function bindGoogleSignInIntent(target) {
-  if (!target) return;
-
-  const markIntent = () => {
-    googleAuthUserIntent = true;
-    window.setTimeout(() => {
-      googleAuthUserIntent = false;
-    }, 60 * 1000);
-  };
-
-  target.addEventListener("pointerdown", markIntent, { passive: true });
-  target.addEventListener("click", markIntent);
-  target.addEventListener("keydown", (event) => {
-    if (event.key === "Enter" || event.key === " ") markIntent();
-  });
-}
-
-function detectAdBlocker() {
-  return new Promise((resolve) => {
-    const s = document.createElement('script');
-    s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
-    s.onload = () => resolve(false);
-    s.onerror = () => resolve(true);
-    s.type = 'text/javascript';
-    document.head.appendChild(s);
-    setTimeout(() => resolve(true), 3000);
-  });
-}
-
-function initGoogleSignIn() {
-  var wrap = document.getElementById("google-button-wrap");
-  if (!wrap) return;
-
-  detectAdBlocker().then(function(adBlocked) {
-    if (adBlocked) {
-      wrap.innerHTML = '<p style="text-align:center;color:#ef4444;font-size:13px;padding:12px;">يبدو أن لديك مانع إعلانات مفعّل. يرجى تعطيله للمتابعة باستخدام تسجيل الدخول عبر Google.</p>';
-      return;
-    }
-    if (!window.google || !google.accounts || !google.accounts.id) {
-      setTimeout(initGoogleSignIn, 300);
-      return;
-    }
-
-    const GOOGLE_CLIENT_ID = getGoogleClientId();
-    if (!GOOGLE_CLIENT_ID) {
-      console.warn("Missing Google client ID. Set window.__Buda_GOOGLE_CLIENT_ID.");
-      return;
-    }
-
-    if (!window.__Buda_GOOGLE_INIT_DONE) {
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: TFA,
-      });
-      window.__Buda_GOOGLE_INIT_DONE = true;
-    }
-
-    let btn = wrap.querySelector(".g_id_signin");
-    if (!btn) {
-      btn = document.createElement("div");
-      btn.className = "g_id_signin";
-      wrap.appendChild(btn);
-    }
-
-    bindGoogleSignInIntent(btn);
-
-    google.accounts.id.renderButton(btn, {
-      theme: "outline",
-      size: "large",
-      text: "continue_with",
-      shape: "rectangular",
-      logo_alignment: "left",
-    });
-  });
 }
 
 function attachPasswordToggle() {
@@ -621,7 +573,7 @@ document.addEventListener("DOMContentLoaded", () => {
   attachPasswordToggle();
   prefillEmailFromQuery();
   showResetSuccessIfAny();
-  initGoogleSignIn();
+  handleGoogleCallback();
 });
 
 function logout() {
