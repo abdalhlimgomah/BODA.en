@@ -287,8 +287,6 @@
 }
 
 .buda-rewards-bg {
-  background: linear-gradient(135deg, #f1f1f1 0%, #7C3AED 50%, #ffffff 100%);
-  position: relative;
   overflow: hidden;
   border-radius: var(--radius-xl);
   text-align: center;
@@ -297,12 +295,11 @@
 .buda-rewards-img {
   display: block;
   width: 100%;
-  max-width: 240px;
   margin: 0 auto;
   cursor: pointer;
   border-radius: var(--radius-xl);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
-  box-shadow: 0 8px 30px rgba(109,40,217,0.3);
+  box-shadow: 0 8px 30px rgb(237 226 255);
 }
 .buda-rewards-img:hover {
   transform: scale(1.03);
@@ -445,7 +442,7 @@
 /* --- Rewards: Responsive --- */
 @media (max-width: 600px) {
   .buda-rewards-bg {
-    padding: 20px 16px;
+    padding: 0px 16px;
   }
   .buda-rewards-header {
     gap: 10px;

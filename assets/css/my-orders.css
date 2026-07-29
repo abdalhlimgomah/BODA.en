@@ -572,14 +572,14 @@
 
 .my-order-empty,
 .my-order-filter-empty {
-  border: 1px dashed #d5deef;
-  border-radius: 14px;
-  background: #ffffff;
-  padding: 16px 12px;
-  text-align: center;
-  color: #5e718f;
-  display: grid;
-  gap: 8px;
+    border: 1px dashed #000000;
+    border-radius: 100px;
+    background: #ffffff;
+    padding: 250px 12px;
+    text-align: center;
+    color: #000000;
+    display: grid;
+    gap: 11px;
 }
 
 .my-order-empty h3,
