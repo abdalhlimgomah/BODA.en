@@ -1189,9 +1189,9 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
 /* ========== BUDA FOOTER DESKTOP (≥768px) ========== */
 @media (min-width: 768px) {
   .buda-footer { 
-    padding: 40px 24px 20px; 
-    background: var(--color-surface);
-    border-top: 1px solid var(--color-border);
+    padding: 48px 24px 20px; 
+    background: linear-gradient(135deg, #1e1b4b 0%, #2e1065 50%, #3B0764 100%);
+    border-top: none;
   }
   .buda-footer__main { 
     max-width: 1400px; 
@@ -1201,37 +1201,53 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
     gap: 32px; 
   }
   .buda-footer__brand-col { max-width: 300px; }
-  .buda-footer__brand-logo { font-size: 1.5rem; font-weight: var(--weight-extrabold); }
-  .buda-footer__brand-desc { font-size: var(--text-body-sm); line-height: 1.6; margin-top: 12px; }
-  .buda-footer__social { gap: 10px; margin-top: 16px; }
+  .buda-footer__brand-logo { font-size: 1.5rem; font-weight: var(--weight-extrabold); color: #fff; }
+  .buda-footer__brand-desc { font-size: var(--text-body-sm); line-height: 1.7; margin-top: 12px; color: #a78bfa; }
+  .buda-footer__social { gap: 10px; margin-top: 20px; }
   .buda-footer__social a { width: 40px; height: 40px; }
   .buda-footer__col-title { 
     font-size: var(--text-body-sm); 
     font-weight: var(--weight-extrabold); 
     margin-bottom: 16px; 
-    color: var(--color-text);
+    color: #fff;
   }
   .buda-footer__links { display: flex; flex-direction: column; gap: 10px; }
   .buda-footer__links a { 
     font-size: var(--text-body-sm); 
-    color: var(--color-text-secondary); 
-    transition: color var(--transition-fast);
+    color: #c4b5fd; 
+    transition: all 0.2s;
+    text-decoration: none;
+    padding: 2px 0;
   }
-  .buda-footer__links a:hover { color: var(--color-primary); }
+  .buda-footer__links a:hover { color: #fff; }
+  .buda-footer__social a { 
+    border-radius: 10px; 
+    background: rgba(255,255,255,0.1); 
+    display: inline-flex; 
+    align-items: center; 
+    justify-content: center; 
+    transition: all 0.2s; 
+  }
+  .buda-footer__social a:hover { 
+    background: rgba(255,255,255,0.2); 
+    transform: translateY(-2px); 
+  }
+  .buda-footer__social a svg { transition: fill 0.2s; }
+  .buda-footer__brand-desc { color: #a78bfa; }
   .buda-footer__bottom { 
     max-width: 1400px; 
-    margin: 32px auto 0; 
-    padding-top: 20px; 
-    border-top: 1px solid var(--color-border); 
+    margin: 40px auto 0; 
+    padding-top: 24px; 
+    border-top: 1px solid rgba(255,255,255,0.1); 
     display: flex; 
     justify-content: space-between; 
     align-items: center; 
     flex-wrap: wrap; 
     gap: 12px; 
   }
-  .buda-footer__copyright { font-size: var(--text-caption); color: var(--color-text-muted); }
-  .buda-footer__payments { display: flex; align-items: center; gap: 12px; font-size: var(--text-caption); color: var(--color-text-muted); }
-  .buda-footer__payments svg { color: var(--color-text-muted); }
+  .buda-footer__copyright { font-size: var(--text-caption); color: #a78bfa; }
+  .buda-footer__payments { display: flex; align-items: center; gap: 12px; font-size: var(--text-caption); color: #a78bfa; }
+  .buda-footer__payments svg { color: #a78bfa; }
 }
 
 /* Large desktop footer */
