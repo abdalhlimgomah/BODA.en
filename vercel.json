@@ -8,8 +8,8 @@
   ],
   "rewrites": [
     {
-      "source": "/api/merchant-feed/:path*",
-      "destination": "https://msgqzgzoslearaprgiqq.supabase.co/functions/v1/merchant-feed/:path*"
+      "source": "/api/merchant-feed/(.*)",
+      "destination": "https://msgqzgzoslearaprgiqq.supabase.co/functions/v1/merchant-feed/$1"
     }
   ]
 }
