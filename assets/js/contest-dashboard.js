@@ -266,8 +266,8 @@
       shareBtn.addEventListener('click', function() {
         if (navigator.share) {
           navigator.share({
-            title: 'انضم إلي في مسابقة Buda Rewards',
-            text: 'ادعوك للمشاركة في مسابقة Buda Rewards واربح جوائز قيمة!',
+            title: 'انضم إلي في مسابقة BudoQ Rewards',
+            text: 'ادعوك للمشاركة في مسابقة BudoQ Rewards واربح جوائز قيمة!',
             url: refUrl
           }).catch(function() {});
         } else {

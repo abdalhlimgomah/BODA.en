@@ -3,7 +3,7 @@
 
   var AdvancedSitemap = {};
 
-  var SITEMAP_BASE = (typeof SEOUtils !== "undefined" ? SEOUtils.getSiteUrl() : "https://buda-rho.vercel.app");
+  var SITEMAP_BASE = (typeof SEOUtils !== "undefined" ? SEOUtils.getSiteUrl() : "https://budoq.vercel.app");
   var DOMAIN = SITEMAP_BASE.replace(/^https?:\/\//, "");
 
   AdvancedSitemap.getClient = function () {

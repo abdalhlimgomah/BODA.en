@@ -37,7 +37,7 @@
     var schema = {
       "@context": "https://schema.org",
       "@type": opts.type || "Store",
-      name: opts.name || "Buda",
+      name: opts.name || "BudoQs",
       description: opts.description || "منصة تجارة إلكترونية متعددة البائعين",
       url: U.getSiteUrl(),
       telephone: opts.phone || undefined,
@@ -120,7 +120,7 @@
       },
       author: {
         "@type": "Person",
-        name: review.author || review.name || "مستخدم Buda",
+        name: review.author || review.name || "مستخدم BudoQ",
       },
       reviewBody: review.body || review.text || undefined,
       datePublished: review.datePublished || review.date || undefined,

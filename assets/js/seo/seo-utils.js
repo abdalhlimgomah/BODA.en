@@ -29,7 +29,7 @@
 
   SEOUtils.getSiteUrl = function () {
     var url = window.location.origin;
-    if (url === "null" || !url) url = "https://buda-rho.vercel.app";
+    if (url === "null" || !url) url = "https://budoq.vercel.app";
     return url.replace(/\/+$/, "");
   };
 
@@ -174,7 +174,7 @@
     return JSON.stringify({
       "@context": "https://schema.org",
       "@type": "Organization",
-      name: "Buda",
+      name: "BudoQ",
       url: SEOUtils.getSiteUrl(),
       logo: SEOUtils.getFullUrl("assets/icons/apple-touch-icon.png"),
       sameAs: [

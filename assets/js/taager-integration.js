@@ -1,9 +1,9 @@
-(function () {
+﻿(function () {
   "use strict";
 
   var TAAGER_MERCHANT_API = "https://merchant.api.taager.com/api";
   var TAAGER_COUNTRIES = [
-    { code: "EG", name: "مصر", flag: "🇪🇬", slug: "egypt" },
+    { code: "EG", name: "مصر", flag: "EG", slug: "egypt" },
     { code: "SA", name: "السعودية", flag: "🇸🇦", slug: "ksa" },
   ];
 
@@ -14,7 +14,7 @@
   var TAAGER_PRODUCTS_PAGE_SIZE = 100;
   var TAAGER_MAX_PAGES = 50;
   var inFlightProductsRequests = {};
-  var inFlightBackgroundRefreshes = {};
+
   var authFailureUntil = 0;
   var authFailedCountries = {};
 
@@ -241,7 +241,7 @@
       item.howToUse || item.how_to_use || item.usageInstructions || additionalInfo.howToUse || additionalInfo.how_to_use || ""
     );
     var videos = parseArrayField(item.videos || item.media || item.videoUrls || item.video_urls || additionalInfo.videos || []);
-    var name = sanitizeText(item.name || item.title || item.product_name || "منتج من تاجر");
+    var name = sanitizeText(item.name || item.title || item.product_name || "منتج من تاجِر");
 
     var availableCountries = [];
     if (item._taager_country) {
@@ -349,7 +349,7 @@
       raw_data: item.raw_data,
       taager_product_id: taagerProductId || (id.indexOf("taager_") === 0 ? id.slice(7) : id),
       product_id: taagerProductId || (id.indexOf("taager_") === 0 ? id.slice(7) : id),
-      name: sanitizeText(item.name || item.title || item.product_name || "منتج من تاجر"),
+      name: sanitizeText(item.name || item.title || item.product_name || "منتج من تاجِر"),
       description: sanitizeText(item.description || item.summary || item.details),
       quick_details: quickDetails,
       content_ideas: contentIdeas,
@@ -438,39 +438,6 @@
     return items.map(normalizer).filter(Boolean);
   }
 
-  function refreshTaagerProductsInBackground(countryCode) {
-    var requestKey = getCountryRequestKey(countryCode);
-    if (inFlightBackgroundRefreshes[requestKey]) return;
-    if (Date.now() < authFailureUntil) return;
-    if (authFailedCountries[requestKey]) return;
-
-    inFlightBackgroundRefreshes[requestKey] = (async function () {
-      try {
-        var liveProducts = await fetchTaagerProductsFromEdge("products", countryCode, normalizeTaagerProduct);
-        if (!liveProducts.length) return;
-        setCachedProducts(liveProducts);
-        mergeTaagerIntoStore(liveProducts);
-        document.dispatchEvent(new CustomEvent("boda:taager-products-refreshed", {
-          detail: {
-            countryCode: countryCode || null,
-            count: liveProducts.length,
-          },
-        }));
-        document.dispatchEvent(new CustomEvent("boda:products-updated", {
-          detail: { source: "taager", count: liveProducts.length },
-        }));
-      } catch (error) {
-        if (isTaagerAuthError(error)) {
-          setAuthFailureBackoff();
-          authFailedCountries[requestKey] = true;
-        }
-        log("warn", "Background Taager refresh failed:", error.message);
-      } finally {
-        delete inFlightBackgroundRefreshes[requestKey];
-      }
-    })();
-  }
-
   async function fetchTaagerProductsFromSupabase(countryCode) {
     if (
       !window.supabaseClient ||
@@ -515,7 +482,6 @@
     var requestPromise = (async function () {
     var cached = getCachedProducts();
     if (cached) {
-      refreshTaagerProductsInBackground(countryCode);
       return filterByCountry(cached, countryCode);
     }
 
@@ -525,7 +491,6 @@
       document.dispatchEvent(new CustomEvent("boda:products-updated", {
         detail: { source: "taager-stored", count: storedProducts.length },
       }));
-      refreshTaagerProductsInBackground(countryCode);
       return filterByCountry(storedProducts, countryCode);
     }
 
@@ -535,141 +500,7 @@
       document.dispatchEvent(new CustomEvent("boda:products-updated", {
         detail: { source: "taager-supabase", count: supabaseProducts.length },
       }));
-      refreshTaagerProductsInBackground(countryCode);
       return filterByCountry(supabaseProducts, countryCode);
-    }
-
-    if (authFailedCountries[getCountryRequestKey(countryCode)]) {
-      return [];
-    }
-
-    if (Date.now() < authFailureUntil) {
-      log("warn", "Skipping Taager live fetch during auth cooldown");
-      return [];
-    }
-
-    var edgeUrl = getEdgeFunctionUrl();
-    var apiKey = getApiKey();
-
-    console.log("[Taager] Edge URL:", edgeUrl, "Country:", countryCode, "API Key exists:", !!apiKey);
-    if (edgeUrl) {
-      try {
-        var products = await fetchTaagerProductsFromEdge("products", countryCode, normalizeTaagerProduct);
-        console.log("[Taager] Edge returned items:", products ? products.length : 0);
-        if (products && products.length > 0) {
-          var sample = products[0];
-          console.log("[Taager] Sample raw item keys:", Object.keys(sample));
-          console.log("[Taager] Sample image fields:", { image: sample.image, images: sample.images, image_url: sample.image_url, image1: sample.image1, image2: sample.image2, image3: sample.image3, gallery: sample.gallery, thumbnail: sample.thumbnail, media: sample.media, variantImages: sample.variantImages });
-        }
-        console.log("[Taager] After normalization:", products.length);
-        setCachedProducts(products);
-        return filterByCountry(products, countryCode);
-      } catch (error) {
-        log("warn", "Edge function failed, trying direct Taager feed:", error.message);
-        console.log("[Taager] Edge error details:", error);
-        if (isTaagerAuthError(error)) {
-          setAuthFailureBackoff();
-          authFailedCountries[getCountryRequestKey(countryCode)] = true;
-          return [];
-        }
-      }
-    }
-
-    var merchantApi = window.TAAGER_MERCHANT_API || TAAGER_MERCHANT_API;
-    if (!merchantApi) {
-      log("warn", "No Taager API configured");
-      return [];
-    }
-
-    var taagerId = window.TAAGER_TAAGER_ID || "2226119";
-    var sessionKey = window.TAAGER_SESSION_KEY || "";
-
-    var reqHeaders = {
-      "Content-Type": "application/json",
-      "taagerId": taagerId,
-      "ui-session-key": sessionKey,
-    };
-    if (apiKey) reqHeaders["Authorization"] = "Bearer " + apiKey;
-
-    // Map country code from ISO2 (EG) to ISO3 (EGY) for Taager API
-    var countryMap = {
-      EG: "EGY", SA: "SAU", AE: "ARE", IQ: "IRQ", OM: "OMN",
-      egy: "EGY", sau: "SAU", are: "ARE", irq: "IRQ", omn: "OMN",
-    };
-    var taagerCountry = countryCode
-      ? (countryMap[countryCode.toUpperCase()] || countryCode.toUpperCase())
-      : "";
-
-    // Try to fetch all products via /products/variants (paginated)
-    try {
-      var allItems = [];
-      for (var page = 1; page <= TAAGER_MAX_PAGES; page++) {
-        var params = "?page=" + page + "&pageSize=" + TAAGER_PRODUCTS_PAGE_SIZE;
-        if (taagerCountry) params += "&country=" + encodeURIComponent(taagerCountry);
-        var url = merchantApi + "/products/variants" + params;
-        var resp = await fetch(url, { headers: reqHeaders });
-        if (!resp.ok) {
-          log("warn", "Products list page " + page + ": " + resp.status);
-          if (resp.status === 401 || resp.status === 403) {
-            setAuthFailureBackoff();
-          }
-          break;
-        }
-        var data = await resp.json();
-        if (!Array.isArray(data) || !data.length) break;
-        // Assign Taager country to each product (API returns per-country)
-        for (var di = 0; di < data.length; di++) {
-          if (taagerCountry) data[di]._taager_country = taagerCountry;
-        }
-        allItems = allItems.concat(data);
-        if (data.length < TAAGER_PRODUCTS_PAGE_SIZE) break;
-      }
-
-      if (allItems.length) {
-        var sample2 = allItems[0];
-        console.log("[Taager] Merchant API sample keys:", Object.keys(sample2));
-        console.log("[Taager] Merchant API image fields:", { image: sample2.image, images: sample2.images, image_url: sample2.image_url, image1: sample2.image1, image2: sample2.image2, image3: sample2.image3, gallery: sample2.gallery, thumbnail: sample2.thumbnail, media: sample2.media, variantImages: sample2.variantImages, productImage: sample2.productImage });
-        var products = allItems.map(normalizeTaagerProduct).filter(Boolean);
-        if (products.length > 0) {
-          console.log("[Taager] Normalized sample images field:", products[0].images);
-          console.log("[Taager] Normalized sample image1-5:", products[0].image1, products[0].image2, products[0].image3, products[0].image4, products[0].image5);
-        }
-        log("info", "Fetched " + products.length + " Taager products");
-        setCachedProducts(products);
-        return filterByCountry(products, countryCode);
-      }
-    } catch (error) {
-      log("warn", "Products list failed:", error.message);
-    }
-
-    // Fallback: fetch highlights instead
-    try {
-      var highlightsGroups = "featured,newArrivals,offers,bestSellers,multiQuantityDiscount,secondProductDiscount,openForTesting";
-      var hlUrl = merchantApi + "/products/variants/highlights?highlightGroups=" + encodeURIComponent(highlightsGroups) + "&language=ar&pageSize=50";
-      if (taagerCountry) hlUrl += "&country=" + encodeURIComponent(taagerCountry);
-      var hlResp = await fetch(hlUrl, { headers: reqHeaders });
-      if (!hlResp.ok) throw new Error("Highlights returned " + hlResp.status);
-      var hlData = await hlResp.json();
-      var hlItems = [];
-      for (var key in hlData) {
-        if (Array.isArray(hlData[key])) {
-          for (var hi = 0; hi < hlData[key].length; hi++) {
-            if (taagerCountry) hlData[key][hi]._taager_country = taagerCountry;
-            hlItems.push(hlData[key][hi]);
-          }
-        }
-      }
-      if (hlItems.length) {
-        var hlProducts = hlItems.map(normalizeTaagerProduct).filter(Boolean);
-        log("info", "Fetched " + hlProducts.length + " Taager products (highlights)");
-        setCachedProducts(hlProducts);
-        return filterByCountry(hlProducts, countryCode);
-      }
-    } catch (error) {
-      if (isTaagerAuthError(error)) {
-        setAuthFailureBackoff();
-      }
-      log("error", "Highlights failed:", error.message);
     }
 
     return [];
@@ -681,7 +512,7 @@
     } finally {
       delete inFlightProductsRequests[requestKey];
     }
-  }
+    }
 
   async function fetchTaagerProductDetail(productId) {
     var products = getCachedProducts();
@@ -829,3 +660,4 @@
     log: log,
   };
 })();
+

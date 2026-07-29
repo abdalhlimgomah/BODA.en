@@ -475,5 +475,5 @@ window.DEMO_BLOG_TAGS = [
   { id: "tag-5", name: "جديد", slug: "new" },
 ];
 window.DEMO_BLOG_AUTHORS = [
-  { id: "auth-1", name: "فريق Buda", slug: "buda-team", bio: "فريق Buda", avatar: "" },
+  { id: "auth-1", name: "فريق BudoQ", slug: "budoq-team", bio: "فريق BudoQ", avatar: "" },
 ];

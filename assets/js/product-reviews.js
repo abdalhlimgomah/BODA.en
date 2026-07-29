@@ -413,7 +413,7 @@ function getCurrentPublicName() {
     .find(Boolean);
 
   const rawName = direct || String(localStorage.getItem("userEmail") || "").split("@")[0].replace(/[._-]+/g, " ").trim();
-  if (!rawName) return "عميل Buda";
+  if (!rawName) return "عميل BudoQ";
   const parts = rawName.replace(/\s+/g, " ").split(" ").filter(Boolean);
   if (parts.length <= 1) return rawName;
   return `${parts[0]} ${parts[1].charAt(0)}.`;

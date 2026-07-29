@@ -3,7 +3,7 @@
 
   var MerchantFeed = {};
 
-  MerchantFeed.SITE_URL = "https://buda-rho.vercel.app";
+  MerchantFeed.SITE_URL = "https://budoq.vercel.app";
   MerchantFeed.FEED_TITLE = "Buda - Product Feed";
   MerchantFeed.FEED_LINK = MerchantFeed.SITE_URL + "/";
   MerchantFeed.FEED_DESCRIPTION = "Google Shopping Product Feed for Buda - Multi-vendor e-commerce platform";

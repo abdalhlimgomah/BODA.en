@@ -51,7 +51,7 @@
         if (!guide) return;
         if (global.MetaGenerator) {
           MetaGenerator.forStaticPage({
-            title: guide.meta_title || guide.title + " | دليل شراء | Buda",
+            title: guide.meta_title || guide.title + " | دليل شراء | BudoQ",
             description: guide.meta_description || guide.subtitle || "",
             image: guide.image || "",
           });
@@ -74,7 +74,7 @@
         if (!comparison) return;
         if (global.MetaGenerator) {
           MetaGenerator.forStaticPage({
-            title: comparison.meta_title || comparison.title + " | مقارنة | Buda",
+            title: comparison.meta_title || comparison.title + " | مقارنة | BudoQ",
             description: comparison.meta_description || comparison.subtitle || "",
             image: comparison.image || "",
           });
@@ -97,7 +97,7 @@
         if (!page) return;
         if (global.MetaGenerator) {
           MetaGenerator.forStaticPage({
-            title: page.meta_title || page.title + " | Buda",
+            title: page.meta_title || page.title + " | BudoQ",
             description: page.meta_description || page.subtitle || page.description || "",
             noindex: page.is_noindex || false,
           });

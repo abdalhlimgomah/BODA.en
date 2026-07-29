@@ -100,7 +100,7 @@
     M.applyDefaults({
       title: U.truncate(seoTitle, 70),
       description: U.truncate(metaDesc, 160),
-      keywords: [name, brand, focusKwd, "تسوق", "Buda"].filter(Boolean).join(", "),
+      keywords: [name, brand, focusKwd, "تسوق", "BudoQ"].filter(Boolean).join(", "),
       url: seoData && seoData.canonical_url ? seoData.canonical_url : window.location.href,
       image: seoData && seoData.og_image ? seoData.og_image : (product.image || ""),
       type: "product",
@@ -134,13 +134,13 @@
     if (!M) return;
 
     var name = brand.name || brand.brand_name || "";
-    var seoTitle = (seoData && seoData.seo_title) || name + " | جميع المنتجات الأصلية | Buda";
-    var metaDesc = (seoData && seoData.meta_description) || (seoData && seoData.description ? seoData.description : "تسوق جميع منتجات " + name + " الأصلية في Buda.");
+    var seoTitle = (seoData && seoData.seo_title) || name + " | جميع المنتجات الأصلية | BudoQ";
+    var metaDesc = (seoData && seoData.meta_description) || (seoData && seoData.description ? seoData.description : "تسوق جميع منتجات " + name + " الأصلية في BudoQ.");
 
     M.applyDefaults({
       title: seoTitle,
       description: metaDesc,
-      keywords: [name, "براند", "منتجات أصلية", "Buda"].filter(Boolean).join(", "),
+      keywords: [name, "براند", "منتجات أصلية", "BudoQ"].filter(Boolean).join(", "),
       image: seoData && seoData.banner_image ? seoData.banner_image : undefined,
     });
 
@@ -159,13 +159,13 @@
     if (!M) return;
 
     var name = category.name || category.slug || "";
-    var seoTitle = (seoData && seoData.seo_title) || name + " | تسوق بأفضل الأسعار | Buda";
-    var metaDesc = (seoData && seoData.meta_description) || (seoData && seoData.description ? seoData.description : "تسوق أفضل منتجات " + name + " في Buda. تشكيلة واسعة بأسعار تنافسية.");
+    var seoTitle = (seoData && seoData.seo_title) || name + " | تسوق بأفضل الأسعار | BudoQ";
+    var metaDesc = (seoData && seoData.meta_description) || (seoData && seoData.description ? seoData.description : "تسوق أفضل منتجات " + name + " في BudoQ. تشكيلة واسعة بأسعار تنافسية.");
 
     M.applyDefaults({
       title: seoTitle,
       description: metaDesc,
-      keywords: [name, "تسوق", "منتجات", "Buda"].filter(Boolean).join(", "),
+      keywords: [name, "تسوق", "منتجات", "BudoQ"].filter(Boolean).join(", "),
       image: seoData && seoData.banner_image ? seoData.banner_image : undefined,
     });
   };
@@ -176,13 +176,13 @@
     if (!M) return;
 
     var name = seller.name || seller.seller_name || "";
-    var seoTitle = (seoData && seoData.seo_title) || name + " | متجر البائع | Buda";
-    var metaDesc = (seoData && seoData.meta_description) || (seoData && seoData.about ? seoData.about : "تسوق من متجر " + name + " في Buda. تشكيلة واسعة من المنتجات.");
+    var seoTitle = (seoData && seoData.seo_title) || name + " | متجر البائع | BudoQ";
+    var metaDesc = (seoData && seoData.meta_description) || (seoData && seoData.about ? seoData.about : "تسوق من متجر " + name + " في BudoQ. تشكيلة واسعة من المنتجات.");
 
     M.applyDefaults({
       title: seoTitle,
       description: metaDesc,
-      keywords: [name, "بائع", "متجر", "Buda"].filter(Boolean).join(", "),
+      keywords: [name, "بائع", "متجر", "BudoQ"].filter(Boolean).join(", "),
       image: seoData && seoData.logo ? seoData.logo : (seoData && seoData.cover_image ? seoData.cover_image : undefined),
     });
   };
@@ -192,8 +192,8 @@
     var M = global.MetaGenerator;
     if (!M) return;
 
-    var seoTitle = (offer.seo_title) || offer.title + " | عروض Buda";
-    var metaDesc = (offer.meta_description) || (offer.description ? offer.description : "استفد من عرض " + offer.title + " في Buda.");
+    var seoTitle = (offer.seo_title) || offer.title + " | عروض BudoQ";
+    var metaDesc = (offer.meta_description) || (offer.description ? offer.description : "استفد من عرض " + offer.title + " في BudoQ.");
 
     M.applyDefaults({
       title: seoTitle,

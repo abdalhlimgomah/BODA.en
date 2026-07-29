@@ -125,7 +125,7 @@ window.ContestReferral = (function() {
     if (shareBtn) {
       shareBtn.addEventListener('click', function() {
         shareLink(
-          'اشترك في مسابقة Buda Rewards واربح جوائز قيمة! استخدم رابط دعوتي:',
+          'اشترك في مسابقة BudoQ Rewards واربح جوائز قيمة! استخدم رابط دعوتي:',
           link
         );
         if (!navigator.share) {
