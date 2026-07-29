@@ -1,2 +1,0 @@
-ALTER TABLE public.kobon ADD COLUMN IF NOT EXISTS rate numeric DEFAULT 5 NOT NULL;
-ALTER TABLE public.kobon ADD COLUMN IF NOT EXISTS minimum_amount numeric DEFAULT 0 NOT NULL;
