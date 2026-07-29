@@ -1,0 +1,138 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>المفضلة - BudoQ</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260630" rel="stylesheet" />
+  <link href="../assets/css/noon-components.css" rel="stylesheet" />
+  <link href="../assets/css/desktop-animations.css?v=20260709" rel="stylesheet" />
+  <link href="../assets/css/home.css" rel="stylesheet" />
+<link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="../assets/icons/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="../assets/icons/site.webmanifest">
+<meta name="theme-color" content="#FFD500">
+<style>
+  /* Custom styles for the empty wishlist state */
+  .wishlist-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 40px 20px;
+    min-height: 300px; /* Ensure it takes up some space */
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-top: 20px;
+  }
+
+  .wishlist-empty-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .wishlist-empty-animation {
+    width: 100px;
+    height: 100px;
+    background: #ffe0b2; /* Light orange/yellow background */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    box-shadow: 0 4px 10px rgba(255, 152, 0, 0.2);
+  }
+
+  .animated-heart {
+    font-size: 56px;
+    color: #ff9800; /* Orange color */
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0% {
+      transform: scale(0.9);
+      opacity: 0.7;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0.9);
+      opacity: 0.7;
+    }
+  }
+
+  .wishlist-empty-title { font-size: 24px; font-weight: 700; color: #333; margin: 0; }
+  .wishlist-empty-text { font-size: 16px; color: #666; max-width: 400px; line-height: 1.6; margin: 0; }
+  .wishlist-empty-cta { margin-top: 20px; padding: 12px 24px; font-size: 18px; border-radius: 8px; display: inline-flex; align-items: center; gap: 8px; background-color: var(--color-primary); color: var(--color-on-primary); text-decoration: none; transition: background-color 0.3s ease; }
+  .wishlist-empty-cta:hover { background-color: var(--color-primary-dark); }
+</style>
+  <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+</head>
+<body class="app-shell">
+             <!-- ========== HEADER - Noon Style (2 Rows) ========== -->
+        <header class="app-header buda-header"></header>
+  <main class="app-main stack">
+    <p id="wishlist-status" class="status-note hidden" aria-live="polite"></p>
+
+    <section class="section-block">
+      <div class="wishlist-header-row">
+        <h2 class="wishlist-heading" data-i18n="منتجاتك المفضلة"> </h2>
+        <span class="pill wishlist-count-pill">العناصر: <strong id="wishlist-count">0</strong></span>
+      </div>
+      <div id="wishlist-items" class="wishlist-items-wrap">
+        <div class="wishlist-grid" id="wishlist-grid"></div>
+      </div>
+      <div id="wishlist-empty" class="wishlist-empty hidden"></div>
+      </div>
+    </section>
+
+
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="home.html" data-nav="home">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="الرئيسية">الرئيسية</small>
+    </a>
+    <a href="products.html" data-nav="products">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="الفئات">الفئات</small>
+    </button>
+    <a href="ahsab.html" data-nav="account">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="حسابي">حسابي</small>
+    </a>
+    <a href="empty-cart.html" data-nav="cart">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="العربة">العربة</small>
+      <span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span>
+    </a>
+  </nav>
+
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../assets/js/supabase-client.js?v=20260327-1"></script>
+  <script src="../assets/js/auth.config.js?v=20260630"></script>
+  <script src="../assets/js/taager-integration.js?v=20260630d"></script>
+  <script src="../assets/js/store.js?v=20260630d"></script>
+  <script src="../assets/js/pricing-engine.js"></script>
+  <script src="../assets/js/wishlist.js"></script>
+  <script src="../assets/js/noon-shell.js"></script>
+</body>
+</html>

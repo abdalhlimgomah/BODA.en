@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>مسابقة BudoQ Rewards</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+  <link href="../assets/css/contest.css" rel="stylesheet" />
+  <link href="../assets/css/desktop.css" rel="stylesheet" media="only screen and (min-width: 768px)" />
+  <link href="../assets/css/desktop-animations.css" rel="stylesheet" media="only screen and (min-width: 768px)" />
+  <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="../assets/icons/site.webmanifest">
+  <meta name="theme-color" content="#6D28D9">
+  <style>html { overflow-x: clip; }</style>
+</head>
+<body class="app-shell">
+  <header class="app-header buda-header"></header>
+
+  <main class="app-main contest-main">
+    <div class="contest-container">
+
+      <!-- Skeleton Loading -->
+      <div id="contestSkeleton" class="contest-skeleton" aria-hidden="true">
+        <div class="skeleton-hero skeleton-pulse"></div>
+        <div class="skeleton-countdown skeleton-pulse"></div>
+        <div class="skeleton-prizes skeleton-pulse"></div>
+        <div class="skeleton-form skeleton-pulse"></div>
+      </div>
+
+      <!-- Login Required -->
+      <section id="contestLoginRequired" class="contest-login-required hidden">
+        <div class="login-icon">
+          <span class="material-icons-outlined">lock</span>
+        </div>
+        <h2>تسجيل الدخول مطلوب</h2>
+        <p>يجب تسجيل الدخول للمشاركة في المسابقة والحصول على رابط الدعوة الخاص بك.</p>
+        <a href="../pages/signin/login.html" class="contest-login-btn">
+          <span class="material-icons-outlined">login</span>
+          تسجيل الدخول
+        </a>
+      </section>
+
+      <!-- Main Content (shown when logged in) -->
+      <div id="contestContent" class="hidden">
+
+        <!-- Hero Image -->
+        <section class="contest-hero">
+          <img
+            src="https://iili.io/CevC2hG.png"
+            alt="Buda Rewards Contest"
+            class="contest-hero-img"
+            loading="eager"
+            fetchpriority="high"
+          />
+        </section>
+
+        <!-- Countdown -->
+        <section class="contest-countdown" aria-label="الوقت المتبقي في المسابقة">
+          <img
+            src="https://iili.io/Ce86WrB.md.png"
+            alt=""
+            aria-hidden="true"
+            class="countdown-bg-img"
+            loading="lazy"
+          />
+          <div class="countdown-overlay">
+            <h2 class="countdown-title"></h2>
+            <div id="countdownDisplay" class="countdown-display">
+              <div class="countdown-item">
+                <span id="countdownDays" class="countdown-num">00</span>
+                <span class="countdown-label">يوم</span>
+              </div>
+              <span class="countdown-sep">:</span>
+              <div class="countdown-item">
+                <span id="countdownHours" class="countdown-num">00</span>
+                <span class="countdown-label">ساعة</span>
+              </div>
+              <span class="countdown-sep">:</span>
+              <div class="countdown-item">
+                <span id="countdownMinutes" class="countdown-num">00</span>
+                <span class="countdown-label">دقيقة</span>
+              </div>
+              <span class="countdown-sep">:</span>
+              <div class="countdown-item">
+                <span id="countdownSeconds" class="countdown-num">00</span>
+                <span class="countdown-label">ثانية</span>
+              </div>
+            </div>
+            <div id="countdownEnded" class="countdown-ended hidden">انتهت المسابقة</div>
+          </div>
+        </section>
+
+        <!-- Prize Cards -->
+        <section class="contest-prizes">
+          <h2 class="contest-section-title">ماذا يمكنك الفوز؟</h2>
+          <p class="contest-section-subtitle">جوائز قيمة تنتظر الفائزين في مسابقة BudoQ Rewards</p>
+          <div id="prizesContainer" class="prizes-grid">
+            <!-- Loaded dynamically from Supabase -->
+          </div>
+        </section>
+
+        <!-- Registration / Dashboard (conditional) -->
+        <section id="contestRegistrationSection">
+
+          <!-- Registration Form (not yet registered) -->
+          <div id="registrationForm" class="contest-registration">
+            <h2 class="contest-section-title">سجل الآن وشارك في المسابقة</h2>
+            <p class="contest-section-subtitle">أكمل بياناتك للانضمام إلى المسابقة وزيادة فرصك في الفوز.</p>
+            <form id="contestForm" class="contest-form" novalidate>
+              <div class="contest-form-grid">
+                <div class="contest-field full-width">
+                  <label for="fullName">الاسم الثلاثي <span class="required">*</span></label>
+                  <input type="text" id="fullName" class="contest-input" required placeholder="مثال: عبد الحليم جمعه  عبد الحليم" autocomplete="name" />
+                  <span class="contest-field-error" id="fullNameError"></span>
+                </div>
+                <div class="contest-field">
+                  <label for="familyName">اسم العائلة <span class="required">*</span></label>
+                  <input type="text" id="familyName" class="contest-input" required placeholder="مثال: سعيد" autocomplete="family-name" />
+                  <span class="contest-field-error" id="familyNameError"></span>
+                </div>
+                <div class="contest-field">
+                  <label for="phone">رقم الهاتف <span class="required">*</span></label>
+                  <input type="tel" id="phone" class="contest-input" required placeholder="مثال: 01121068271" autocomplete="tel" dir="ltr" />
+                  <span class="contest-field-error" id="phoneError"></span>
+                </div>
+                <div class="contest-field">
+                  <label for="email">البريد الإلكتروني <span class="required">*</span></label>
+                  <input type="email" id="email" class="contest-input" readonly required />
+                  <span class="contest-field-error" id="emailError"></span>
+                </div>
+                <div class="contest-field">
+                  <label for="city">المدينة <span class="required">*</span></label>
+                  <input type="text" id="city" class="contest-input" required placeholder="مثال: القاهرة" autocomplete="address-level2" />
+                  <span class="contest-field-error" id="cityError"></span>
+                </div>
+                <div class="contest-field">
+                  <label for="birthDate">تاريخ الميلاد <span class="required">*</span></label>
+                  <input type="date" id="birthDate" class="contest-input" required />
+                  <span class="contest-field-error" id="birthDateError"></span>
+                </div>
+              </div>
+
+              <div class="contest-checkbox full-width">
+                <input type="checkbox" id="termsAccepted" />
+                <label for="termsAccepted">
+                  أوافق على <a href="#" id="showTermsLink">الشروط والأحكام</a>
+                  و <a href="../pages/privacy.html" target="_blank">سياسة الخصوصية</a> الخاصة بالمسابقة.
+                  <span class="required">*</span>
+                </label>
+              </div>
+              <span class="contest-field-error" id="termsError"></span>
+
+              <button type="submit" id="contestSubmitBtn" class="contest-submit-btn">
+                <span class="btn-text">سجل الآن</span>
+                <span class="btn-loading">
+                  <span class="material-icons-outlined" style="font-size:18px;animation:spin 1s linear infinite;">sync</span>
+                  جاري التسجيل...
+                </span>
+              </button>
+            </form>
+          </div>
+
+          <!-- Success State (just registered) -->
+          <div id="contestSuccess" class="contest-success hidden">
+            <div class="contest-success-icon">
+              <span class="material-icons-outlined">check</span>
+            </div>
+            <h2 class="contest-success-title">تم تسجيلك بنجاح!</h2>
+            <p class="contest-success-desc">مرحباً بك في مسابقة BudoQ Rewards. شارك رابط الدعوة مع أصدقائك لزيادة فرصك في الفوز.</p>
+          </div>
+
+          <!-- User Dashboard (already registered) -->
+          <div id="contestDashboard" class="contest-dashboard hidden">
+            <div class="dashboard-header">
+              <h2 id="dashboardUserName" class="dashboard-name">مرحباً!</h2>
+              <p id="dashboardUserEmail" class="dashboard-email"></p>
+            </div>
+
+            <div class="dashboard-metrics">
+              <div class="dashboard-metric">
+                <span id="metricReferred" class="dashboard-metric-num">0</span>
+                <span class="dashboard-metric-label">الأشخاص الذين دعوتهم</span>
+              </div>
+              <div class="dashboard-metric">
+                <span id="metricQualified" class="dashboard-metric-num">0</span>
+                <span class="dashboard-metric-label">التسجيلات المؤهلة</span>
+              </div>
+              <div class="dashboard-metric">
+                <span id="metricPrizes" class="dashboard-metric-num">0</span>
+                <span class="dashboard-metric-label">الجوائز التي حصلت عليها</span>
+              </div>
+              <div class="dashboard-metric">
+                <span id="metricStatus" class="dashboard-metric-num" style="font-size:0.9rem">مشارك</span>
+                <span class="dashboard-metric-label">حالة المشاركة</span>
+              </div>
+            </div>
+
+            <!-- Referral -->
+            <div class="contest-referral">
+              <h3 class="referral-title">رابط الدعوة الخاص بك</h3>
+              <p class="referral-desc">شارك الرابط مع أصدقائك. عندما يسجل شخص مؤهل من رابطك، يتم احتسابه لديك.</p>
+              <div class="referral-code-box">
+                <span id="referralCodeDisplay" class="referral-code-text">BUDA-XXXXX</span>
+              </div>
+              <p id="referralLinkDisplay" class="referral-link-display"></p>
+              <div class="referral-actions">
+                <button id="copyReferralBtn" class="referral-btn" aria-label="نسخ رابط الدعوة">
+                  <span class="material-icons-outlined">content_copy</span>
+                  نسخ الرابط
+                </button>
+                <button id="shareReferralBtn" class="referral-btn" aria-label="مشاركة رابط الدعوة">
+                  <span class="material-icons-outlined">share</span>
+                  مشاركة
+                </button>
+              </div>
+            </div>
+
+            <!-- Messages -->
+            <div id="contestMessagesSection" class="contest-messages">
+              <h3 class="messages-title">
+                <span class="material-icons-outlined" style="font-size:20px;color:#6D28D9;">mail_outline</span>
+                جوائزي ورسائلي
+              </h3>
+              <div id="messagesList" class="messages-list">
+                <!-- Loaded dynamically -->
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Contest Rules -->
+        <section class="contest-rules" aria-labelledby="rulesTitle">
+          <h2 id="rulesTitle" class="contest-section-title">كيف تشارك؟</h2>
+          <div class="rules-steps">
+            <div class="rule-step">
+              <span class="rule-step-num" aria-hidden="true">1</span>
+              <p class="rule-step-text">سجل في المسابقة من خلال استكمال بياناتك أعلاه.</p>
+            </div>
+            <div class="rule-step">
+              <span class="rule-step-num" aria-hidden="true">2</span>
+              <p class="rule-step-text">احصل على رابط دعوتك الفريد بعد التسجيل.</p>
+            </div>
+            <div class="rule-step">
+              <span class="rule-step-num" aria-hidden="true">3</span>
+              <p class="rule-step-text">شارك الرابط مع أصدقائك عبر واتساب أو أي وسيلة تواصل.</p>
+            </div>
+            <div class="rule-step">
+              <span class="rule-step-num" aria-hidden="true">4</span>
+              <p class="rule-step-text">عندما يسجل شخص مؤهل من رابطك، يتم احتسابه لديك وتزداد فرصك في الفوز.</p>
+            </div>
+            <div class="rule-step">
+              <span class="rule-step-num" aria-hidden="true">5</span>
+              <p class="rule-step-text">تابع فرصك وجوائزك من صفحة المسابقة في حسابك.</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- FAQ -->
+        <section class="contest-faq" aria-label="الأسئلة الشائعة">
+          <h2 class="contest-section-title">الأسئلة الشائعة</h2>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>كيف أشارك في المسابقة؟</span>
+              <span class="material-icons-outlined">expand_more</span>
+            </button>
+            <div class="faq-answer"><p>قم بتسجيل الدخول إلى حسابك في BudoQ، ثم املأ نموذج التسجيل في المسابقة بالبيانات المطلوبة. بعد التسجيل، ستحصل على رابط دعوة فريد لمشاركته مع أصدقائك.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>كيف أحصل على رابط الدعوة؟</span>
+              <span class="material-icons-outlined">expand_more</span>
+            </button>
+            <div class="faq-answer"><p>بعد تسجيلك في المسابقة، سيظهر رابط الدعوة الخاص بك في صفحة المسابقة. يمكنك نسخه أو مشاركته مباشرة مع أصدقائك.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>متى يتم احتساب الشخص الذي دعوته؟</span>
+              <span class="material-icons-outlined">expand_more</span>
+            </button>
+            <div class="faq-answer"><p>يتم احتساب الإحالة فقط عندما يقوم الشخص بالتسجيل في المسابقة من خلال رابطك ويكمل جميع بياناته بنجاح. مجرد النقر على الرابط لا يعتبر إحالة.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>هل يمكنني دعوة نفسي؟</span>
+              <span class="material-icons-outlined">expand_more</span>
+            </button>
+            <div class="faq-answer"><p>لا، لا يمكنك دعوة نفسك. النظام يمنع التسجيل الذاتي عبر رابط الدعوة الخاص بك.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>ما هي الجوائز؟</span>
+              <span class="material-icons-outlined">expand_more</span>
+            </button>
+            <div class="faq-answer"><p>تشمل الجوائز: جوائز مالية بقيمة 70,000 جنيه مصري لـ 69 فائزاً، وأكثر من 200 منتج مجاني، وكوبونات خصم تصل إلى 50%.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>متى تنتهي المسابقة؟</span>
+              <span class="material-icons-outlined">expand_more</span>
+            </button>
+            <div class="faq-answer"><p>مدة المسابقة شهران كاملان من تاريخ بدء الحملة. يمكنك متابعة الوقت المتبقي في عداد المسابقة في أعلى الصفحة.</p></div>
+          </div>
+
+          <div class="faq-item">
+            <button class="faq-question" aria-expanded="false">
+              <span>كيف أعرف أنني فزت؟</span>
+              <span class="material-icons-outlined">expand_more</span>
+            </button>
+            <div class="faq-answer"><p>سيتم إعلان الفائزين عبر صفحة المسابقة، كما ستصل رسالة إلى حسابك في BudoQ تبلغك بالفوز. يمكنك متابعة رسائلك في قسم "جوائزي ورسائلي".</p></div>
+          </div>
+        </section>
+
+      <!-- Terms Modal -->
+      <div id="termsModal" class="contest-modal-backdrop">
+        <div class="contest-modal">
+          <div class="contest-modal-header">
+            <h3>الشروط والأحكام</h3>
+            <button id="closeTermsModal" class="contest-modal-close" aria-label="إغلاق">&times;</button>
+          </div>
+          <div class="contest-modal-body">
+            <h4>1. المشاركة في المسابقة</h4>
+            <p>المشاركة في مسابقة BudoQ Rewards متاحة لجميع المستخدمين المسجلين في BudoQ والذين أكملوا بياناتهم الشخصية بشكل صحيح وكامل. يحق لكل مستخدم الاشتراك مرة واحدة فقط.</p>
+            <h4>2. آلية الفوز</h4>
+            <p>يتم اختيار الفائزين بناءً على نظام الإحالات: كلما دعوت أشخاصاً أكثر من خلال رابطك الفريد، زادت فرصك في الفوز. يتم توثيق كل إحالة عند تسجيل المدعو في المسابقة.</p>
+            <h4>3. الجوائز</h4>
+            <p>الجوائز تشمل جوائز مالية بقيمة 70,000 جنيه مصري، منتجات مجانية، وكوبونات خصم. يتم التواصل مع الفائزين عبر الرسائل في حسابهم على BudoQ. يستلم الفائز جائزته خلال 14 يوماً من تاريخ الإعلان.</p>
+            <h4>4. الشروط العامة</h4>
+            <p>تحتفظ BudoQ بالحق في إلغاء أو تعديل المسابقة في أي وقت دون إشعار مسبق. أي محاولة للتلاعب أو الغش تؤدي إلى استبعاد المشارك. جميع البيانات الشخصية تخضع لسياسة الخصوصية الخاصة بالموقع.</p>
+          </div>
+        </div>
+      </div>
+      </div><!-- /contestContent -->
+    </div><!-- /contest-container -->
+  </main>
+
+  <!-- Toast -->
+  <div id="contestToast" class="contest-toast" role="status" aria-live="polite"></div>
+
+  <nav class="bottom-nav" id="bottomNav" role="navigation" aria-label="الشريط السفلي"></nav>
+
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+  <script src="../assets/js/store.js"></script>
+  <script src="../assets/js/auth.config.js"></script>
+  <script src="../assets/js/security-utils.js"></script>
+  <script src="../assets/js/noon-shell.js"></script>
+  <script src="../assets/js/contest-data.js"></script>
+  <script src="../assets/js/contest-referral.js"></script>
+  <script src="../assets/js/contest-registration.js"></script>
+  <script>
+    // Spin animation for loading icon
+    var style = document.createElement('style');
+    style.textContent = '@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }';
+    document.head.appendChild(style);
+  </script>
+  <script src="../assets/js/contest.js"></script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>الأقسام - BudoQ</title>
+  <link rel="preload" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" as="style" />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260723" rel="stylesheet" media="screen and (min-width: 768px)" />
+  <link href="../assets/css/desktop-animations.css?v=20260723" rel="stylesheet" media="screen and (min-width: 768px)" />
+  <link href="../assets/css/design-system.css" rel="stylesheet" />
+  <link href="../assets/css/sections.css?v=20260724" rel="stylesheet" />
+  <link rel="preconnect" href="https://media.taager.com" />
+  <link rel="preconnect" href="https://msgqzgzoslearaprgiqq.supabase.co" />
+  <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="../assets/icons/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="../assets/icons/site.webmanifest">
+  <meta name="theme-color" content="#6D28D9">
+  <style>
+    body.sections-loading .sections-content,
+    body.sections-loading .bottom-nav { opacity: 0 !important; }
+    body.sections-loaded .sections-content,
+    body.sections-loaded .bottom-nav { opacity: 1 !important; }
+    body.sections-loaded .sk-sections-overlay { display: none !important; }
+    .sk-sections-overlay { position: absolute; inset: 0; z-index: 55; padding: 12px 14px 0; background: var(--color-bg); pointer-events: none; }
+    .sk-sections-header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-xl); margin-bottom: 16px; }
+    .sk-sections-title { width: 180px; height: 24px; border-radius: 6px; overflow: hidden; }
+    .sk-sections-subtitle { width: 260px; height: 16px; border-radius: 4px; overflow: hidden; margin-bottom: 24px; }
+    .sk-sections-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 14px; }
+    .sk-section-card { border-radius: var(--radius-xl); overflow: hidden; background: var(--color-skeleton); aspect-ratio: 1 / 1.1; }
+    .sk-section-img { width: 100%; height: 65%; background: var(--color-skeleton); }
+    .sk-section-text { padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+    .sk-section-name { width: 70%; height: 16px; border-radius: 4px; overflow: hidden; }
+    .sk-section-count { width: 50%; height: 12px; border-radius: 4px; overflow: hidden; }
+    .sk-bottomnav-overlay { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; margin: 0 auto; pointer-events: none; width: min(100%, 1400px); height: 82px; padding-bottom: max(8px, env(safe-area-inset-bottom)); }
+    .sk-bottomnav-inner { display: grid; grid-template-columns: 1fr 1fr 56px 1fr 1fr; align-items: center; gap: 0; height: 82px; background: var(--color-surface); border: 1px solid var(--color-border); border-bottom: 0; border-radius: var(--radius-xl) var(--radius-xl) 0 0; box-shadow: 0 -10px 24px rgba(15,23,42,0.08); }
+    .sk-bottomnav-cell { display: flex; flex-direction: column; align-items: center; gap: 5px; justify-self: center; padding: 8px 0; }
+    .sk-nav-icon { width: 24px; height: 24px; border-radius: 50%; overflow: hidden; }
+    .sk-nav-label { width: 50px; height: 10px; border-radius: 4px; overflow: hidden; }
+    @media (min-width: 640px) { .sk-sections-grid { grid-template-columns: 1fr 1fr 1fr; } }
+    @media (min-width: 1024px) { .sk-sections-grid { grid-template-columns: 1fr 1fr 1fr 1fr; } }
+    @media (min-width: 1200px) { .sk-bottomnav-overlay { display: none !important; } }
+  </style>
+  <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+</head>
+<body class="app-shell sections-loading">
+  <header class="app-header buda-header"></header>
+
+
+  <!-- SKELETON OVERLAY -->
+  <div class="sk-sections-overlay">
+    <div class="sk-sections-header">
+      <div class="sk-sections-title skeleton-pulse"></div>
+    </div>
+    <div class="sk-sections-subtitle skeleton-pulse"></div>
+    <div class="sk-sections-grid">
+      <div class="sk-section-card"><div class="sk-section-img skeleton-pulse"></div><div class="sk-section-text"><div class="sk-section-name skeleton-pulse"></div><div class="sk-section-count skeleton-pulse"></div></div></div>
+      <div class="sk-section-card"><div class="sk-section-img skeleton-pulse"></div><div class="sk-section-text"><div class="sk-section-name skeleton-pulse"></div><div class="sk-section-count skeleton-pulse"></div></div></div>
+      <div class="sk-section-card"><div class="sk-section-img skeleton-pulse"></div><div class="sk-section-text"><div class="sk-section-name skeleton-pulse"></div><div class="sk-section-count skeleton-pulse"></div></div></div>
+      <div class="sk-section-card"><div class="sk-section-img skeleton-pulse"></div><div class="sk-section-text"><div class="sk-section-name skeleton-pulse"></div><div class="sk-section-count skeleton-pulse"></div></div></div>
+      <div class="sk-section-card"><div class="sk-section-img skeleton-pulse"></div><div class="sk-section-text"><div class="sk-section-name skeleton-pulse"></div><div class="sk-section-count skeleton-pulse"></div></div></div>
+      <div class="sk-section-card"><div class="sk-section-img skeleton-pulse"></div><div class="sk-section-text"><div class="sk-section-name skeleton-pulse"></div><div class="sk-section-count skeleton-pulse"></div></div></div>
+    </div>
+    <div class="sk-bottomnav-overlay">
+      <div class="sk-bottomnav-inner">
+        <div class="sk-bottomnav-cell"><div class="sk-nav-icon skeleton-pulse"></div><div class="sk-nav-label skeleton-pulse"></div></div>
+        <div class="sk-bottomnav-cell"><div class="sk-nav-icon skeleton-pulse"></div><div class="sk-nav-label skeleton-pulse"></div></div>
+        <div class="sk-bottomnav-cell-icon"><div class="sk-nav-icon-large skeleton-pulse"></div></div>
+        <div class="sk-bottomnav-cell"><div class="sk-nav-icon skeleton-pulse"></div><div class="sk-nav-label skeleton-pulse"></div></div>
+        <div class="sk-bottomnav-cell"><div class="sk-nav-icon skeleton-pulse"></div><div class="sk-nav-label skeleton-pulse"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="sections-content">
+    <div class="sections-page">
+      <div class="sections-header">
+        <h1 class="sections-title">الأقسام</h1>
+        <p class="sections-subtitle">استكشف جميع الأقسام والتصنيفات</p>
+      </div>
+
+      <div class="sections-grid" id="sectionsGrid"></div>
+
+      
+    </div>
+  </main>
+
+  <nav class="bottom-nav"></nav>
+
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../assets/js/supabase-client.js?v=20260630"></script>
+  <script src="../assets/js/auth.config.js?v=20260630"></script>
+  <script src="../assets/js/store.js?v=20260630d"></script>
+  <script src="../assets/js/noon-shell.js"></script>
+  <script src="../assets/js/sections.js?v=20260724"></script>
+</body>
+</html>

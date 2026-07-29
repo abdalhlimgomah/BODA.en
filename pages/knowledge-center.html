@@ -1,0 +1,104 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>مركز المعرفة - BudoQ | أدلة شراء، مقارنات، مراجعات</title>
+  <meta name="description" content="مركز معرفة BudoQ: أدلة شراء شاملة، مقارنات بين المنتجات والبراندات، مراجعات، نصائح وحيل، وأخبار العروض. كل ما تحتاج لاتخاذ قرار شراء ذكي.">
+  <meta name="keywords" content="مركز المعرفة, أدلة شراء, مقارنات, مراجعات, نصائح, تسوق, BudoQ">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://budoq.vercel.app/pages/knowledge-center.html">
+  <meta property="og:title" content="مركز المعرفة - BudoQ | أدلة شراء، مقارنات، مراجعات">
+  <meta property="og:description" content="مركز معرفة BudoQs: أدلة شراء، مقارنات، مراجعات، ونصائح.">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Buda">
+  <meta property="og:locale" content="ar_AR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <link rel="icon" type="image/png" href="../assets/icons/favicon.png">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0">
+  <link rel="stylesheet" href="../assets/css/blog.css">
+  <link rel="stylesheet" href="../assets/css/noon.css">
+  <script src="../assets/js/seo/seo-utils.js"></script>
+</head>
+<body>
+  <div id="shell-root"></div>
+
+  <div class="kc-page">
+    <header class="kc-header">
+      <h1>مركز المعرفة</h1>
+      <p>كل ما تحتاج معرفته قبل الشراء: أدلة، مقارنات، مراجعات، ونصائح</p>
+    </header>
+
+    <div class="kc-sections" id="kc-sections">
+      <div class="blog-loading">
+        <div class="skeleton-loader" style="height:120px;border-radius:16px"></div>
+      </div>
+    </div>
+
+    <section id="kc-guides-section">
+      <h2 class="section-title" style="margin-bottom:20px">أدلة الشراء</h2>
+      <div class="guides-grid" id="guides-grid">
+        <div class="blog-loading">
+          <div class="skeleton-loader" style="height:160px;border-radius:16px"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="kc-comparisons-section" style="margin-top:48px">
+      <h2 class="section-title" style="margin-bottom:20px">المقارنات</h2>
+      <div class="comparisons-grid" id="comparisons-grid">
+        <div class="blog-loading">
+          <div class="skeleton-loader" style="height:160px;border-radius:16px"></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <div id="shell-footer"></div>
+
+  <script src="../assets/js/seo/blog-engine.js"></script>
+  <script src="../assets/js/seo/knowledge-center.js"></script>
+  <script src="../assets/js/seo/content-engine.js"></script>
+  <script src="../assets/js/seo/meta-generator.js"></script>
+  <script src="../assets/js/seo/schema-generator.js"></script>
+  <script src="../assets/js/seo/seo-engine.js"></script>
+  <script>
+    (function () {
+      function loadKC() {
+        KnowledgeCenter.getSections().then(function (sections) {
+          var container = document.getElementById('kc-sections');
+          if (!container) return;
+          container.innerHTML = sections.map(function (s) {
+            var href = s.slug === 'buying-guides' ? '#kc-guides-section' :
+                       s.slug === 'comparisons' ? '#kc-comparisons-section' :
+                       '/pages/blog/?category=' + encodeURIComponent(s.slug);
+            return '<a href="' + href + '" class="kc-section-card">' +
+              '<div class="kc-section-icon" style="background:' + (s.color || '#1a2530') + '">' +
+              '<span class="material-icons-outlined">' + (s.icon || 'article') + '</span></div>' +
+              '<h3>' + KnowledgeCenter.escHtml(s.title) + '</h3>' +
+              '<p>' + KnowledgeCenter.escHtml(s.description) + '</p></a>';
+          }).join('');
+        });
+
+        KnowledgeCenter.getGuides({ limit: 12 }).then(function (guides) {
+          KnowledgeCenter.renderGuidesGrid(guides, 'guides-grid');
+        });
+
+        KnowledgeCenter.getComparisons({ limit: 12 }).then(function (comparisons) {
+          KnowledgeCenter.renderComparisonsGrid(comparisons, 'comparisons-grid');
+        });
+      }
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', loadKC);
+      } else {
+        loadKC();
+      }
+    })();
+  </script>
+  <script src="../assets/js/noon-shell.js"></script>
+  <script src="../assets/js/supabase-client.js"></script>
+</body>
+</html>

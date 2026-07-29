@@ -1,0 +1,334 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>تعديل الحساب - BudoQ</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260630" rel="stylesheet" />
+  <link href="../assets/css/noon-components.css" rel="stylesheet" />
+  <link href="../assets/css/account.css?v=20260630d" rel="stylesheet" />
+  <link href="../assets/css/phone-verification.css?v=20260704" rel="stylesheet" />
+<link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="../assets/icons/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
+<link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="../assets/icons/site.webmanifest">
+<meta name="theme-color" content="#FFD500">
+  <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+</head>
+<body class="app-shell">
+
+
+  <main class="app-main edit-account-page">
+
+    <h1 class="page-title" data-i18n="استعرض و حدث بيانات التواصل و معلومات حسابك">استعرض و حدث بيانات التواصل و معلومات حسابك</h1>
+    <p class="page-subtitle" data-i18n="قم بتحديث معلوماتك الشخصية وبيانات الاتصال">قم بتحديث معلوماتك الشخصية وبيانات الاتصال</p>
+
+    <div class="edit-section">
+      <h2 class="edit-section-title" data-i18n="معلومات الاتصال">معلومات الاتصال</h2>
+
+      <div class="edit-field">
+        <label data-i18n="البريد الإلكتروني">البريد الإلكتروني</label>
+        <input id="editEmail" class="noon-input" type="email" readonly />
+      </div>
+
+      <div class="edit-field">
+        <label data-i18n="رقم الجوّال">رقم الجوّال</label>
+        <div id="editPhoneWrap">
+          <div class="readonly-phone-card">
+            <div class="phone-text-wrap">
+              <span class="phone-text" id="phoneDisplayVal">لم يتم تعيين رقم هاتف</span>
+              <span class="phone-badge unverified" id="phoneStatusBadge">
+                <span class="material-icons-outlined"></span>
+                <span id="phoneStatusBadgeText">غير متحقق</span>
+              </span>
+            </div>
+            <button type="button" class="phone-edit-trigger" id="editPhoneTriggerBtn">تعديل</button>
+          </div>
+          <!-- Hidden input to keep compatibility with existing submit logic -->
+          <input id="editPhone" type="hidden" />
+        </div>
+        <p class="field-note" data-i18n="استخدمه لتسجيل الدخول على جميع تطبيقات نون.">استخدمه لتسجيل الدخول على جميع تطبيقات BudoQ.</p>
+      </div>
+    </div>
+
+    <div class="edit-section">
+      <h2 class="edit-section-title" data-i18n="معلوماتك الشخصية">معلوماتك الشخصية</h2>
+
+      <div class="edit-field">
+        <label data-i18n="الاسم الأول">الاسم الأول</label>
+        <input id="editFirstName" class="noon-input" type="text" placeholder="الاسم الأول" />
+      </div>
+
+      <div class="edit-field">
+        <label data-i18n="اسم العائلة">اسم العائلة</label>
+        <input id="editLastName" class="noon-input" type="text" placeholder="اسم العائلة" />
+      </div>
+
+      <div class="edit-field">
+        <label data-i18n="يوم الميلاد">يوم الميلاد</label>
+        <div class="birthday-selects">
+          <select id="editBirthDay">
+            <option value="">اليوم</option>
+          </select>
+          <select id="editBirthMonth">
+            <option value="">الشهر</option>
+          </select>
+          <select id="editBirthYear">
+            <option value="">السنة</option>
+          </select>
+        </div>
+        <p class="birthday-display" id="birthdayDisplay"></p>
+      </div>
+
+      <div class="edit-field">
+        <label data-i18n="الجنس">الجنس</label>
+        <div class="gender-options">
+          <label class="gender-option" id="genderMale">
+            <input type="radio" name="gender" value="male" />
+            <span data-i18n="ذكر">ذكر</span>
+          </label>
+          <label class="gender-option" id="genderFemale">
+            <input type="radio" name="gender" value="female" />
+            <span data-i18n="أنثى">أنثى</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="edit-field">
+        <label data-i18n="الجنسية">الجنسية</label>
+        <select id="editNationality" class="nationality-select">
+          <option value="مصر">مصر</option>
+          <option value="السعودية">السعودية</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="editSubmitBtn" class="edit-submit-btn" type="button" data-i18n="تحديث حسابك">تحديث حسابك</button>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="home.html" data-nav="home">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="الرئيسية">الرئيسية</small>
+    </a>
+    <a href="products.html" data-nav="products">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="الفئات">الفئات</small>
+    </a>
+    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="الرئيسية">
+      <img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" />
+    </button>
+    <a href="ahsab.html" data-nav="account">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="حسابي">حسابي</small>
+    </a>
+    <a href="empty-cart.html" data-nav="cart">
+      <span class="material-icons-outlined"></span>
+      <small data-i18n="العربة">العربة</small>
+      <span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span>
+    </a>
+  </nav>
+  
+  <!-- Noon Phone Verification Modal Backdrop -->
+  <div id="phoneVerificationBackdrop" class="phone-backdrop">
+    <div id="phoneVerificationModal" class="phone-modal">
+      
+      <!-- Panel 1: Enter Phone Number -->
+      <div id="panelPhoneInput" class="phone-modal-panel active">
+        <div class="phone-modal-header">
+          <h3 class="phone-modal-title">تغيير رقم الهاتف</h3>
+          <button type="button" class="phone-modal-close" id="closePhoneModalBtn">
+            <span class="material-icons-outlined">close</span>
+          </button>
+        </div>
+        <p class="phone-modal-subtitle">أضف معلومات الهاتف للتحقق من حسابك</p>
+        
+        <div class="phone-input-row" id="phoneInputRow">
+          <!-- Country Select -->
+          <div class="country-select-wrap">
+            <select id="modalCountrySelect">
+              <option value="EG">🇪🇬 +20</option>
+              <option value="SA">🇸🇦 +966</option>
+            </select>
+          </div>
+          <!-- Number Input -->
+          <input type="tel" id="modalPhoneInput" class="phone-modal-input" placeholder="أدخل رقم الجوال" />
+        </div>
+
+        <div id="phoneCountryWarning" class="phone-warning-msg" style="display:none;">
+          <span class="material-icons-outlined" style="font-size:16px;vertical-align:middle;"></span>
+          <span id="phoneCountryWarningText"></span>
+        </div>
+        
+        <span class="phone-error-msg" id="phoneErrorMsg"></span>
+        
+        <div class="channel-title">اختر طريقة استلام الرمز</div>
+        <div class="channel-options">
+          <label class="channel-card active whatsapp" id="channelWhatsappLabel">
+            <input type="radio" name="otp_channel" value="whatsapp" checked />
+            <svg viewBox="0 0 24 24">
+              <path fill="#25D366" d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 001.37 5.04l-1.46 5.334 5.47-1.43a9.926 9.926 0 004.61 1.139h.004c5.502 0 9.99-4.478 9.99-9.988 0-2.668-1.036-5.176-2.92-7.062C17.182 3.14 14.685 2 12.012 2z"/>
+              <path fill="#FFF" d="M12.012 3.586c2.247 0 4.36.877 5.95 2.467 1.589 1.591 2.465 3.705 2.465 5.934 0 4.629-3.771 8.4-8.411 8.4-.904 0-1.794-.146-2.645-.436l-.378-.127-3.268.858.873-3.19-.142-.228a8.318 8.318 0 01-1.277-4.498c0-4.631 3.773-8.408 8.413-8.408zm5.088 8.948c-.282-.142-1.666-.822-1.924-.916-.257-.094-.446-.142-.634.142-.187.283-.726.916-.889 1.103-.163.189-.327.212-.609.07a7.683 7.683 0 01-2.261-1.396 8.46 8.46 0 01-1.564-1.946c-.163-.284-.017-.436.124-.577.127-.127.283-.33.424-.496.142-.165.188-.283.283-.472.094-.189.047-.354-.023-.496-.071-.142-.634-1.528-.868-2.09-.229-.55-.497-.473-.68-.482-.178-.009-.382-.009-.588-.009-.205 0-.54.077-.822.385-.282.308-1.077 1.053-1.077 2.569 0 1.516 1.103 2.983 1.256 3.19.153.205 2.169 3.312 5.253 4.646.734.317 1.306.506 1.751.648.738.234 1.41.201 1.942.122.593-.089 1.666-.679 1.9-.1333.234-.347.234-.644.164-.707-.07-.063-.257-.156-.54-.298z"/>
+            </svg>
+            <span>📱 WhatsApp (موصى به)</span>
+          </label>
+          <label class="channel-card sms" id="channelSmsLabel">
+            <input type="radio" name="otp_channel" value="sms" />
+            <svg viewBox="0 0 24 24">
+              <path fill="#4b5563" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/>
+            </svg>
+            <span>💬 رسالة SMS</span>
+          </label>
+        </div>
+        
+        <button type="button" class="phone-primary-btn" id="sendOtpBtn" disabled>إرسال رمز التحقق</button>
+      </div>
+      
+      <!-- Panel 2: Enter OTP -->
+      <div id="panelOtpInput" class="phone-modal-panel">
+
+        <!-- ── Screen A: OTP entry ── -->
+        <div id="otpEntryScreen">
+          <div class="phone-modal-header">
+            <h3 class="phone-modal-title">تحقق من حسابك</h3>
+            <button type="button" class="phone-modal-close" id="closeOtpModalBtn">
+              <span class="material-icons-outlined"></span>
+            </button>
+          </div>
+          <p class="phone-modal-subtitle">
+            أدخل رمز التحقق المكون من 6 أرقام والمرسل إلى:
+            <span class="otp-target-phone" id="otpTargetPhoneText"></span>
+          </p>
+
+          <!-- Channel indicator badge -->
+          <div style="text-align: center;">
+            <div class="otp-channel-badge" id="otpChannelBadge">
+              <!-- Icon and label updated dynamically -->
+            </div>
+          </div>
+
+          <!-- OTP digit input row -->
+          <div class="otp-inputs-row" id="otpInputsGrid">
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+          </div>
+
+          <!-- Countdown timer -->
+          <div class="otp-timer-container" id="otpTimerContainer">
+            إعادة إرسال الرمز بعد: <span class="otp-time-val" id="otpTimerVal">00:59</span>
+          </div>
+
+          <!-- Resend options -->
+          <div class="otp-resend-container" id="otpResendContainer">
+            <button type="button" class="otp-resend-btn whatsapp" id="resendWhatsappBtn">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;"><path fill="#25D366" d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 001.37 5.04l-1.46 5.334 5.47-1.43a9.926 9.926 0 004.61 1.139h.004c5.502 0 9.99-4.478 9.99-9.988 0-2.668-1.036-5.176-2.92-7.062C17.182 3.14 14.685 2 12.012 2z"/><path fill="#FFF" d="M12.012 3.586c2.247 0 4.36.877 5.95 2.467 1.589 1.591 2.465 3.705 2.465 5.934 0 4.629-3.771 8.4-8.411 8.4-.904 0-1.794-.146-2.645-.436l-.378-.127-3.268.858.873-3.19-.142-.228a8.318 8.318 0 01-1.277-4.498c0-4.631 3.773-8.408 8.413-8.408zm5.088 8.948c-.282-.142-1.666-.822-1.924-.916-.257-.094-.446-.142-.634.142-.187.283-.726.916-.889 1.103-.163.189-.327.212-.609.07a7.683 7.683 0 01-2.261-1.396 8.46 8.46 0 01-1.564-1.946c-.163-.284-.017-.436.124-.577.127-.127.283-.33.424-.496.142-.165.188-.283.283-.472.094-.189.047-.354-.023-.496-.071-.142-.634-1.528-.868-2.09-.229-.55-.497-.473-.68-.482-.178-.009-.382-.009-.588-.009-.205 0-.54.077-.822.385-.282.308-1.077 1.053-1.077 2.569 0 1.516 1.103 2.983 1.256 3.19.153.205 2.169 3.312 5.253 4.646.734.317 1.306.506 1.751.648.738.234 1.41.201 1.942.122.593-.089 1.666-.679 1.9-.1333.234-.347.234-.644.164-.707-.07-.063-.257-.156-.54-.298z"/></svg>
+              <span>📱 WhatsApp</span>
+            </button>
+            <button type="button" class="otp-resend-btn sms" id="resendSmsBtn">
+              <svg viewBox="0 0 24 24" style="width:16px;height:16px;"><path fill="#4b5563" d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zM6 9h12v2H6V9zm8 5H6v-2h8v2zm4-6H6V6h12v2z"/></svg>
+              <span>💬 رسالة SMS</span>
+            </button>
+          </div>
+
+          <!-- Attempts counter -->
+          <div class="otp-attempts-left" id="otpAttemptsLeftText"></div>
+
+          <button type="button" class="phone-primary-btn" id="verifyOtpBtn">تحقق</button>
+
+          <!-- WhatsApp Sandbox Help trigger -->
+          <button type="button" class="otp-whatsapp-help-trigger" id="otpWhatsappHelpBtn">
+            <span class="material-icons-outlined" style="font-size: 15px; vertical-align: middle;"></span>
+            لم يصلك الرمز؟ اضغط للحل
+          </button>
+
+          <div class="otp-back-container">
+            <button type="button" class="otp-back-btn" id="otpBackBtn">
+              <span class="material-icons-outlined" style="font-size: 16px;"></span>
+              <span>تغيير رقم الهاتف</span>
+            </button>
+          </div>
+        </div><!-- /#otpEntryScreen -->
+
+        <!-- ── Screen B: WhatsApp activation help ── -->
+        <div id="waHelpScreen" style="display:none;">
+          <div class="phone-modal-header">
+            <h3 class="phone-modal-title" style="font-size:0.95rem;">تفعيل واتساب لاستقبال الرمز</h3>
+            <button type="button" class="phone-modal-close" id="closeWaHelpBtn">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+
+          <div class="wa-help-icon">📲</div>
+          <p class="wa-help-desc">
+            خدمة الواتساب تحتاج تفعيلاً لمرة واحدة فقط.<br>أرسل الرسالة التالية على واتساب:
+          </p>
+
+          <div class="wa-help-msg-box">
+            <span class="wa-help-msg-label">الرسالة:</span>
+            <code class="wa-help-code">join lungs-dog</code>
+            <button class="wa-copy-btn" onclick="navigator.clipboard.writeText('join lungs-dog').then(()=>{this.textContent='✓ تم';setTimeout(()=>this.textContent='نسخ',2000)})">
+              نسخ
+            </button>
+          </div>
+
+          <a class="wa-help-link"
+             href="https://wa.me/14155238886?text=join%20lungs-dog"
+             target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" style="width:20px;height:20px;flex-shrink:0;"><path fill="#fff" d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 001.37 5.04l-1.46 5.334 5.47-1.43a9.926 9.926 0 004.61 1.139h.004c5.502 0 9.99-4.478 9.99-9.988 0-2.668-1.036-5.176-2.92-7.062C17.182 3.14 14.685 2 12.012 2z"/></svg>
+            اضغط هنا لفتح واتساب وإرسال الرسالة
+          </a>
+
+          <div class="wa-help-steps">
+            <div class="wa-step"><span class="wa-step-num">1</span><span>اضغط الرابط الأخضر لفتح واتساب</span></div>
+            <div class="wa-step"><span class="wa-step-num">2</span><span>اضغط إرسال ← الرسالة جاهزة تلقائياً</span></div>
+            <div class="wa-step"><span class="wa-step-num">3</span><span>ارجع وأعد طلب رمز التحقق</span></div>
+          </div>
+
+          <!-- Back to OTP entry -->
+          <div class="otp-back-container" style="margin-top:14px;">
+            <button type="button" class="otp-back-btn" id="waHelpBackToOtpBtn">
+              <span class="material-icons-outlined" style="font-size: 16px;"></span>
+              <span>رجوع لإدخال الرمز</span>
+            </button>
+          </div>
+        </div><!-- /#waHelpScreen -->
+
+      </div>
+      
+      <!-- Panel 3: Success Animation -->
+      <div id="panelSuccess" class="phone-modal-panel">
+        <div class="success-panel">
+          <svg class="success-checkmark-svg" viewBox="0 0 52 52">
+            <circle cx="26" cy="26" r="25" fill="none"/>
+            <path fill="none" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
+          </svg>
+          <h3 class="phone-modal-title" style="text-align: center; margin-bottom: 8px;">تم التحقق بنجاح!</h3>
+          <p class="phone-modal-subtitle" style="text-align: center; margin-bottom: 0;">تم حفظ وتأكيد رقم الهاتف لحسابك.</p>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../assets/js/supabase-client.js?v=20260327-1"></script>
+  <script src="../assets/js/taager-integration.js?v=20260630d"></script>
+  <script src="../assets/js/store.js?v=20260630d"></script>
+  <script src="../assets/js/edit-account.js?v=20260630d"></script>
+  <script src="../assets/js/noon-shell.js"></script>
+</body>
+</html>

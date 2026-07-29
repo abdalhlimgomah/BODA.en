@@ -1,0 +1,90 @@
+﻿<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="إنشاء حساب جديد في BudoQ - منصة التجارة الإلكترونية المتعددة. سجل الآن واستمتع بتجربة تسوق فريدة." />
+  <meta property="og:title" content="إنشاء حساب - BudoQ" />
+  <meta property="og:description" content="أنشئ حسابك في BudoQ وابدأ التسوق من آلاف المنتجات." />
+  <title>إنشاء حساب - BudoQ</title>
+  <link rel="stylesheet" href="../../assets/vendor/fontawesome/css/all.min.css" />
+  <link href="../../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../../assets/css/noon-components.css" rel="stylesheet" />
+  <link rel="stylesheet" href="../signin/signin.css" />
+  <link rel="stylesheet" href="signup.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <script>
+    (function () {
+      emailjs.init({ publicKey: "xdVqEELgzBCftq4cf" });
+    })();
+  </script>
+<link rel="icon" type="image/x-icon" href="../../assets/icons/favicon.ico">
+<link rel="icon" type="image/png" sizes="16x16" href="../../assets/icons/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../assets/icons/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="../../assets/icons/favicon-48x48.png">
+<link rel="icon" type="image/png" sizes="64x64" href="../../assets/icons/favicon-64x64.png">
+<link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
+<link rel="manifest" href="../../assets/icons/site.webmanifest">
+<meta name="theme-color" content="#FFD500">
+  <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+</head>
+<body>
+  <div class="auth-shell">
+    <div class="auth-card">
+      <a class="auth-brand" href="../home.html">
+        <span class="material-icons-outlined"></span>
+        BudoQ
+      </a>
+      <h1 class="auth-title">إنشاء حساب جديد</h1>
+      <p class="auth-subtitle">سجّل بياناتك ثم أكمل التحقق عبر رمز OTP.</p>
+      <p id="auth-feedback" class="status-note hidden" aria-live="polite"></p>
+
+      <form class="auth-form" onsubmit="handleSignUp(event)">
+        <div class="auth-field">
+          <label for="signup-name">الاسم الكامل</label>
+          <input id="signup-name" class="auth-input" type="text" name="name" required />
+        </div>
+        <div class="auth-field">
+          <label for="signup-country">الدولة</label>
+          <select id="signup-country" class="auth-input" name="country" required>
+            <option value="EG">🇪🇬 مصر</option>
+            <option value="SA">🇸🇦 السعودية</option>
+          </select>
+        </div>
+        <div class="auth-field">
+          <label for="signup-email">البريد الإلكتروني</label>
+          <input id="signup-email" class="auth-input" type="email" name="email" autocomplete="email" required />
+        </div>
+        <div class="auth-field">
+          <label for="signup-password">كلمة المرور</label>
+          <input id="signup-password" class="auth-input" type="password" name="password" minlength="8" autocomplete="new-password" required />
+        </div>
+        <div class="auth-field">
+          <label for="signup-confirm">تأكيد كلمة المرور</label>
+          <input id="signup-confirm" class="auth-input" type="password" name="confirm-password" minlength="8" autocomplete="new-password" required />
+        </div>
+        <button type="submit" class="auth-btn">إنشاء الحساب</button>
+      </form>
+
+      <div class="auth-footer">
+        لديك حساب بالفعل؟ <a href="../signin/login.html">تسجيل الدخول</a>
+      </div>
+
+      <div class="google-wrap" id="google-button-wrap"></div>
+    </div>
+  </div>
+
+  <script src="../../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../../assets/js/supabase-client.js?v=20260327-1"></script>
+  <script src="../../assets/js/store.js?v=20260327-1"></script>
+  <script src="../../assets/js/security-utils.js"></script>
+  <script src="../../assets/js/auth.config.js"></script>
+  <script src="../signin/signin.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+</body>
+</html>
