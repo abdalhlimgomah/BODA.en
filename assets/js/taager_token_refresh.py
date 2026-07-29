@@ -128,30 +128,7 @@ try:
         )
         if proc.returncode == 0:
             log("Supabase secrets updated!")
-            AUTH_CONFIG = os.path.join(PROJECT_DIR, "assets", "js", "auth.config.js")
-            try:
-                with open(AUTH_CONFIG, "r", encoding="utf-8") as f:
-                    content = f.read()
-                content = re.sub(
-                    r'(window\.TAAGER_API_KEY\s*=\s*")[^"]*(")',
-                    lambda m: m.group(1) + token + m.group(2),
-                    content
-                )
-                content = re.sub(
-                    r'(window\.TAAGER_TAAGER_ID\s*=\s*")[^"]*(")',
-                    lambda m: m.group(1) + taager_id + m.group(2),
-                    content
-                )
-                content = re.sub(
-                    r'(window\.TAAGER_SESSION_KEY\s*=\s*")[^"]*(")',
-                    lambda m: m.group(1) + session_key + m.group(2),
-                    content
-                )
-                with open(AUTH_CONFIG, "w", encoding="utf-8") as f:
-                    f.write(content)
-                log("auth.config.js updated too!")
-            except Exception as e:
-                log(f"Failed to update auth.config.js: {e}")
+            log("لم يعد script يكتب المفاتيح في auth.config.js - الملف الأمامي لم يعد يحتوي على مفاتيح.")
         else:
             log(f"Failed: {proc.stderr}")
     else:

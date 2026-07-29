@@ -8,6 +8,22 @@ const CORS_HEADERS = {
   "Access-Control-Allow-Headers": "Content-Type, Authorization, apikey, x-client-info",
 };
 
+// Rate limiting
+const RL_WINDOW_MS = 60_000;
+const RL_MAX = 30;
+
+async function checkRateLimit(sb: ReturnType<typeof createClient>, ip: string, fn: string): Promise<boolean> {
+  const ws = new Date(Date.now() - RL_WINDOW_MS).toISOString();
+  try {
+    const { count } = await sb.from("api_rate_limits")
+      .select("*", { count: "exact", head: true })
+      .eq("ip", ip).eq("function_name", fn).gt("created_at", ws);
+    if (count && count >= RL_MAX) return false;
+    sb.from("api_rate_limits").insert({ ip, function_name: fn }).catch(() => {});
+    return true;
+  } catch { return true; }
+}
+
 // SHA-256 hashing helper for secure OTP storage
 async function hashOtp(otp: string): Promise<string> {
   const msgBuffer = new TextEncoder().encode(otp);
@@ -98,6 +114,14 @@ serve(async (req) => {
       throw new Error("Missing Supabase env configuration");
     }
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
+
+    // General rate limit
+    const allowed = await checkRateLimit(supabase, clientIp, "phone-verification");
+    if (!allowed) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded. Try again later." }), {
+        status: 429, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      });
+    }
 
     // Read headers for logging
     const userAgent = req.headers.get("user-agent") || "unknown";

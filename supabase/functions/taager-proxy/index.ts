@@ -12,6 +12,25 @@ const DEFAULT_COUNTRIES = ["EG", "SA"];
 const TAAGER_PRODUCTS_PAGE_SIZE = 100;
 const TAAGER_MAX_PAGES = 50;
 
+// Rate limiting
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 50;
+
+async function checkRateLimit(ip: string, fn: string): Promise<{allowed:boolean;retryAfter?:number}> {
+  if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) return { allowed: true };
+  const sb = getSupabaseAdmin();
+  if (!sb) return { allowed: true };
+  const ws = new Date(Date.now() - RATE_LIMIT_WINDOW_MS).toISOString();
+  try {
+    const { count } = await sb.from("api_rate_limits")
+      .select("*", { count: "exact", head: true })
+      .eq("ip", ip).eq("function_name", fn).gt("created_at", ws);
+    if (count && count >= RATE_LIMIT_MAX) return { allowed: false, retryAfter: 60 };
+    sb.from("api_rate_limits").insert({ ip, function_name: fn }).catch(() => {});
+    return { allowed: true };
+  } catch { return { allowed: true }; }
+}
+
 type JsonRecord = Record<string, unknown>;
 
 type HttpError = Error & {
@@ -718,6 +737,12 @@ async function syncProducts(countryParam = "") {
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
+  const clientIp = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const rateCheck = await checkRateLimit(clientIp, "taager-proxy");
+  if (!rateCheck.allowed) {
+    return respond(JSON.stringify({ error: "Rate limit exceeded. Try again later." }), 429);
   }
 
   const url = new URL(req.url);

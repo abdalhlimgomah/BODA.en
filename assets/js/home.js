@@ -49,22 +49,22 @@ var HOME_CONFIG = {
       img: "../assets/images/Home/b4962b5d-b1ac-403b-b7fe-5fa53bf556b4_20260703174859.png",
     },
     {
-      img: "https://a.nooncdn.com/assets/img-706x706/ar_mb_eg-hero-01_(3).1782397992.9076655.png?width=800",
+      img: "",
       link: "category.html?cat=beauty-and-care",
     },
     { img: "../assets/images/Home/ChatGPT Image Jul 4, 2026, 05_06_56 AM.png" },
     {
-      img: "https://a.nooncdn.com/mpcms/EN0003/assets/1d15f3cc-3ff5-4c53-b7bb-8bf56d1fecfb.png?width=2400",
+      img: "",
       link: "category.html?cat=phones",
     },
     { img: "../assets/images/Home/Jul 4, 2026, 05_00_52 AM.png" },
     {
-      img: "https://a.nooncdn.com/mpcms/EN0003/assets/38921e30-fdac-41be-a62c-c43fb5cf2304.png?width=800",
+      img: "",
       link: "category.html?cat=headphones",
     },
     { img: "../assets/images/Home/ChatGPT Image Jul 4, 2026, 05_04_03 AM.png" },
     {
-      img: "https://a.nooncdn.com/mpcms/EN0003/assets/773236d6-6411-43f2-b60f-ef2d41573ca8.png?width=800",
+      img: "",
       link: "category.html?cat=sports",
     },
     {
@@ -80,7 +80,7 @@ var HOME_CONFIG = {
     },
     {
       name: "موبايلات",
-      img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=300&h=300&fit=crop&q=80",
+      img: "",
       link: "category.html?cat=phones",
     },
     {
@@ -105,7 +105,7 @@ var HOME_CONFIG = {
     },
     {
       name: "منزل ومطبخ",
-      img: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300&h=300&fit=crop&q=80",
+      img: "",
       link: "category.html?cat=home",
     },
     {
@@ -120,37 +120,37 @@ var HOME_CONFIG = {
     },
     {
       name: "ألعاب",
-      img: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=300&h=300&fit=crop&q=80",
+      img: "",
       link: "category.html?cat=toys",
     },
     {
       name: "أطفال",
-      img: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=300&h=300&fit=crop&q=80",
+      img: "",
       link: "category.html?cat=baby",
     },
     {
       name: "أثاث وديكور",
-      img: "https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=300&h=300&fit=crop&q=80",
+      img: "",
       link: "category.html?cat=furniture",
     },
     {
       name: "مكتب ودراسة",
-      img: "https://images.unsplash.com/photo-1497366216548-37526070297c?w=300&h=300&fit=crop&q=80",
+      img: "",
       link: "category.html?cat=office",
     },
     {
       name: "كاميرات",
-      img: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300&h=300&fit=crop&q=80",
+      img: "",
       link: "category.html?cat=cameras",
     },
     {
       name: "مجوهرات",
-      img: "https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=300&h=300&fit=crop&q=80",
+      img: "",
       link: "category.html?cat=jewelry",
     },
     {
       name: "هدايا",
-      img: "https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=300&h=300&fit=crop&q=80",
+      img: "",
       link: "category.html?cat=gifts",
     },
   ],
@@ -697,47 +697,54 @@ function syncWishlistButtons(container) {
 // ========== FETCH DATA ==========
 async function fetchSupabaseProducts(filter) {
   if (isHomeSupabaseBackoffActive()) return [];
-  var client = getSupabaseProductsClient();
-  if (!client || typeof client.from !== "function") return [];
+  var q = String(filter || "").trim().toLowerCase();
+  var mapped = q ? ARABIC_CATEGORY_MAP[q] : null;
+  var data = null;
   try {
-    var query = client.from("products").select("*");
-    var q = String(filter || "")
-      .trim()
-      .toLowerCase();
-    if (q) {
-      var mapped = ARABIC_CATEGORY_MAP[q];
+    var url = "/api/products";
+    if (mapped) url += "?filter=" + encodeURIComponent(mapped);
+    var res = await fetch(url);
+    if (res.ok) data = await res.json();
+  } catch (e) {
+    console.warn("cache proxy failed, falling back:", e);
+  }
+  if (!data) {
+    var client = getSupabaseProductsClient();
+    if (!client || typeof client.from !== "function") return [];
+    try {
+      var query = client.from("products").select("*");
       if (mapped) query = query.eq("category", mapped);
-    }
-    var result = await query.order("created_at", { ascending: false });
-    if (result.error) {
-      if (isNetworkResolutionError(result.error)) markHomeSupabaseBackoff();
-      console.warn("fetch error:", result.error);
+      var result = await query.order("created_at", { ascending: false });
+      if (result.error) {
+        if (isNetworkResolutionError(result.error)) markHomeSupabaseBackoff();
+        console.warn("fetch error:", result.error);
+        return [];
+      }
+      data = result.data;
+    } catch (e) {
+      if (isNetworkResolutionError(e)) markHomeSupabaseBackoff();
+      console.warn("fetch failed:", e);
       return [];
     }
-    var matched = normalizeProducts(result.data);
-    var enriched = await annotateProductsWithSupabaseRatings(matched);
-    if (window.addProductToStore)
-      enriched.forEach(function (p) {
-        window.addProductToStore(p);
-      });
-    if (window.TaagerIntegration) {
-      var cc = (window.TaagerIntegration.getSelectedCountry() || {}).code;
-      var tp = await window.TaagerIntegration.fetchTaagerProducts(cc);
-      window.TaagerIntegration.mergeTaagerIntoStore(tp);
-      enriched.push.apply(enriched, tp);
-      var filtered = window.TaagerIntegration.filterByCountry(enriched, cc);
-      if (filtered.length) enriched = filtered;
-    }
-    // Filter all products by current country (for both Taager and local products)
-    var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "EG";
-    enriched = filterProductsByCountry(enriched, currentCountry);
-    if (q) return filterProductsBySearchTerm(enriched, q);
-    return enriched;
-  } catch (e) {
-    if (isNetworkResolutionError(e)) markHomeSupabaseBackoff();
-    console.warn("fetch failed:", e);
-    return [];
   }
+  var matched = normalizeProducts(data);
+  var enriched = await annotateProductsWithSupabaseRatings(matched);
+  if (window.addProductToStore)
+    enriched.forEach(function (p) {
+      window.addProductToStore(p);
+    });
+  if (window.TaagerIntegration) {
+    var cc = (window.TaagerIntegration.getSelectedCountry() || {}).code;
+    var tp = await window.TaagerIntegration.fetchTaagerProducts(cc);
+    window.TaagerIntegration.mergeTaagerIntoStore(tp);
+    enriched.push.apply(enriched, tp);
+    var filtered = window.TaagerIntegration.filterByCountry(enriched, cc);
+    if (filtered.length) enriched = filtered;
+  }
+  var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "EG";
+  enriched = filterProductsByCountry(enriched, currentCountry);
+  if (q) return filterProductsBySearchTerm(enriched, q);
+  return enriched;
 }
 
 // Filter products by country code (EG/SA)

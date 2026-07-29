@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
+    <loc>https://budoq.vercel.app/</loc>
+    <priority>1.0</priority>
+    <changefreq>daily</changefreq>
+  </url>
+  <url>
     <loc>https://budoq.vercel.app/pages/home.html</loc>
     <priority>1.0</priority>
     <changefreq>daily</changefreq>
@@ -21,24 +26,69 @@
     <changefreq>weekly</changefreq>
   </url>
   <url>
+    <loc>https://budoq.vercel.app/pages/signin/login.html</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/signup/index.html</loc>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
     <loc>https://budoq.vercel.app/pages/about.html</loc>
-    <priority>0.5</priority>
+    <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://budoq.vercel.app/pages/contact.html</loc>
-    <priority>0.5</priority>
+    <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/privacy.html</loc>
-    <priority>0.3</priority>
+    <loc>https://budoq.vercel.app/pages/faq.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/shipping.html</loc>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/support.html</loc>
+    <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://budoq.vercel.app/pages/returns.html</loc>
     <priority>0.5</priority>
     <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/privacy.html</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/complaints.html</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/offers.html</loc>
+    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/seller.html</loc>
+    <priority>0.6</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/merchant-center.html</loc>
+    <priority>0.5</priority>
+    <changefreq>weekly</changefreq>
   </url>
   <url>
     <loc>https://budoq.vercel.app/pages/wishlist.html</loc>
@@ -48,6 +98,31 @@
   <url>
     <loc>https://budoq.vercel.app/pages/search.html</loc>
     <priority>0.6</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/checkout.html</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/my-orders.html</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/ahsab.html</loc>
+    <priority>0.5</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/product-listing.html</loc>
+    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/contest.html</loc>
+    <priority>0.5</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
@@ -74,6 +149,16 @@
     <loc>https://budoq.vercel.app/pages/landing.html</loc>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/order-tracking.html</loc>
+    <priority>0.4</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.vercel.app/pages/referral-dashboard.html</loc>
+    <priority>0.3</priority>
+    <changefreq>monthly</changefreq>
   </url>
   <url>
     <loc>https://budoq.vercel.app/pages/content-manager.html</loc>

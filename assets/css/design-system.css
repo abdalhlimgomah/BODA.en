@@ -15,19 +15,19 @@
 /* ———— Design Tokens ———— */
 :root {
   /* Brand Colors */
-  --buda-primary: #6D28D9;
-  --buda-secondary: #A855F7;
-  --buda-dark: #3B0A75;
+  --buda-primary: #7C3AED;
+  --buda-secondary: #A78BFA;
+  --buda-dark: #5B21B6;
   --buda-bg: #FFFFFF;
   --buda-card: #FFFFFF;
   --buda-text: #111111;
   --buda-text-secondary: #6B7280;
   --buda-border: #E5E7EB;
-  --buda-shadow: rgba(109,40,217,0.12);
+  --buda-shadow: rgba(124,58,237,0.12);
 
   /* Gradients (ONLY ONE) */
-  --buda-gradient: linear-gradient(45deg, #6D28D9, #A855F7);
-  --buda-gradient-hover: linear-gradient(45deg, #5B21B6, #9333EA);
+  --buda-gradient: linear-gradient(45deg, #7C3AED, #A78BFA);
+  --buda-gradient-hover: linear-gradient(45deg, #5B21B6, #7C3AED);
 
   /* Radii */
   --buda-radius-xs: 12px;
@@ -42,10 +42,10 @@
   --buda-radius-sheet: 24px;
 
   /* Shadows — soft purple only */
-  --buda-shadow-sm: 0 1px 3px rgba(109,40,217,0.08);
-  --buda-shadow-md: 0 4px 20px rgba(109,40,217,0.12);
-  --buda-shadow-lg: 0 8px 32px rgba(109,40,217,0.16);
-  --buda-shadow-xl: 0 16px 48px rgba(109,40,217,0.2);
+  --buda-shadow-sm: 0 1px 3px rgba(124,58,237,0.08);
+  --buda-shadow-md: 0 4px 20px rgba(124,58,237,0.12);
+  --buda-shadow-lg: 0 8px 32px rgba(124,58,237,0.16);
+  --buda-shadow-xl: 0 16px 48px rgba(124,58,237,0.2);
 
   /* Typography */
   --buda-font: 'Plus Jakarta Sans', 'Manrope', sans-serif;

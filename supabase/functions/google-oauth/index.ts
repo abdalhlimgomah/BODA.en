@@ -1,5 +1,21 @@
 import "https://deno.land/x/xhr@0.3.0/mod.ts";
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+
+const RL_WINDOW_MS = 60_000;
+const RL_MAX = 20;
+
+async function checkRateLimit(sb: ReturnType<typeof createClient>, ip: string, fn: string): Promise<boolean> {
+  const ws = new Date(Date.now() - RL_WINDOW_MS).toISOString();
+  try {
+    const { count } = await sb.from("api_rate_limits")
+      .select("*", { count: "exact", head: true })
+      .eq("ip", ip).eq("function_name", fn).gt("created_at", ws);
+    if (count && count >= RL_MAX) return false;
+    sb.from("api_rate_limits").insert({ ip, function_name: fn }).catch(() => {});
+    return true;
+  } catch { return true; }
+}
 
 serve(async (req: Request) => {
   if (req.method !== "POST") {
@@ -7,6 +23,19 @@ serve(async (req: Request) => {
       status: 405,
       headers: { "Content-Type": "application/json" },
     });
+  }
+
+  const clientIp = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const supabaseUrl = Deno.env.get("SUPABASE_URL") || "";
+  const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  if (supabaseUrl && supabaseKey) {
+    const sb = createClient(supabaseUrl, supabaseKey);
+    const ok = await checkRateLimit(sb, clientIp, "google-oauth");
+    if (!ok) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
+        status: 429, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
+    }
   }
 
   try {

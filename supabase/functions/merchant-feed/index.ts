@@ -6,6 +6,22 @@ const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "
 const SITE_URL = Deno.env.get("SITE_URL") || "https://budoq.vercel.app";
 const FEED_SECRET = Deno.env.get("MERCHANT_FEED_SECRET") || "";
 
+// Rate limiting
+const RL_WINDOW_MS = 60_000;
+const RL_MAX = 30;
+
+async function checkRateLimit(sb: ReturnType<typeof createClient>, ip: string, fn: string): Promise<boolean> {
+  const ws = new Date(Date.now() - RL_WINDOW_MS).toISOString();
+  try {
+    const { count } = await sb.from("api_rate_limits")
+      .select("*", { count: "exact", head: true })
+      .eq("ip", ip).eq("function_name", fn).gt("created_at", ws);
+    if (count && count >= RL_MAX) return false;
+    sb.from("api_rate_limits").insert({ ip, function_name: fn }).catch(() => {});
+    return true;
+  } catch { return true; }
+}
+
 const GOOGLE_CATEGORIES: Record<string, string> = {
   electronics: "Electronics",
   fashion: "Apparel & Accessories > Clothing",
@@ -167,6 +183,16 @@ async function generateFeed(sb: ReturnType<typeof createClient>): Promise<string
 }
 
 serve(async (req) => {
+  const clientIp = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  if (SUPABASE_URL && SUPABASE_SERVICE_ROLE_KEY) {
+    const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    if (!await checkRateLimit(sb, clientIp, "merchant-feed")) {
+      return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
+        status: 429, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+      });
+    }
+  }
+
   const url = new URL(req.url);
   const path = url.pathname;
 
