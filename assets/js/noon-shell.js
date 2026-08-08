@@ -121,7 +121,10 @@ function getNoonHeaderHTML() {
     '      </button>',
     '    <a href="my-orders.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg> الطلبيات</a>',
     '    <a href="wishlist.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> المفضلة</a>',
-    '    <a href="empty-cart.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> عربة التسوق</a>',
+    '    <a href="empty-cart.html" class="buda-header__desktop-link">' +
+    '      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> عربة التسوق' +
+    '      <span id="nav-cart-count-desk" class="nav-cart-count-desk nav-cart-0">0</span>' +
+    '    </a>',
     '    <div class="buda-desktop-account" id="budaDesktopAccount">',
 
     '      <div class="buda-desktop-account-dropdown" id="budaDesktopAccountDropdown"></div>',
@@ -573,7 +576,6 @@ function hideBottomNavOnDesktop() {
 
   function initSearchRedirect() {
     document.querySelectorAll("[data-search-target]").forEach((input) => {
-      if (window.location.pathname.toLowerCase().includes('/home.html')) return; // Skip on home (has dropdown)
       const target = input.getAttribute("data-search-target") || "search.html";
       const redirect = () => {
         if (window.location.pathname.toLowerCase().includes("/search.html")) return;
