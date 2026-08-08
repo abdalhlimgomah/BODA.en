@@ -1554,7 +1554,6 @@ HM.renderBrands = function () {
 HM.renderFeatures = function () {
   if (!HM.contentEl) return;
   var html =
-    '<div class="hm-features-wrap hm-fade" id="hm-features">' +
     /* Mobile: single card with 4 horizontal items */
     '<div class="hm-features-mobile">' +
     '<div class="hm-f-card">' +
@@ -1568,18 +1567,7 @@ HM.renderFeatures = function () {
     '</div></div>' +
 /* Desktop: stacked vertical cards */
     '<div class="hm-features-desktop">' +
-    // اول 4 - زي ما هما
-    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><polygon points="12 15 17 21 7 21 12 15"/><path d="M12 15V9"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">توصيل سريع</span><span class="hm-fd-desc">إلى جميع المناطق</span></div></div>' +
-    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">دفع آمن</span><span class="hm-fd-desc">حماية بياناتك</span></div></div>' +
-    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h-1a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1"/><path d="M20 6h1a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1"/><path d="M6 14h2v6H6z"/><path d="M16 14h2v6h-2z"/><path d="M6 14v-2a6 6 0 0 1 12 0v2"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">دعم 24/7</span><span class="hm-fd-desc">دائماً لمساعدتك</span></div></div>' +
-    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">إرجاع سهل</span><span class="hm-fd-desc">ضمان استرجاع خلال 14 يوم</span></div></div>' +
 
-    // اخر 4 - جداد تماماً
-    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">منتجات أصلية</span><span class="hm-fd-desc">100% ضمان الجودة</span></div></div>' +
-    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">تقييمات عالية</span><span class="hm-fd-desc">آلاف العملاء راضين</span></div></div>' +
-    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">تغليف مميز</span><span class="hm-fd-desc">يوصل بحالة ممتازة</span></div></div>' +
-    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9 12l2 2 4-4"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">عروض حصرية</span><span class="hm-fd-desc">خصومات كل اسبوع</span></div></div>' +
-    '<div class="hm-fd-card"><div class="hm-fd-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div><div class="hm-fd-info"><span class="hm-fd-title">تحديثات مستمرة</span><span class="hm-fd-desc">منتجات جديدة كل اسبوع</span></div></div>' +
     '</div></div>';
   var temp = document.createElement("div");
   temp.innerHTML = html;
@@ -1591,10 +1579,6 @@ HM.renderSmartCategories = function (section) {
   var cards = HOME_CONFIG._smartCategories || [];
   if (!cards || !cards.length) {
     cards = [
-      { title: "الساعات الذكية", subtitle: "أحدث التقنيات في معصمك", image_url: "../assets/images/categories/watches.png", link_url: "category-landing.html?slug=smart-watches", gradient_from: "#1a1a2e", gradient_to: "#16213e" },
-      { title: "السماعات", subtitle: "تجربة صوتية فريدة", image_url: "../assets/images/categories/headphones.png", link_url: "category-landing.html?slug=headphones", gradient_from: "#0f3443", gradient_to: "#34e89e" },
-      { title: "الأحذية", subtitle: "أناقة وراحة في كل خطوة", image_url: "../assets/images/categories/sports.png", link_url: "category-landing.html?slug=shoes", gradient_from: "#4a00e0", gradient_to: "#8e2de2" },
-      { title: "الملابس", subtitle: "أحدث صيحات الموضة", image_url: "../assets/images/categories/fashion.png", link_url: "category-landing.html?slug=clothes", gradient_from: "#e44d26", gradient_to: "#f09737" },
     ];
   }
   var html =
