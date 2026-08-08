@@ -130,6 +130,10 @@
     width: 40px;
     height: 40px;
   }
+  /* Country selector: visible only on desktop (far end of the bar) */
+  .buda-country-select {
+    display: inline-flex;
+  }
   .buda-header__notif:hover svg,
   .buda-header__desktop-link:hover svg {
     color: var(--color-primary);

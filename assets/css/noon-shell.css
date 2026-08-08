@@ -98,6 +98,86 @@
 .buda-desktop-account-dropdown .buda-divider { height: 1px; background: #E5E7EB; margin: 4px 0; }
 .buda-desktop-account-dropdown .buda-logout { color: #EF4444 !important; }
 
+/* Country selector (desktop, far end of header) */
+.buda-country-select {
+  position: relative;
+  flex-shrink: 0;
+  display: none;
+}
+.buda-country-trigger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid #E2E8F0;
+  border-radius: 999px;
+  background: #FFFFFF;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  color: #1F2937;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease;
+}
+.buda-country-select:hover .buda-country-trigger,
+.buda-country-select.open .buda-country-trigger {
+  border-color: #6D28D9;
+  background: #FAF5FF;
+  box-shadow: 0 4px 12px rgba(109, 40, 217, 0.12);
+}
+.buda-country-flag {
+  font-size: 1.05rem;
+  line-height: 1;
+}
+.buda-country-name {
+  max-width: 110px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.buda-country-caret {
+  color: #6B7280;
+}
+
+/* Shared modal backdrop/card (used by the country selector popup) */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(0, 0, 0, 0.4);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+.modal-backdrop.show {
+  display: flex;
+}
+.modal-card {
+  width: min(100%, 460px);
+  border: 1px solid #E5E7EB;
+  border-radius: 16px;
+  background: #fff;
+  padding: 16px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+.inline-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn-danger {
+  border: 1px solid #FCA5A5;
+  background: #FEF2F2;
+  color: #B91C1C;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+}
+
 /* Inline search inside header — hidden on mobile, shown on desktop */
 .buda-header__search-inline {
   display: none;
@@ -287,9 +367,9 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #6D28D9;
+  background: #8769b500;
 }
-.buda-search-icon svg { display: block; stroke: #FFFFFF; width: 16px; height: 16px; }
+.buda-search-icon svg { display: block; stroke: #666262; width: 16px; height: 16px; }
 .buda-search-box__input {
   flex: 1;
   height: 100%;
@@ -608,7 +688,7 @@
 
 .sidebar-footer {
   border-top: 1px solid var(--noon-border);
-  margin-top: 270px;
+  margin-top: 0px;
   padding-top: 16px;
 }
 
