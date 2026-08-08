@@ -202,33 +202,151 @@ function normalizeTaagerDbProduct(item) {
   });
 }
 
+function countryKeyMatches(value, code) {
+  const upp = String(value || "").toUpperCase().trim();
+  if (!upp) return false;
+  const upper = String(code || "").toUpperCase().trim();
+  const iso3 = { EG: "EGY", SA: "SAU", AE: "ARE", IQ: "IRQ", OM: "OMN" };
+  const slugs = {
+    EG: ["EGYPT", "مصر"],
+    SA: ["KSA", "SAUDI-ARABIA", "SAUDI ARABIA", "السعودية"],
+    AE: ["UAE", "EMIRATES", "الإمارات"],
+    IQ: ["IRAQ", "العراق"],
+    OM: ["OMAN", "عمان"],
+  };
+  if (upp === upper) return true;
+  if (upp === iso3[upper]) return true;
+  const list = slugs[upper] || [];
+  return list.indexOf(upp) !== -1;
+}
+
+function matchesCountry(product, countryCode) {
+  if (!product) return false;
+  const upper = String(countryCode || "EG").toUpperCase().trim();
+  const countryField = String(product.country || product.country_code || "").toUpperCase().trim();
+  const countries = Array.isArray(product.available_countries) ? product.available_countries : [];
+  if (countries.length) {
+    for (let i = 0; i < countries.length; i++) {
+      if (countryKeyMatches(countries[i], upper)) return true;
+    }
+    return false;
+  }
+  if (countryField) return countryKeyMatches(countryField, upper);
+  return true;
+}
+
 function filterTaagerProductsByCountry(products = [], countryCode = "") {
   if (!countryCode) return [...products];
-  const iso2to3 = { EG: "EGY", SA: "SAU", AE: "ARE", IQ: "IRQ", OM: "OMN" };
-  const upperCode = String(countryCode || "").toUpperCase();
-  const iso3Code = iso2to3[upperCode] || upperCode;
-  return products.filter((product) => {
-    const countries = Array.isArray(product?.available_countries) ? product.available_countries : [];
-    if (!countries.length) return true;
-    return countries.some((entry) => {
-      const code = String(entry || "").toUpperCase().trim();
-      return code === upperCode || code === iso3Code;
+  return products.filter((product) => matchesCountry(product, countryCode));
+}
+
+const TAAGER_LIST_COLUMNS =
+  "id,taager_product_id,name,created_at,description,quick_details,content_ideas,how_to_use,videos,category,price,original_price,image,images,image1,image2,image3,image4,image5,image6,image7,image8,available_countries,stock,stock_status,brand,seller,source,is_active,updated_at,last_synced_at";
+
+const _taagerListMemoryCache = {};
+const TAAGER_LIST_CACHE_TTL = 10 * 60 * 1000;
+
+// Cross-page cache for the taager_products table (reloads don't re-download)
+const TAAGER_IDB_DB = "buda_products_cache";
+const TAAGER_IDB_STORE = "taager_list";
+let _taagerIdbPromise = null;
+
+function getTaagerIDB() {
+  if (!window.indexedDB) return null;
+  if (_taagerIdbPromise) return _taagerIdbPromise;
+  _taagerIdbPromise = new Promise(function (resolve) {
+    var req;
+    try {
+      req = window.indexedDB.open(TAAGER_IDB_DB, 1);
+    } catch (_e) {
+      resolve(null);
+      return;
+    }
+    req.onupgradeneeded = function () {
+      var db = req.result;
+      if (!db.objectStoreNames.contains(TAAGER_IDB_STORE)) {
+        db.createObjectStore(TAAGER_IDB_STORE);
+      }
+    };
+    req.onsuccess = function () {
+      resolve(req.result);
+    };
+    req.onerror = function () {
+      _taagerIdbPromise = null;
+      resolve(null);
+    };
+  });
+  return _taagerIdbPromise;
+}
+
+function taagerIdbGet(key) {
+  return getTaagerIDB().then(function (db) {
+    if (!db) return null;
+    return new Promise(function (resolve) {
+      try {
+        var tx = db.transaction(TAAGER_IDB_STORE, "readonly");
+        var getReq = tx.objectStore(TAAGER_IDB_STORE).get(key);
+        getReq.onsuccess = function () {
+          resolve(getReq.result || null);
+        };
+        getReq.onerror = function () {
+          resolve(null);
+        };
+      } catch (_e) {
+        resolve(null);
+      }
+    });
+  });
+}
+
+function taagerIdbPut(key, entry) {
+  return getTaagerIDB().then(function (db) {
+    if (!db) return;
+    return new Promise(function (resolve) {
+      try {
+        var tx = db.transaction(TAAGER_IDB_STORE, "readwrite");
+        tx.objectStore(TAAGER_IDB_STORE).put(entry, key);
+        tx.oncomplete = resolve;
+        tx.onerror = function () { resolve(); };
+      } catch (_e) {
+        resolve();
+      }
     });
   });
 }
 
 async function fetchTaagerProducts(countryCode = "") {
   const client = getSupabaseClient();
+  const cacheKey = "TAAGER:" + String(countryCode || "EG").toUpperCase();
+  const memHit = _taagerListMemoryCache[cacheKey];
+  if (memHit && Date.now() - memHit.t < TAAGER_LIST_CACHE_TTL) {
+    return memHit.products;
+  }
+
+  // IDB hit: survives reloads
+  try {
+    const idbEntry = await taagerIdbGet(cacheKey);
+    if (
+      idbEntry &&
+      idbEntry.t &&
+      Array.isArray(idbEntry.products) &&
+      Date.now() - idbEntry.t < TAAGER_LIST_CACHE_TTL
+    ) {
+      _taagerListMemoryCache[cacheKey] = { t: idbEntry.t, products: idbEntry.products };
+      return idbEntry.products;
+    }
+  } catch (_e) {}
 
   try {
     const pageSize = 1000;
     const allRows = [];
     let useActiveFilter = true;
+    let columnMode = "list";
 
     for (let offset = 0; offset < 100000; offset += pageSize) {
       let query = client
         .from("taager_products")
-        .select("*")
+        .select(columnMode === "star" ? "*" : TAAGER_LIST_COLUMNS)
         .range(offset, offset + pageSize - 1);
 
       if (useActiveFilter) {
@@ -236,10 +354,17 @@ async function fetchTaagerProducts(countryCode = "") {
       }
 
       let { data, error } = await query;
-      if (error && useActiveFilter && isMissingColumnError(error)) {
-        useActiveFilter = false;
-        offset -= pageSize;
-        continue;
+      if (error) {
+        if (columnMode === "list" && isMissingColumnError(error)) {
+          columnMode = "star";
+          offset -= pageSize;
+          continue;
+        }
+        if (useActiveFilter && isMissingColumnError(error)) {
+          useActiveFilter = false;
+          offset -= pageSize;
+          continue;
+        }
       }
       if (error) {
         console.warn("failed fetching taager_products from supabase", error);
@@ -254,7 +379,10 @@ async function fetchTaagerProducts(countryCode = "") {
     if (allRows.length) {
       const products = allRows.map(normalizeTaagerDbProduct).filter(Boolean);
       const filtered = filterTaagerProductsByCountry(products, countryCode);
-      return annotateProductsWithRatingsTable(client, filtered);
+      const annotated = await annotateProductsWithRatingsTable(client, filtered);
+      _taagerListMemoryCache[cacheKey] = { t: Date.now(), products: annotated };
+      taagerIdbPut(cacheKey, { t: Date.now(), products: annotated }).catch(function () {});
+      return annotated;
     }
   } catch (error) {
     console.warn("failed fetching taager_products from supabase", error);
@@ -1104,24 +1232,123 @@ async function annotateProductsWithRatingsTable(client, products = []) {
   }
 }
 
+const _productsListMemoryCache = {};
+const PRODUCTS_LIST_CACHE_TTL = 10 * 60 * 1000;
+
+// ===== Cross-page products list cache (IndexedDB) =====
+// fetchAllProducts was pulling the whole `products` table on every page load,
+// which caused massive egress. We now persist the annotated list for 10
+// minutes so reloads/navigation reuse it.
+const PRODUCTS_IDB_DB = "buda_products_cache";
+const PRODUCTS_IDB_STORE = "products";
+const PRODUCTS_IDB_KEY = "PRODUCTS:ALL";
+let _productsIdbPromise = null;
+
+function getProductsIDB() {
+  if (!window.indexedDB) return null;
+  if (_productsIdbPromise) return _productsIdbPromise;
+  _productsIdbPromise = new Promise(function (resolve) {
+    var req;
+    try {
+      req = window.indexedDB.open(PRODUCTS_IDB_DB, 1);
+    } catch (_e) {
+      resolve(null);
+      return;
+    }
+    req.onupgradeneeded = function () {
+      var db = req.result;
+      if (!db.objectStoreNames.contains(PRODUCTS_IDB_STORE)) {
+        db.createObjectStore(PRODUCTS_IDB_STORE);
+      }
+    };
+    req.onsuccess = function () {
+      resolve(req.result);
+    };
+    req.onerror = function () {
+      _productsIdbPromise = null;
+      resolve(null);
+    };
+  });
+  return _productsIdbPromise;
+}
+
+function productsIdbGet() {
+  return getProductsIDB().then(function (db) {
+    if (!db) return null;
+    return new Promise(function (resolve) {
+      try {
+        var tx = db.transaction(PRODUCTS_IDB_STORE, "readonly");
+        var getReq = tx.objectStore(PRODUCTS_IDB_STORE).get(PRODUCTS_IDB_KEY);
+        getReq.onsuccess = function () {
+          resolve(getReq.result || null);
+        };
+        getReq.onerror = function () {
+          resolve(null);
+        };
+      } catch (_e) {
+        resolve(null);
+      }
+    });
+  });
+}
+
+function productsIdbPut(entry) {
+  return getProductsIDB().then(function (db) {
+    if (!db) return;
+    return new Promise(function (resolve) {
+      try {
+        var tx = db.transaction(PRODUCTS_IDB_STORE, "readwrite");
+        tx.objectStore(PRODUCTS_IDB_STORE).put(entry, PRODUCTS_IDB_KEY);
+        tx.oncomplete = resolve;
+        tx.onerror = function () { resolve(); };
+      } catch (_e) {
+        resolve();
+      }
+    });
+  });
+}
+
 async function fetchAllProducts() {
   const client = getSupabaseClient();
+  const memKey = "PRODUCTS:ALL";
+  const memHit = _productsListMemoryCache[memKey];
+  if (memHit && Date.now() - memHit.t < PRODUCTS_LIST_CACHE_TTL) {
+    return memHit.products;
+  }
+
+  // IDB hit: survives page reloads so reloading doesn't re-download the table
+  try {
+    const idbEntry = await productsIdbGet();
+    if (
+      idbEntry &&
+      idbEntry.t &&
+      Array.isArray(idbEntry.products) &&
+      Date.now() - idbEntry.t < PRODUCTS_LIST_CACHE_TTL
+    ) {
+      _productsListMemoryCache[memKey] = { t: idbEntry.t, products: idbEntry.products };
+      return idbEntry.products;
+    }
+  } catch (_e) {}
+
   try {
     const pageSize = 1000;
     const allRows = [];
-    
+
     for (let offset = 0; offset < 100000; offset += pageSize) {
       const { data, error } = await client
         .from("products")
         .select("*")
         .range(offset, offset + pageSize - 1);
-        
+
       if (error) throw error;
       const batch = Array.isArray(data) ? data : [];
       allRows.push.apply(allRows, batch);
       if (batch.length < pageSize) break;
     }
-    return annotateProductsWithRatingsTable(client, allRows);
+    const products = await annotateProductsWithRatingsTable(client, allRows);
+    _productsListMemoryCache[memKey] = { t: Date.now(), products };
+    productsIdbPut({ t: Date.now(), products }).catch(function () {});
+    return products;
   } catch (error) {
     console.error("fetchAllProducts failed, trying single fetch fallback:", error);
     const { data, error: err2 } = await client.from("products").select("*");
@@ -1387,15 +1614,12 @@ async function fetchAllProductsWithTaager(countryCode) {
 
     // Check if any product matches this country before filtering
     var hasCountryMatch = merged.some(function (product) {
-      var pc = (product?.country || product?.country_code || "").toUpperCase();
-      return pc === upperCode || pc === iso3Code || pc === slugMatch;
+      return matchesCountry(product, upperCode);
     });
 
     if (hasCountryMatch) {
       return merged.filter(function (product) {
-        var pCountry = (product?.country || product?.country_code || "").toUpperCase();
-        if (!pCountry) return true;
-        return pCountry === upperCode || pCountry === iso3Code || pCountry === slugMatch;
+        return matchesCountry(product, upperCode);
       });
     }
   }

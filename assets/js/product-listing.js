@@ -752,6 +752,9 @@ PL.fetchProducts = async function () {
   // Filter by current country
   var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "EG";
   source = (source || []).filter(function (p) {
+    if (window.TaagerIntegration && typeof window.TaagerIntegration.matchesCountry === "function") {
+      return window.TaagerIntegration.matchesCountry(p, currentCountry);
+    }
     var pCountry = (p?.country || p?.country_code || "").toUpperCase();
     if (!pCountry) return true;
     return pCountry === currentCountry.toUpperCase();

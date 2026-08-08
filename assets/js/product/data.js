@@ -90,7 +90,7 @@
           record = pool.find(function (p) { return String(p.id || p.product_id) === String(id); }) || null;
         }
         if (!record && typeof client.from === "function") {
-          var allResp = await client.from("products").select("*");
+          var allResp = await client.from("products").select("*").limit(2000);
           if (!allResp.error && allResp.data && allResp.data.length) {
             record = allResp.data.find(function (p) { return String(p.id || p.product_id) === String(id); }) || null;
           }
@@ -189,21 +189,6 @@
         var tp = await global.TaagerIntegration.fetchTaagerProducts(countryCode);
         global.TaagerIntegration.mergeTaagerIntoStore(tp);
         remote = remote.concat(tp);
-      }
-      if (hasSupabase && typeof global.supabaseClient.from === "function") {
-        try {
-          var { data: taRaw } = await global.supabaseClient.from("taager_products").select("id, name, raw_data").limit(5000);
-          if (Array.isArray(taRaw) && taRaw.length) {
-            var taMap = {};
-            taRaw.forEach(function (r) { if (r && r.id) taMap["taager_" + r.id] = r.raw_data; });
-            remote.forEach(function (p) {
-              if (p && p.source === "taager" && taMap[p.id] && !p.raw_data) p.raw_data = taMap[p.id];
-            });
-            local.forEach(function (p) {
-              if (p && p.source === "taager" && taMap[p.id] && !p.raw_data) p.raw_data = taMap[p.id];
-            });
-          }
-        } catch (e) { /* taager_products raw fallback failed */ }
       }
       var map = new Map();
       local.concat(remote).forEach(function (p) { if (p && p.id != null) map.set(String(p.id), p); });

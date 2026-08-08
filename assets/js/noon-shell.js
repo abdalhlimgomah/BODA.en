@@ -35,8 +35,8 @@ function ensureSiteIdentity() {
   schema.textContent = JSON.stringify({
     "@context": "https://schema.org",
     "@type": "WebSite",
-    "name": "Buda",
-    "alternateName": "Buda",
+    "name": "BudoQ",
+    "alternateName": "BudoQ",
     "url": "https://budoq.vercel.app/",
     "potentialAction": {
       "@type": "SearchAction",
@@ -116,18 +116,26 @@ function getNoonHeaderHTML() {
     '      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
     '      <span class="buda-header__badge" id="budaCartBadge">0</span>',
     '    </button>',
-    '    <a href="wishlist.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> المفضلة</a>',
-    '    <a href="my-orders.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg> طلباتي</a>',
-    '    <a href="empty-cart.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> السلة</a>',
-    '    <div class="buda-desktop-account" id="budaDesktopAccount">',
     '      <button class="buda-header__desktop-link buda-desktop-account-btn" id="budaDesktopAccountBtn">',
-    '        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <span id="budaDesktopAccountLabel">حسابي</span>',
+    '        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> <span id="budaDesktopAccountLabel">الحساب</span>',
     '      </button>',
+    '    <a href="my-orders.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg> الطلبيات</a>',
+    '    <a href="wishlist.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg> المفضلة</a>',
+    '    <a href="empty-cart.html" class="buda-header__desktop-link"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg> عربة التسوق</a>',
+    '    <div class="buda-desktop-account" id="budaDesktopAccount">',
+
     '      <div class="buda-desktop-account-dropdown" id="budaDesktopAccountDropdown"></div>',
     '    </div>',
     '    <button id="menu-toggle" class="buda-header__menu-btn" type="button" aria-label="القائمة">',
     '      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>',
     '    </button>',
+    '    <div class="buda-country-select" id="budaCountrySelect">',
+    '      <button type="button" class="buda-country-trigger" aria-label="تغيير الدولة">',
+    '        <span class="buda-country-flag" id="budaCountryFlag">🌍</span>',
+    '        <span class="buda-country-name" id="budaCountryName">الدولة</span>',
+    '        <svg class="buda-country-caret" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>',
+    '      </button>',
+    '    </div>',
     '  </div>',
     '</div>'
   ].join('\n');
@@ -170,7 +178,7 @@ function ensureSidebar() {
       (isLoggedIn && userName ? '<a href="ahsab.html" class="sidebar-link"><span class="material-icons-outlined">person</span> ' + escapeHtml(userName) + '</a>' : '<a href="ahsab.html" class="sidebar-link"><span class="material-icons-outlined">login</span> تسجيل الدخول</a>') +
       '<a href="home.html" class="sidebar-link"><span class="material-icons-outlined">home</span> الرئيسية</a>' +
       '<a href="sections.html" class="sidebar-link"><span class="material-icons-outlined">category</span> الأقسام</a>' +
-      '<a href="my-orders.html" class="sidebar-link"><span class="material-icons-outlined">inventory_2</span> طلباتي</a>' +
+      '<a href="my-orders.html" class="sidebar-link"><span class="material-icons-outlined">inventory_2</span> الطلبات</a>' +
       '<a href="wishlist.html" class="sidebar-link"><span class="material-icons-outlined">favorite</span> المفضلة</a>' +
       '<a href="ahsab.html" class="sidebar-link"><span class="material-icons-outlined">settings</span> الإعدادات</a>' +
       '<div class="sidebar-footer">' +
@@ -248,7 +256,7 @@ function injectStandardBottomNav() {
     '</a>' +
     '<a href="empty-cart.html" data-nav="cart">' +
     '  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="21" r="1"/><circle cx="19" cy="21" r="1"/><path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/></svg>' +
-    '  <small>السلة</small>' +
+    '  <small>عربة التسوق</small>' +
     '  <span class="nav-cart-count nav-cart-0" id="nav-cart-count">0</span>' +
     '</a>' +
     '<a href="wishlist.html" data-nav="wishlist">' +
@@ -257,7 +265,7 @@ function injectStandardBottomNav() {
     '</a>' +
     '<a href="ahsab.html" data-nav="account">' +
     '  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>' +
-    '  <small>الحساب</small>' +
+    '  <small>حسابي</small>' +
     '</a>';
   nav.style.opacity = '1';
   // ensure nav-home-btn exists in DOM (for legacy JS)
@@ -407,7 +415,7 @@ function initDesktopLoginLabel() {
     dropdown.innerHTML =
       '<a href="ahsab.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> حسابي</a>' +
       '<a href="sections.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> الأقسام</a>' +
-      '<a href="my-orders.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg> طلباتي</a>' +
+      '<a href="my-orders.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 2v20l2-1 2 1 2-1 2 1 2-1 2 1 2-1 2 1V2l-2 1-2-1-2 1-2-1-2 1-2-1-2 1Z"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/></svg> الطلبيات</a>' +
       '<a href="returns.html"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg> الإرجاعات</a>' +
       '<a href="ahsab.html#support" id="budaDesktopSupportBtn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/></svg> الدعم</a>' +
       '<div class="buda-divider"></div>' +
@@ -770,6 +778,140 @@ function hideBottomNavOnDesktop() {
     });
   }
 
+  function getCountryFlagEmoji(country) {
+    if (!country || !country.flag) return "";
+    var flag = String(country.flag);
+    return /[^\x00-\x7F]/.test(flag) ? flag : "";
+  }
+
+  function initCountrySelector() {
+    var wrap = document.getElementById("budaCountrySelect");
+    if (!wrap) return;
+
+    var modal = null;
+    var optionsEl = null;
+    var countries = [];
+
+    if (window.TaagerIntegration && window.TaagerIntegration.getAvailableCountries) {
+      countries = window.TaagerIntegration.getAvailableCountries();
+    }
+
+    function closeModal() {
+      if (!modal || !modal.classList.contains("show")) return;
+      modal.classList.remove("show");
+      document.body.style.overflow = "";
+    }
+
+    function openModal() {
+      if (!modal) return;
+      if (!optionsEl || !optionsEl.childElementCount || !window.TaagerIntegration) return;
+      var selected = window.TaagerIntegration.getSelectedCountry();
+      var selCode = selected && selected.code ? selected.code : "";
+      Array.prototype.forEach.call(optionsEl.children, function (opt) {
+        if (opt.getAttribute("data-country-code") === selCode) opt.classList.add("is-active");
+        else opt.classList.remove("is-active");
+      });
+      modal.classList.add("show");
+      document.body.style.overflow = "hidden";
+    }
+
+    function buildModal() {
+      modal = document.createElement("div");
+      modal.className = "modal-backdrop";
+      modal.id = "budaCountryModal";
+      modal.innerHTML =
+        '<div class="modal-card" style="max-width:320px;text-align:center;">' +
+        '<h3 style="margin:0 0 16px;">اختر الدولة</h3>' +
+        '<div id="budaCountryOptions" style="display:flex;flex-direction:column;gap:8px;"></div>' +
+        '<div class="inline-actions" style="margin-top:16px;justify-content:center;">' +
+        '<button id="budaCountryCancel" class="btn-danger" type="button">إلغاء</button>' +
+        "</div></div>";
+      document.body.appendChild(modal);
+      optionsEl = modal.querySelector("#budaCountryOptions");
+
+      if (!window.TaagerIntegration || !countries.length) return;
+      optionsEl.innerHTML = countries
+        .map(function (country) {
+          var flag = getCountryFlagEmoji(country);
+          return (
+            '<button type="button" class="country-chip" data-country-code="' +
+            country.code +
+            '" style="width:100%;justify-content:center;padding:10px;font-size:0.9rem;">' +
+            (flag ? '<span class="country-flag">' + flag + "</span> " : "") +
+            country.name +
+            "</button>"
+          );
+        })
+        .join("");
+
+      optionsEl.querySelectorAll("[data-country-code]").forEach(function (opt) {
+        opt.addEventListener("click", function () {
+          var code = opt.getAttribute("data-country-code");
+          var target = null;
+          for (var i = 0; i < countries.length; i++) {
+            if (countries[i].code === code) {
+              target = countries[i];
+              break;
+            }
+          }
+          if (!target || !window.TaagerIntegration) return;
+          var oldCode = window.TaagerIntegration.getSelectedCountry();
+          if (oldCode && oldCode.code === code) {
+            closeModal();
+            return;
+          }
+          window.TaagerIntegration.setSelectedCountry(target);
+          try {
+            localStorage.setItem("userCountry", code);
+          } catch (_e) {}
+          closeModal();
+          window.location.href = "home.html";
+        });
+      });
+
+      var cancelBtn = modal.querySelector("#budaCountryCancel");
+      if (cancelBtn) cancelBtn.addEventListener("click", closeModal);
+      modal.addEventListener("click", function (e) {
+        if (e.target === modal) closeModal();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") closeModal();
+      });
+    }
+
+    function renderLabel() {
+      var flagEl = document.getElementById("budaCountryFlag");
+      var nameEl = document.getElementById("budaCountryName");
+      if (!flagEl || !nameEl) return;
+      var selected =
+        window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry
+          ? window.TaagerIntegration.getSelectedCountry()
+          : null;
+      if (selected) {
+        flagEl.textContent = getCountryFlagEmoji(selected) || selected.code || "🌍";
+        nameEl.textContent = selected.name || selected.code || "الدولة";
+      } else {
+        flagEl.textContent = "🌍";
+        nameEl.textContent = "الدولة";
+      }
+    }
+
+    var trigger = wrap.querySelector(".buda-country-trigger");
+    if (trigger) {
+      trigger.addEventListener("click", function (e) {
+        e.stopPropagation();
+        if (!modal) buildModal();
+        openModal();
+      });
+    }
+
+    document.addEventListener("boda:country-changed", function () {
+      renderLabel();
+    });
+
+    renderLabel();
+  }
+
   function escapeHtml(value) {
     if (value == null) return '';
     return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
@@ -1114,6 +1256,7 @@ function hideBottomNavOnDesktop() {
     initBrandBadge();
     initNoonHeaderUI();
     initSupportBadge();
+    initCountrySelector();
     if (window.BudaUI && window.BudaUI.refreshShell) window.BudaUI.refreshShell();
   });
   window.addEventListener("resize", function () {

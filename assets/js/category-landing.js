@@ -10,10 +10,10 @@ var CL_DEMO = new URLSearchParams(window.location.search).get("demo") === "1";
 // ========== DEMO DATA ==========
 function clDemoCategory(slug) {
   var map = {
-    "smart-watches": { name: "الساعات الذكية", name_en: "Smart Watches", description: "أحدث الساعات الذكية والتقنيات القابلة للارتداء", icon: "watch", meta_title: "ساعات ذكية - Buda" },
-    "headphones": { name: "السماعات", name_en: "Headphones", description: "سماعات رأس وأذن بأعلى جودة صوت", icon: "headphones", meta_title: "سماعات - Buda" },
-    "shoes": { name: "الأحذية", name_en: "Shoes", description: "أحذية رياضية وعصرية لكل المناسبات", icon: "footprint", meta_title: "أحذية - Buda" },
-    "clothes": { name: "الملابس", name_en: "Fashion", description: "أحدث صيحات الموضة والأزياء", icon: "checkroom", meta_title: "أزياء وموضة - Buda" },
+    "smart-watches": { name: "الساعات الذكية", name_en: "Smart Watches", description: "أحدث الساعات الذكية والتقنيات القابلة للارتداء", icon: "watch", meta_title: "ساعات ذكية - BudoQ" },
+    "headphones": { name: "السماعات", name_en: "Headphones", description: "سماعات رأس وأذن بأعلى جودة صوت", icon: "headphones", meta_title: "سماعات - BudoQ" },
+    "shoes": { name: "الأحذية", name_en: "Shoes", description: "أحذية رياضية وعصرية لكل المناسبات", icon: "footprint", meta_title: "أحذية - BudoQ" },
+    "clothes": { name: "الملابس", name_en: "Fashion", description: "أحدث صيحات الموضة والأزياء", icon: "checkroom", meta_title: "أزياء وموضة - BudoQ" },
   };
   var m = map[slug] || map["clothes"];
   return {

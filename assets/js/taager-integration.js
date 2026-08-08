@@ -95,28 +95,149 @@
     return [];
   }
 
-  function getCachedProducts() {
-    try {
-      var raw = localStorage.getItem(CACHE_KEY);
-      if (!raw) return null;
-      var parsed = JSON.parse(raw);
-      if (Date.now() - parsed.timestamp < CACHE_TTL_MS) {
-        return Array.isArray(parsed.products) ? parsed.products : null;
+  var MEMORY_CACHE_TTL_MS = 5 * 60 * 1000;
+  var IDB_DB_NAME = "buda_store_cache";
+  var IDB_STORE_NAME = "taager_products";
+  var IDB_KEY_PREFIX = "list_v3_";
+  var _taagerMemoryCache = {};
+  var _idbDbPromise = null;
+
+  function getIDB() {
+    if (!window.indexedDB) return null;
+    if (_idbDbPromise) return _idbDbPromise;
+    _idbDbPromise = new Promise(function (resolve) {
+      var req;
+      try {
+        req = window.indexedDB.open(IDB_DB_NAME, 1);
+      } catch (_e) {
+        resolve(null);
+        return;
       }
-      localStorage.removeItem(CACHE_KEY);
-      return null;
-    } catch (_a) {
-      return null;
-    }
+      req.onupgradeneeded = function () {
+        var db = req.result;
+        if (!db.objectStoreNames.contains(IDB_STORE_NAME)) {
+          db.createObjectStore(IDB_STORE_NAME);
+        }
+      };
+      req.onsuccess = function () {
+        resolve(req.result);
+      };
+      req.onerror = function () {
+        _idbDbPromise = null;
+        resolve(null);
+      };
+    });
+    return _idbDbPromise;
   }
 
-  function setCachedProducts(products) {
-    try {
-      localStorage.setItem(
-        CACHE_KEY,
-        JSON.stringify({ products: products, timestamp: Date.now() })
-      );
-    } catch (_a) {}
+  function idbSet(key, value) {
+    return getIDB()
+      .then(function (db) {
+        if (!db) return;
+        return new Promise(function (resolve) {
+          try {
+            var tx = db.transaction(IDB_STORE_NAME, "readwrite");
+            tx.objectStore(IDB_STORE_NAME).put(value, key);
+            tx.oncomplete = resolve;
+            tx.onerror = function () { resolve(); };
+            tx.onabort = function () { resolve(); };
+          } catch (_e) {
+            resolve();
+          }
+        });
+      });
+  }
+
+  function idbGet(key) {
+    return getIDB()
+      .then(function (db) {
+        if (!db) return null;
+        return new Promise(function (resolve) {
+          try {
+            var tx = db.transaction(IDB_STORE_NAME, "readonly");
+            var reqGet = tx.objectStore(IDB_STORE_NAME).get(key);
+            reqGet.onsuccess = function () {
+              resolve(reqGet.result || null);
+            };
+            reqGet.onerror = function () { resolve(null); };
+          } catch (_e) {
+            resolve(null);
+          }
+        });
+      });
+  }
+
+  function idbDeleteKey(key) {
+    return getIDB()
+      .then(function (db) {
+        if (!db) return;
+        return new Promise(function (resolve) {
+          try {
+            var tx = db.transaction(IDB_STORE_NAME, "readwrite");
+            tx.objectStore(IDB_STORE_NAME).delete(key);
+            tx.oncomplete = resolve;
+            tx.onerror = function () { resolve(); };
+            tx.onabort = function () { resolve(); };
+          } catch (_e) {
+            resolve();
+          }
+        });
+      });
+  }
+
+  function idbClearAll() {
+    return getIDB()
+      .then(function (db) {
+        if (!db) return;
+        return new Promise(function (resolve) {
+          try {
+            var tx = db.transaction(IDB_STORE_NAME, "readwrite");
+            tx.objectStore(IDB_STORE_NAME).clear();
+            tx.oncomplete = resolve;
+            tx.onerror = function () { resolve(); };
+            tx.onabort = function () { resolve(); };
+          } catch (_e) {
+            resolve();
+          }
+        });
+      });
+  }
+
+  function getCacheKeyForCountry(countryCode) {
+    return IDB_KEY_PREFIX + getCountryRequestKey(countryCode);
+  }
+
+  // ===== Legacy cleanup: the old localStorage cache (boda_taager_products_cache_v2)
+  // exceeded the ~5MB quota so it failed silently and caused a full-table download
+  // on every page load. Remove it so it frees space and is never read again.
+  try {
+    if (localStorage.getItem(CACHE_KEY)) localStorage.removeItem(CACHE_KEY);
+  } catch (_a) {}
+
+  function getCachedProducts(countryCode) {
+    var cacheKey = getCacheKeyForCountry(countryCode);
+    var mem = _taagerMemoryCache[cacheKey];
+    if (mem && Date.now() - mem.t < MEMORY_CACHE_TTL_MS) {
+      return Promise.resolve(mem.products);
+    }
+    return idbGet(cacheKey).then(function (entry) {
+      if (!entry || !entry.timestamp || !Array.isArray(entry.products)) return null;
+      if (Date.now() - entry.timestamp < CACHE_TTL_MS) {
+        _taagerMemoryCache[cacheKey] = {
+          t: entry.timestamp,
+          products: entry.products,
+        };
+        return entry.products;
+      }
+      idbDeleteKey(cacheKey);
+      return null;
+    });
+  }
+
+  function setCachedProducts(products, countryCode) {
+    var cacheKey = getCacheKeyForCountry(countryCode);
+    _taagerMemoryCache[cacheKey] = { t: Date.now(), products: products };
+    idbSet(cacheKey, { timestamp: Date.now(), products: products }).catch(function () {});
   }
 
   function getSelectedCountry() {
@@ -133,7 +254,6 @@
   function setSelectedCountry(country) {
     try {
       localStorage.setItem(COUNTRY_STORAGE_KEY, JSON.stringify(country));
-      clearCache();
       document.dispatchEvent(
         new CustomEvent("boda:country-changed", { detail: country })
       );
@@ -480,14 +600,14 @@
     }
 
     var requestPromise = (async function () {
-    var cached = getCachedProducts();
-    if (cached) {
+    var cached = await getCachedProducts(countryCode);
+    if (cached && cached.length) {
       return filterByCountry(cached, countryCode);
     }
 
     var storedProducts = await fetchStoredTaagerProducts(countryCode);
     if (storedProducts.length) {
-      setCachedProducts(storedProducts);
+      setCachedProducts(storedProducts, countryCode);
       document.dispatchEvent(new CustomEvent("boda:products-updated", {
         detail: { source: "taager-stored", count: storedProducts.length },
       }));
@@ -496,7 +616,7 @@
 
     var supabaseProducts = await fetchTaagerProductsFromSupabase(countryCode);
     if (supabaseProducts.length) {
-      setCachedProducts(supabaseProducts);
+      setCachedProducts(supabaseProducts, countryCode);
       document.dispatchEvent(new CustomEvent("boda:products-updated", {
         detail: { source: "taager-supabase", count: supabaseProducts.length },
       }));
@@ -515,19 +635,24 @@
     }
 
   async function fetchTaagerProductDetail(productId) {
-    var products = getCachedProducts();
-    if (products) {
+    var selectedCode = "";
+    var selected = getSelectedCountry();
+    if (selected && selected.code) selectedCode = selected.code;
+
+    var cached = await getCachedProducts(selectedCode);
+    if (!cached) cached = await getCachedProducts("");
+    if (cached) {
       var found = null;
-      for (var i = 0; i < products.length; i++) {
-        if (products[i].id === productId || products[i].taager_product_id === productId) {
-          found = products[i];
+      for (var i = 0; i < cached.length; i++) {
+        if (cached[i].id === productId || cached[i].taager_product_id === productId) {
+          found = cached[i];
           break;
         }
       }
       if (found) return found;
     }
 
-    var allProducts = await fetchTaagerProducts();
+    var allProducts = await fetchTaagerProducts(selectedCode);
     for (var j = 0; j < allProducts.length; j++) {
       if (allProducts[j].id === productId || allProducts[j].taager_product_id === productId) {
         return allProducts[j];
@@ -538,19 +663,8 @@
 
   function filterByCountry(products, countryCode) {
     if (!countryCode) return products;
-    // Map ISO2 -> ISO3 for comparison with Taager API format
-    var iso2to3 = { EG: "EGY", SA: "SAU", AE: "ARE", IQ: "IRQ", OM: "OMN" };
-    var upperCode = countryCode.toUpperCase();
-    var iso3Code = iso2to3[upperCode] || upperCode;
     return products.filter(function (product) {
-      var countries = product.available_countries;
-      if (!Array.isArray(countries) || !countries.length) return true;
-      for (var i = 0; i < countries.length; i++) {
-        var c = String(countries[i] || "").toUpperCase().trim();
-        // Match either ISO2 (EG) or ISO3 (EGY) or slug (egypt)
-        if (c === upperCode || c === iso3Code || c === getCountrySlug(upperCode)) return true;
-      }
-      return false;
+      return matchesCountry(product, countryCode);
     });
   }
 
@@ -559,6 +673,50 @@
       if (TAAGER_COUNTRIES[i].code === code) return TAAGER_COUNTRIES[i].slug;
     }
     return code;
+  }
+
+  function countryKeyMatches(value, code) {
+    var upp = String(value || "").toUpperCase().trim();
+    if (!upp) return false;
+    var upper = String(code || "").toUpperCase().trim();
+    var iso3 = { EG: "EGY", SA: "SAU", AE: "ARE", IQ: "IRQ", OM: "OMN" };
+    var slugs = {
+      EG: ["EGYPT", "مصر"],
+      SA: ["KSA", "SAUDI-ARABIA", "SAUDI ARABIA", "السعودية"],
+      AE: ["UAE", "EMIRATES", "الإمارات"],
+      IQ: ["IRAQ", "العراق"],
+      OM: ["OMAN", "عمان"],
+    };
+    if (upp === upper) return true;
+    if (upp === iso3[upper]) return true;
+    var list = slugs[upper] || [];
+    for (var i = 0; i < list.length; i++) {
+      if (upp === list[i]) return true;
+    }
+    return false;
+  }
+
+  function matchesCountry(product, countryCode) {
+    if (!product) return false;
+    var upper = String(countryCode || "EG").toUpperCase().trim();
+    var countryField = String(product.country || product.country_code || "").toUpperCase().trim();
+    var countries = Array.isArray(product.available_countries) ? product.available_countries : [];
+    if (countries.length) {
+      for (var i = 0; i < countries.length; i++) {
+        if (countryKeyMatches(countries[i], upper)) return true;
+      }
+      return false;
+    }
+    if (countryField) return countryKeyMatches(countryField, upper);
+    return true;
+  }
+
+  function filterProductsByCountry(products, countryCode) {
+    if (!Array.isArray(products)) return [];
+    var upper = String(countryCode || "EG").toUpperCase().trim();
+    return products.filter(function (product) {
+      return matchesCountry(product, upper);
+    });
   }
 
   function mergeTaagerIntoStore(taagerProducts) {
@@ -612,6 +770,8 @@
   }
 
   function clearCache() {
+    _taagerMemoryCache = {};
+    idbClearAll();
     try {
       localStorage.removeItem(CACHE_KEY);
     } catch (_a) {}
@@ -647,6 +807,9 @@
     fetchTaagerProductDetail: fetchTaagerProductDetail,
     normalizeTaagerProduct: normalizeTaagerProduct,
     filterByCountry: filterByCountry,
+    matchesCountry: matchesCountry,
+    filterProductsByCountry: filterProductsByCountry,
+    getCountrySlug: getCountrySlug,
     mergeTaagerIntoStore: mergeTaagerIntoStore,
     annotateCartItemWithSource: annotateCartItemWithSource,
     getOrderPayloadExtra: getOrderPayloadExtra,

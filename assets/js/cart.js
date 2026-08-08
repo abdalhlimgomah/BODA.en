@@ -23,7 +23,7 @@ const ARABIC_NUMBER_FORMATTER = new Intl.NumberFormat("ar-EG");
 
 const SUGGESTIONS_POOL_LIMIT = 90;
 const SUGGESTIONS_CACHE_TTL_MS = 10000;
-const CART_SLIDER_CACHE_TTL_MS = 15000;
+const CART_SLIDER_CACHE_TTL_MS = 10 * 60 * 1000;
 
 const EMPTY_SLIDER_COUNT = 48;
 const OFFERS_SLIDER_COUNT = 12;
@@ -1320,16 +1320,37 @@ async function fetchSliderProducts(count) {
   var client = getProductsClient();
   if (!client) return [];
 
-  try {
-    var { data, error } = await client
-      .from("products")
-      .select("*")
-      .order("created_at", { ascending: false })
-      .limit(count * 2);
+  var CACHE_TTL = 10 * 60 * 1000;
+  var nowMs = Date.now();
+  if (cartSliderCache._loadedAt && nowMs - cartSliderCache._loadedAt < CACHE_TTL) {
+    var cachedAll = [].concat(cartSliderCache.offers || [], cartSliderCache.topSelling || [], cartSliderCache.recommended || [])
+      .filter(Boolean);
+    var uniqueCached = [];
+    var seenSet = new Set();
+    cachedAll.forEach(function (p) { if (p && p.id && !seenSet.has(p.id)) { seenSet.add(p.id); uniqueCached.push(p); } });
+    if (uniqueCached.length) return uniqueCached;
+  }
 
-    if (error || !Array.isArray(data) || !data.length) return [];
+  try {
+    var data = [];
+    if (typeof window.supabaseClient?.fetchAllProducts === "function") {
+      data = await window.supabaseClient.fetchAllProducts();
+      data = data.slice().sort(function (a, b) {
+        return new Date(b?.created_at || 0) - new Date(a?.created_at || 0);
+      }).slice(0, count * 2);
+    } else {
+      var raw = await client
+        .from("products")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(count * 2);
+      if (raw.error || !Array.isArray(raw.data) || !raw.data.length) return [];
+      data = raw.data;
+    }
+    if (!Array.isArray(data) || !data.length) return [];
     var normalized = data.map(normalizeSuggestionProduct).filter(Boolean);
     var rated = await annotateSuggestionProductsWithSupabaseRatings(normalized, client);
+    cartSliderCache._loadedAt = Date.now();
     if (typeof window.addProductToStore === "function") {
       rated.forEach(function (p) { window.addProductToStore(p); });
     }
@@ -1456,7 +1477,7 @@ function startSliderAutoRefresh() {
   suggestionsAutoRefreshTimer = window.setInterval(function () {
     if (!window.BudaStore) return;
     refreshSliderCache(false);
-  }, 7000);
+  }, 60000);
 }
 
 function showHideEmptySections(show) {

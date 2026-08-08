@@ -700,27 +700,35 @@ async function fetchSupabaseProducts(filter) {
   var q = String(filter || "").trim().toLowerCase();
   var mapped = q ? ARABIC_CATEGORY_MAP[q] : null;
   var data = null;
-  try {
-    var url = "/api/products";
-    if (mapped) url += "?filter=" + encodeURIComponent(mapped);
-    var res = await fetch(url);
-    if (res.ok) data = await res.json();
-  } catch (e) {
-    console.warn("cache proxy failed, falling back:", e);
+  if (!window.__productsProxyUnavailable) {
+    try {
+      var url = "/api/products";
+      if (mapped) url += "?filter=" + encodeURIComponent(mapped);
+      var res = await fetch(url);
+      if (res.ok) data = await res.json();
+      else window.__productsProxyUnavailable = true;
+    } catch (e) {
+      window.__productsProxyUnavailable = true;
+      console.warn("cache proxy failed, falling back:", e);
+    }
   }
   if (!data) {
     var client = getSupabaseProductsClient();
     if (!client || typeof client.from !== "function") return [];
     try {
-      var query = client.from("products").select("*");
-      if (mapped) query = query.eq("category", mapped);
-      var result = await query.order("created_at", { ascending: false });
-      if (result.error) {
-        if (isNetworkResolutionError(result.error)) markHomeSupabaseBackoff();
-        console.warn("fetch error:", result.error);
-        return [];
+      if (typeof window.supabaseClient?.fetchAllProducts === "function") {
+        data = await window.supabaseClient.fetchAllProducts();
+      } else {
+        var query = client.from("products").select("*");
+        if (mapped) query = query.eq("category", mapped);
+        var result = await query.order("created_at", { ascending: false });
+        if (result.error) {
+          if (isNetworkResolutionError(result.error)) markHomeSupabaseBackoff();
+          console.warn("fetch error:", result.error);
+          return [];
+        }
+        data = result.data;
       }
-      data = result.data;
     } catch (e) {
       if (isNetworkResolutionError(e)) markHomeSupabaseBackoff();
       console.warn("fetch failed:", e);
@@ -728,7 +736,8 @@ async function fetchSupabaseProducts(filter) {
     }
   }
   var matched = normalizeProducts(data);
-  var enriched = await annotateProductsWithSupabaseRatings(matched);
+  var needsRatings = !matched.length || !matched.some(function (p) { return p.hasSupabaseRatings; });
+  var enriched = needsRatings ? await annotateProductsWithSupabaseRatings(matched) : matched;
   if (window.addProductToStore)
     enriched.forEach(function (p) {
       window.addProductToStore(p);
@@ -751,9 +760,11 @@ async function fetchSupabaseProducts(filter) {
 function filterProductsByCountry(products, countryCode) {
   if (!Array.isArray(products)) return [];
   var cc = (countryCode || "EG").toUpperCase();
+  if (window.TaagerIntegration && typeof window.TaagerIntegration.filterProductsByCountry === "function") {
+    return window.TaagerIntegration.filterProductsByCountry(products, cc);
+  }
   return products.filter(function(p) {
     var pCountry = (p?.country || p?.country_code || "").toUpperCase();
-    // If no country specified, assume it's available in all countries
     if (!pCountry) return true;
     return pCountry === cc;
   });
@@ -763,6 +774,9 @@ function getLocalProducts() {
   return window.BudaStore?.getAllProducts
     ? normalizeProducts(
         Object.values(window.BudaStore.getAllProducts()).filter(Boolean).filter(function(p) {
+          if (window.TaagerIntegration && typeof window.TaagerIntegration.matchesCountry === "function") {
+            return window.TaagerIntegration.matchesCountry(p, cc);
+          }
           var pCountry = (p?.country || p?.country_code || "").toUpperCase();
           if (!pCountry) return true;
           return pCountry === cc.toUpperCase();
@@ -2926,12 +2940,98 @@ HM.loadDynamicConfig = async function () {
   }
 };
 
+// ========== COUNTRY GATE (mandatory country selection before browsing) ==========
+function initCountryGate() {
+  var gate = document.getElementById("hm-country-gate");
+  if (!gate) return;
+
+  var optionsEl = document.getElementById("hmCountryGateOptions");
+  var opened = false;
+
+  function listCountries() {
+    if (!window.TaagerIntegration || !window.TaagerIntegration.getAvailableCountries) return [];
+    return window.TaagerIntegration.getAvailableCountries();
+  }
+
+  function flagEmoji(country) {
+    if (!country || !country.flag) return "";
+    return /[^\x00-\x7F]/.test(String(country.flag)) ? String(country.flag) : "";
+  }
+
+  function openGate() {
+    if (opened) return;
+    opened = true;
+    gate.classList.add("is-open");
+    gate.setAttribute("aria-hidden", "false");
+    document.body.classList.add("hm-gate-open");
+  }
+
+  function closeGate() {
+    if (!opened) return;
+    opened = false;
+    gate.classList.remove("is-open");
+    gate.setAttribute("aria-hidden", "true");
+    document.body.classList.remove("hm-gate-open");
+  }
+
+  function maybeOpen() {
+    if (!window.TaagerIntegration || !window.TaagerIntegration.getSelectedCountry) return;
+    var selected = window.TaagerIntegration.getSelectedCountry();
+    if (selected && selected.code) closeGate();
+    else openGate();
+  }
+
+  var countries = listCountries();
+  if (window.TaagerIntegration && optionsEl && countries.length) {
+    optionsEl.innerHTML = countries
+      .map(function (country) {
+        var flag = flagEmoji(country);
+        return (
+          '<button type="button" class="hm-country-gate__option" data-gate-country="' +
+          country.code +
+          '">' +
+          (flag ? '<span class="hm-country-gate__flag">' + flag + "</span>" : "") +
+          "<span>" +
+          country.name +
+          "</span>" +
+          "</button>"
+        );
+      })
+      .join("");
+
+    optionsEl.querySelectorAll("[data-gate-country]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var code = btn.getAttribute("data-gate-country");
+        var target = null;
+        for (var i = 0; i < countries.length; i++) {
+          if (countries[i].code === code) {
+            target = countries[i];
+            break;
+          }
+        }
+        if (target) {
+          window.TaagerIntegration.setSelectedCountry(target);
+          closeGate();
+        }
+      });
+    });
+  }
+
+  document.addEventListener("boda:country-changed", function () {
+    maybeOpen();
+  });
+
+  // Small delay so any startup country restore (profile) can finish first
+  setTimeout(maybeOpen, 250);
+}
+
 // ========== INIT ==========
 HM.init = async function () {
   var isHome = document.getElementById("hm-content") !== null;
   if (!isHome) return;
   HM.contentEl = document.getElementById("hm-content");
   initBudaUI();
+  initCountryGate();
   if (
     window.skeletonLoader &&
     typeof window.skeletonLoader.hideSkeleton === "function"

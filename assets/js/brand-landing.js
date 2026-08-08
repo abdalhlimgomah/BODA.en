@@ -275,7 +275,7 @@ function renderBreadcrumb(brand) {
     parentEl.textContent = brand.name || 'المنتجات';
   }
   var titleEl = document.querySelector('title');
-  if (titleEl) titleEl.textContent = (brand.name || 'العلامة التجارية') + ' - Buda';
+  if (titleEl) titleEl.textContent = (brand.name || 'العلامة التجارية') + ' - BudoQ';
 }
 
 // ========== RENDER HERO SLIDER ==========
