@@ -51,7 +51,8 @@ module.exports = async function handler(req, res) {
         .resize({ width, withoutEnlargement: true })
         .webp({ quality })
         .toBuffer();
-    } catch {
+    } catch (err) {
+      if (q.debug) return res.status(500).json({ error: "sharp failed: " + String(err && err.message || err) });
       return res.redirect(302, target);
     }
 
@@ -59,7 +60,8 @@ module.exports = async function handler(req, res) {
     res.setHeader("Cache-Control", "public, max-age=31536000, s-maxage=31536000, immutable");
     res.setHeader("X-Content-Type-Options", "nosniff");
     return res.status(200).send(output);
-  } catch {
+  } catch (err) {
+    if (q.debug) return res.status(500).json({ error: "outer: " + String(err && err.message || err) });
     return res.redirect(302, target);
   }
 };
