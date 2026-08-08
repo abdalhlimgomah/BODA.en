@@ -538,19 +538,8 @@
 
   function filterByCountry(products, countryCode) {
     if (!countryCode) return products;
-    // Map ISO2 -> ISO3 for comparison with Taager API format
-    var iso2to3 = { EG: "EGY", SA: "SAU", AE: "ARE", IQ: "IRQ", OM: "OMN" };
-    var upperCode = countryCode.toUpperCase();
-    var iso3Code = iso2to3[upperCode] || upperCode;
     return products.filter(function (product) {
-      var countries = product.available_countries;
-      if (!Array.isArray(countries) || !countries.length) return true;
-      for (var i = 0; i < countries.length; i++) {
-        var c = String(countries[i] || "").toUpperCase().trim();
-        // Match either ISO2 (EG) or ISO3 (EGY) or slug (egypt)
-        if (c === upperCode || c === iso3Code || c === getCountrySlug(upperCode)) return true;
-      }
-      return false;
+      return matchesCountry(product, countryCode);
     });
   }
 
@@ -559,6 +548,50 @@
       if (TAAGER_COUNTRIES[i].code === code) return TAAGER_COUNTRIES[i].slug;
     }
     return code;
+  }
+
+  function countryKeyMatches(value, code) {
+    var upp = String(value || "").toUpperCase().trim();
+    if (!upp) return false;
+    var upper = String(code || "").toUpperCase().trim();
+    var iso3 = { EG: "EGY", SA: "SAU", AE: "ARE", IQ: "IRQ", OM: "OMN" };
+    var slugs = {
+      EG: ["EGYPT", "مصر"],
+      SA: ["KSA", "SAUDI-ARABIA", "SAUDI ARABIA", "السعودية"],
+      AE: ["UAE", "EMIRATES", "الإمارات"],
+      IQ: ["IRAQ", "العراق"],
+      OM: ["OMAN", "عمان"],
+    };
+    if (upp === upper) return true;
+    if (upp === iso3[upper]) return true;
+    var list = slugs[upper] || [];
+    for (var i = 0; i < list.length; i++) {
+      if (upp === list[i]) return true;
+    }
+    return false;
+  }
+
+  function matchesCountry(product, countryCode) {
+    if (!product) return false;
+    var upper = String(countryCode || "EG").toUpperCase().trim();
+    var countryField = String(product.country || product.country_code || "").toUpperCase().trim();
+    var countries = Array.isArray(product.available_countries) ? product.available_countries : [];
+    if (countries.length) {
+      for (var i = 0; i < countries.length; i++) {
+        if (countryKeyMatches(countries[i], upper)) return true;
+      }
+      return false;
+    }
+    if (countryField) return countryKeyMatches(countryField, upper);
+    return true;
+  }
+
+  function filterProductsByCountry(products, countryCode) {
+    if (!Array.isArray(products)) return [];
+    var upper = String(countryCode || "EG").toUpperCase().trim();
+    return products.filter(function (product) {
+      return matchesCountry(product, upper);
+    });
   }
 
   function mergeTaagerIntoStore(taagerProducts) {
@@ -647,6 +680,9 @@
     fetchTaagerProductDetail: fetchTaagerProductDetail,
     normalizeTaagerProduct: normalizeTaagerProduct,
     filterByCountry: filterByCountry,
+    matchesCountry: matchesCountry,
+    filterProductsByCountry: filterProductsByCountry,
+    getCountrySlug: getCountrySlug,
     mergeTaagerIntoStore: mergeTaagerIntoStore,
     annotateCartItemWithSource: annotateCartItemWithSource,
     getOrderPayloadExtra: getOrderPayloadExtra,

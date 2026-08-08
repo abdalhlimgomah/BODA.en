@@ -249,7 +249,7 @@ async function fetchBrandProducts(brandName) {
     try {
       var client = getSupabaseClient();
       if (client) {
-        var { data, error } = await client.from('products').select('*').limit(200);
+        var { data, error } = await client.from('products').select('id,name,name_ar,name_en,description,description_ar,description_en,price,original_price,old_price,current_price,currency,category,category_id,brand,brand_id,seller,seller_email,image,image_url,thumbnail,images,img,image1,image2,image3,image4,image5,image6,image7,image8,stock,stock_status,quantity,sold_count,rating,rating_avg,rating_count,review_count,is_active,is_featured,source,taager_id,taager_product_id,available_countries,sku,barcode,created_at,updated_at').limit(200);
         if (!error && data) all = data;
       }
     } catch (e) {}
@@ -275,7 +275,7 @@ function renderBreadcrumb(brand) {
     parentEl.textContent = brand.name || 'المنتجات';
   }
   var titleEl = document.querySelector('title');
-  if (titleEl) titleEl.textContent = (brand.name || 'العلامة التجارية') + ' - Buda';
+  if (titleEl) titleEl.textContent = (brand.name || 'العلامة التجارية') + ' - BudoQ';
 }
 
 // ========== RENDER HERO SLIDER ==========
@@ -640,7 +640,7 @@ BL.init = async function () {
       try {
         var client = getSupabaseClient();
         if (client) {
-          var { data } = await client.from('products').select('*').limit(200);
+          var { data } = await client.from('products').select('id,name,name_ar,name_en,description,description_ar,description_en,price,original_price,old_price,current_price,currency,category,category_id,brand,brand_id,seller,seller_email,image,image_url,thumbnail,images,img,image1,image2,image3,image4,image5,image6,image7,image8,stock,stock_status,quantity,sold_count,rating,rating_avg,rating_count,review_count,is_active,is_featured,source,taager_id,taager_product_id,available_countries,sku,barcode,created_at,updated_at').limit(200);
           if (data) allProducts = data;
         }
       } catch (e) {}

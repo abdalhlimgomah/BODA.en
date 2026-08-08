@@ -583,6 +583,9 @@ async function fetchLiveProducts(countryParam = "") {
   return mergeNormalizedProducts(normalized);
 }
 
+const TAAGER_LIST_COLUMNS =
+  "id,taager_product_id,name,created_at,description,quick_details,content_ideas,how_to_use,videos,category,price,original_price,image,images,image1,image2,image3,image4,image5,image6,image7,image8,available_countries,stock,stock_status,brand,seller,source,is_active,updated_at,last_synced_at";
+
 async function readStoredProducts(countryCode = "") {
   const supabase = getSupabaseAdmin();
   if (!supabase) throw new Error("Supabase service role is not configured");
@@ -590,11 +593,12 @@ async function readStoredProducts(countryCode = "") {
   const pageSize = 1000;
   const rows: JsonRecord[] = [];
   let useActiveFilter = true;
+  let columnMode: "list" | "star" = "list";
 
   for (let offset = 0; offset < 100000; offset += pageSize) {
     let query = supabase
       .from("taager_products")
-      .select("*")
+      .select(columnMode === "star" ? "*" : TAAGER_LIST_COLUMNS)
       .range(offset, offset + pageSize - 1);
 
     if (useActiveFilter) {
@@ -602,10 +606,17 @@ async function readStoredProducts(countryCode = "") {
     }
 
     let { data, error } = await query;
-    if (error && useActiveFilter) {
-      useActiveFilter = false;
-      offset -= pageSize;
-      continue;
+    if (error) {
+      if (columnMode === "list") {
+        columnMode = "star";
+        offset -= pageSize;
+        continue;
+      }
+      if (useActiveFilter) {
+        useActiveFilter = false;
+        offset -= pageSize;
+        continue;
+      }
     }
     if (error) throw error;
 

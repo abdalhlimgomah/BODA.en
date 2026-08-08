@@ -202,33 +202,68 @@ function normalizeTaagerDbProduct(item) {
   });
 }
 
+function countryKeyMatches(value, code) {
+  const upp = String(value || "").toUpperCase().trim();
+  if (!upp) return false;
+  const upper = String(code || "").toUpperCase().trim();
+  const iso3 = { EG: "EGY", SA: "SAU", AE: "ARE", IQ: "IRQ", OM: "OMN" };
+  const slugs = {
+    EG: ["EGYPT", "مصر"],
+    SA: ["KSA", "SAUDI-ARABIA", "SAUDI ARABIA", "السعودية"],
+    AE: ["UAE", "EMIRATES", "الإمارات"],
+    IQ: ["IRAQ", "العراق"],
+    OM: ["OMAN", "عمان"],
+  };
+  if (upp === upper) return true;
+  if (upp === iso3[upper]) return true;
+  const list = slugs[upper] || [];
+  return list.indexOf(upp) !== -1;
+}
+
+function matchesCountry(product, countryCode) {
+  if (!product) return false;
+  const upper = String(countryCode || "EG").toUpperCase().trim();
+  const countryField = String(product.country || product.country_code || "").toUpperCase().trim();
+  const countries = Array.isArray(product.available_countries) ? product.available_countries : [];
+  if (countries.length) {
+    for (let i = 0; i < countries.length; i++) {
+      if (countryKeyMatches(countries[i], upper)) return true;
+    }
+    return false;
+  }
+  if (countryField) return countryKeyMatches(countryField, upper);
+  return true;
+}
+
 function filterTaagerProductsByCountry(products = [], countryCode = "") {
   if (!countryCode) return [...products];
-  const iso2to3 = { EG: "EGY", SA: "SAU", AE: "ARE", IQ: "IRQ", OM: "OMN" };
-  const upperCode = String(countryCode || "").toUpperCase();
-  const iso3Code = iso2to3[upperCode] || upperCode;
-  return products.filter((product) => {
-    const countries = Array.isArray(product?.available_countries) ? product.available_countries : [];
-    if (!countries.length) return true;
-    return countries.some((entry) => {
-      const code = String(entry || "").toUpperCase().trim();
-      return code === upperCode || code === iso3Code;
-    });
-  });
+  return products.filter((product) => matchesCountry(product, countryCode));
 }
+
+const TAAGER_LIST_COLUMNS =
+  "id,taager_product_id,name,created_at,description,quick_details,content_ideas,how_to_use,videos,category,price,original_price,image,images,image1,image2,image3,image4,image5,image6,image7,image8,available_countries,stock,stock_status,brand,seller,source,is_active,updated_at,last_synced_at";
+
+const _taagerListMemoryCache = {};
+const TAAGER_LIST_CACHE_TTL = 10 * 60 * 1000;
 
 async function fetchTaagerProducts(countryCode = "") {
   const client = getSupabaseClient();
+  const cacheKey = "TAAGER:" + String(countryCode || "EG").toUpperCase();
+  const memHit = _taagerListMemoryCache[cacheKey];
+  if (memHit && Date.now() - memHit.t < TAAGER_LIST_CACHE_TTL) {
+    return memHit.products;
+  }
 
   try {
     const pageSize = 1000;
     const allRows = [];
     let useActiveFilter = true;
+    let columnMode = "list";
 
     for (let offset = 0; offset < 100000; offset += pageSize) {
       let query = client
         .from("taager_products")
-        .select("*")
+        .select(columnMode === "star" ? "*" : TAAGER_LIST_COLUMNS)
         .range(offset, offset + pageSize - 1);
 
       if (useActiveFilter) {
@@ -236,10 +271,17 @@ async function fetchTaagerProducts(countryCode = "") {
       }
 
       let { data, error } = await query;
-      if (error && useActiveFilter && isMissingColumnError(error)) {
-        useActiveFilter = false;
-        offset -= pageSize;
-        continue;
+      if (error) {
+        if (columnMode === "list" && isMissingColumnError(error)) {
+          columnMode = "star";
+          offset -= pageSize;
+          continue;
+        }
+        if (useActiveFilter && isMissingColumnError(error)) {
+          useActiveFilter = false;
+          offset -= pageSize;
+          continue;
+        }
       }
       if (error) {
         console.warn("failed fetching taager_products from supabase", error);
@@ -254,7 +296,9 @@ async function fetchTaagerProducts(countryCode = "") {
     if (allRows.length) {
       const products = allRows.map(normalizeTaagerDbProduct).filter(Boolean);
       const filtered = filterTaagerProductsByCountry(products, countryCode);
-      return annotateProductsWithRatingsTable(client, filtered);
+      const annotated = await annotateProductsWithRatingsTable(client, filtered);
+      _taagerListMemoryCache[cacheKey] = { t: Date.now(), products: annotated };
+      return annotated;
     }
   } catch (error) {
     console.warn("failed fetching taager_products from supabase", error);
@@ -1104,24 +1148,48 @@ async function annotateProductsWithRatingsTable(client, products = []) {
   }
 }
 
+const PRODUCT_LIST_COLUMNS =
+  "id,name,name_ar,name_en,description,description_ar,description_en,price,original_price,old_price,current_price,currency,category,category_id,brand,brand_id,seller,seller_email,image,image_url,thumbnail,images,img,image1,image2,image3,image4,image5,image6,image7,image8,stock,stock_status,quantity,sold_count,rating,rating_avg,rating_count,review_count,is_active,is_featured,has_variants,source,taager_id,taager_product_id,available_countries,sku,barcode,metadata,tags,seo_title,seo_description,created_at,updated_at";
+
+const _productsListMemoryCache = {};
+const PRODUCTS_LIST_CACHE_TTL = 10 * 60 * 1000;
+
 async function fetchAllProducts() {
   const client = getSupabaseClient();
+  const memHit = _productsListMemoryCache["PRODUCTS:ALL"];
+  if (memHit && Date.now() - memHit.t < PRODUCTS_LIST_CACHE_TTL) {
+    return memHit.products;
+  }
+
   try {
     const pageSize = 1000;
     const allRows = [];
-    
+
     for (let offset = 0; offset < 100000; offset += pageSize) {
       const { data, error } = await client
         .from("products")
-        .select("*")
+        .select(PRODUCT_LIST_COLUMNS)
         .range(offset, offset + pageSize - 1);
-        
+
+      if (error && isMissingColumnError(error)) {
+        const { data: stars, error: errStar } = await client
+          .from("products")
+          .select("*")
+          .range(offset, offset + pageSize - 1);
+        if (errStar) throw errStar;
+        const starBatch = Array.isArray(stars) ? stars : [];
+        allRows.push.apply(allRows, starBatch);
+        if (starBatch.length < pageSize) break;
+        continue;
+      }
       if (error) throw error;
       const batch = Array.isArray(data) ? data : [];
       allRows.push.apply(allRows, batch);
       if (batch.length < pageSize) break;
     }
-    return annotateProductsWithRatingsTable(client, allRows);
+    const products = await annotateProductsWithRatingsTable(client, allRows);
+    _productsListMemoryCache["PRODUCTS:ALL"] = { t: Date.now(), products };
+    return products;
   } catch (error) {
     console.error("fetchAllProducts failed, trying single fetch fallback:", error);
     const { data, error: err2 } = await client.from("products").select("*");
@@ -1387,15 +1455,12 @@ async function fetchAllProductsWithTaager(countryCode) {
 
     // Check if any product matches this country before filtering
     var hasCountryMatch = merged.some(function (product) {
-      var pc = (product?.country || product?.country_code || "").toUpperCase();
-      return pc === upperCode || pc === iso3Code || pc === slugMatch;
+      return matchesCountry(product, upperCode);
     });
 
     if (hasCountryMatch) {
       return merged.filter(function (product) {
-        var pCountry = (product?.country || product?.country_code || "").toUpperCase();
-        if (!pCountry) return true;
-        return pCountry === upperCode || pCountry === iso3Code || pCountry === slugMatch;
+        return matchesCountry(product, upperCode);
       });
     }
   }

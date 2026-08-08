@@ -90,7 +90,9 @@
           record = pool.find(function (p) { return String(p.id || p.product_id) === String(id); }) || null;
         }
         if (!record && typeof client.from === "function") {
-          var allResp = await client.from("products").select("*");
+          var allResp = await client.from("products").select(
+            "id,name,name_ar,name_en,description,description_ar,description_en,price,original_price,old_price,current_price,currency,category,category_id,brand,brand_id,seller,seller_email,image,image_url,thumbnail,images,img,image1,image2,image3,image4,image5,image6,image7,image8,stock,stock_status,quantity,sold_count,rating,rating_avg,rating_count,review_count,is_active,is_featured,source,taager_id,taager_product_id,available_countries,sku,barcode,created_at,updated_at"
+          ).limit(2000);
           if (!allResp.error && allResp.data && allResp.data.length) {
             record = allResp.data.find(function (p) { return String(p.id || p.product_id) === String(id); }) || null;
           }
@@ -189,21 +191,6 @@
         var tp = await global.TaagerIntegration.fetchTaagerProducts(countryCode);
         global.TaagerIntegration.mergeTaagerIntoStore(tp);
         remote = remote.concat(tp);
-      }
-      if (hasSupabase && typeof global.supabaseClient.from === "function") {
-        try {
-          var { data: taRaw } = await global.supabaseClient.from("taager_products").select("id, name, raw_data").limit(5000);
-          if (Array.isArray(taRaw) && taRaw.length) {
-            var taMap = {};
-            taRaw.forEach(function (r) { if (r && r.id) taMap["taager_" + r.id] = r.raw_data; });
-            remote.forEach(function (p) {
-              if (p && p.source === "taager" && taMap[p.id] && !p.raw_data) p.raw_data = taMap[p.id];
-            });
-            local.forEach(function (p) {
-              if (p && p.source === "taager" && taMap[p.id] && !p.raw_data) p.raw_data = taMap[p.id];
-            });
-          }
-        } catch (e) { /* taager_products raw fallback failed */ }
       }
       var map = new Map();
       local.concat(remote).forEach(function (p) { if (p && p.id != null) map.set(String(p.id), p); });

@@ -717,7 +717,7 @@ PL.fetchProducts = async function () {
     var client = getSupabaseClient();
     if (client) {
       try {
-        var result = await client.from("products").select("*").order("created_at", { ascending: false });
+        var result = await client.from("products").select("id,name,name_ar,name_en,description,description_ar,description_en,price,original_price,old_price,current_price,currency,category,category_id,brand,brand_id,seller,seller_email,image,image_url,thumbnail,images,img,image1,image2,image3,image4,image5,image6,image7,image8,stock,stock_status,quantity,sold_count,rating,rating_avg,rating_count,review_count,is_active,is_featured,source,taager_id,taager_product_id,available_countries,sku,barcode,created_at,updated_at").order("created_at", { ascending: false });
         if (!result.error && Array.isArray(result.data)) {
           source = result.data.filter(function (r) { return r && typeof r.id !== "undefined"; });
           if (window.addProductToStore) source.forEach(function (p) { window.addProductToStore(p); });
@@ -752,6 +752,9 @@ PL.fetchProducts = async function () {
   // Filter by current country
   var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "EG";
   source = (source || []).filter(function (p) {
+    if (window.TaagerIntegration && typeof window.TaagerIntegration.matchesCountry === "function") {
+      return window.TaagerIntegration.matchesCountry(p, currentCountry);
+    }
     var pCountry = (p?.country || p?.country_code || "").toUpperCase();
     if (!pCountry) return true;
     return pCountry === currentCountry.toUpperCase();

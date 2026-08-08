@@ -568,7 +568,16 @@ async function loadProductsFromSupabase() {
   if (!window.supabaseClient || typeof window.supabaseClient.from !== "function") return;
 
   try {
-    const { data, error } = await window.supabaseClient.from("products").select("*");
+    const PRODUCT_COLUMNS =
+      "id,name,name_ar,name_en,description,description_ar,description_en,price,original_price,old_price,current_price,currency,category,category_id,brand,brand_id,seller,seller_email,image,image_url,thumbnail,images,img,image1,image2,image3,image4,image5,image6,image7,image8,stock,stock_status,quantity,sold_count,rating,rating_avg,rating_count,review_count,is_active,is_featured,has_variants,source,taager_id,taager_product_id,available_countries,sku,barcode,metadata,tags,seo_title,seo_description,created_at,updated_at";
+    let { data, error } = await window.supabaseClient
+      .from("products")
+      .select(PRODUCT_COLUMNS);
+    if (error && (error.code === "42703" || /column/i.test(String(error.message || "")))) {
+      const starResult = await window.supabaseClient.from("products").select("*");
+      error = starResult.error;
+      data = starResult.data;
+    }
     if (error) throw error;
     if (!Array.isArray(data) || data.length === 0) return;
 

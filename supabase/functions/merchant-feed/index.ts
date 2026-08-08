@@ -154,10 +154,18 @@ function buildItem(p: Record<string, unknown>): string {
 }
 
 async function generateFeed(sb: ReturnType<typeof createClient>): Promise<string> {
-  const { data: products, error } = await sb
+  const FEED_COLUMNS =
+    "id,name,seo_title,seo_description,meta_description,description,short_description,description_ar,description_en,image,images,image_url,image1,image2,image3,image4,image5,image6,image7,image8,price,current_price,currentPrice,original_price,sale_price,discount_price,is_active,brand,seller_name,seller,gtin,ean,upc,mpn,sku,category,main_category,weight,color,size,gender,age_group,availability,stock,quantity,inventory,created_at,updated_at";
+  let { data: products, error } = await sb
     .from("products")
-    .select("*")
+    .select(FEED_COLUMNS)
     .limit(10000);
+
+  if (error && (error.code === "42703" || /column|could not find|does not exist/i.test(String(error.message || "")))) {
+    const starResult = await sb.from("products").select("*").limit(10000);
+    products = starResult.data;
+    error = starResult.error;
+  }
 
   if (error) throw error;
 
