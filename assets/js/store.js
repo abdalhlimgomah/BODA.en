@@ -638,9 +638,21 @@ const getImagePath = (path) => {
   if (!source) return fallback;
   if (/^\s*javascript:/i.test(source)) return fallback;
   if (/^(https?:|data:|blob:)/i.test(source)) {
-    // Proxy Taager media URLs through the Edge Function to avoid 429 rate limits
-    if (typeof source === "string" && source.indexOf("media.taager.com") >= 0 && window.TAAGER_EDGE_FUNCTION_URL) {
-      return window.TAAGER_EDGE_FUNCTION_URL + "?action=proxy-image&url=" + encodeURIComponent(source);
+    // Decode legacy Supabase-edge proxy URLs back to the origin image.
+    if (typeof source === "string" && source.indexOf("action=proxy-image") >= 0) {
+      try {
+        const raw = source.split("url=")[1] || "";
+        if (raw) source = decodeURIComponent(raw);
+      } catch (_e) { /* keep original */ }
+    }
+    // Resize remote images through our own Vercel optimizer (CDN-cached),
+    // except when serving from a local dev server (no /api there).
+    const isRemoteImage = /^https?:\/\/(media\.taager\.com|msgqzgzoslearaprgiqq\.supabase\.co)\//i.test(source);
+    if (isRemoteImage) {
+      const host = String(window.location && window.location.hostname || "");
+      if (!/^127\.0\.0\.1$|^localhost$/i.test(host)) {
+        return "/api/img?u=" + encodeURIComponent(source) + "&w=800";
+      }
     }
     return source;
   }
