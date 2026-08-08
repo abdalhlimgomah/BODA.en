@@ -1148,9 +1148,6 @@ async function annotateProductsWithRatingsTable(client, products = []) {
   }
 }
 
-const PRODUCT_LIST_COLUMNS =
-  "id,name,name_ar,name_en,description,description_ar,description_en,price,original_price,old_price,current_price,currency,category,category_id,brand,brand_id,seller,seller_email,image,image_url,thumbnail,images,img,image1,image2,image3,image4,image5,image6,image7,image8,stock,stock_status,quantity,sold_count,rating,rating_avg,rating_count,review_count,is_active,is_featured,has_variants,source,taager_id,taager_product_id,available_countries,sku,barcode,metadata,tags,seo_title,seo_description,created_at,updated_at";
-
 const _productsListMemoryCache = {};
 const PRODUCTS_LIST_CACHE_TTL = 10 * 60 * 1000;
 
@@ -1168,20 +1165,9 @@ async function fetchAllProducts() {
     for (let offset = 0; offset < 100000; offset += pageSize) {
       const { data, error } = await client
         .from("products")
-        .select(PRODUCT_LIST_COLUMNS)
+        .select("*")
         .range(offset, offset + pageSize - 1);
 
-      if (error && isMissingColumnError(error)) {
-        const { data: stars, error: errStar } = await client
-          .from("products")
-          .select("*")
-          .range(offset, offset + pageSize - 1);
-        if (errStar) throw errStar;
-        const starBatch = Array.isArray(stars) ? stars : [];
-        allRows.push.apply(allRows, starBatch);
-        if (starBatch.length < pageSize) break;
-        continue;
-      }
       if (error) throw error;
       const batch = Array.isArray(data) ? data : [];
       allRows.push.apply(allRows, batch);
