@@ -1619,7 +1619,7 @@ body.checkout-page {
 .checkout-page .bottom-nav { display: none; }
 
 /* ========================================
-   Confirmation Animation Overlay
+   Confirmation Animation Overlay (BudoQ)
    ======================================== */
 .ch-confirm-overlay {
   position: fixed;
@@ -1634,14 +1634,14 @@ body.checkout-page {
 .ch-confirm-bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 50% 40%, #162d5c 0%, #0b1f44 60%, #060e1f 100%);
+  background: radial-gradient(ellipse at 50% 38%, #172a5e 0%, #0d1b3e 62%, #060e1f 100%);
 }
 .ch-confirm-bg::after {
   content: "";
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 20% 30%, rgba(109,40,217,0.08) 0%, transparent 60%),
-              radial-gradient(circle at 80% 70%, rgba(16,185,129,0.05) 0%, transparent 50%);
+  background: radial-gradient(circle at 22% 28%, rgba(255,122,26,0.10) 0%, transparent 55%),
+              radial-gradient(circle at 78% 72%, rgba(255,122,26,0.05) 0%, transparent 50%);
 }
 
 .ch-confirm-scene {
@@ -1649,7 +1649,7 @@ body.checkout-page {
   z-index: 1;
   text-align: center;
   width: 100%;
-  max-width: 300px;
+  max-width: 320px;
   padding: var(--pad-card);
 }
 
@@ -1665,189 +1665,92 @@ body.checkout-page {
   margin: 0;
   letter-spacing: 0.5px;
 }
-.ch-confirm-success { color: #22c55e; }
+.ch-confirm-success { color: #ffb257; }
 
-/* Stage 1: 3D Cube */
-.ch-icon-3d {
-  perspective: 400px;
-  width: 110px;
-  height: 110px;
-  margin: 0 auto var(--pad-lg);
-}
-
-.ch-cube {
-  width: 80px;
-  height: 80px;
-  position: relative;
-  margin: 15px auto;
-  transform-style: preserve-3d;
-  animation: chCubeFloat 2s var(--ease-bounce) infinite;
-}
-
-.ch-cube-face {
-  position: absolute;
-  width: 80px;
-  height: 80px;
-}
-
-.ch-cube-front {
-  background: linear-gradient(145deg, #ffffff, #e8ecf3);
-  border-radius: var(--radius-sm);
+/* Brand lockup (visible across all stages) */
+.ch-brand-lockup {
+  margin: -4px 0 18px;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  transform: translateZ(40px);
-  box-shadow: 0 0 30px rgba(109,40,217,0.15);
+}
+.ch-brand-name {
+  font-family: "Plus Jakarta Sans", "Manrope", sans-serif;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: 10px;
+  text-indent: 10px;
+  color: #ffffff;
+  background: linear-gradient(120deg, #ffffff 20%, #ffb257 45%, #ff7a1a 60%, #ffffff 85%);
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: chBrandShine 2.8s var(--ease-in-out) infinite;
+  filter: drop-shadow(0 4px 18px rgba(255,122,26,0.25));
 }
 
-.ch-cube-top {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(145deg, #dbe4f5, #b8c8e8);
-  border-radius: var(--radius-sm);
-  transform: rotateX(90deg) translateZ(40px);
-  box-shadow: inset 0 -2px 4px rgba(0,0,0,0.05);
-}
-
-.ch-cube-right {
-  width: 80px;
-  height: 80px;
-  background: linear-gradient(145deg, #c4d2ed, #a3b5d9);
-  border-radius: var(--radius-sm);
-  transform: rotateY(90deg) translateZ(40px);
-  box-shadow: inset -2px 0 4px rgba(0,0,0,0.05);
-}
-
-.ch-cube-brand {
-  font-size: var(--text-body-sm);
-  font-weight: var(--weight-extrabold);
-  color: var(--color-primary);
-  letter-spacing: 2px;
-}
-
-.ch-cube-lines {
+/* Stage 1: preparing dots */
+.ch-fill-dots {
   display: flex;
-  gap: var(--pad-xs);
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  height: 120px;
+  margin: 0 auto 8px;
 }
-.ch-cube-lines span {
-  width: 14px;
-  height: 14px;
-  background: rgba(109,40,217,0.08);
-  border-radius: 3px;
-  animation: chCubeItemPop 1.5s ease-in-out infinite;
+.ch-fill-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: var(--radius-full);
+  background: linear-gradient(135deg, #ff9a4d, #ff7a1a);
+  box-shadow: 0 0 14px rgba(255,122,26,0.5);
+  animation: chDotPop 1.4s var(--ease-bounce) infinite;
 }
-.ch-cube-lines span:nth-child(2) { animation-delay: 0.15s; }
-.ch-cube-lines span:nth-child(3) { animation-delay: 0.3s; }
+.ch-fill-dots span:nth-child(2) { animation-delay: 0.15s; }
+.ch-fill-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+/* Stages 2-3: Lottie holders */
+.ch-lottie-holder {
+  position: relative;
+  width: 224px;
+  height: 224px;
+  margin: 0 auto 14px;
+}
+.ch-lottie-holder::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  width: 160px;
+  height: 26px;
+  transform: translateX(-50%);
+  background: radial-gradient(ellipse at center, rgba(0,0,0,0.45) 0%, transparent 70%);
+  filter: blur(4px);
+}
+.ch-lottie-holder svg {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 18px 30px rgba(0,0,0,0.35));
+}
 
 .ch-progress-bar {
   width: 140px;
   height: 3px;
   background: rgba(255,255,255,0.1);
   border-radius: var(--radius-badge);
-  margin: 0 auto var(--gap-text);
+  margin: var(--gap-text) auto 0;
   overflow: hidden;
 }
 .ch-progress-bar span {
   display: block;
   width: 40%;
   height: 100%;
-  background: linear-gradient(90deg, var(--color-primary), var(--color-secondary));
+  background: linear-gradient(90deg, #ff9a4d, #ff7a1a);
   border-radius: var(--radius-badge);
   animation: chProgSlide 1.2s ease-in-out infinite;
-}
-
-/* Stage 2: Route animation */
-.ch-map-ani {
-  position: relative;
-  width: 160px;
-  height: 90px;
-  margin: 0 auto 28px;
-}
-
-.ch-map-dot {
-  position: absolute;
-  bottom: 0;
-  width: 12px;
-  height: 12px;
-  border-radius: var(--radius-full);
-}
-.ch-map-dot-from {
-  left: 0;
-  background: var(--color-primary);
-  box-shadow: 0 0 0 4px rgba(109,40,217,0.2);
-  animation: chDotGlow 1.5s ease-in-out infinite;
-}
-.ch-map-dot-to {
-  right: 0;
-  background: #22c55e;
-  box-shadow: 0 0 0 4px rgba(34,197,94,0.2);
-  animation: chDotGlow 1.5s ease-in-out 0.5s infinite;
-}
-
-.ch-map-arc {
-  position: absolute;
-  bottom: 2px;
-  left: 6px;
-  right: 6px;
-  height: 60px;
-}
-
-.ch-arc-travel {
-  animation: chArcDraw 2s var(--ease-out) forwards;
-}
-
-.ch-ship-wrap {
-  position: absolute;
-  left: 0;
-  bottom: -6px;
-  animation: chShipMove 2.5s var(--ease-bounce) infinite;
-}
-
-.ch-ship {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-.ch-ship-body {
-  width: 36px;
-  height: 20px;
-  background: var(--color-primary);
-  border-radius: var(--radius-xs) var(--radius-xs) 6px 6px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.ch-ship-brand {
-  font-size: 0.5rem;
-  font-weight: var(--weight-extrabold);
-  color: var(--color-text-inverse);
-  letter-spacing: 1px;
-}
-.ch-ship-window {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  width: 10px;
-  height: 8px;
-  background: rgba(255,255,255,0.25);
-  border-radius: 2px;
-}
-
-/* Stage 3: Success */
-.ch-success-ring {
-  width: 110px;
-  height: 110px;
-  margin: 0 auto var(--pad-lg);
-}
-.ch-success-ring svg { width: 100%; height: 100%; display: block; }
-
-.ch-sr-progress {
-  animation: chCircleIn 1s var(--ease-out) forwards;
-}
-.ch-sr-check {
-  animation: chCheckIn 0.4s var(--ease-out) 0.9s forwards;
 }
 
 /* Keyframes */
@@ -1855,32 +1758,19 @@ body.checkout-page {
   from { opacity: 0; transform: translateY(20px) scale(0.95); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
-@keyframes chCubeFloat {
-  0%, 100% { transform: translateY(0) rotateX(-8deg) rotateY(-15deg); }
-  50% { transform: translateY(-12px) rotateX(-6deg) rotateY(-10deg); }
+@keyframes chBrandShine {
+  0% { background-position: 120% 0; }
+  100% { background-position: -130% 0; }
 }
-@keyframes chCubeItemPop {
-  0%, 100% { transform: scale(1); opacity: 0.6; }
-  50% { transform: scale(1.25); opacity: 1; }
+@keyframes chDotPop {
+  0%, 100% { transform: scale(1) translateY(0); opacity: 0.55; }
+  50% { transform: scale(1.35) translateY(-14px); opacity: 1; }
 }
 @keyframes chProgSlide {
   0% { transform: translateX(-100%); }
   100% { transform: translateX(350%); }
 }
-@keyframes chDotGlow {
-  0%, 100% { box-shadow: 0 0 0 4px rgba(109,40,217,0.2); }
-  50% { box-shadow: 0 0 0 8px rgba(109,40,217,0.08); }
-}
-@keyframes chArcDraw {
-  to { stroke-dashoffset: 0; }
-}
-@keyframes chShipMove {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(118px); }
-}
-@keyframes chCircleIn {
-  to { stroke-dashoffset: 0; }
-}
-@keyframes chCheckIn {
-  to { stroke-dashoffset: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .ch-brand-name, .ch-fill-dots span, .ch-progress-bar span { animation: none; }
 }
