@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
@@ -273,7 +273,7 @@
   <script src="../assets/js/auth.config.js?v=20260630"></script>
   <script src="../assets/js/taager-integration.js?v=20260630d"></script>
   <script src="../assets/js/store.js?v=20260712c"></script>
-  <script src="../assets/js/supabase-client.js?v=20260809-1"></script>
+  <script src="../assets/js/supabase-client.js?v=20260809-2"></script>
   <script src="../assets/js/pricing-engine.js?v=20260703"></script>
   <script src="../assets/js/shipping-zones.js"></script>
   <script src="../assets/js/cart.js?v=20260809"></script>
@@ -355,13 +355,15 @@
           if (profiles && profiles.length && profiles[0].phone_verified && profiles[0].phone_number) {
             localStorage.setItem("userPhone", profiles[0].phone_number);
             localStorage.setItem("userPhoneVerified", "true");
-            localStorage.setItem("userPhoneCountry", profiles[0].phone_country || "EG");
+            localStorage.setItem("userPhoneCountry", profiles[0].phone_country || (window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry ? window.TaagerIntegration.getSelectedCountry() : localStorage.getItem("userCountry")) || "SA");
             window.location.href = "checkout.html"; return;
           }
         } catch (err) {}
       }
       PhoneVerification.show(userEmail, function () { window.location.href = "checkout.html"; }, {
-        prefillPhone: localStorage.getItem("userPhone") || "", prefillCountry: localStorage.getItem("userPhoneCountry") || "EG"
+        prefillPhone: localStorage.getItem("userPhone") || "", prefillCountry: localStorage.getItem("userPhoneCountry")
+          || (window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry ? window.TaagerIntegration.getSelectedCountry() : localStorage.getItem("userCountry"))
+          || "SA"
       });
     }
   </script>
