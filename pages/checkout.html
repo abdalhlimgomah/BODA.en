@@ -193,6 +193,33 @@
       </button>
     </div>
 
+    <!-- ===== DELIVERY CITY (GOVERNORATE) ===== -->
+    <div class="ch-card ch-gov-card" id="ch-gov-card">
+      <div class="ch-section-title">
+        <span class="ch-brand-dot"></span>
+        <span id="ch-gov-card-title">المحافظة</span>
+      </div>
+      <div id="ch-gov-display" class="ch-gov-display" style="display:none;">
+        <div class="ch-gov-display-row">
+          <div class="ch-gov-display-body">
+            <span class="ch-gov-display-label" id="ch-gov-display-label">المحافظة</span>
+            <div class="ch-gov-display-main">
+              <span class="ch-gov-display-name" id="ch-gov-display-name"></span>
+              <span class="ch-gov-display-fee" id="ch-gov-display-fee"></span>
+            </div>
+          </div>
+          <button class="ch-gov-change-btn" id="ch-gov-change-btn" type="button">تغيير</button>
+        </div>
+      </div>
+      <div id="ch-gov-selector">
+        <div id="ch-governorate" class="ch-gov-select" role="button" tabindex="0">
+          <span id="ch-gov-placeholder" class="ch-gov-placeholder">اختر المحافظة</span>
+          <svg class="ch-gov-arrow" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </div>
+      </div>
+      <input type="hidden" id="ch-gov-input" value="" />
+    </div>
+
     <!-- ===== FORM FIELDS ===== -->
     <div class="ch-card" id="ch-address-form">
       <div class="ch-section-title">
@@ -210,28 +237,6 @@
       <div class="ch-field">
         <label for="ch-phone">رقم الهاتف</label>
         <input id="ch-phone" type="tel" placeholder="01XXXXXXXXX" required />
-      </div>
-      <div class="ch-field" id="ch-gov-field">
-        <label>المحافظة</label>
-        <div id="ch-gov-selector">
-          <div id="ch-governorate" class="ch-gov-select" role="button" tabindex="0">
-            <span id="ch-gov-placeholder" class="ch-gov-placeholder">اختر المحافظة</span>
-            <svg class="ch-gov-arrow" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </div>
-        </div>
-        <input type="hidden" id="ch-gov-input" value="" />
-      </div>
-      <div id="ch-gov-display" class="ch-gov-display" style="display:none;">
-        <div class="ch-gov-display-row">
-          <div class="ch-gov-display-body">
-            <span class="ch-gov-display-label">المحافظة</span>
-            <div class="ch-gov-display-main">
-              <span class="ch-gov-display-name" id="ch-gov-display-name"></span>
-              <span class="ch-gov-display-fee" id="ch-gov-display-fee"></span>
-            </div>
-          </div>
-          <button class="ch-gov-change-btn" id="ch-gov-change-btn" type="button">تغيير</button>
-        </div>
       </div>
       <div class="ch-field">
         <label for="ch-address">العنوان التفصيلي</label>
