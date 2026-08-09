@@ -1011,7 +1011,11 @@ async function handleConfirmClick(event) {
     if (window.PhoneVerification) {
 checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "info");
       await new Promise(function (resolve) {
-        window.PhoneVerification.show(getUserEmail(), function (phone) {
+        var checkoutPhoneCountry = (function () {
+        var sc = window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry ? window.TaagerIntegration.getSelectedCountry() : null;
+        return sc ? (sc.code || sc.countryCode || "") : "";
+      })();
+      window.PhoneVerification.show(getUserEmail(), function (phone) {
           var phoneEl = document.getElementById("ch-phone");
           if (phoneEl) {
             phoneEl.value = phone;
@@ -1024,7 +1028,8 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
         }, {
           prefillPhone: localStorage.getItem("userPhone") || "",
           prefillCountry: localStorage.getItem("userPhoneCountry")
-            || (window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry ? window.TaagerIntegration.getSelectedCountry() : localStorage.getItem("userCountry"))
+            || checkoutPhoneCountry
+            || localStorage.getItem("userCountry")
             || "SA"
         });
       });

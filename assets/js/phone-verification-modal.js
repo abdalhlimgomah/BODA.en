@@ -733,13 +733,28 @@ function _getClient() {
     const modalCountrySelect = document.getElementById("modalCountrySelect");
     const modalPhoneInput = document.getElementById("modalPhoneInput");
 
-    // Determine country — force to user's account country
-    var userCountry = (typeof getUserCountryCode === 'function') ? getUserCountryCode() : (prefillCountry || localStorage.getItem('userCountry') || 'SA');
-    var country = userCountry;
+    // Determine country — force to user's account country.
+    // prefillCountry may arrive as a string code ("SA") or as a country
+    // object ({code, name}) from TaagerIntegration.getSelectedCountry().
+    var country = (typeof getUserCountryCode === 'function') ? getUserCountryCode() : (prefillCountry || localStorage.getItem('userCountry') || 'SA');
+    if (country && typeof country === "object") {
+      country = country.code || country.countryCode || "";
+    }
+    country = String(country || (localStorage.getItem("userCountry") || "SA")).toUpperCase();
     if (modalCountrySelect) {
       // Show only the matching country option
+      var countryMatched = false;
       for (var pi = 0; pi < modalCountrySelect.options.length; pi++) {
-        modalCountrySelect.options[pi].style.display = modalCountrySelect.options[pi].value === country ? '' : 'none';
+        var optMatch = modalCountrySelect.options[pi].value === country;
+        if (optMatch) countryMatched = true;
+        modalCountrySelect.options[pi].style.display = optMatch ? '' : 'none';
+      }
+      // If nothing matched (bad code), fall back to SA and re-filter
+      if (!countryMatched) {
+        country = "SA";
+        for (var pj = 0; pj < modalCountrySelect.options.length; pj++) {
+          modalCountrySelect.options[pj].style.display = modalCountrySelect.options[pj].value === country ? '' : 'none';
+        }
       }
       modalCountrySelect.value = country;
       modalCountrySelect.disabled = false;
