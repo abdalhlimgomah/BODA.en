@@ -79,10 +79,33 @@ function renderRatingStars(rating) {
   return "";
 }
 
+function getWishlistCountryCode() {
+  if (window.TaagerIntegration && typeof window.TaagerIntegration.getSelectedCountry === "function") {
+    var selected = window.TaagerIntegration.getSelectedCountry();
+    if (selected && selected.code) return String(selected.code).toUpperCase();
+  }
+  return "EG";
+}
+
+function wishlistItemMatchesCountry(item, countryCode) {
+  if (!item) return false;
+  if (window.TaagerIntegration && typeof window.TaagerIntegration.matchesCountry === "function") {
+    return window.TaagerIntegration.matchesCountry(item, countryCode);
+  }
+  var pCountry = String(item.country || item.country_code || "").toUpperCase();
+  if (!pCountry) return true;
+  return pCountry === String(countryCode || "EG").toUpperCase();
+}
+
 function renderWishlist() {
   if (!window.BudaStore) return;
 
-  const wishlist = window.BudaStore.getWishlist();
+  const countryCode = getWishlistCountryCode();
+  const allWishlist = window.BudaStore.getWishlist();
+  const wishlist = allWishlist.filter(function (item) {
+    return wishlistItemMatchesCountry(item, countryCode);
+  });
+  const hasHiddenItems = wishlist.length === 0 && allWishlist.length > 0;
   const grid = document.getElementById("wishlist-grid");
   const emptyState = document.getElementById("wishlist-empty");
   const countEl = document.getElementById("wishlist-count");
@@ -94,7 +117,21 @@ function renderWishlist() {
     grid.innerHTML = "";
     emptyState?.classList.remove("hidden");
     if (emptyState) {
-      emptyState.innerHTML = `
+      emptyState.innerHTML = hasHiddenItems
+        ? `
+        <div class="wishlist-empty-content">
+          <div class="wishlist-empty-animation">
+            <span class="material-icons-outlined animated-heart">favorite_border</span>
+          </div>
+          <h2 class="wishlist-empty-title">لا توجد منتجات متاحة في بلدك الحالي</h2>
+          <p class="wishlist-empty-text">منتجاتك المفضلة من دول أخرى لا تظهر هنا. بدّل الدولة من القائمة العلوية لعرضها.</p>
+          <a href="home.html" class="btn-primary wishlist-empty-cta">
+            <span class="material-icons-outlined">shopping_bag</span>
+            تسوق الآن
+          </a>
+        </div>
+      `
+        : `
         <div class="wishlist-empty-content">
           <div class="wishlist-empty-animation">
             <span class="material-icons-outlined animated-heart">favorite_border</span>
@@ -116,8 +153,22 @@ function renderWishlist() {
   grid.innerHTML = `
     <div class="wishlist-grids">
       ${wishlist
-        .map((item) => {
+        .map((origItem) => {
+          let item = origItem;
           const id = String(item.id);
+          // Refresh price/image snapshot from the live store so prices match
+          // the currently selected country.
+          var liveProduct = null;
+          if (window.BudaStore && typeof window.BudaStore.getProductById === "function") {
+            try { liveProduct = window.BudaStore.getProductById(id); } catch (_e) {}
+          }
+          if (
+            liveProduct &&
+            (Number(liveProduct.price) > 0 || Number(liveProduct.currentPrice) > 0) &&
+            wishlistItemMatchesCountry(liveProduct, countryCode)
+          ) {
+            item = Object.assign({}, liveProduct, item);
+          }
           const imgs = window.BudaStore?.getProductImages
             ? window.BudaStore.getProductImages(item)
             : [item.image];
@@ -274,6 +325,11 @@ document.addEventListener("boda:pricing-updated", function () {
 });
 
 document.addEventListener("boda:wishlist-loaded", function () {
+  renderWishlist();
+  setupWishlistEvents(document.getElementById("wishlist-grid"));
+});
+
+document.addEventListener("boda:country-changed", function () {
   renderWishlist();
   setupWishlistEvents(document.getElementById("wishlist-grid"));
 });
