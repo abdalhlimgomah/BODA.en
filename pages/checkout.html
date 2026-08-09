@@ -505,7 +505,7 @@
         var name = item.name || item.title || "منتج";
         var qty = item.quantity || item.qty || 1;
         var price = item.price || item.total || 0;
-        var currency = item.currency || "ج.م";
+        var currency = item.currency || (typeof window.getCheckoutCurrency === "function" ? window.getCheckoutCurrency() : "ج.م");
         html += '<div class="ch-summary-detail-item">';
         html += '<div class="ch-summary-detail-img"><img src="' + img.replace(/"/g, "&quot;") + '" alt="" loading="lazy" onerror="this.style.display=\'none\'" /></div>';
         html += '<div class="ch-summary-detail-body">';
@@ -535,8 +535,8 @@
       var isCod = selected && selected.getAttribute("data-payment") === "cod";
       line.style.display = isCod ? "flex" : "none";
       if (isCod) {
-        var fee = 12;
-        var currency = "ج.م";
+        var fee = typeof window.getCheckoutCodFee === "function" ? window.getCheckoutCodFee() : 12;
+        var currency = typeof window.getCheckoutCurrency === "function" ? window.getCheckoutCurrency() : "جنيه";
         feeEl.textContent = fee.toFixed(2) + " " + currency;
       }
     }
