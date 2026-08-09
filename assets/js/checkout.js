@@ -1152,10 +1152,35 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
 /* ========================================================================
    CONFIRMATION ANIMATION
    ======================================================================== */
+var chLottieAnims = {};
+var chLottieStageData = {
+  "ch-stage-2": "truck",
+  "ch-stage-3": "success"
+};
+function chPlayStageLottie(id) {
+  var dataKey = chLottieStageData[id];
+  if (!dataKey) return;
+  var stage = document.getElementById(id);
+  var container = stage ? stage.querySelector(".ch-lottie-holder") : null;
+  if (!container || !window.lottie) return;
+  var anim = chLottieAnims[id];
+  if (anim) { anim.goToAndPlay(0, true); return; }
+  var data = (window.BUDOQ_LOTTIE && window.BUDOQ_LOTTIE[dataKey]) || null;
+  if (!data) return;
+  chLottieAnims[id] = lottie.loadAnimation({
+    container: container,
+    renderer: "svg",
+    loop: false,
+    autoplay: true,
+    animationData: data
+  });
+}
+
 function showConfirmStage(id) {
   document.querySelectorAll(".ch-confirm-stage").forEach(function (s) { s.classList.add("hidden"); });
   var el = document.getElementById(id);
   if (el) el.classList.remove("hidden");
+  chPlayStageLottie(id);
 }
 
 function startConfirmAnimation(cart, fields, totals) {

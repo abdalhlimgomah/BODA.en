@@ -1,4 +1,4 @@
-// Central Supabase helper. Load once per page after supabase-js library.
+﻿// Central Supabase helper. Load once per page after supabase-js library.
 
 if (typeof window.SUPABASE_URL === 'undefined') {
   window.SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
@@ -21,14 +21,10 @@ if (typeof window._clientInstance === 'undefined') {
     if (window._clientInstance && isRealSupabaseClient(window._clientInstance)) {
       return window._clientInstance;
     }
-    if (window.getSupabaseClient) {
-      try {
-        var shared = window.getSupabaseClient();
-        if (shared) return shared;
-      } catch (e) {}
-    }
     var fresh = realCreateClient.apply(window.supabase, arguments);
-    if (fresh && typeof fresh.from === "function") window._clientInstance = fresh;
+    if (fresh && typeof fresh.from === "function") {
+      window._clientInstance = fresh;
+    }
     return fresh;
   };
   window.supabase.createClient.__bodaSingle = true;
@@ -650,15 +646,6 @@ function isRealSupabaseClient(c) {
 function getSupabaseClient() {
   if (_clientInstance && isRealSupabaseClient(_clientInstance)) return _clientInstance;
 
-  // Prefer the library already loaded on this page.
-  if (window.supabase && typeof window.supabase.createClient === "function") {
-    validatePublicKeySafety();
-    _clientInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    return _clientInstance;
-  }
-
-  validatePublicKeySafety();
-
   // Reuse an existing real client created elsewhere (e.g., empty-cart.html).
   if (window.__rawSupabase && isRealSupabaseClient(window.__rawSupabase)) {
     _clientInstance = window.__rawSupabase;
@@ -668,6 +655,15 @@ function getSupabaseClient() {
     _clientInstance = window.supabaseClient;
     return _clientInstance;
   }
+
+  // Prefer the library already loaded on this page.
+  if (window.supabase && typeof window.supabase.createClient === "function") {
+    validatePublicKeySafety();
+    _clientInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    return _clientInstance;
+  }
+
+  validatePublicKeySafety();
 
   // NOTE: window.supabaseClient may be a local helper shim (no .functions),
   // it must never be used as the real client here.
