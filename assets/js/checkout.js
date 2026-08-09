@@ -277,13 +277,12 @@ function renderSavedContacts() {
 
 function setupReceiverSection() {
   var display = document.getElementById("ch-receiver-display");
-  var form = document.getElementById("ch-receiver-form");
   var nameEl = document.getElementById("ch-receiver-name");
   var phoneEl = document.getElementById("ch-receiver-phone");
   var nameInput = document.getElementById("ch-name");
   var phoneInput = document.getElementById("ch-phone");
 
-  if (!display || !form) return;
+  if (!display) return;
 
   var savedName = localStorage.getItem("userFullName") || "";
   var savedPhone = localStorage.getItem("userPhone") || "";
@@ -295,13 +294,11 @@ function setupReceiverSection() {
     if (nameInput) nameInput.value = savedName;
     if (phoneInput) phoneInput.value = savedPhone;
     display.classList.remove("hidden");
-    form.classList.add("hidden");
     updateReceiverDisplay(true);
     var titleName = document.getElementById("ch-receiver-title-name");
     if (titleName) titleName.textContent = savedName;
   } else {
     display.classList.add("hidden");
-    form.classList.remove("hidden");
     updateReceiverDisplay(false);
     var titleName = document.getElementById("ch-receiver-title-name");
     if (titleName) titleName.textContent = "";
@@ -604,16 +601,29 @@ function setupGovernorateSection() {
 
   if (!selector || !display) return;
 
+  var titleEl = document.getElementById("ch-gov-card-title");
+  var labelEl = document.getElementById("ch-gov-display-label");
+  if (titleEl) titleEl.textContent = getGovernorateLabel();
+  if (labelEl) labelEl.textContent = getGovernorateLabel();
+  var placeholder = document.getElementById("ch-gov-placeholder");
+  if (placeholder) placeholder.textContent = getGovernoratePlaceholder();
+
   if (savedGov) {
     selector.classList.add("hidden");
     display.classList.remove("hidden");
+    display.style.display = "";
     if (displayName) displayName.textContent = savedGov;
     setGovernorate(savedGov);
     var fee = getShippingCost();
     var currency = getCheckoutCurrency();
-    if (displayFee) displayFee.textContent = "رسوم الشحن " + (Number(fee) || 0).toFixed(2) + " " + currency;
+    if (displayFee) {
+      displayFee.textContent = (Number(fee) || 0) > 0
+        ? "رسوم الشحن " + (Number(fee) || 0).toFixed(2) + " " + currency
+        : "";
+    }
   } else {
     selector.classList.remove("hidden");
+    display.style.display = "none";
     display.classList.add("hidden");
   }
 
@@ -622,6 +632,7 @@ function setupGovernorateSection() {
   if (changeBtn) {
     changeBtn.addEventListener("click", function () {
       selector.classList.remove("hidden");
+      display.style.display = "none";
       display.classList.add("hidden");
     });
   }
@@ -781,6 +792,11 @@ function setGovernorate(name) {
   if (hiddenInput) hiddenInput.value = name;
   if (sel) sel.classList.add("ch-sheet-open");
 
+  var titleEl = document.getElementById("ch-gov-card-title");
+  var labelEl = document.getElementById("ch-gov-display-label");
+  if (titleEl) titleEl.textContent = getGovernorateLabel();
+  if (labelEl) labelEl.textContent = getGovernorateLabel();
+
   var addrInput = document.getElementById("ch-address");
   if (addrInput) {
     var current = addrInput.value.trim();
@@ -800,10 +816,15 @@ function setGovernorate(name) {
     if (!selector.classList.contains("hidden")) {
       selector.classList.add("hidden");
       display.classList.remove("hidden");
+      display.style.display = "";
     }
     if (displayName) displayName.textContent = name;
     var currency = getCheckoutCurrency();
-    if (displayFee) displayFee.textContent = "رسوم الشحن " + (Number(governorateShippingFee) || 0).toFixed(2) + " " + currency;
+    if (displayFee) {
+      displayFee.textContent = (Number(governorateShippingFee) || 0) > 0
+        ? "رسوم الشحن " + (Number(governorateShippingFee) || 0).toFixed(2) + " " + currency
+        : "";
+    }
   }
 
   renderCheckoutTotals();
