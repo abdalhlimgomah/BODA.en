@@ -278,7 +278,7 @@
   <script src="../assets/js/shipping-zones.js"></script>
   <script src="../assets/js/cart.js?v=20260809"></script>
   <script src="../assets/js/noon-shell.js?v=20260808"></script>
-  <script src="../assets/js/phone-verification-modal.js?v=20260809-2"></script>
+  <script src="../assets/js/phone-verification-modal.js?v=20260809-3"></script>
 
   <nav class="bottom-nav" id="bottom-nav">
     <a href="home.html" data-nav="home">
@@ -355,14 +355,25 @@
           if (profiles && profiles.length && profiles[0].phone_verified && profiles[0].phone_number) {
             localStorage.setItem("userPhone", profiles[0].phone_number);
             localStorage.setItem("userPhoneVerified", "true");
-            localStorage.setItem("userPhoneCountry", profiles[0].phone_country || (window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry ? window.TaagerIntegration.getSelectedCountry() : localStorage.getItem("userCountry")) || "SA");
+            var ecProfileCountry = profiles[0].phone_country
+            || (function () {
+              var sc2 = window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry ? window.TaagerIntegration.getSelectedCountry() : null;
+              return sc2 ? (sc2.code || sc2.countryCode || "") : "";
+            }())
+            || localStorage.getItem("userCountry") || "SA";
+            localStorage.setItem("userPhoneCountry", ecProfileCountry);
             window.location.href = "checkout.html"; return;
           }
         } catch (err) {}
       }
+      var ecCountryCode = (function () {
+        var sc = window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry ? window.TaagerIntegration.getSelectedCountry() : null;
+        return sc ? (sc.code || sc.countryCode || "") : "";
+      })();
       PhoneVerification.show(userEmail, function () { window.location.href = "checkout.html"; }, {
         prefillPhone: localStorage.getItem("userPhone") || "", prefillCountry: localStorage.getItem("userPhoneCountry")
-          || (window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry ? window.TaagerIntegration.getSelectedCountry() : localStorage.getItem("userCountry"))
+          || ecCountryCode
+          || localStorage.getItem("userCountry")
           || "SA"
       });
     }
