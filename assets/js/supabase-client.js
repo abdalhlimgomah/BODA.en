@@ -10,6 +10,30 @@ if (typeof window._clientInstance === 'undefined') {
   window._clientInstance = null;
 }
 
+// Ensure a single Supabase client per page. Direct createClient calls
+// (home.js, category-landing.js, external scripts) would otherwise spawn
+// extra GoTrueClient instances under the same storage key.
+(function ensureSingleSupabaseClient() {
+  if (!window.supabase || typeof window.supabase.createClient !== "function") return;
+  if (window.supabase.createClient.__bodaSingle) return;
+  var realCreateClient = window.supabase.createClient;
+  window.supabase.createClient = function () {
+    if (window._clientInstance && isRealSupabaseClient(window._clientInstance)) {
+      return window._clientInstance;
+    }
+    if (window.getSupabaseClient) {
+      try {
+        var shared = window.getSupabaseClient();
+        if (shared) return shared;
+      } catch (e) {}
+    }
+    var fresh = realCreateClient.apply(window.supabase, arguments);
+    if (fresh && typeof fresh.from === "function") window._clientInstance = fresh;
+    return fresh;
+  };
+  window.supabase.createClient.__bodaSingle = true;
+})();
+
 if (typeof window._ordersColumnsCache === 'undefined') {
   window._ordersColumnsCache = null;
 }
