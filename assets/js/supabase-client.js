@@ -610,26 +610,84 @@ function saveLocalOrderSnapshot(orderId, items = []) {
   }
 }
 
-function getSupabaseClient() {
-  if (_clientInstance) return _clientInstance;
+function isRealSupabaseClient(c) {
+  return (
+    !!c &&
+    typeof c.from === "function" &&
+    c.functions !== null &&
+    typeof c.functions === "object" &&
+    c.auth !== null &&
+    typeof c.auth === "object" &&
+    c.storage !== null &&
+    typeof c.storage === "object"
+  );
+}
 
-  // Reuse existing client if one was already created (e.g., in empty-cart.html)
-  if (window.supabaseClient && typeof window.supabaseClient.from === "function") {
-    _clientInstance = window.supabaseClient;
+function getSupabaseClient() {
+  if (_clientInstance && isRealSupabaseClient(_clientInstance)) return _clientInstance;
+
+  // Prefer the library already loaded on this page.
+  if (window.supabase && typeof window.supabase.createClient === "function") {
+    validatePublicKeySafety();
+    _clientInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     return _clientInstance;
   }
 
   validatePublicKeySafety();
 
-  if (!window.supabase || typeof window.supabase.createClient !== "function") {
-    throw new Error("Supabase library not loaded");
+  // Reuse an existing real client created elsewhere (e.g., empty-cart.html).
+  if (window.__rawSupabase && isRealSupabaseClient(window.__rawSupabase)) {
+    _clientInstance = window.__rawSupabase;
+    return _clientInstance;
+  }
+  if (window.supabaseClient && isRealSupabaseClient(window.supabaseClient)) {
+    _clientInstance = window.supabaseClient;
+    return _clientInstance;
   }
 
-  _clientInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  return _clientInstance;
+  // NOTE: window.supabaseClient may be a local helper shim (no .functions),
+  // it must never be used as the real client here.
+  throw new Error("Supabase library not loaded");
+}
+
+var _cdnSupabasePromise = null;
+
+// Returns a client guaranteed to support Edge Functions (client.functions.invoke).
+// If the local Supabase library failed to load, falls back to loading it from CDN.
+function getFunctionsClient() {
+  try {
+    return Promise.resolve(getSupabaseClient());
+  } catch (e) {}
+
+  if (!_cdnSupabasePromise) {
+    _cdnSupabasePromise = new Promise(function (resolve, reject) {
+      var s = document.createElement("script");
+      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js";
+      s.crossOrigin = "anonymous";
+      s.onload = function () {
+        try {
+          var c = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+          if (c && typeof c.functions !== "undefined") {
+            _clientInstance = c;
+            resolve(c);
+          } else {
+            reject(new Error("فشل تهيئة مكتبة Supabase"));
+          }
+        } catch (err) {
+          reject(err);
+        }
+      };
+      s.onerror = function () {
+        reject(new Error("تعذر الاتصال بخدمة التحقق. تأكد من الاتصال بالإنترنت وحاول مرة أخرى."));
+      };
+      document.head.appendChild(s);
+    });
+  }
+  return _cdnSupabasePromise;
 }
 
 window.getSupabaseClient = getSupabaseClient;
+window.getFunctionsClient = getFunctionsClient;
 
 function isMissingColumnError(error) {
   if (!error) return false;

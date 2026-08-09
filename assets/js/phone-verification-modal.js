@@ -3,10 +3,15 @@
  * Shared across Edit Account Page and Cart Checkout protection.
  */
 
-// Helper to get Supabase client from any page
+// Helper to get a client that can call Edge Functions from any page
 function _getClient() {
+  if (window.getFunctionsClient) return window.getFunctionsClient();
   if (window.getSupabaseClient) return window.getSupabaseClient();
-  if (window.supabaseClient) return window.supabaseClient;
+  if (window.supabaseClient && typeof window.supabaseClient.functions !== "undefined") return window.supabaseClient;
+  if (window.supabaseClient && typeof window.supabaseClient.raw === "function") {
+    var raw = window.supabaseClient.raw();
+    if (raw && typeof raw.functions !== "undefined") return raw;
+  }
   throw new Error("Supabase client not initialised on this page.");
 }
 
@@ -415,7 +420,7 @@ function _getClient() {
     activeBtn.innerHTML = (isResend ? 'إرسال الرمز' : 'إرسال رمز التحقق') + ' <span class="btn-loader"></span>';
 
     try {
-      const client = _getClient();
+      const client = await _getClient();
       
       const { data, error } = await client.functions.invoke("phone-verification", {
         body: {
@@ -512,7 +517,7 @@ function _getClient() {
     otpInputs.forEach(input => input.disabled = true);
 
     try {
-      const client = _getClient();
+      const client = await _getClient();
 
       var { data, error } = await client.functions.invoke("phone-verification", {
         body: {

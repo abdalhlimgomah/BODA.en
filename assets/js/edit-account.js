@@ -563,7 +563,7 @@ document.addEventListener("DOMContentLoaded", function () {
     activeBtn.innerHTML = (isResend ? 'إرسال الرمز' : 'إرسال رمز التحقق') + ' <span class="btn-loader"></span>';
 
     try {
-      var client = getClient();
+      var client = await getFunctionsClient();
       if (!client) {
         throw new Error("فشل الاتصال بقاعدة البيانات (Supabase client not found)");
       }
@@ -663,7 +663,7 @@ document.addEventListener("DOMContentLoaded", function () {
     otpInputs.forEach(function (input) { input.disabled = true; });
 
     try {
-      var client = getClient();
+      var client = await getFunctionsClient();
       if (!client) {
         throw new Error("فشل الاتصال بـ Supabase client");
       }
