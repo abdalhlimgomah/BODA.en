@@ -953,6 +953,7 @@ function renderCheckoutTotals() {
     couponDiscount,
     couponCode: activeCoupon?.code || "",
     shipping: shippingCost,
+    codFee: getCheckoutCodFee(),
   };
 }
 
@@ -1022,7 +1023,9 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
           resolve();
         }, {
           prefillPhone: localStorage.getItem("userPhone") || "",
-          prefillCountry: localStorage.getItem("userPhoneCountry") || "EG"
+          prefillCountry: localStorage.getItem("userPhoneCountry")
+            || (window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry ? window.TaagerIntegration.getSelectedCountry() : localStorage.getItem("userCountry"))
+            || "SA"
         });
       });
     }
@@ -1155,10 +1158,22 @@ function startConfirmAnimation(cart, fields, totals) {
     Analytics.trackPurchase({ id: fields?.order_id || Date.now(), total: totals?.total || 0 }, cart);
     Analytics.trackBeginCheckout(cart);
   }
+  var countryCode = "EG";
+  try {
+    var selected = window.TaagerIntegration && typeof window.TaagerIntegration.getSelectedCountry === "function"
+      ? window.TaagerIntegration.getSelectedCountry()
+      : null;
+    if (selected && selected.code) {
+      countryCode = String(selected.code).toUpperCase();
+    } else if (localStorage.getItem("userCountry")) {
+      countryCode = String(localStorage.getItem("userCountry")).toUpperCase();
+    }
+  } catch (e) {}
   sessionStorage.setItem("orderSuccessData", JSON.stringify({
     cart: cart,
     fields: fields,
     totals: totals,
+    country_code: countryCode,
     date: new Date().toISOString(),
   }));
 
