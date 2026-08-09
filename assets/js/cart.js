@@ -10,7 +10,21 @@ const CAIRO_PARTS_FORMATTER = new Intl.DateTimeFormat("en-GB", {
   hour12: false,
 });
 const CHECKOUT_SHIPPING = 19;
-const CHECKOUT_TAX = 12;
+function isCartSaudi() {
+  try {
+    var cc = String(localStorage.getItem("userCountry") || "").toUpperCase();
+    if (cc) return cc === "SA";
+    var selected = window.TaagerIntegration && typeof window.TaagerIntegration.getSelectedCountry === "function"
+      ? window.TaagerIntegration.getSelectedCountry()
+      : null;
+    return !!(selected && selected.code === "SA");
+  } catch (e) {
+    return false;
+  }
+}
+function getCartCodFee() {
+  return isCartSaudi() ? 5 : 12;
+}
 const COUPON_STORAGE_KEY = "boda_active_coupon";
 const DELIVERY_START_OFFSET_DAYS = 2;
 const DELIVERY_END_OFFSET_DAYS = 5;
@@ -1563,7 +1577,7 @@ function renderCart() {
     couponDiscount = calculateCouponDiscount(subtotal, activeCoupon);
   }
   var totalItemSavings = viewItems.reduce(function (t, i) { return t + (Number(i.totalSavings) || 0); }, 0);
-  var grandTotal = Math.max(subtotal + CHECKOUT_TAX - couponDiscount, 0);
+  var grandTotal = Math.max(subtotal + getCartCodFee() - couponDiscount, 0);
   var fmt = formatEgp;
 
   if (cartItemsCount) cartItemsCount.textContent = totalUnits + " " + (totalUnits === 1 ? "منتج" : "منتجات");
@@ -1587,7 +1601,7 @@ function renderCart() {
   if (mDiscountRow) mDiscountRow.classList.toggle("hidden", couponDiscount <= 0);
   if (mSavingsVal) mSavingsVal.innerHTML = "- " + fmt(couponDiscount);
   if (mShipping) mShipping.innerHTML = "__";
-  if (mTax) mTax.innerHTML = fmt(CHECKOUT_TAX);
+  if (mTax) mTax.innerHTML = fmt(getCartCodFee());
   if (mGrandTotal) mGrandTotal.innerHTML = fmt(grandTotal);
   if (mSavings) {
     if (totalItemSavings + couponDiscount > 0) { mSavings.innerHTML = "وفرت " + fmt(totalItemSavings + couponDiscount); mSavings.classList.remove("hidden"); }
@@ -1607,7 +1621,7 @@ function renderCart() {
   if (dDiscountRow) dDiscountRow.classList.toggle("hidden", couponDiscount <= 0);
   if (dSavings) dSavings.innerHTML = "- " + fmt(couponDiscount);
   if (dShipping) dShipping.innerHTML = "__";
-  if (dTax) dTax.innerHTML = fmt(CHECKOUT_TAX);
+  if (dTax) dTax.innerHTML = fmt(getCartCodFee());
   if (dGrandTotal) dGrandTotal.innerHTML = fmt(grandTotal);
   if (dSummary) dSummary.classList.remove("hidden");
 

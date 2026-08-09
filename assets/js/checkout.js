@@ -1,4 +1,6 @@
-﻿const CHECKOUT_TAX = 12;
+﻿function getCheckoutCodFee() {
+  return isSaudiArabia() ? 5 : 12;
+}
 const COUPON_STORAGE_KEY = "boda_active_coupon";
 const DEFAULT_COUPON_RATE = 0.02;
 const GOVERNORATE_STORAGE_KEY = "buda_governorate";
@@ -902,7 +904,7 @@ function renderCheckoutTotals() {
   const activeCoupon = getActiveCoupon();
   const couponDiscount = calculateCouponDiscount(subtotal, activeCoupon);
   var shippingCost = getShippingCost();
-  const total = Math.max(subtotal + shippingCost + CHECKOUT_TAX - couponDiscount, 0);
+  const total = Math.max(subtotal + shippingCost + getCheckoutCodFee() - couponDiscount, 0);
 
   const subtotalEl = document.getElementById("ch-subtotal");
   const shippingEl = document.getElementById("ch-shipping");
@@ -914,7 +916,7 @@ function renderCheckoutTotals() {
 
   if (subtotalEl) subtotalEl.innerHTML = formatCheckoutMoney(subtotal);
   if (shippingEl) shippingEl.innerHTML = shippingCost > 0 ? formatCheckoutMoney(shippingCost) : "--";
-  if (taxEl) taxEl.innerHTML = formatCheckoutMoney(CHECKOUT_TAX);
+  if (taxEl) taxEl.innerHTML = formatCheckoutMoney(getCheckoutCodFee());
   if (discountRowEl) {
     discountRowEl.classList.toggle("hidden", couponDiscount <= 0);
   }
@@ -1051,7 +1053,7 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
 
     var itemCouponDiscount = totals.subtotal > 0 ? Math.round((itemTotal / totals.subtotal) * totals.couponDiscount * 100) / 100 : 0;
     var discountedTotal = Math.max(itemTotal - itemCouponDiscount, 0);
-    var grandTotal = discountedTotal + totals.shipping + CHECKOUT_TAX;
+    var grandTotal = discountedTotal + totals.shipping + getCheckoutCodFee();
 
     var singleOrder = {
       user_name: fields.name,
@@ -1066,7 +1068,7 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
       payment_method: selectedPayment,
       shipping_method: "standard",
       shipping_cost: totals.shipping,
-      tax: CHECKOUT_TAX,
+      tax: getCheckoutCodFee(),
       user_id: getCurrentUserId(),
       items_json: JSON.stringify([item]),
       order_source: "taager",

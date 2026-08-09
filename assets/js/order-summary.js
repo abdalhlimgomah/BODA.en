@@ -33,7 +33,19 @@ function formatInvoiceMoney(value) {
 }
 
 function computeFinancials(order, items) {
-  const CHECKOUT_TAX = 12; // قيمة الضريبة الثابتة من checkout.js
+  const COD_FEE_EG = 12; // رسوم الدفع عند الاستلام في مصر
+  const COD_FEE_SA = 5;  // رسوم الدفع عند الاستلام في السعودية (ريال)
+
+  function getCodFeeForOrder() {
+    var code = String((order && (order.country_code || order.countryCode)) || "").toUpperCase();
+    if (!code) {
+      try {
+        var selected = window.TaagerIntegration?.getSelectedCountry?.();
+        code = selected ? String(selected.code || "").toUpperCase() : "";
+      } catch (e) {}
+    }
+    return code === "SA" ? COD_FEE_SA : COD_FEE_EG;
+  }
 
   const rawTotal = Number(order.total_price ?? order.total ?? order.amount ?? order.order_total ?? order.grand_total ?? order.final_total ?? 0) || 0;
   const itemsTotal = items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
@@ -49,8 +61,9 @@ function computeFinancials(order, items) {
     const totalWithoutSubtotal = rawTotal - subtotal;
     const inferredDiscount = (subtotal * 0.3); // 30% discount from checkout
     const remaining = totalWithoutSubtotal + inferredDiscount;
-    shipping = Math.max(0, remaining - CHECKOUT_TAX);
-    tax = CHECKOUT_TAX;
+    const codFee = getCodFeeForOrder();
+    shipping = Math.max(0, remaining - codFee);
+    tax = codFee;
     discount = inferredDiscount;
   }
 
