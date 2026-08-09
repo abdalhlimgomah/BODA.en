@@ -652,36 +652,65 @@ function getSupabaseClient() {
 
 var _cdnSupabasePromise = null;
 
+// Locate the locally-vendored Supabase library (same folder as supabase-client.js),
+// which is always allowed by the site CSP ('self').
+function getVendorSupabaseUrl() {
+  var scripts = document.getElementsByTagName("script");
+  for (var i = 0; i < scripts.length; i++) {
+    var src = scripts[i].src || "";
+    if (src.indexOf("supabase-client.js") !== -1) {
+      return src.replace(/supabase-client\.js[^/]*$/, "") + "vendor/supabase/supabase-js@2.js";
+    }
+  }
+  return "./assets/vendor/supabase/supabase-js@2.js";
+}
+
+function loadSupabaseLibrary() {
+  var urls = [
+    getVendorSupabaseUrl(),
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"
+  ];
+  return new Promise(function (resolve, reject) {
+    var idx = 0;
+    function attempt() {
+      if (idx >= urls.length) {
+        reject(new Error("تعذر الاتصال بخدمة التحقق. تأكد من الاتصال بالإنترنت وحاول مرة أخرى."));
+        return;
+      }
+      var s = document.createElement("script");
+      s.src = urls[idx++];
+      s.crossOrigin = "anonymous";
+      s.onload = function () {
+        try {
+          if (window.supabase && typeof window.supabase.createClient === "function") {
+            var c = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            if (c && typeof c.functions !== "undefined") {
+              _clientInstance = c;
+              resolve(c);
+              return;
+            }
+          }
+        } catch (err) {
+          // Fall through to the next source.
+        }
+        attempt();
+      };
+      s.onerror = function () { attempt(); };
+      document.head.appendChild(s);
+    }
+    attempt();
+  });
+}
+
 // Returns a client guaranteed to support Edge Functions (client.functions.invoke).
-// If the local Supabase library failed to load, falls back to loading it from CDN.
+// If the local Supabase library failed to load, tries a second source.
 function getFunctionsClient() {
   try {
     return Promise.resolve(getSupabaseClient());
   } catch (e) {}
 
   if (!_cdnSupabasePromise) {
-    _cdnSupabasePromise = new Promise(function (resolve, reject) {
-      var s = document.createElement("script");
-      s.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js";
-      s.crossOrigin = "anonymous";
-      s.onload = function () {
-        try {
-          var c = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-          if (c && typeof c.functions !== "undefined") {
-            _clientInstance = c;
-            resolve(c);
-          } else {
-            reject(new Error("فشل تهيئة مكتبة Supabase"));
-          }
-        } catch (err) {
-          reject(err);
-        }
-      };
-      s.onerror = function () {
-        reject(new Error("تعذر الاتصال بخدمة التحقق. تأكد من الاتصال بالإنترنت وحاول مرة أخرى."));
-      };
-      document.head.appendChild(s);
-    });
+    _cdnSupabasePromise = loadSupabaseLibrary();
   }
   return _cdnSupabasePromise;
 }
@@ -1731,7 +1760,7 @@ async function loadTaagerCredentials() {
     if (map.taager_edge_function_url) window.TAAGER_EDGE_FUNCTION_URL = map.taager_edge_function_url;
     try { localStorage.setItem("_taagerCredentials", JSON.stringify(map)); } catch (_e) {}
   } catch (e) {
-    if (!isNetworkResolutionError?.(e)) console.warn("[Supabase] loadTaagerCredentials error:", e);
+    if (!(typeof isNetworkResolutionError === "function" && isNetworkResolutionError(e))) console.warn("[Supabase] loadTaagerCredentials error:", e);
   }
 }
 // Load credentials from Supabase table in background
