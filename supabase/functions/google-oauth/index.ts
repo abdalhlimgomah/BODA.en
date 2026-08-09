@@ -5,6 +5,19 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 const RL_WINDOW_MS = 60_000;
 const RL_MAX = 20;
 
+const CORS_HEADERS = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, Authorization",
+};
+
+function respond(body: string, status = 200, extraHeaders: Record<string, string> = {}): Response {
+  return new Response(body, {
+    status,
+    headers: { ...CORS_HEADERS, "Content-Type": "application/json", ...extraHeaders },
+  });
+}
+
 async function checkRateLimit(sb: ReturnType<typeof createClient>, ip: string, fn: string): Promise<boolean> {
   const ws = new Date(Date.now() - RL_WINDOW_MS).toISOString();
   try {
@@ -18,11 +31,12 @@ async function checkRateLimit(sb: ReturnType<typeof createClient>, ip: string, f
 }
 
 serve(async (req: Request) => {
+  if (req.method === "OPTIONS") {
+    return new Response(null, { status: 204, headers: CORS_HEADERS });
+  }
+
   if (req.method !== "POST") {
-    return new Response(JSON.stringify({ error: "Method not allowed" }), {
-      status: 405,
-      headers: { "Content-Type": "application/json" },
-    });
+    return respond(JSON.stringify({ error: "Method not allowed" }), 405);
   }
 
   const clientIp = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
@@ -32,28 +46,20 @@ serve(async (req: Request) => {
     const sb = createClient(supabaseUrl, supabaseKey);
     const ok = await checkRateLimit(sb, clientIp, "google-oauth");
     if (!ok) {
-      return new Response(JSON.stringify({ error: "Rate limit exceeded" }), {
-        status: 429, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-      });
+      return respond(JSON.stringify({ error: "Rate limit exceeded" }), 429);
     }
   }
 
   try {
     const { code, redirect_uri } = await req.json();
     if (!code) {
-      return new Response(JSON.stringify({ error: "Missing code" }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return respond(JSON.stringify({ error: "Missing code" }), 400);
     }
 
     const clientId = Deno.env.get("GOOGLE_CLIENT_ID") || "";
     const clientSecret = Deno.env.get("GOOGLE_CLIENT_SECRET") || "";
     if (!clientId || !clientSecret) {
-      return new Response(JSON.stringify({ error: "Missing Google OAuth config" }), {
-        status: 500,
-        headers: { "Content-Type": "application/json" },
-      });
+      return respond(JSON.stringify({ error: "Missing Google OAuth config" }), 500);
     }
 
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
@@ -70,10 +76,7 @@ serve(async (req: Request) => {
 
     const tokenData = await tokenRes.json();
     if (!tokenRes.ok || !tokenData.access_token) {
-      return new Response(JSON.stringify({ error: "Token exchange failed", details: tokenData }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return respond(JSON.stringify({ error: "Token exchange failed", details: tokenData }), 400);
     }
 
     const userRes = await fetch("https://www.googleapis.com/oauth2/v2/userinfo", {
@@ -82,34 +85,19 @@ serve(async (req: Request) => {
     const userData = await userRes.json();
 
     if (!userRes.ok || !userData.email) {
-      return new Response(JSON.stringify({ error: "Failed to fetch user info", details: userData }), {
-        status: 400,
-        headers: { "Content-Type": "application/json" },
-      });
+      return respond(JSON.stringify({ error: "Failed to fetch user info", details: userData }), 400);
     }
 
-    return new Response(
+    return respond(
       JSON.stringify({
         id: userData.id,
         email: userData.email,
         name: userData.name || userData.given_name || "Google User",
         picture: userData.picture || "",
         provider: "google",
-      }),
-      {
-        status: 200,
-        headers: {
-          "Content-Type": "application/json",
-          "Access-Control-Allow-Origin": "*",
-          "Access-Control-Allow-Methods": "POST, OPTIONS",
-          "Access-Control-Allow-Headers": "Content-Type, Authorization",
-        },
-      }
+      })
     );
   } catch (error) {
-    return new Response(JSON.stringify({ error: error.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json" },
-    });
+    return respond(JSON.stringify({ error: error.message }), 500);
   }
 });
