@@ -115,6 +115,11 @@ serve(async (req) => {
     }
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
+    // Read headers for logging
+    const userAgent = req.headers.get("user-agent") || "unknown";
+    const clientIp = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+    const deviceType = getDeviceType(userAgent);
+
     // General rate limit
     const allowed = await checkRateLimit(supabase, clientIp, "phone-verification");
     if (!allowed) {
@@ -122,11 +127,6 @@ serve(async (req) => {
         status: 429, headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
       });
     }
-
-    // Read headers for logging
-    const userAgent = req.headers.get("user-agent") || "unknown";
-    const clientIp = req.headers.get("x-real-ip") || req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
-    const deviceType = getDeviceType(userAgent);
 
     const { action, phone_number, country_code, channel, otp_code, email } = await req.json();
 
