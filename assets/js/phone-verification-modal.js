@@ -47,6 +47,11 @@ function _getClient() {
         
         <span class="phone-error-msg" id="phoneErrorMsg"></span>
         
+        <div id="phoneCountryWarning" class="phone-warning-msg" style="display:none;">
+          <span class="material-icons-outlined" style="font-size:16px;vertical-align:middle;"></span>
+          <span id="phoneCountryWarningText"></span>
+        </div>
+        
         <div class="channel-title">اختر طريقة استلام الرمز</div>
         <div class="channel-options">
           <label class="channel-card active whatsapp" id="channelWhatsappLabel">
@@ -66,60 +71,112 @@ function _getClient() {
       
       <!-- Panel 2: Enter OTP -->
       <div id="panelOtpInput" class="phone-modal-panel">
-        <div class="phone-modal-header">
-          <h3 class="phone-modal-title">تحقق من حسابك</h3>
-          <button type="button" class="phone-modal-close" id="closeOtpModalBtn">
-            <span class="material-icons-outlined">close</span>
+        <div id="otpEntryScreen">
+          <div class="phone-modal-header">
+            <h3 class="phone-modal-title">تحقق من حسابك</h3>
+            <button type="button" class="phone-modal-close" id="closeOtpModalBtn">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+          <p class="phone-modal-subtitle">
+            أدخل رمز التحقق المكون من 6 أرقام والمرسل إلى:
+            <span class="otp-target-phone" id="otpTargetPhoneText"></span>
+          </p>
+          
+          <!-- Channel indicator badge -->
+          <div style="text-align: center;">
+            <div class="otp-channel-badge" id="otpChannelBadge"></div>
+          </div>
+          
+          <!-- OTP digit input row -->
+          <div class="otp-inputs-row" id="otpInputsGrid">
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+            <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
+          </div>
+          
+          <!-- Countdown timer -->
+          <div class="otp-timer-container" id="otpTimerContainer">
+            إعادة إرسال الرمز بعد: <span class="otp-time-val" id="otpTimerVal">00:59</span>
+          </div>
+          
+          <!-- Resend options -->
+          <div class="otp-resend-container" id="otpResendContainer">
+            <button type="button" class="otp-resend-btn whatsapp" id="resendWhatsappBtn">
+              ${WHATSAPP_SVG}
+              <span>📱 WhatsApp</span>
+            </button>
+            <button type="button" class="otp-resend-btn sms" id="resendSmsBtn">
+              ${SMS_SVG}
+              <span>💬 رسالة SMS</span>
+            </button>
+          </div>
+          
+          <!-- Attempts counter -->
+          <div class="otp-attempts-left" id="otpAttemptsLeftText"></div>
+          
+          <button type="button" class="phone-primary-btn" id="verifyOtpBtn">تحقق</button>
+          
+          <!-- WhatsApp Sandbox Help trigger -->
+          <button type="button" class="otp-whatsapp-help-trigger" id="otpWhatsappHelpBtn">
+            <span class="material-icons-outlined" style="font-size: 15px; vertical-align: middle;"></span>
+            لم يصلك الرمز؟ اضغط للحل
           </button>
-        </div>
-        <p class="phone-modal-subtitle">
-          أدخل رمز التحقق المكون من 6 أرقام والمرسل إلى:
-          <span class="otp-target-phone" id="otpTargetPhoneText"></span>
-        </p>
-        
-        <!-- Channel indicator badge -->
-        <div style="text-align: center;">
-          <div class="otp-channel-badge" id="otpChannelBadge"></div>
-        </div>
-        
-        <!-- OTP digit input row -->
-        <div class="otp-inputs-row" id="otpInputsGrid">
-          <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
-          <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
-          <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
-          <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
-          <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
-          <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
-        </div>
-        
-        <!-- Countdown timer -->
-        <div class="otp-timer-container" id="otpTimerContainer">
-          إعادة إرسال الرمز بعد: <span class="otp-time-val" id="otpTimerVal">00:59</span>
-        </div>
-        
-        <!-- Resend options -->
-        <div class="otp-resend-container" id="otpResendContainer">
-          <button type="button" class="otp-resend-btn whatsapp" id="resendWhatsappBtn">
-            ${WHATSAPP_SVG}
-            <span>📱 WhatsApp</span>
-          </button>
-          <button type="button" class="otp-resend-btn sms" id="resendSmsBtn">
-            ${SMS_SVG}
-            <span>💬 رسالة SMS</span>
-          </button>
-        </div>
-        
-        <!-- Attempts counter -->
-        <div class="otp-attempts-left" id="otpAttemptsLeftText"></div>
-        
-        <button type="button" class="phone-primary-btn" id="verifyOtpBtn">تحقق</button>
-        
-        <div class="otp-back-container">
-          <button type="button" class="otp-back-btn" id="otpBackBtn">
-            <span class="material-icons-outlined" style="font-size: 16px;">arrow_forward</span>
-            <span>تغيير رقم الهاتف</span>
-          </button>
-        </div>
+          
+          <div class="otp-back-container">
+            <button type="button" class="otp-back-btn" id="otpBackBtn">
+              <span class="material-icons-outlined" style="font-size: 16px;">arrow_forward</span>
+              <span>تغيير رقم الهاتف</span>
+            </button>
+          </div>
+        </div><!-- /#otpEntryScreen -->
+
+        <!-- Screen B: WhatsApp activation help -->
+        <div id="waHelpScreen" style="display:none;">
+          <div class="phone-modal-header">
+            <h3 class="phone-modal-title" style="font-size:0.95rem;">تفعيل واتساب لاستقبال الرمز</h3>
+            <button type="button" class="phone-modal-close" id="closeWaHelpBtn">
+              <span class="material-icons-outlined">close</span>
+            </button>
+          </div>
+
+          <div class="wa-help-icon">📲</div>
+          <p class="wa-help-desc">
+            خدمة الواتساب تحتاج تفعيلاً لمرة واحدة فقط.<br>أرسل الرسالة التالية على واتساب:
+          </p>
+
+          <div class="wa-help-msg-box">
+            <span class="wa-help-msg-label">الرسالة:</span>
+            <code class="wa-help-code">join lungs-dog</code>
+            <button class="wa-copy-btn" onclick="navigator.clipboard.writeText('join lungs-dog').then(()=>{this.textContent='✓ تم';setTimeout(()=>this.textContent='نسخ',2000)})">
+              نسخ
+            </button>
+          </div>
+
+          <a class="wa-help-link"
+             href="https://wa.me/14155238886?text=join%20lungs-dog"
+             target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" style="width:20px;height:20px;flex-shrink:0;"><path fill="#fff" d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.96 9.96 0 001.37 5.04l-1.46 5.334 5.47-1.43a9.926 9.926 0 004.61 1.139h.004c5.502 0 9.99-4.478 9.99-9.988 0-2.668-1.036-5.176-2.92-7.062C17.182 3.14 14.685 2 12.012 2z"/><path fill="#FFF" d="M12.012 3.586c2.247 0 4.36.877 5.95 2.467 1.589 1.591 2.465 3.705 2.465 5.934 0 4.629-3.771 8.4-8.411 8.4-.904 0-1.794-.146-2.645-.436l-.378-.127-3.268.858.873-3.19-.142-.228a8.318 8.318 0 01-1.277-4.498c0-4.631 3.773-8.408 8.413-8.408zm5.088 8.948c-.282-.142-1.666-.822-1.924-.916-.257-.094-.446-.142-.634.142-.187.283-.726.916-.889 1.103-.163.189-.327.212-.609.07a7.683 7.683 0 01-2.261-1.396 8.46 8.46 0 01-1.564-1.946c-.163-.284-.017-.436.124-.577.127-.127.283-.33.424-.496.142-.165.188-.283.283-.472.094-.189.047-.354-.023-.496-.071-.142-.634-1.528-.868-2.09-.229-.55-.497-.473-.68-.482-.178-.009-.382-.009-.588-.009-.205 0-.54.077-.822.385-.282.308-1.077 1.053-1.077 2.569 0 1.516 1.103 2.983 1.256 3.19.153.205 2.169 3.312 5.253 4.646.734.317 1.306.506 1.751.648.738.234 1.41.201 1.942.122.593-.089 1.666-.679 1.9-.1333.234-.347.234-.644.164-.707-.07-.063-.257-.156-.54-.298z"/></svg>
+            اضغط هنا لفتح واتساب وإرسال الرسالة
+          </a>
+
+          <div class="wa-help-steps">
+            <div class="wa-step"><span class="wa-step-num">1</span><span>اضغط الرابط الأخضر لفتح واتساب</span></div>
+            <div class="wa-step"><span class="wa-step-num">2</span><span>اضغط إرسال ← الرسالة جاهزة تلقائياً</span></div>
+            <div class="wa-step"><span class="wa-step-num">3</span><span>ارجع وأعد طلب رمز التحقق</span></div>
+          </div>
+
+          <!-- Back to OTP entry -->
+          <div class="otp-back-container" style="margin-top:14px;">
+            <button type="button" class="otp-back-btn" id="waHelpBackToOtpBtn">
+              <span class="material-icons-outlined" style="font-size: 16px;">arrow_forward</span>
+              <span>رجوع لإدخال الرمز</span>
+            </button>
+          </div>
+        </div><!-- /#waHelpScreen -->
       </div>
       
       <!-- Panel 3: Success Animation -->
@@ -175,6 +232,11 @@ function _getClient() {
     const resendSmsBtn = document.getElementById("resendSmsBtn");
     const otpBackBtn = document.getElementById("otpBackBtn");
     const channelCards = modalEl.querySelectorAll(".channel-card");
+    const otpEntryScreen = document.getElementById("otpEntryScreen");
+    const waHelpScreen = document.getElementById("waHelpScreen");
+    const otpWhatsappHelpBtn = document.getElementById("otpWhatsappHelpBtn");
+    const waHelpBackToOtpBtn = document.getElementById("waHelpBackToOtpBtn");
+    const closeWaHelpBtn = document.getElementById("closeWaHelpBtn");
 
     // Close events
     if (closePhoneModalBtn) closePhoneModalBtn.addEventListener("click", closeVerificationModal);
@@ -222,6 +284,29 @@ function _getClient() {
     // Back click
     if (otpBackBtn) {
       otpBackBtn.addEventListener("click", () => {
+        clearInterval(countdownTimer);
+        modalPhoneInput.disabled = false;
+        modalCountrySelect.disabled = false;
+        showPanel("phone-input");
+        clearOtpInputs();
+        isVerifyingOtp = false;
+      });
+    }
+
+    // WhatsApp Sandbox Help — in-panel screen flip
+    function showWaHelpScreen() {
+      if (otpEntryScreen) otpEntryScreen.style.display = "none";
+      if (waHelpScreen) waHelpScreen.style.display = "block";
+    }
+    function showOtpEntryScreen() {
+      if (waHelpScreen) waHelpScreen.style.display = "none";
+      if (otpEntryScreen) otpEntryScreen.style.display = "block";
+    }
+    if (otpWhatsappHelpBtn) otpWhatsappHelpBtn.addEventListener("click", showWaHelpScreen);
+    if (waHelpBackToOtpBtn) waHelpBackToOtpBtn.addEventListener("click", showOtpEntryScreen);
+    if (closeWaHelpBtn) {
+      closeWaHelpBtn.addEventListener("click", () => {
+        showOtpEntryScreen();
         clearInterval(countdownTimer);
         modalPhoneInput.disabled = false;
         modalCountrySelect.disabled = false;
@@ -322,7 +407,14 @@ function _getClient() {
     panelSuccess.classList.remove("active");
 
     if (panelName === "phone-input") panelPhoneInput.classList.add("active");
-    else if (panelName === "otp-input") panelOtpInput.classList.add("active");
+    else if (panelName === "otp-input") {
+      panelOtpInput.classList.add("active");
+      // Always reset to OTP entry sub-screen when opening this panel
+      const otpEntryScreen = document.getElementById("otpEntryScreen");
+      const waHelpScreen = document.getElementById("waHelpScreen");
+      if (otpEntryScreen) otpEntryScreen.style.display = "block";
+      if (waHelpScreen) waHelpScreen.style.display = "none";
+    }
     else if (panelName === "success") panelSuccess.classList.add("active");
   }
 
@@ -651,6 +743,22 @@ function _getClient() {
       }
       modalCountrySelect.value = country;
       modalCountrySelect.disabled = false;
+    }
+
+    // Show warning if GPS country differs from account country
+    var phoneWarning = document.getElementById("phoneCountryWarning");
+    var phoneWarningText = document.getElementById("phoneCountryWarningText");
+    if (phoneWarning && phoneWarningText) {
+      var gpsCountry = localStorage.getItem("gpsCountry");
+      if (gpsCountry && gpsCountry !== country) {
+        var countryNames = { SA: 'السعودية', EG: 'مصر' };
+        var accName = countryNames[country] || country;
+        var gpsName = countryNames[gpsCountry] || gpsCountry;
+        phoneWarningText.textContent = 'موقعك الحالي في ' + gpsName + ' لكن حسابك مسجل في ' + accName + '. يرجى التأكد من استخدام رقم هاتف ' + accName;
+        phoneWarning.style.display = 'flex';
+      } else {
+        phoneWarning.style.display = 'none';
+      }
     }
 
     // Pre-fill phone number if provided (strip country prefix → local 0XXXXXXXXX)
