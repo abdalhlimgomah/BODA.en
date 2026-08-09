@@ -242,7 +242,7 @@ function renderOrderCard(order) {
         <div class="noon-order-copy">
           ${primaryItem.brand ? `<small>${window.BudaOrders.escapeHtml(primaryItem.brand)}</small>` : ""}
           <h3 class="noon-order-title">${window.BudaOrders.escapeHtml(primaryItem.name)}</h3>
-          <p class="noon-order-price">${window.BudaOrders.formatMoney(displayPrice)}</p>
+          <p class="noon-order-price">${window.BudaOrders.formatMoney(displayPrice, order)}</p>
           ${moreCount ? `<p class="noon-order-more">+ ${moreCount} منتج إضافي</p>` : ""}
         </div>
         <div class="noon-order-image">

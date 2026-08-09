@@ -28,8 +28,13 @@ function renderSummaryEmpty(message) {
   `;
 }
 
-function formatInvoiceMoney(value) {
-  return `${(Number(value) || 0).toFixed(2)} جنيه`;
+function formatInvoiceMoney(value, context) {
+  var code = window.BudaOrders && typeof window.BudaOrders.resolveOrderCountryCode === "function"
+    ? window.BudaOrders.resolveOrderCountryCode(context)
+    : "EG";
+  var num = Number(value) || 0;
+  var formatted = new Intl.NumberFormat(code === "SA" ? "ar-SA" : "ar-EG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+  return formatted + (code === "SA" ? " ريال" : " جنيه");
 }
 
 function computeFinancials(order, items) {
@@ -51,20 +56,22 @@ function computeFinancials(order, items) {
   const itemsTotal = items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0);
   const subtotal = itemsTotal > 0 ? itemsTotal : 0;
 
-  // 1. Try to read shipping & tax directly from order
-  let shipping = Number(order.shipping_cost ?? order.shipping_fee ?? order.shipping ?? 0);
-  let tax = Number(order.tax ?? order.vat ?? 0);
-  let discount = Number(order.discount ?? order.discount_amount ?? order.coupon_discount ?? 0);
+  // 1. Read values directly from the order (some may be missing)
+  let shipping = Math.max(0, Number(order.shipping_cost ?? order.shipping_fee ?? order.shipping ?? 0) || 0);
+  let tax = Math.max(0, Number(order.tax ?? order.vat ?? 0) || 0);
+  let discount = Math.max(0, Number(order.discount ?? order.discount_amount ?? order.coupon_discount ?? 0) || 0);
 
-  // 2. If they are zero, calculate them from the total
-  if (rawTotal > 0 && (shipping === 0 || tax === 0 || discount === 0)) {
-    const totalWithoutSubtotal = rawTotal - subtotal;
-    const inferredDiscount = (subtotal * 0.3); // 30% discount from checkout
-    const remaining = totalWithoutSubtotal + inferredDiscount;
-    const codFee = getCodFeeForOrder();
-    shipping = Math.max(0, remaining - codFee);
-    tax = codFee;
-    discount = inferredDiscount;
+  // 2. Fill only the missing pieces so the breakdown matches الإجمالي
+  if (rawTotal > 0) {
+    if (tax <= 0) tax = getCodFeeForOrder();
+
+    let diff = rawTotal - (subtotal - discount + shipping + tax);
+
+    if (diff > 0.001 && shipping <= 0) {
+      shipping = diff; // رسوم الشحن ناقصة من السجل
+    } else if (diff < -0.001 && discount <= 0) {
+      discount = Math.min(-diff, subtotal); // الخصم ناقص من السجل
+    }
   }
 
   const total = rawTotal > 0 ? rawTotal : (subtotal - discount + shipping + tax);
@@ -137,7 +144,7 @@ function renderSummaryPage(order) {
             <p>الكمية: ${items.reduce((q, i) => q + (Number(i.quantity) || 1), 0) || 1}</p>
           </div>
           <div class="os-v2-product-price">
-            ${window.BudaOrders.formatMoney(finances.subtotal)}
+            ${window.BudaOrders.formatMoney(finances.subtotal, order)}
           </div>
         </div>
       </div>
@@ -149,12 +156,12 @@ function renderSummaryPage(order) {
           <h2>ملخص الدفع</h2>
         </div>
         <div class="os-v2-totals">
-          <div class="os-v2-totals-row"><span>قيمة المنتجات</span><span>${window.BudaOrders.formatMoney(finances.subtotal)}</span></div>
-          <div class="os-v2-totals-row"><span>رسوم الشحن</span><span>${window.BudaOrders.formatMoney(finances.shipping)}</span></div>
-          <div class="os-v2-totals-row"><span>الضريبة</span><span>${window.BudaOrders.formatMoney(finances.tax)}</span></div>
-          ${hasDiscount ? `<div class="os-v2-totals-row discount"><span>الخصم</span><span>-${window.BudaOrders.formatMoney(finances.discount)}</span></div>` : ''}
+          <div class="os-v2-totals-row"><span>قيمة المنتجات</span><span>${window.BudaOrders.formatMoney(finances.subtotal, order)}</span></div>
+          <div class="os-v2-totals-row"><span>رسوم الشحن</span><span>${window.BudaOrders.formatMoney(finances.shipping, order)}</span></div>
+          <div class="os-v2-totals-row"><span>رسوم الدفع عند الاستلام</span><span>${window.BudaOrders.formatMoney(finances.tax, order)}</span></div>
+          ${hasDiscount ? `<div class="os-v2-totals-row discount"><span>الخصم</span><span>-${window.BudaOrders.formatMoney(finances.discount, order)}</span></div>` : ''}
           <div class="os-v2-totals-divider"></div>
-          <div class="os-v2-totals-row grand-total"><span>الإجمالي</span><span>${window.BudaOrders.formatMoney(finances.total)}</span></div>
+          <div class="os-v2-totals-row grand-total"><span>الإجمالي</span><span>${window.BudaOrders.formatMoney(finances.total, order)}</span></div>
         </div>
       </div>
 
@@ -196,14 +203,14 @@ function renderSummaryPage(order) {
       `تاريخ الطلب: ${orderDate}`,
       `─────────────────────────────`,
       `${primaryItem.name} × ${primaryItem.quantity}`,
-      `  السعر: ${formatInvoiceMoney(paidPrice)} / ${primaryItem.quantity}  المجموع: ${formatInvoiceMoney(displayPrice)}`,
+      `  السعر: ${formatInvoiceMoney(paidPrice, order)} / ${primaryItem.quantity}  المجموع: ${formatInvoiceMoney(displayPrice, order)}`,
       `─────────────────────────────`,
-      `قيمة المنتجات: ${formatInvoiceMoney(finances.subtotal)}`,
-      `رسوم الشحن: ${formatInvoiceMoney(finances.shipping)}`,
-      `الضريبة: ${formatInvoiceMoney(finances.tax)}`,
-      ...(finances.discount > 0 ? [`الخصم: -${formatInvoiceMoney(finances.discount)}`] : []),
+      `قيمة المنتجات: ${formatInvoiceMoney(finances.subtotal, order)}`,
+      `رسوم الشحن: ${formatInvoiceMoney(finances.shipping, order)}`,
+      `رسوم الدفع عند الاستلام: ${formatInvoiceMoney(finances.tax, order)}`,
+      ...(finances.discount > 0 ? [`الخصم: -${formatInvoiceMoney(finances.discount, order)}`] : []),
       `─────────────────────────────`,
-      `المجموع الكلي: ${formatInvoiceMoney(finances.total)}`,
+      `المجموع الكلي: ${formatInvoiceMoney(finances.total, order)}`,
       `─────────────────────────────`,
       `عنوان التوصيل: ${address}`,
       `طريقة الدفع: ${payment}`,
@@ -252,7 +259,14 @@ function renderSummaryPage(order) {
     const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
     const blobUrl = URL.createObjectURL(blob);
 
-     window.open(blobUrl, "_blank");
+    // Download the invoice file directly without leaving the page
+    const a = document.createElement("a");
+    a.href = blobUrl;
+    a.download = "invoice-" + (orderRef || orderId) + ".html";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 5000);
   });
 }
 

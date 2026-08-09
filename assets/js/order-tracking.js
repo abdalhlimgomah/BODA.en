@@ -112,7 +112,7 @@ function renderTrackingPage(order) {
             <h4>${window.BudaOrders.escapeHtml(primaryItem.name)}</h4>
             <p>الكمية: ${items.reduce((q, i) => q + (Number(i.quantity) || 1), 0) || 1}</p>
           </div>
-          <div class="ot-v2-product-price">${window.BudaOrders.formatMoney(displayPrice)}</div>
+          <div class="ot-v2-product-price">${window.BudaOrders.formatMoney(displayPrice, order)}</div>
         </div>
       </div>
 

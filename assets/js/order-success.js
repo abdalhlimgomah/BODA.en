@@ -5,8 +5,39 @@ function escapeHtml(v) {
   return String(v ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;").replaceAll("'", "&#039;");
 }
 
+function getOrderCountryCode() {
+  try {
+    var raw = sessionStorage.getItem("orderSuccessData");
+    if (raw) {
+      var parsed = JSON.parse(raw);
+      if (parsed && parsed.country_code) return String(parsed.country_code).toUpperCase();
+    }
+  } catch (e) {}
+  try {
+    var stored = String(localStorage.getItem("userCountry") || "").toUpperCase();
+    if (stored) return stored;
+  } catch (e) {}
+  try {
+    var selected = window.TaagerIntegration && typeof window.TaagerIntegration.getSelectedCountry === "function"
+      ? window.TaagerIntegration.getSelectedCountry()
+      : null;
+    if (selected && selected.code) return String(selected.code).toUpperCase();
+  } catch (e) {}
+  return "EG";
+}
+
+function getOrderCurrencyConfig() {
+  var code = getOrderCountryCode();
+  return code === "SA"
+    ? { locale: "ar-SA", code: "SAR", label: "ريال" }
+    : { locale: "ar-EG", code: "EGP", label: "جنيه" };
+}
+
 function formatOrderMoney(value) {
-  return window.BudaStore ? window.BudaStore.formatMoney(value, { plain: true, minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (Number(value) || 0).toFixed(2) + " جنيه";
+  var cfg = getOrderCurrencyConfig();
+  var num = Number(value) || 0;
+  var formatted = new Intl.NumberFormat(cfg.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+  return formatted + " " + cfg.label;
 }
 
 function getDeliveryEstimate() {
@@ -82,24 +113,19 @@ function renderOrderSuccess() {
   var deliverySummary = document.getElementById("os-delivery-summary");
   if (deliverySummary && totals) {
     var shipping = Number(totals.shipping) || 0;
-    var grandTotal = Number(totals.total) || (subtotal + shipping - couponDiscount);
-    var html = '';
+    var codFee = Number(totals.codFee) || 0;
+    var grandTotal = Number(totals.total) || (subtotal + shipping + codFee - couponDiscount);
+    var rows = ['<div class="os-total-row"><span>المجموع الفرعي</span><span>' + formatOrderMoney(subtotal) + '</span></div>'];
     if (couponDiscount > 0) {
-      html += '<div class="os-totals">' +
-        '<div class="os-total-row"><span>المجموع الفرعي</span><span>' + formatOrderMoney(subtotal) + '</span></div>' +
-        '<div class="os-total-row os-discount-row"><span>الخصم</span><span>- ' + formatOrderMoney(couponDiscount) + '</span></div>' +
-        '<div class="os-total-row"><span>الشحن</span><span>' + formatOrderMoney(shipping) + '</span></div>' +
-        '<div class="os-total-divider"></div>' +
-        '<div class="os-total-row os-grand-total-row"><strong>الإجمالي</strong><strong>' + formatOrderMoney(grandTotal) + '</strong></div>' +
-      '</div>';
-    } else {
-      html += '<div class="os-totals">' +
-        '<div class="os-total-row"><span>المجموع الفرعي</span><span>' + formatOrderMoney(subtotal) + '</span></div>' +
-        '<div class="os-total-row"><span>الشحن</span><span>' + formatOrderMoney(shipping) + '</span></div>' +
-        '<div class="os-total-divider"></div>' +
-        '<div class="os-total-row os-grand-total-row"><strong>الإجمالي</strong><strong>' + formatOrderMoney(grandTotal) + '</strong></div>' +
-      '</div>';
+      rows.push('<div class="os-total-row os-discount-row"><span>الخصم</span><span>- ' + formatOrderMoney(couponDiscount) + '</span></div>');
     }
+    rows.push('<div class="os-total-row"><span>الشحن</span><span>' + formatOrderMoney(shipping) + '</span></div>');
+    if (codFee > 0) {
+      rows.push('<div class="os-total-row"><span>رسوم الدفع عند الاستلام</span><span>' + formatOrderMoney(codFee) + '</span></div>');
+    }
+    rows.push('<div class="os-total-divider"></div>');
+    rows.push('<div class="os-total-row os-grand-total-row"><strong>الإجمالي</strong><strong>' + formatOrderMoney(grandTotal) + '</strong></div>');
+    var html = '<div class="os-totals">' + rows.join("") + '</div>';
     deliverySummary.insertAdjacentHTML("beforebegin", html);
   }
 }

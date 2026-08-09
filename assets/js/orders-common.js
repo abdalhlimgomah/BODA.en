@@ -59,7 +59,35 @@
       .replaceAll("'", "&#39;");
   }
 
-  function formatMoney(value) {
+  function resolveOrderCountryCode(context) {
+    var code = "";
+    if (context && typeof context === "object") {
+      code = String(context.country_code || context.countryCode || context.country || "");
+    } else if (context) {
+      code = String(context);
+    }
+    code = code.toUpperCase();
+    if (code === "SA" || code === "EG") return code;
+    try {
+      var stored = String(localStorage.getItem("userCountry") || "").toUpperCase();
+      if (stored === "SA" || stored === "EG") return stored;
+    } catch (e) {}
+    try {
+      var selected = window.TaagerIntegration && typeof window.TaagerIntegration.getSelectedCountry === "function"
+        ? window.TaagerIntegration.getSelectedCountry()
+        : null;
+      var selectedCode = selected ? String(selected.code || "").toUpperCase() : "";
+      if (selectedCode === "SA" || selectedCode === "EG") return selectedCode;
+    } catch (e) {}
+    return "EG";
+  }
+
+  function formatMoney(value, context) {
+    var code = resolveOrderCountryCode(context);
+    var num = Number(value) || 0;
+    if (code === "SA") {
+      return new Intl.NumberFormat("ar-SA", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num) + " ريال";
+    }
     if (window.BudaStore) {
       return window.BudaStore.formatMoney(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     }
@@ -1046,6 +1074,7 @@
   window.BudaOrders = {
     escapeHtml,
     formatMoney,
+    resolveOrderCountryCode,
     formatOrderDate,
     toTimestamp,
     normalizeStatusKey,
