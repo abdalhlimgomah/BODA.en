@@ -89,12 +89,60 @@
 
       participant = result.data;
 
+       /* Backfill: ensure every participant using my code has a referrals row */
+       syncReferralRows(client);
+
        /* Load referrals, rewards, and messages */
        loadReferrals(client);
        loadRewardsData(client);
        loadMessages(client);
        renderProfile();
        renderReferral();
+    }
+
+    function syncReferralRows(client) {
+      if (!campaign || !participant || !participant.referral_code) return;
+      var myCode = participant.referral_code;
+      var myUserId = String(participant.user_id || '');
+
+      client.from('contest_participants').select('id, user_id').eq('campaign_id', campaign.id).eq('referred_by', myCode)
+        .then(function(refResult) {
+          if (refResult.error || !refResult.data || refResult.data.length === 0) return;
+          var referred = refResult.data.filter(function(p) {
+            return String(p.user_id) !== myUserId;
+          });
+          if (referred.length === 0) return;
+
+          client.from('referrals').select('referred_user_id').eq('campaign_id', campaign.id).eq('referral_code', myCode)
+            .then(function(rowsResult) {
+              if (rowsResult.error) return;
+              var existing = {};
+              (rowsResult.data || []).forEach(function(r) { existing[r.referred_user_id] = true; });
+              var inserts = referred.filter(function(p) { return !existing[p.user_id]; })
+                .map(function(p) {
+                  return {
+                    campaign_id: campaign.id,
+                    referrer_user_id: participant.user_id,
+                    referred_user_id: p.user_id,
+                    referral_code: myCode,
+                    status: 'qualified'
+                  };
+                });
+              if (inserts.length === 0) return;
+              client.from('referrals')
+                .insert(inserts)
+                .onConflict('referral_code,referred_user_id')
+                .ignore()
+                .select()
+                .then(function() { loadReferrals(client); })
+                .catch(function(err) {
+                  console.error('[Contest Dashboard] Referral backfill error:', err);
+                  loadReferrals(client);
+                });
+            })
+            .catch(function() {});
+        })
+        .catch(function() {});
     }
 
     if (userId) {

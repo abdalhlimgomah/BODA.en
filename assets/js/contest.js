@@ -182,12 +182,29 @@ window.ContestUI = (function() {
 
       if (result.data) {
         participant = result.data;
-        /* Already registered — go to dashboard */
+        /* Already registered — claim referral from link if not claimed yet */
+        claimRefIfNeeded(participant);
+        /* Go to dashboard */
         window.location.href = 'referral-dashboard.html';
         return;
       } else {
         showForm();
       }
+    }
+
+    function claimRefIfNeeded(p) {
+      var refCode = window.ContestReferral.getStoredRefCode();
+      if (!refCode || !p.id || p.referred_by) return;
+      var refUser = null;
+      try { refUser = JSON.parse(localStorage.getItem('currentUser')); } catch(e) {}
+      var refUserId = refUser && refUser.id ? String(refUser.id) : null;
+      window.ContestData.checkReferralCode(refCode)
+        .then(function(r) {
+          if (r.data && String(r.data.user_id) !== String(refUserId)) {
+            window.ContestData.claimReferral(p.id, refCode).catch(function() {});
+          }
+        })
+        .catch(function() {});
     }
 
     if (userId) {
