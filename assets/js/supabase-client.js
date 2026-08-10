@@ -679,10 +679,10 @@ function getVendorSupabaseUrl() {
   for (var i = 0; i < scripts.length; i++) {
     var src = scripts[i].src || "";
     if (src.indexOf("supabase-client.js") !== -1) {
-      return src.replace(/supabase-client\.js[^/]*$/, "") + "vendor/supabase/supabase-js@2.js";
+      return src.replace(/supabase-client\.js[^/]*$/, "") + "vendor/supabase/supabase-js@2.js?v=20260810";
     }
   }
-  return "./assets/vendor/supabase/supabase-js@2.js";
+  return "./assets/vendor/supabase/supabase-js@2.js?v=20260810";
 }
 
 function loadSupabaseLibrary() {
