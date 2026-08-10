@@ -181,9 +181,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     var fill = document.getElementById("profileProgressFill");
     var label = document.getElementById("profileProgressLabel");
     var row = document.getElementById("profileProgressRow");
+    var isComplete = pct >= 100;
     if (fill) fill.style.width = pct + "%";
-    if (label) label.textContent = "اكتملت بنسبة " + pct + "%";
-    if (row) row.style.display = pct >= 100 ? "none" : "flex";
+    if (row) row.classList.toggle("is-complete", isComplete);
+    if (label) {
+      label.textContent = isComplete
+        ? "اكتمل ملفك الشخصي بنجاح ✓"
+        : "اكتملت بنسبة " + pct + "%";
+    }
   }
 
   function populateProfileSync() {
