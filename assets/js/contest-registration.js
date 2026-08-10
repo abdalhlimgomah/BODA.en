@@ -236,6 +236,26 @@ window.ContestRegistration = (function() {
       proceed(null);
     }
 
+    function createReferralIfNeeded(referredBy, referralCode) {
+      if (!referredBy || referredBy === referralCode) return Promise.resolve();
+      return window.ContestData.checkReferralCode(referredBy)
+        .then(function(refResult) {
+          if (!refResult.data || String(refResult.data.user_id) === String(userId)) return;
+          window.ContestReferral.clearStoredRef();
+          return window.ContestData.createReferral({
+            campaign_id: campaignId,
+            referrer_user_id: refResult.data.user_id,
+            referred_user_id: userId,
+            referral_code: referredBy,
+            status: 'qualified'
+          });
+        })
+        .catch(function(err) {
+          console.error('[Contest] Referral creation error:', err);
+          window.ContestUI.showToast('تم تسجيلك، لكن لم يتم ربط الدعوة — سيتم ربطها تلقائياً لاحقاً');
+        });
+    }
+
     function doRegister(referralCode, referredBy) {
       var participantData = {
         user_id: userId,
@@ -253,49 +273,27 @@ window.ContestRegistration = (function() {
         joined_at: new Date().toISOString()
       };
 
+      /* Register first, then create the referral record BEFORE navigating away */
       window.ContestData.registerParticipant(participantData)
         .then(function(result) {
           setLoading(false);
           if (result.error) {
-            /* Check for duplicate */
             if (result.error.message && result.error.message.indexOf('duplicate') !== -1) {
               window.ContestUI.showToast('أنت مسجل بالفعل في هذه المسابقة');
             } else {
               window.ContestUI.showToast('حدث خطأ أثناء التسجيل: ' + result.error.message);
             }
-            return;
+            throw new Error('registration_failed');
           }
-
-          var participant = result.data;
-
-          /* Create referral if user came from a link */
-          if (referredBy && referredBy !== referralCode) {
-            /* Find who referred them */
-            window.ContestData.checkReferralCode(referredBy)
-              .then(function(refResult) {
-                if (refResult.data && refResult.data.user_id !== userId) {
-                  /* Not self-referral — create referral record */
-                  window.ContestData.createReferral({
-                    campaign_id: campaignId,
-                    referrer_user_id: refResult.data.user_id,
-                    referred_user_id: userId,
-                    referral_code: referredBy,
-                    status: 'qualified'
-                  }).catch(function(err) {
-                    console.error('[Contest] Referral creation error:', err);
-                    window.ContestUI.showToast('تم تسجيلك، لكن لم يتم ربط الدعوة — سيتم ربطها تلقائياً لاحقاً');
-                  });
-                }
-                window.ContestReferral.clearStoredRef();
-              })
-              .catch(function() {});
-          }
-
-          /* Redirect to referral dashboard */
+          return createReferralIfNeeded(referredBy, referralCode);
+        })
+        .then(function() {
+          window.ContestReferral.clearStoredRef();
           window.location.href = 'referral-dashboard.html';
         })
         .catch(function(err) {
           setLoading(false);
+          if (err && err.message === 'registration_failed') return;
           window.ContestUI.showToast('حدث خطأ في الاتصال. حاول مرة أخرى.');
           console.error('[Contest] Registration error:', err);
         });
