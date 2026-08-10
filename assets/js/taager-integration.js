@@ -3,7 +3,7 @@
 
   var TAAGER_MERCHANT_API = "https://merchant.api.taager.com/api";
   var TAAGER_COUNTRIES = [
-    { code: "EG", name: "مصر", flag: "EG", slug: "egypt" },
+    { code: "EG", name: "مصر", flag: "🇪🇬", slug: "egypt" },
     { code: "SA", name: "السعودية", flag: "🇸🇦", slug: "ksa" },
   ];
 

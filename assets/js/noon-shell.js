@@ -783,7 +783,15 @@ function hideBottomNavOnDesktop() {
   function getCountryFlagEmoji(country) {
     if (!country || !country.flag) return "";
     var flag = String(country.flag);
-    return /[^\x00-\x7F]/.test(flag) ? flag : "";
+    if (/[^\x00-\x7F]/.test(flag)) return flag;
+    if (/^[A-Za-z]{2}$/.test(flag)) {
+      var c = flag.toUpperCase();
+      return String.fromCodePoint(
+        0x1f1e6 + c.charCodeAt(0) - 65,
+        0x1f1e6 + c.charCodeAt(1) - 65
+      );
+    }
+    return "";
   }
 
   function initCountrySelector() {
