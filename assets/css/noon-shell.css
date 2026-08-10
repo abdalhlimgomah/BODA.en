@@ -104,6 +104,11 @@
   flex-shrink: 0;
   display: none;
 }
+@media (min-width: 768px) {
+  .buda-country-select {
+    display: inline-flex;
+  }
+}
 .buda-country-trigger {
   display: flex;
   align-items: center;
