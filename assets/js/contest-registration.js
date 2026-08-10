@@ -11,7 +11,8 @@ window.ContestRegistration = (function() {
     phone: { el: null, error: null, validator: validatePhone },
     email: { el: null, error: null },
     city: { el: null, error: null, validator: validateRequired },
-    birthDate: { el: null, error: null, validator: validateBirthDate }
+    birthDate: { el: null, error: null, validator: validateBirthDate },
+    inviteCode: { el: null, error: null, validator: null }
   };
 
   function validateName(val) {
@@ -171,28 +172,69 @@ window.ContestRegistration = (function() {
     var city = FIELDS.city.el.value.trim();
     var birthDate = FIELDS.birthDate.el.value;
 
-    /* Generate referral code */
-    window.ContestReferral.ensureUniqueCode(function(referralCode) {
+    /* Manual invite code (if any) is the primary referral source */
+    var manualRef = (FIELDS.inviteCode.el && FIELDS.inviteCode.el.value)
+      ? FIELDS.inviteCode.el.value.trim().toUpperCase()
+      : '';
+    manualRef = manualRef || null;
 
-      /* Check if referred by someone */
-      var referredBy = window.ContestReferral.getStoredRefCode() || null;
+    /* Fallback: referral code from URL link (?ref=) */
+    var storedRef = window.ContestReferral.getStoredRefCode() || null;
 
-      /* Prevent self-referral: check if ref code belongs to this user */
-      if (referredBy) {
-        window.ContestData.checkReferralCode(referredBy)
-          .then(function(result) {
-            if (result.data) {
-              /* We'll check user_id after registration */
-            }
-            doRegister(referralCode, referredBy);
-          })
-          .catch(function() {
-            doRegister(referralCode, null);
-          });
-      } else {
-        doRegister(referralCode, null);
-      }
-    });
+    /* Generate referral code & register */
+    function proceed(referredBy) {
+      window.ContestReferral.ensureUniqueCode(function(referralCode) {
+
+        /* Prevent self-referral via own generated code */
+        if (referredBy && referredBy === referralCode) {
+          setLoading(false);
+          window.ContestUI.showToast('لا يمكن استخدام كود الدعوة الخاص بك');
+          return;
+        }
+        doRegister(referralCode, referredBy);
+      });
+    }
+
+    if (manualRef) {
+      /* Strict validation: code must exist and not belong to this user */
+      window.ContestData.checkReferralCode(manualRef)
+        .then(function(result) {
+          if (result.error || !result.data) {
+            setLoading(false);
+            var errEl = FIELDS.inviteCode.error;
+            if (errEl) errEl.textContent = 'كود الدعوة غير صحيح';
+            window.ContestUI.showToast('كود الدعوة غير صحيح، تحقق منه وحاول مرة أخرى');
+            return;
+          }
+          if (String(result.data.user_id) === String(userId)) {
+            setLoading(false);
+            var errEl2 = FIELDS.inviteCode.error;
+            if (errEl2) errEl2.textContent = 'لا يمكن استخدام كود الدعوة الخاص بك';
+            window.ContestUI.showToast('لا يمكن استخدام كود الدعوة الخاص بك');
+            return;
+          }
+          proceed(manualRef);
+        })
+        .catch(function() {
+          setLoading(false);
+          window.ContestUI.showToast('حدث خطأ أثناء التحقق من كود الدعوة. حاول مرة أخرى.');
+        });
+    } else if (storedRef) {
+      /* Soft validation for URL ref: use it only if valid and not self */
+      window.ContestData.checkReferralCode(storedRef)
+        .then(function(result) {
+          if (result.data && String(result.data.user_id) !== String(userId)) {
+            proceed(storedRef);
+          } else {
+            proceed(null);
+          }
+        })
+        .catch(function() {
+          proceed(null);
+        });
+    } else {
+      proceed(null);
+    }
 
     function doRegister(referralCode, referredBy) {
       var participantData = {
@@ -241,6 +283,7 @@ window.ContestRegistration = (function() {
                     status: 'qualified'
                   }).catch(function(err) {
                     console.error('[Contest] Referral creation error:', err);
+                    window.ContestUI.showToast('تم تسجيلك، لكن لم يتم ربط الدعوة — سيتم ربطها تلقائياً لاحقاً');
                   });
                 }
                 window.ContestReferral.clearStoredRef();

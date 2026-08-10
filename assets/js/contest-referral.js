@@ -3,11 +3,11 @@
 window.ContestReferral = (function() {
   var BASE_URL = window.location.origin + '/pages/contest.html';
 
-  /* Generate unique referral code: BUDA-XXXXX (5 alphanumeric chars) */
+  /* Generate unique referral code: BUDOQ-XXXX (4 alphanumeric chars) */
   function generateCode() {
     var chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-    var code = 'BUDA-';
-    for (var i = 0; i < 5; i++) {
+    var code = 'BUDOQ-';
+    for (var i = 0; i < 4; i++) {
       code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
     return code;

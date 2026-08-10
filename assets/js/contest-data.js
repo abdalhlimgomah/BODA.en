@@ -67,6 +67,18 @@ window.ContestData = (function() {
       .single();
   }
 
+  /* Claim referral for an already-registered participant (first claim wins) */
+  function claimReferral(participantId, code) {
+    var client = getClient();
+    if (!client) return Promise.reject(new Error('Supabase client not available'));
+    return client
+      .from('contest_participants')
+      .update({ referred_by: code })
+      .eq('id', participantId)
+      .select()
+      .single();
+  }
+
   /* Check if referral code exists, returns user_id */
   function checkReferralCode(code) {
     var client = getClient();
@@ -259,6 +271,7 @@ window.ContestData = (function() {
     getParticipant: getParticipant,
     getParticipantByEmail: getParticipantByEmail,
     registerParticipant: registerParticipant,
+    claimReferral: claimReferral,
     checkReferralCode: checkReferralCode,
     createReferral: createReferral,
     getReferralCount: getReferralCount,
