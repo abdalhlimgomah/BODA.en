@@ -14,6 +14,20 @@ function getHomePath() {
   return "home.html";
 }
 
+/* After login: return to contest page if a referral code is pending */
+function getPostLoginPath() {
+  try {
+    if (sessionStorage.getItem("contest_ref_code")) {
+      const path = (window.location.pathname || "").toLowerCase();
+      if (path.includes("/pages/signin/") || path.includes("/pages/signup/")) {
+        return "../pages/contest.html";
+      }
+      return "pages/contest.html";
+    }
+  } catch (_e) {}
+  return getHomePath();
+}
+
 const LOGIN_FAIL_COUNT_KEY = "auth_login_fail_count";
 const LOGIN_LOCK_UNTIL_KEY = "auth_login_lock_until";
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -394,7 +408,7 @@ async function handleLogIn(event) {
 
     authNotify(`مرحبًا ${user.name}`, "success");
     setTimeout(() => {
-      window.location.href = getHomePath();
+      window.location.href = getPostLoginPath();
     }, 500);
   } catch (error) {
     console.error("login catch error", error);
@@ -498,7 +512,7 @@ async function handleGoogleCallback() {
 
     authNotify("مرحبًا " + (userData.name || "مستخدم Google"), "success");
     setTimeout(function () {
-      window.location.href = getHomePath();
+      window.location.href = getPostLoginPath();
     }, 350);
   } catch (error) {
     console.error("Google OAuth error:", error);
