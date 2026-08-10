@@ -899,3 +899,4 @@
 @media (min-width: 1440px) {
   .contest-container { max-width: 1200px; }
 }
+.contest-optional { color: #8a8f98; font-weight: 400; font-size: 0.85rem; }
