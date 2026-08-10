@@ -1,0 +1,214 @@
+@import '../design-system/index.css';
+
+/* ─── Let app-header be styled by .buda-header from design system ─── */
+.app-header {
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Buda header ─── */
+.buda-header {
+  background: var(--color-header-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--color-header-border);
+  box-shadow: var(--shadow-header);
+}
+
+.buda-header__inner {
+}
+
+.buda-header__inner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  max-width: var(--content-wide);
+  margin: 0 auto;
+  padding: 0 var(--space-3);
+  height: var(--header-h-desktop);
+}
+
+/* ─── Location trigger ─── */
+.buda-header__location {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  cursor: pointer;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  transition: background var(--transition-fast);
+  flex-shrink: 0;
+}
+.buda-header__location:hover {
+  background: var(--color-primary-50);
+}
+.buda-header__location svg {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+.buda-header__location-label {
+  display: block;
+  font-size: var(--text-caption);
+  color: var(--color-text-muted);
+}
+.buda-header__location-value {
+  display: block;
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+/* ─── Lang toggle ─── */
+.buda-header__lang {
+  font-family: var(--font-primary);
+}
+.buda-header__lang-text {
+  font-size: 13px;
+  font-weight: var(--weight-extrabold);
+  letter-spacing: 0.02em;
+}
+
+/* ─── Account trigger ─── */
+.buda-header__account {
+  position: relative;
+}
+
+/* ─── Account dropdown ─── */
+.buda-header__account.open .buda-header__account-dropdown {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: all;
+}
+
+.buda-header__account-divider {
+  height: 1px;
+  background: var(--color-divider);
+  margin: var(--space-0-5) 0;
+}
+
+.buda-header__account-logout svg,
+.buda-header__account-dropdown a svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+/* ─── Nav mega menu ─── */
+.buda-header__nav {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  max-width: var(--content-wide);
+  margin: 0 auto;
+  padding: 0 var(--space-2);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+}
+
+/* ─── Search active state ─── */
+.buda-header__search.active .buda-search-box__results {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ─── Search dropdown items ─── */
+.buda-header__search-dd-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text-secondary);
+}
+.buda-header__search-dd-header button {
+  background: none;
+  border: none;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.buda-header__search-dd-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.buda-search-dd-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-body-sm);
+  color: var(--color-text);
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+  transition: background var(--transition-fast);
+}
+.buda-search-dd-item:hover {
+  background: var(--color-primary-50);
+}
+.buda-search-dd-item svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  color: var(--color-text-muted);
+}
+
+/* ─── Search box overrides for header ─── */
+.buda-header__search .buda-search-box {
+  height: 48px;
+}
+
+/* ─── Mobile responsive ─── */
+@media (max-width: 767px) {
+  .buda-header__inner {
+    height: var(--header-h-mobile);
+    padding: 0 var(--space-2);
+    gap: var(--space-1);
+  }
+  .buda-header__brand-name {
+    font-size: var(--brand-logo-mobile);
+  }
+  .buda-header__location {
+    display: none;
+  }
+  .buda-header__search {
+    position: static;
+  }
+  .buda-header__search .buda-search-box {
+    height: 44px;
+  }
+  .buda-header__search .buda-search-box__results {
+    position: fixed;
+    top: var(--header-h-mobile);
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-height: calc(100dvh - var(--header-h-mobile));
+    border-radius: 0;
+    z-index: var(--z-dropdown);
+  }
+  .buda-header__account-dropdown {
+    position: fixed;
+    top: auto;
+    inset-inline-end: var(--space-2);
+    min-width: 220px;
+  }
+}
+
+@media (max-width: 1279px) {
+  .buda-header__search {
+    max-width: 480px;
+  }
+}
