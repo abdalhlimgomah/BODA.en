@@ -700,29 +700,60 @@ const AddressesModule = (function() {
 
     // Reverse geocode using BigDataCloud (free, no key, CORS-friendly)
     reverseGeocode: function(lat, lon, callback) {
-      const url = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=ar`;
+      var self = this;
+      var finished = false;
+      function finish(name) {
+        if (finished) return;
+        finished = true;
+        callback(name);
+      }
+      function coordsFallback() {
+        finish(lat.toFixed(4) + ', ' + lon.toFixed(4));
+      }
+      var url = "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=" + lat + "&longitude=" + lon + "&localityLanguage=ar";
 
       fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          const parts = [];
-          if (data.localityInfo?.administrative) {
-            const admins = data.localityInfo.administrative
-              .filter(a => a.order >= 6 && a.order <= 9)
-              .sort((a, b) => b.order - a.order);
-            admins.slice(0, 2).forEach(a => { if (a.name) parts.push(a.name); });
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          var parts = [];
+          if (data.localityInfo && data.localityInfo.administrative) {
+            var admins = data.localityInfo.administrative
+              .filter(function(a) { return a.order >= 6 && a.order <= 9; })
+              .sort(function(a, b) { return b.order - a.order; });
+            admins.slice(0, 2).forEach(function(a) { if (a.name) parts.push(a.name); });
           }
           if (!parts.length && data.locality) parts.push(data.locality);
           if (!parts.length && data.city) parts.push(data.city);
           if (data.principalSubdivision && parts.length < 2) parts.push(data.principalSubdivision);
           if (data.countryName && parts.length < 2) parts.push(data.countryName);
 
-          const name = parts.length ? parts.join('، ') : `${lat.toFixed(4)}, ${lon.toFixed(4)}`;
-          callback(name);
+          if (parts.length) {
+            finish(parts.join('، '));
+          } else {
+            self.nominatimReverse(lat, lon, finish, coordsFallback);
+          }
         })
-        .catch(() => {
-          callback(`${lat.toFixed(4)}, ${lon.toFixed(4)}`);
+        .catch(function() {
+          self.nominatimReverse(lat, lon, finish, coordsFallback);
         });
+    },
+
+    // Secondary reverse geocoder (OSM Nominatim) for Arabic names
+    nominatimReverse: function(lat, lon, onOk, onFail) {
+      var url = "https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=" + lat + "&lon=" + lon + "&accept-language=ar&zoom=16";
+      fetch(url, { headers: { "Accept-Language": "ar" } })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+          if (data && data.display_name) {
+            var parts = String(data.display_name).split(',').map(function(s) { return s.trim(); });
+            while (parts.length && /^\d+$/.test(parts[parts.length - 1])) parts.pop();
+            if (parts.length && parts.join('، ').length > 2) {
+              return onOk(parts.slice(0, 2).join('، '));
+            }
+          }
+          onFail();
+        })
+        .catch(onFail);
     },
 
     // Debounce utility (kept for compatibility)
