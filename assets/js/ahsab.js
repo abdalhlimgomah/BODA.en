@@ -183,11 +183,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     var row = document.getElementById("profileProgressRow");
     var isComplete = pct >= 100;
     if (fill) fill.style.width = pct + "%";
-    if (row) row.classList.toggle("is-complete", isComplete);
     if (label) {
       label.textContent = isComplete
         ? "اكتمل ملفك الشخصي بنجاح ✓"
         : "اكتملت بنسبة " + pct + "%";
+    }
+    if (row) {
+      row.style.display = isComplete ? "none" : "";
+      row.classList.toggle("is-complete", isComplete);
     }
   }
 
