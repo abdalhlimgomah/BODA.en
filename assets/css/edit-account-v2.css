@@ -1,214 +1,672 @@
+/* =============================================
+   Edit Account Page — v2 redesign (20260812)
+   SaaS-style settings: white cards on soft gray,
+   blue #3866df primary, yellow #ffd447 accent.
+   Scoped under .edit-account-page to safely
+   override account.css / phone-verification.css.
+   ============================================= */
+
 :root {
-  --ea-v2-bg: #f4f7fa;
+  --ea-v2-bg: #f4f7fb;
   --ea-v2-card-bg: #ffffff;
   --ea-v2-text-primary: #1a2530;
   --ea-v2-text-secondary: #64748b;
   --ea-v2-border: #e8ecf0;
   --ea-v2-primary: #3866df;
+  --ea-v2-primary-hover: #2c4fc2;
   --ea-v2-primary-light: #e0e7ff;
-  --ea-v2-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  --ea-v2-primary-softer: #eef2ff;
+  --ea-v2-accent: #ffd447;
+  --ea-v2-success: #15803d;
+  --ea-v2-success-light: #dcfce7;
+  --ea-v2-danger: #dc2626;
+  --ea-v2-danger-light: #fee2e2;
+  --ea-v2-warn: #b45309;
+  --ea-v2-warn-light: #fef3c7;
+  --ea-v2-field-bg: #f8fafc;
+  --ea-v2-disabled-bg: #f1f5f9;
+  --ea-v2-shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.05);
+  --ea-v2-shadow-md: 0 2px 4px rgba(16, 24, 40, 0.06), 0 16px 40px rgba(16, 24, 40, 0.1);
+  --ea-v2-radius-card: 16px;
+  --ea-v2-radius-field: 10px;
 }
 
-.ea-v2-page {
+/* ---------- Page surface ---------- */
+
+body.app-shell:has(.edit-account-page) {
   background-color: var(--ea-v2-bg);
+  font-family: "Cairo", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-.ea-v2-main {
+.edit-account-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: 24px 16px !important;
+  background-color: var(--ea-v2-bg);
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding: 28px 20px 48px;
+  font-family: "Cairo", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-.ea-v2-header {
+/* ---------- Page header ---------- */
+
+.ea2-head {
   display: flex;
   align-items: center;
   gap: 16px;
   margin-bottom: 24px;
+  animation: ea2-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-.ea-v2-back-btn {
-  display: inline-flex;
+.ea2-head-icon {
+  position: relative;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
   background-color: var(--ea-v2-card-bg);
   border: 1px solid var(--ea-v2-border);
-  color: var(--ea-v2-text-secondary);
-  text-decoration: none;
-  transition: all 0.2s;
-}
-.ea-v2-back-btn:hover {
-  background-color: var(--ea-v2-primary-light);
+  border-radius: 14px;
+  box-shadow: var(--ea-v2-shadow-sm);
   color: var(--ea-v2-primary);
 }
-
-.ea-v2-header-text h1 {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: var(--ea-v2-text-primary);
-  margin: 0 0 4px;
+.ea2-head-icon .material-icons-outlined {
+  font-size: 26px;
+}
+.ea2-head-icon::after {
+  content: "";
+  position: absolute;
+  bottom: -4px;
+  right: 12px;
+  width: 14px;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ea-v2-accent);
 }
 
-.ea-v2-header-text p {
+.ea2-head-text {
+  min-width: 0;
+}
+
+.edit-account-page .page-title {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--ea-v2-text-primary);
+  margin: 0 0 4px;
+  line-height: 1.45;
+}
+
+.edit-account-page .page-subtitle {
   font-size: 0.9rem;
+  font-weight: 500;
   color: var(--ea-v2-text-secondary);
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* ---------- Form stack ---------- */
+
+.ea2-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ---------- Cards ---------- */
+
+.ea2-card {
+  background-color: var(--ea-v2-card-bg);
+  border: 1px solid var(--ea-v2-border);
+  border-radius: var(--ea-v2-radius-card);
+  box-shadow: var(--ea-v2-shadow-sm);
+  margin: 0;
+  padding: 22px 20px 24px;
+  animation: ea2-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.ea2-card:nth-child(2) {
+  animation-delay: 0.07s;
+}
+
+.edit-account-page .edit-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--ea-v2-text-primary);
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ea-v2-border);
+}
+.edit-account-page .edit-section-title::before {
+  content: "";
+  flex-shrink: 0;
+  width: 5px;
+  height: 20px;
+  border-radius: 999px;
+  background: var(--ea-v2-primary);
+}
+
+.ea2-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+/* ---------- Two-column grid (desktop) ---------- */
+
+.ea2-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+/* ---------- Fields ---------- */
+
+.edit-account-page .ea2-field {
   margin: 0;
 }
 
-.ea-v2-form {
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
-
-.ea-v2-card {
-  background-color: var(--ea-v2-card-bg);
-  border-radius: 16px;
-  padding: 24px;
-  border: 1px solid var(--ea-v2-border);
-}
-
-.ea-v2-card-title {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--ea-v2-text-primary);
-  margin: 0 0 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid var(--ea-v2-border);
-}
-
-.ea-v2-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-}
-
-@media (min-width: 768px) {
-  .ea-v2-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
-.ea-v2-field {
-  display: flex;
-  flex-direction: column;
-}
-
-.ea-v2-field label {
-  font-size: 0.8rem;
+.edit-account-page .ea2-field label {
+  display: block;
+  font-size: 0.82rem;
   font-weight: 600;
   color: var(--ea-v2-text-secondary);
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
 
-.ea-v2-input, .ea-v2-select {
+/* Input shell with leading icon (right side in RTL) */
+.ea2-input-shell {
+  position: relative;
+}
+
+.ea2-input-shell .ea2-input-icon {
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  transform: translateY(-50%);
+  font-size: 20px;
+  color: #94a3b8;
+  pointer-events: none;
+  transition: color 0.2s;
+}
+
+.edit-account-page .ea2-input {
   width: 100%;
   height: 48px;
-  padding: 0 14px;
+  padding: 0 46px 0 14px;
   border: 1px solid var(--ea-v2-border);
-  border-radius: 10px;
-  background-color: #f8fafc;
-  font-size: 0.9rem;
+  border-radius: var(--ea-v2-radius-field);
+  background-color: var(--ea-v2-field-bg);
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 500;
   color: var(--ea-v2-text-primary);
-  transition: all 0.2s;
-  -webkit-appearance: none;
-  appearance: none;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
 }
 
-.ea-v2-input:focus, .ea-v2-select:focus {
+.edit-account-page .ea2-input::placeholder {
+  color: #8a94a6;
+  font-weight: 400;
+}
+
+.edit-account-page .ea2-input:focus {
   outline: none;
   border-color: var(--ea-v2-primary);
   background-color: var(--ea-v2-card-bg);
   box-shadow: 0 0 0 3px var(--ea-v2-primary-light);
 }
 
-.ea-v2-input[readonly] {
-  background-color: #f1f5f9;
+.edit-account-page .ea2-input:focus ~ .ea2-input-icon,
+.ea2-input-shell:focus-within .ea2-input-icon {
+  color: var(--ea-v2-primary);
+}
+
+.edit-account-page .ea2-input[readonly] {
+  background-color: var(--ea-v2-disabled-bg);
   color: var(--ea-v2-text-secondary);
   cursor: not-allowed;
+  border-style: dashed;
 }
 
-.ea-v2-select {
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: left 14px center;
-  padding-left: 40px;
+/* ---------- Phone display card ---------- */
+
+.edit-account-page #editPhoneWrap {
+  display: block;
 }
 
-.ea-v2-select-group { display: flex; gap: 8px; }
-.ea-v2-radio-group { display: flex; gap: 12px; margin-top: 8px; }
-.ea-v2-radio-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border: 1px solid var(--ea-v2-border);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.ea-v2-radio-label:hover { border-color: var(--ea-v2-primary); }
-.ea-v2-radio-label input { display: none; }
-.ea-v2-radio-label input:checked + span { color: var(--ea-v2-primary); font-weight: 700; }
-.ea-v2-radio-label input:checked ~ .ea-v2-radio-label { border-color: var(--ea-v2-primary); background-color: var(--ea-v2-primary-light); }
-
-.ea-v2-field-note {
-  font-size: 0.75rem;
-  color: var(--ea-v2-text-secondary);
-  margin-top: 6p
-}
-
-/* Phone display */
-.ea-v2-phone-display {
+.edit-account-page .readonly-phone-card {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 16px;
-  border-radius: 10px;
-  background-color: #f8fafc;
+  padding: 10px 12px;
   border: 1px solid var(--ea-v2-border);
+  border-radius: var(--ea-v2-radius-field);
+  background-color: var(--ea-v2-field-bg);
+  direction: rtl;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
 }
-.ea-v2-phone-text { flex: 1; font-weight: 600; direction: ltr; text-align: right; }
-.ea-v2-phone-badge { font-size: 0.7rem; font-weight: 700; padding: 2px 8px; border-radius: 6px; }
-.ea-v2-phone-badge.verified { background-color: #dcfce7; color: #16a34a; }
-.ea-v2-phone-badge.unverified { background-color: #fee2e2; color: #dc2626; }
-.ea-v2-phone-edit {
-  background: none; border: none; color: var(--ea-v2-primary); font-weight: 700; cursor: pointer; font-size: 0.8rem;
+.edit-account-page .readonly-phone-card:focus-within {
+  border-color: var(--ea-v2-primary);
+  background-color: var(--ea-v2-card-bg);
+  box-shadow: 0 0 0 3px var(--ea-v2-primary-light);
 }
-.ea-v2-add-phone-btn {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  width: 100%; height: 48px; border: 2px dashed var(--ea-v2-border); border-radius: 10px;
-  background-color: transparent; color: var(--ea-v2-text-secondary); font-weight: 600; cursor: pointer; transition: all 0.2s;
-}
-.ea-v2-add-phone-btn:hover { border-color: var(--ea-v2-primary); color: var(--ea-v2-primary); background-color: var(--ea-v2-primary-light); }
 
-.ea-v2-footer {
-  margin-top: 16px;
+.ea2-phone-ico {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background-color: var(--ea-v2-primary-softer);
+  color: var(--ea-v2-primary);
+}
+.ea2-phone-ico .material-icons-outlined {
+  font-size: 20px;
 }
 
-.ea-v2-submit-btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-width: 180px; height: 52px; padding: 0 24px;
-  background-color: var(--ea-v2-primary); color: #fff;
-  border: none; border-radius: 12px; font-size: 1rem; font-weight: 700;
-  cursor: pointer; transition: all 0.2s;
+.edit-account-page .readonly-phone-card .phone-text-wrap {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+  min-width: 0;
 }
-.ea-v2-submit-btn:hover:not(:disabled) { background-color: #2c2ea4; transform: translateY(-1px); }
-.ea-v2-submit-btn:disabled { background-color: #94a3b8; cursor: not-allowed; }
-.ea-v2-submit-btn .spinner { width: 20px; height: 20px; border-width: 2px; border-color: rgba(255,255,255,0.3); border-top-color: #fff; }
 
-.hidden { display: none !important; }
+.edit-account-page .readonly-phone-card .phone-text {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ea-v2-text-primary);
+  direction: ltr;
+  display: inline-block;
+  unicode-bidi: plaintext;
+}
 
+/* Badge — JS rewrites className to exactly "phone-badge verified|unverified" */
+.edit-account-page .phone-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 4px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.edit-account-page .phone-badge.verified {
+  background-color: var(--ea-v2-success-light);
+  color: var(--ea-v2-success);
+}
+.edit-account-page .phone-badge.verified .material-icons-outlined {
+  font-size: 14px;
+}
+
+.edit-account-page .phone-badge.unverified {
+  background-color: var(--ea-v2-warn-light);
+  color: var(--ea-v2-warn);
+}
+.edit-account-page .phone-badge.unverified .material-icons-outlined {
+  font-size: 14px;
+}
+
+/* Edit trigger button */
+.edit-account-page .phone-edit-trigger {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  border: 1px solid var(--ea-v2-primary-light);
+  border-radius: 999px;
+  background-color: var(--ea-v2-primary-softer);
+  color: var(--ea-v2-primary);
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
+}
+.edit-account-page .phone-edit-trigger .material-icons-outlined {
+  font-size: 16px;
+}
+.edit-account-page .phone-edit-trigger:hover {
+  background-color: var(--ea-v2-primary);
+  border-color: var(--ea-v2-primary);
+  color: #fff;
+}
+.edit-account-page .phone-edit-trigger:active {
+  transform: scale(0.97);
+}
+.edit-account-page .phone-edit-trigger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ea-v2-primary-light);
+}
+
+/* Field note */
+.edit-account-page .ea2-field .field-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: var(--ea-v2-text-secondary);
+  margin: 8px 2px 0;
+  line-height: 1.6;
+}
+
+/* ---------- Birthday selects ---------- */
+
+.birthday-selects.ea2-birthday {
+  display: flex;
+  gap: 10px;
+}
+
+.edit-account-page .birthday-selects select {
+  flex: 1;
+  min-width: 0;
+  height: 46px;
+  padding: 0 12px 0 30px;
+  border: 1px solid var(--ea-v2-border);
+  border-radius: var(--ea-v2-radius-field);
+  background-color: var(--ea-v2-field-bg);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--ea-v2-text-primary);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 10px center;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.edit-account-page .birthday-selects select:focus {
+  outline: none;
+  border-color: var(--ea-v2-primary);
+  background-color: var(--ea-v2-card-bg);
+  box-shadow: 0 0 0 3px var(--ea-v2-primary-light);
+}
+
+.edit-account-page .birthday-selects select:disabled {
+  background-color: var(--ea-v2-disabled-bg);
+  cursor: not-allowed;
+  color: var(--ea-v2-text-secondary);
+}
+
+/* Birthday summary line — JS writes textContent only, icon via CSS */
+.edit-account-page .birthday-display {
+  font-family: "Material Icons Outlined", "Cairo", sans-serif;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  font-weight: 500;
+  color: var(--ea-v2-primary);
+  margin: 8px 2px 0;
+  min-height: 1.2em;
+}
+.edit-account-page .birthday-display::before {
+  content: "celebration";
+  font-size: 15px;
+  line-height: 1;
+  font-family: inherit;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- Gender pills ---------- */
+
+.gender-options.ea2-gender {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 0;
+}
+
+.edit-account-page .gender-option {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--ea-v2-border);
+  border-radius: var(--ea-v2-radius-field);
+  background-color: var(--ea-v2-field-bg);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--ea-v2-text-secondary);
+  transition: border-color 0.2s, background-color 0.2s, color 0.2s, box-shadow 0.2s;
+}
+
+.edit-account-page .gender-option:hover {
+  border-color: var(--ea-v2-primary);
+}
+
+.edit-account-page .gender-option:focus-within {
+  outline: none;
+  border-color: var(--ea-v2-primary);
+  box-shadow: 0 0 0 3px var(--ea-v2-primary-light);
+}
+
+.edit-account-page .gender-option input[type="radio"] {
+  display: none;
+}
+
+/* Custom radio dot */
+.ea2-gender-radio {
+  position: relative;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  border: 2px solid #c3ccd8;
+  border-radius: 50%;
+  background-color: var(--ea-v2-card-bg);
+  transition: border-color 0.2s, background-color 0.2s;
+}
+.ea2-gender-radio::after {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background-color: var(--ea-v2-primary);
+  transform: scale(0);
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Active state — toggled by JS via classList "active" */
+.edit-account-page .gender-option.active {
+  border-color: var(--ea-v2-primary);
+  background-color: var(--ea-v2-primary-softer);
+  color: var(--ea-v2-primary);
+  font-weight: 700;
+  box-shadow: 0 0 0 3px rgba(56, 102, 223, 0.08);
+}
+.edit-account-page .gender-option.active .ea2-gender-radio {
+  border-color: var(--ea-v2-primary);
+}
+.edit-account-page .gender-option.active .ea2-gender-radio::after {
+  transform: scale(1);
+}
+
+/* ---------- Selects (nationality) ---------- */
+
+.edit-account-page .ea2-select {
+  width: 100%;
+  height: 48px;
+  padding: 0 14px 0 40px;
+  border: 1px solid var(--ea-v2-border);
+  border-radius: var(--ea-v2-radius-field);
+  background-color: var(--ea-v2-field-bg);
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ea-v2-text-primary);
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: left 14px center;
+  transition: border-color 0.2s, background-color 0.2s, box-shadow 0.2s;
+}
+
+.edit-account-page .ea2-select:focus {
+  outline: none;
+  border-color: var(--ea-v2-primary);
+  background-color: var(--ea-v2-card-bg);
+  box-shadow: 0 0 0 3px var(--ea-v2-primary-light);
+}
+
+/* ---------- Submit button ---------- */
+
+.edit-account-page .edit-submit-btn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  height: 52px;
+  padding: 0 28px;
+  border: none;
+  border-radius: 12px;
+  background-color: var(--ea-v2-primary);
+  color: #fff;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(56, 102, 223, 0.28);
+  transition: background-color 0.2s, box-shadow 0.2s, transform 0.15s;
+  animation: ea2-rise 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.14s both;
+}
+
+.edit-account-page .edit-submit-btn:hover:not(:disabled) {
+  background-color: var(--ea-v2-primary-hover);
+  box-shadow: 0 10px 26px rgba(56, 102, 223, 0.36);
+  transform: translateY(-1px);
+}
+
+.edit-account-page .edit-submit-btn:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+.edit-account-page .edit-submit-btn:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ea-v2-card-bg), 0 0 0 6px var(--ea-v2-primary-light);
+}
+
+.edit-account-page .edit-submit-btn:disabled {
+  background-color: #9aa7bd;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Spinner injected INSIDE the button (span.spinner) */
+.edit-account-page .edit-submit-btn .spinner {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+}
+
+/* Spinner applied TO the button itself (class="spinner") */
+.edit-account-page .edit-submit-btn.spinner {
+  font-size: 0;
+  pointer-events: none;
+  color: transparent;
+}
+.edit-account-page .edit-submit-btn.spinner::after {
+  content: "";
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid rgba(255, 255, 255, 0.35);
+  border-top-color: #fff;
+  animation: ea2-spin 0.6s linear infinite;
+}
+
+/* Generic spinner utility (used by the button states above) */
 .spinner {
-  border: 2px solid rgba(0,0,0,0.1);
+  border: 2px solid rgba(0, 0, 0, 0.1);
   border-top-color: currentColor;
   border-radius: 50%;
   width: 16px;
   height: 16px;
-  animation: spin 0.6s linear infinite;
+  animation: ea2-spin 0.6s linear infinite;
+  display: inline-block;
 }
-@keyframes spin { to { transform: rotate(360deg); } }
+
+@keyframes ea2-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes ea2-rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------- Tablet / Desktop ---------- */
+
+@media (min-width: 768px) {
+  .edit-account-page {
+    padding: 36px 24px 56px;
+  }
+
+  .ea2-head {
+    margin-bottom: 28px;
+  }
+
+  .edit-account-page .page-title {
+    font-size: 1.5rem;
+  }
+
+  .ea2-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .ea2-card {
+    padding: 26px 28px 28px;
+  }
+
+  .ea2-card-body {
+    gap: 20px;
+  }
+
+  .edit-account-page .edit-submit-btn {
+    width: 260px;
+    margin-inline-start: auto;
+  }
+}
+
+/* ---------- Reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ea2-card,
+  .ea2-head,
+  .edit-account-page .edit-submit-btn {
+    animation: none;
+  }
+  .spinner,
+  .edit-account-page .edit-submit-btn.spinner::after {
+    animation-duration: 1.2s;
+  }
+}
