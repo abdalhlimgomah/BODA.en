@@ -221,7 +221,6 @@ var HOME_CONFIG = {
       discountFilter: 40,
     },
     { type: "banner", index: 3 },
-    { type: "shein-style", id: "hm-style-1", title: "تشكيلة مميزة" },
     {
       type: "category-products",
       id: "hm-beauty",
