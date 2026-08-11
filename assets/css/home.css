@@ -1296,3 +1296,53 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
   .hm-hero-wrap { order: 0; flex: 1; min-width: 0; }
   .hm-features-wrap { order: 1; flex: 0 0 280px; }
 }
+
+/* ===== MEGA OFFERS REDESIGN — leaderboard ranks / flash deals / coupons ===== */
+.buda-mega-rank {
+    position: absolute; top: 6px; left: 6px; z-index: 2;
+    width: 22px; height: 22px; border-radius: 50%;
+    background: linear-gradient(135deg, #f7d774, #e0a020);
+    color: #fff; font-size: 0.7rem; font-weight: var(--weight-extrabold);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    border: 1.5px solid #fff;
+}
+.buda-mega-flash-head {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 8px; margin-bottom: 12px;
+}
+.buda-mega-flash-head .buda-mega-col-title { margin-bottom: 0; }
+.buda-mega-flash-timer {
+    background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.25);
+    color: #fff; font-size: 0.75rem; font-weight: var(--weight-extrabold);
+    letter-spacing: 1px; padding: 4px 10px; border-radius: 999px;
+    white-space: nowrap; font-variant-numeric: tabular-nums;
+    display: inline-flex; align-items: center; gap: 6px;
+}
+.buda-mega-flash-timer::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: #ff4d4f; animation: buda-flash-blink 1s infinite;
+}
+@keyframes buda-flash-blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+.buda-mega-stamp {
+    position: absolute; top: 8px; left: 8px; z-index: 2;
+    width: 46px; height: 46px; border-radius: 50%;
+    background: radial-gradient(circle, #ff4d4f 0%, #d9363e 70%);
+    color: #fff; font-size: 0.72rem; font-weight: 900;
+    display: flex; align-items: center; justify-content: center; text-align: center;
+    box-shadow: 0 4px 12px rgba(217,54,62,0.45);
+    border: 2px solid rgba(255,255,255,0.85);
+}
+.buda-coupon { border: 1.5px dashed rgba(255,255,255,0.55); }
+.buda-coupon::before, .buda-coupon::after {
+    content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+    background: var(--color-surface); z-index: 3; top: 50%; transform: translateY(-50%);
+}
+.buda-coupon::before { left: -9px; }
+.buda-coupon::after { right: -9px; }
+.buda-coupon-tag {
+    position: absolute; top: 10px; left: 10px; z-index: 3;
+    background: #d9363e; color: #fff; font-size: 0.62rem; font-weight: var(--weight-extrabold);
+    padding: 3px 10px; border-radius: 999px;
+    box-shadow: 0 2px 8px rgba(217,54,62,0.4);
+}
