@@ -17,6 +17,7 @@
   display: block;
   width: 100%;
   height: auto;
+  max-height: none;
   aspect-ratio: 3 / 4;
   object-fit: cover;
   background: #f1f5f9;
