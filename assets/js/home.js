@@ -2697,13 +2697,14 @@ HM.renderMegaOffers = function (section) {
   var html =
     '<div class="buda-mega-offers hm-fade">' +
     '  <div class="buda-mega-col buda-mega-col-1">' +
-    '    <h3 class="buda-mega-col-title"><span class="material-icons-outlined">shopping_bag</span> اشتري أكثر وبالك مرتاح</h3>' +
+    '    <h3 class="buda-mega-col-title"><span class="material-icons-outlined">emoji_events</span> الأكثر مبيعاً</h3>' +
     '    <div class="buda-mega-grid" id="buda-mega-grid-3">';
-  col1Items.forEach(function (p) {
+  col1Items.forEach(function (p, idx) {
     var rp = resolvePrice(p);
     var img = getImage(p);
     html +=
       '<div class="buda-mega-product" data-view-product="' + String(p.id) + '">' +
+      '<span class="buda-mega-rank">' + (idx + 1) + '</span>' +
       (rp.hasDiscount ? '<span class="buda-mega-product-badge">-' + rp.discountPercent + '%</span>' : '') +
       '<div class="buda-mega-product-img-wrap"><div class="buda-pulse-dot" data-pulse-dot="' + String(p.id) + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img class="buda-mega-product-img" src="' + img + '" alt="' + escapeHtml(p.name || '') + '" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
       '<div class="buda-mega-product-info">' +
@@ -2715,14 +2716,15 @@ HM.renderMegaOffers = function (section) {
   html +=
     '    </div></div>' +
     '  <div class="buda-mega-col buda-mega-col-2">' +
-    '    <h3 class="buda-mega-col-title"><span class="material-icons-outlined">bolt</span> عروض ميجا</h3>' +
+    '    <div class="buda-mega-flash-head"><h3 class="buda-mega-col-title"><span class="material-icons-outlined">bolt</span> عروض خاطفة</h3>' +
+    '    <span class="buda-mega-flash-timer" id="buda-flash-timer">--:--:--</span></div>' +
     '    <div class="buda-mega-grid" id="buda-mega-grid-2">';
   col2Items.forEach(function (p) {
     var rp = resolvePrice(p);
     var img = getImage(p);
     html +=
       '<div class="buda-mega-product" data-view-product="' + String(p.id) + '">' +
-      (rp.hasDiscount ? '<span class="buda-mega-product-badge">-' + rp.discountPercent + '%</span>' : '') +
+      (rp.hasDiscount ? '<span class="buda-mega-stamp">-' + rp.discountPercent + '%</span>' : '') +
       '<div class="buda-mega-product-img-wrap"><div class="buda-pulse-dot" data-pulse-dot="' + String(p.id) + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img class="buda-mega-product-img" src="' + img + '" alt="' + escapeHtml(p.name || '') + '" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
       '<div class="buda-mega-product-info">' +
       '<p class="buda-mega-product-name">' + escapeHtml((p.name || '').slice(0, 25)) + '</p>' +
@@ -2739,11 +2741,12 @@ HM.renderMegaOffers = function (section) {
   html +=
     '    </div></div>' +
     '  <div class="buda-mega-col buda-mega-col-3">' +
-    '    <h3 class="buda-mega-col-title"><span class="material-icons-outlined">local_offer</span> شوف كل الخصومات</h3>' +
+    '    <h3 class="buda-mega-col-title"><span class="material-icons-outlined">confirmation_number</span> كوبونات التوفير</h3>' +
     '    <div class="buda-mega-banners">';
   banners.forEach(function (b) {
     html +=
-      '      <a class="buda-mega-banner" href="' + escapeHtml(b.link_url || '#') + '">' +
+      '      <a class="buda-mega-banner buda-coupon" href="' + escapeHtml(b.link_url || '#') + '">' +
+      '        <span class="buda-coupon-tag">وفّر أكثر</span>' +
       '        <div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + b.image_url + '" alt="" loading="lazy" onerror="this.closest(\'.buda-mega-banner\').style.display=\'none\'" /></div>' +
       '        <div class="buda-mega-banner-overlay"><strong>' + escapeHtml(b.title || '') + '</strong><span>' + escapeHtml(b.subtitle || '') + '</span></div>' +
       '      </a>';
@@ -2757,6 +2760,30 @@ HM.renderMegaOffers = function (section) {
   if (!HM.contentEl) return null;
   HM.contentEl.appendChild(el);
   attachProductCardEvents(el);
+  // Flash deals countdown — 6h cycle, persisted so refresh keeps the same timer
+  var endTs = 0;
+  try { endTs = parseInt(localStorage.getItem('buda_flash_end') || '0', 10); } catch (_e) { endTs = 0; }
+  if (!endTs || endTs <= Date.now()) endTs = Date.now() + 6 * 3600 * 1000;
+  try { localStorage.setItem('buda_flash_end', String(endTs)); } catch (_e) {}
+  var timerEl = el.querySelector('#buda-flash-timer');
+  if (timerEl) {
+    if (window._budaFlashTimer) clearInterval(window._budaFlashTimer);
+    function pad2(n) { return (n < 10 ? '0' : '') + n; }
+    function tickFlash() {
+      var diff = endTs - Date.now();
+      if (diff <= 0) {
+        endTs = Date.now() + 6 * 3600 * 1000;
+        try { localStorage.setItem('buda_flash_end', String(endTs)); } catch (_e) {}
+        diff = endTs - Date.now();
+      }
+      timerEl.textContent =
+        pad2(Math.floor(diff / 3600000)) +
+        ':' + pad2(Math.floor((diff % 3600000) / 60000)) +
+        ':' + pad2(Math.floor((diff % 60000) / 1000));
+    }
+    tickFlash();
+    window._budaFlashTimer = setInterval(tickFlash, 1000);
+  }
   return el;
 };
 
