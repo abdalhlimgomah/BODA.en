@@ -26,6 +26,13 @@
   contain-intrinsic-size: 180px 380px;
 }
 
+@media (min-width: 768px) {
+  #productsGrid .noon-product-card {
+    max-width: none !important;
+    width: 100%;
+  }
+}
+
 .products-cats-mobile {
   display: none;
 }
