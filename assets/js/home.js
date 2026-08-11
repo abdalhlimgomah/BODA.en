@@ -261,10 +261,8 @@ var HOME_CONFIG = {
     },
     { type: "banner", index: 5 },
     {
-      type: "shein-deal",
+      type: "shein-trend",
       id: "hm-sdeal-2",
-      title: " تخفيضات نهاية الأسبوع",
-      discountFilter: 30,
     },
     { type: "banner", index: 6 },
     {
