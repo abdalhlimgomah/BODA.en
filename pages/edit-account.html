@@ -13,6 +13,7 @@
   <link href="../assets/css/noon-components.css" rel="stylesheet" />
   <link href="../assets/css/account.css?v=20260630d" rel="stylesheet" />
   <link href="../assets/css/phone-verification.css?v=20260704" rel="stylesheet" />
+  <link href="../assets/css/edit-account-v2.css?v=20260812" rel="stylesheet" />
 <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
@@ -29,90 +30,130 @@
 
   <main class="app-main edit-account-page">
 
-    <h1 class="page-title" data-i18n="استعرض و حدث بيانات التواصل و معلومات حسابك">استعرض و حدث بيانات التواصل و معلومات حسابك</h1>
-    <p class="page-subtitle" data-i18n="قم بتحديث معلوماتك الشخصية وبيانات الاتصال">قم بتحديث معلوماتك الشخصية وبيانات الاتصال</p>
-
-    <div class="edit-section">
-      <h2 class="edit-section-title" data-i18n="معلومات الاتصال">معلومات الاتصال</h2>
-
-      <div class="edit-field">
-        <label data-i18n="البريد الإلكتروني">البريد الإلكتروني</label>
-        <input id="editEmail" class="noon-input" type="email" readonly />
+    <header class="ea2-head">
+      <div class="ea2-head-icon" aria-hidden="true">
+        <span class="material-icons-outlined">manage_accounts</span>
       </div>
+      <div class="ea2-head-text">
+        <h1 class="page-title" data-i18n="استعرض و حدث بيانات التواصل و معلومات حسابك">استعرض و حدث بيانات التواصل و معلومات حسابك</h1>
+        <p class="page-subtitle" data-i18n="قم بتحديث معلوماتك الشخصية وبيانات الاتصال">قم بتحديث معلوماتك الشخصية وبيانات الاتصال</p>
+      </div>
+    </header>
 
-      <div class="edit-field">
-        <label data-i18n="رقم الجوّال">رقم الجوّال</label>
-        <div id="editPhoneWrap">
-          <div class="readonly-phone-card">
-            <div class="phone-text-wrap">
-              <span class="phone-text" id="phoneDisplayVal">لم يتم تعيين رقم هاتف</span>
-              <span class="phone-badge unverified" id="phoneStatusBadge">
-                <span class="material-icons-outlined"></span>
-                <span id="phoneStatusBadgeText">غير متحقق</span>
-              </span>
+    <div class="ea2-form">
+
+      <section class="edit-section ea2-card">
+        <h2 class="edit-section-title" data-i18n="معلومات الاتصال">معلومات الاتصال</h2>
+
+        <div class="ea2-card-body">
+
+          <div class="edit-field ea2-field">
+            <label for="editEmail" data-i18n="البريد الإلكتروني">البريد الإلكتروني</label>
+            <div class="ea2-input-shell">
+              <span class="material-icons-outlined ea2-input-icon" aria-hidden="true">mail</span>
+              <input id="editEmail" class="noon-input ea2-input" type="email" readonly />
             </div>
-            <button type="button" class="phone-edit-trigger" id="editPhoneTriggerBtn">تعديل</button>
           </div>
-          <!-- Hidden input to keep compatibility with existing submit logic -->
-          <input id="editPhone" type="hidden" />
+
+          <div class="edit-field ea2-field">
+            <label for="editPhoneTriggerBtn" data-i18n="رقم الجوّال">رقم الجوّال</label>
+            <div id="editPhoneWrap">
+              <div class="readonly-phone-card ea2-phone-card">
+                <span class="ea2-phone-ico" aria-hidden="true">
+                  <span class="material-icons-outlined">smartphone</span>
+                </span>
+                <div class="phone-text-wrap">
+                  <span class="phone-text" id="phoneDisplayVal">لم يتم تعيين رقم هاتف</span>
+                  <span class="phone-badge unverified" id="phoneStatusBadge">
+                    <span class="material-icons-outlined"></span>
+                    <span id="phoneStatusBadgeText">غير متحقق</span>
+                  </span>
+                </div>
+                <button type="button" class="phone-edit-trigger ea2-phone-edit" id="editPhoneTriggerBtn">
+                  <span class="material-icons-outlined" aria-hidden="true">edit</span>
+                  <span>تعديل</span>
+                </button>
+              </div>
+              <!-- Hidden input to keep compatibility with existing submit logic -->
+              <input id="editPhone" type="hidden" />
+            </div>
+            <p class="field-note" data-i18n="استخدمه لتسجيل الدخول على جميع تطبيقات نون.">استخدمه لتسجيل الدخول على جميع تطبيقات BudoQ.</p>
+          </div>
+
         </div>
-        <p class="field-note" data-i18n="استخدمه لتسجيل الدخول على جميع تطبيقات نون.">استخدمه لتسجيل الدخول على جميع تطبيقات BudoQ.</p>
-      </div>
+      </section>
+
+      <section class="edit-section ea2-card">
+        <h2 class="edit-section-title" data-i18n="معلوماتك الشخصية">معلوماتك الشخصية</h2>
+
+        <div class="ea2-card-body">
+
+          <div class="ea2-grid">
+            <div class="edit-field ea2-field">
+              <label for="editFirstName" data-i18n="الاسم الأول">الاسم الأول</label>
+              <div class="ea2-input-shell">
+                <span class="material-icons-outlined ea2-input-icon" aria-hidden="true">person</span>
+                <input id="editFirstName" class="noon-input ea2-input" type="text" placeholder="الاسم الأول" />
+              </div>
+            </div>
+
+            <div class="edit-field ea2-field">
+              <label for="editLastName" data-i18n="اسم العائلة">اسم العائلة</label>
+              <div class="ea2-input-shell">
+                <span class="material-icons-outlined ea2-input-icon" aria-hidden="true">person_outline</span>
+                <input id="editLastName" class="noon-input ea2-input" type="text" placeholder="اسم العائلة" />
+              </div>
+            </div>
+          </div>
+
+          <div class="edit-field ea2-field">
+            <label for="editBirthDay" data-i18n="يوم الميلاد">يوم الميلاد</label>
+            <div class="birthday-selects ea2-birthday">
+              <select id="editBirthDay">
+                <option value="">اليوم</option>
+              </select>
+              <select id="editBirthMonth">
+                <option value="">الشهر</option>
+              </select>
+              <select id="editBirthYear">
+                <option value="">السنة</option>
+              </select>
+            </div>
+            <p class="birthday-display ea2-birthday-display" id="birthdayDisplay"></p>
+          </div>
+
+          <div class="ea2-grid">
+            <div class="edit-field ea2-field">
+              <label for="genderMale" data-i18n="الجنس">الجنس</label>
+              <div class="gender-options ea2-gender">
+                <label class="gender-option ea2-gender-option" id="genderMale">
+                  <input type="radio" name="gender" value="male" />
+                  <span class="ea2-gender-radio" aria-hidden="true"></span>
+                  <span data-i18n="ذكر">ذكر</span>
+                </label>
+                <label class="gender-option ea2-gender-option" id="genderFemale">
+                  <input type="radio" name="gender" value="female" />
+                  <span class="ea2-gender-radio" aria-hidden="true"></span>
+                  <span data-i18n="أنثى">أنثى</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="edit-field ea2-field">
+              <label for="editNationality" data-i18n="الجنسية">الجنسية</label>
+              <select id="editNationality" class="nationality-select ea2-select">
+                <option value="مصر">مصر</option>
+                <option value="السعودية">السعودية</option>
+              </select>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <button id="editSubmitBtn" class="edit-submit-btn ea2-submit" type="button" data-i18n="تحديث حسابك">تحديث حسابك</button>
+
     </div>
-
-    <div class="edit-section">
-      <h2 class="edit-section-title" data-i18n="معلوماتك الشخصية">معلوماتك الشخصية</h2>
-
-      <div class="edit-field">
-        <label data-i18n="الاسم الأول">الاسم الأول</label>
-        <input id="editFirstName" class="noon-input" type="text" placeholder="الاسم الأول" />
-      </div>
-
-      <div class="edit-field">
-        <label data-i18n="اسم العائلة">اسم العائلة</label>
-        <input id="editLastName" class="noon-input" type="text" placeholder="اسم العائلة" />
-      </div>
-
-      <div class="edit-field">
-        <label data-i18n="يوم الميلاد">يوم الميلاد</label>
-        <div class="birthday-selects">
-          <select id="editBirthDay">
-            <option value="">اليوم</option>
-          </select>
-          <select id="editBirthMonth">
-            <option value="">الشهر</option>
-          </select>
-          <select id="editBirthYear">
-            <option value="">السنة</option>
-          </select>
-        </div>
-        <p class="birthday-display" id="birthdayDisplay"></p>
-      </div>
-
-      <div class="edit-field">
-        <label data-i18n="الجنس">الجنس</label>
-        <div class="gender-options">
-          <label class="gender-option" id="genderMale">
-            <input type="radio" name="gender" value="male" />
-            <span data-i18n="ذكر">ذكر</span>
-          </label>
-          <label class="gender-option" id="genderFemale">
-            <input type="radio" name="gender" value="female" />
-            <span data-i18n="أنثى">أنثى</span>
-          </label>
-        </div>
-      </div>
-
-      <div class="edit-field">
-        <label data-i18n="الجنسية">الجنسية</label>
-        <select id="editNationality" class="nationality-select">
-          <option value="مصر">مصر</option>
-          <option value="السعودية">السعودية</option>
-        </select>
-      </div>
-    </div>
-
-    <button id="editSubmitBtn" class="edit-submit-btn" type="button" data-i18n="تحديث حسابك">تحديث حسابك</button>
   </main>
 
   <nav class="bottom-nav">
