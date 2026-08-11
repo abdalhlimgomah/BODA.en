@@ -551,6 +551,8 @@ function normalizeCouponTokenStrict(value) {
 function pickFirstImageSource(item) {
   if (!item || typeof item !== "object") return "";
 
+  const VIDEO_SOURCE_RE = /\.(mp4|webm|mov|m4v|ogv|mkv|avi|m3u8|mpg|mpeg|ts)([?#].*)?$/i;
+
   const directCandidates = [
     item.image_url,
     item.image,
@@ -564,7 +566,7 @@ function pickFirstImageSource(item) {
 
   for (const candidate of directCandidates) {
     const text = sanitizeText(candidate);
-    if (text) return text;
+    if (text && !VIDEO_SOURCE_RE.test(text)) return text;
   }
 
   const collectionCandidates = [item.images, item.gallery, item.thumbnails];
@@ -572,7 +574,9 @@ function pickFirstImageSource(item) {
     if (!listValue) continue;
 
     if (Array.isArray(listValue)) {
-      const first = listValue.map((entry) => sanitizeText(entry)).find(Boolean);
+      const first = listValue
+        .map((entry) => sanitizeText(entry))
+        .find((entry) => entry && !VIDEO_SOURCE_RE.test(entry));
       if (first) return first;
       continue;
     }
@@ -594,7 +598,7 @@ function pickFirstImageSource(item) {
       const first = normalized
         .split(/[,\n;|]+/g)
         .map((entry) => sanitizeText(entry))
-        .find(Boolean);
+        .find((entry) => entry && !VIDEO_SOURCE_RE.test(entry));
       if (first) return first;
     }
   }

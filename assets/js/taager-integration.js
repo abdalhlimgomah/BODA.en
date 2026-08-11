@@ -287,8 +287,9 @@
     }
 
     var image = "";
+    var VIDEO_SOURCE_RE = /\.(mp4|webm|mov|m4v|ogv|mkv|avi|m3u8|mpg|mpeg|ts)([?#].*)?$/i;
     var thumbnail = item.thumbnail || item.thumbnailUrl || "";
-    if (thumbnail) image = thumbnail;
+    if (thumbnail && !VIDEO_SOURCE_RE.test(thumbnail)) image = thumbnail;
     if (!image) {
       var imageCandidates = [
         item.image_url, item.image, item.product_image,
@@ -296,14 +297,20 @@
       ];
       for (var i = 0; i < imageCandidates.length; i++) {
         var candidate = sanitizeText(imageCandidates[i]);
-        if (candidate) {
+        if (candidate && !VIDEO_SOURCE_RE.test(candidate)) {
           image = candidate;
           break;
         }
       }
     }
     if (!image && Array.isArray(item.images) && item.images.length) {
-      image = sanitizeText(item.images[0]);
+      for (var vi = 0; vi < item.images.length; vi++) {
+        var imgEntry = sanitizeText(item.images[vi]);
+        if (imgEntry && !VIDEO_SOURCE_RE.test(imgEntry)) {
+          image = imgEntry;
+          break;
+        }
+      }
     }
 
     if (!window.__taager_debug_logged__) {

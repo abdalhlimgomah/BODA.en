@@ -142,6 +142,10 @@ function toDirectImageUrl(value) {
   return source;
 }
 
+function isVideoUrl(value) {
+  return /\.(mp4|webm|mov|m4v|ogv|mkv|avi|m3u8|mpg|mpeg|ts)([?#].*)?$/i.test(value);
+}
+
 function collectImageCandidates(...values) {
   const bucket = [];
 
@@ -169,6 +173,7 @@ function collectImageCandidates(...values) {
     if (!normalized) return;
     const lowered = normalized.toLowerCase();
     if (lowered === "null" || lowered === "undefined") return;
+    if (isVideoUrl(lowered)) return;
     unique.add(normalized);
   });
 
