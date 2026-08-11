@@ -5,6 +5,8 @@ const ALLOWED_HOSTS = new Set([
   "msgqzgzoslearaprgiqq.supabase.co",
 ]);
 
+const VIDEO_EXT_RE = /\.(mp4|webm|mov|m4v|ogv|mkv|avi|m3u8|mpg|mpeg|ts)([?#].*)?$/i;
+
 function toImageUrl(value) {
   try {
     const u = new URL(String(value || ""));
@@ -22,6 +24,9 @@ module.exports = async function handler(req, res) {
   const target = toImageUrl(q.u || q.url);
   if (!target) {
     return res.status(400).json({ error: "Invalid image url" });
+  }
+  if (VIDEO_EXT_RE.test(target)) {
+    return res.status(400).json({ error: "Video url not supported" });
   }
 
   const requestedWidth = parseInt(q.w, 10);
