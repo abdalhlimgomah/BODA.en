@@ -256,7 +256,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       var card = document.createElement('article');
       card.className = 'noon-product-card';
-      card.style.maxWidth = '180px';
       card.setAttribute('data-product-id', id);
 
       card.innerHTML =
