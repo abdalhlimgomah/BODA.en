@@ -215,10 +215,8 @@ var HOME_CONFIG = {
     },
     { type: "for-you", id: "hm-for-you", title: "قد يعجبك" },
     {
-      type: "shein-deal",
+      type: "shein-trend",
       id: "hm-sdeal-1",
-      title: "عرض مميز",
-      discountFilter: 40,
     },
     { type: "banner", index: 3 },
     {
@@ -1771,11 +1769,13 @@ HM.renderSheinTrend = function (section) {
         escapeHtml(section.badge) +
         "</span>"
       : "") +
-    '<h2 class="hm-shein-title" style="color:' +
-    pal[0] +
-    '">' +
-    escapeHtml(section.title || "رائج الآن") +
-    "</h2>" +
+    (section.title
+      ? '<h2 class="hm-shein-title" style="color:' +
+        pal[0] +
+        '">' +
+        escapeHtml(section.title) +
+        "</h2>"
+      : "") +
     '<a class="hm-view-all" href="section.html?type=' +
     section.type +
     "&id=" +
