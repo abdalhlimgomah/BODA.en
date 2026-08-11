@@ -87,7 +87,6 @@ document.addEventListener("DOMContentLoaded", function () {
     var client = getClient();
     if (client && storedEmail) {
       try {
-        console.log("[edit-account.js] Loading profile from Supabase for email:", storedEmail);
         var { data, error } = await client.from("profiles").select("*").eq("email", storedEmail).limit(1);
         
         if (error) {
@@ -96,7 +95,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (Array.isArray(data) && data.length) {
           profile = data[0];
-          console.log("[edit-account.js] Profile successfully loaded from Supabase:", profile);
         } else {
           console.log("[edit-account.js] Profile row not found. Auto-creating a new row...");
           // Auto-create profile row if missing
@@ -115,7 +113,6 @@ document.addEventListener("DOMContentLoaded", function () {
             var { data: reFetched, error: reFetchErr } = await client.from("profiles").select("*").eq("email", storedEmail).limit(1);
             if (reFetched && reFetched.length) {
               profile = reFetched[0];
-              console.log("[edit-account.js] Profile re-fetched successfully:", profile);
             }
           } else {
             console.warn("[edit-account.js] Auto profile insert error:", insErr);
