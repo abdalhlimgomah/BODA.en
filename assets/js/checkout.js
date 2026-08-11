@@ -1068,6 +1068,10 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
 
   updateProgress();
 
+  localStorage.setItem("userEmail", fields.email);
+  localStorage.setItem("userFullName", fields.name);
+  if (fields.phone) localStorage.setItem("userPhone", fields.phone);
+
   for (var i = 0; i < cart.length; i++) {
     var item = cart[i];
     var quantity = Number(item.quantity) || 1;
@@ -1130,8 +1134,6 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
   }
 
   localStorage.setItem("userEmail", fields.email);
-  localStorage.setItem("userFullName", fields.name);
-  if (fields.phone) localStorage.setItem("userPhone", fields.phone);
   upsertAddressForUser(fields.email, fields.address);
 
   if (window.BudaStore && typeof window.BudaStore.clearCart === "function") {

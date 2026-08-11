@@ -13,6 +13,42 @@ if (typeof window._clientInstance === 'undefined') {
 // Ensure a single Supabase client per page. Direct createClient calls
 // (home.js, category-landing.js, external scripts) would otherwise spawn
 // extra GoTrueClient instances under the same storage key.
+// Security: every REST request to this Supabase project carries a dynamic
+// "x-user-email" header (from localStorage) so RLS policies can gate rows
+// to their owner. Injected at the fetch layer so it works with every
+// supabase-js build (vendored or CDN fallback).
+function getSecUserEmail() {
+  try {
+    var raw = String(
+      localStorage.getItem("userEmail") || localStorage.getItem("user_email") || ""
+    ).trim();
+    return raw.toLowerCase();
+  } catch (e) {
+    return "";
+  }
+}
+(function injectSecurityFetch() {
+  if (window.__bodaSecFetch) return;
+  window.__bodaSecFetch = true;
+  var originalFetch = window.fetch;
+  if (typeof originalFetch !== "function") return;
+  window.fetch = function (input, init) {
+    try {
+      var url = typeof input === "string" ? input : (input && input.url) || "";
+      if (url.indexOf("/rest/v1/") !== -1) {
+        init = init || {};
+        if (!(init.headers instanceof Headers)) {
+          init.headers = new Headers(init.headers || {});
+        }
+        var email = getSecUserEmail();
+        if (email) {
+          init.headers.set("x-user-email", email);
+        }
+      }
+    } catch (e) {}
+    return originalFetch.call(this, input, init);
+  };
+})();
 (function ensureSingleSupabaseClient() {
   if (!window.supabase || typeof window.supabase.createClient !== "function") return;
   if (window.supabase.createClient.__bodaSingle) return;
