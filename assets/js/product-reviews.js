@@ -654,9 +654,12 @@ function removeReviewImage(imageId) {
   renderReviewImagePreviews();
 }
 
+let reviewImageSectionBound = false;
+
 function bindImageUploadSection() {
   const { upload, input } = getReviewImageElements();
-  if (!upload || !input) return;
+  if (!upload || !input || reviewImageSectionBound) return;
+  reviewImageSectionBound = true;
 
   const openPicker = (event) => {
     if (event) event.preventDefault();
@@ -746,8 +749,7 @@ function bindComposeForm() {
 
   bindImageUploadSection();
 
-  document.querySelectorAll(".review-star-btn").forEach((button) => {
-    button.addEventListener("click", () => setSelectedRating(button.getAttribute("data-star-value")));
+  document.querySelectorAll(".review-star-btn").forEach((button) => {    button.addEventListener("click", () => setSelectedRating(button.getAttribute("data-star-value")));
   });
   setSelectedRating(0);
 
@@ -903,5 +905,6 @@ async function renderProductReviewsPage() {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+  bindImageUploadSection();
   renderProductReviewsPage();
 });
