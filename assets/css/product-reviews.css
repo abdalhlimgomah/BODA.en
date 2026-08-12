@@ -245,11 +245,6 @@
   pointer-events: none;
 }
 
-.review-image-upload[hidden],
-.review-image-upload.hidden {
-  display: none !important;
-}
-
 .review-image-input {
   position: absolute;
   width: 1px;
@@ -266,6 +261,11 @@
   height: 1px;
   opacity: 0;
   pointer-events: none;
+}
+
+.review-image-upload[hidden],
+.review-image-upload.hidden {
+  display: none !important;
 }
 
 .review-image-preview-remove .material-icons-outlined {
