@@ -245,6 +245,16 @@
   pointer-events: none;
 }
 
+.review-image-upload[hidden],
+.review-image-upload.hidden {
+  display: none !important;
+}
+
+.review-image-preview-remove .material-icons-outlined {
+  font-size: 12px;
+  margin: 0;
+}
+
 .review-image-error {
   color: #e74c3c;
   font-size: 0.78rem;
