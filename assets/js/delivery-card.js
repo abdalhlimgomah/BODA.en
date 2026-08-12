@@ -27,7 +27,7 @@
     if (badgeEl) badgeEl.style.display = vm.delivery.express ? "" : "none";
 
     var etaEl = U.qs(".pdp-delivery-eta", root);
-    if (etaEl) etaEl.textContent = "احصل عليه بحلول " + vm.delivery.etaDate + " بحد أقصى";
+    if (etaEl) etaEl.textContent = "احصل عليه بحلول " + vm.delivery.etaDate;
 
     var feeEl = U.qs(".pdp-delivery-fee", root);
     if (feeEl) feeEl.textContent = "رسوم الشحن: " + vm.delivery.feeText;
