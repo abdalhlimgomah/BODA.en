@@ -250,6 +250,24 @@
   display: none !important;
 }
 
+.review-image-input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.review-image-input[hidden] {
+  display: block;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .review-image-preview-remove .material-icons-outlined {
   font-size: 12px;
   margin: 0;
