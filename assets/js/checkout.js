@@ -737,7 +737,7 @@ function renderCheckoutItems() {
     html += '</div>';
     html += '</div>';
     html += '<div class="ch-item-strip">';
-    html += '<div class="ch-item-strip-text">احصل عليها <b>' + deliveryDate + '</b></div>';
+    html += '<div class="ch-item-strip-text">احصل عليها <b>' + deliveryDate + '</b> بحد أقصى</div>';
     html += '<div class="ch-item-strip-badge">';
     html += '<span class="ch-item-strip-icon">';
     html += '<svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 5H14V13C14 13.5523 13.5523 14 13 14H3C2.44772 14 2 13.5523 2 13V5Z" fill="#3866df" opacity="0.2"/><path d="M2 5H14M6 2V5M10 2V5M3 8H5M7 8H9M11 8H13M3 11H5M7 11H9M11 11H13" stroke="#3866df" stroke-width="1.2" stroke-linecap="round"/></svg>';
