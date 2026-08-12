@@ -1,5 +1,19 @@
 @import '../design-system/index.css';
 
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+button, a, input, select, textarea, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+html, body {
+  touch-action: pan-y;
+  overscroll-behavior-y: none;
+}
+
 /* ─── Let app-header be styled by .buda-header from design system ─── */
 .app-header {
   padding: 0;

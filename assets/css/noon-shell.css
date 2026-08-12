@@ -1,5 +1,19 @@
 .buda-v2-hidden { display: none !important; }
 
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+button, a, input, select, textarea, [role="button"] {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+html, body {
+  touch-action: pan-y;
+  overscroll-behavior-y: none;
+}
+
 .app-shell {
   min-height: 100vh;
   padding-bottom: 100px;

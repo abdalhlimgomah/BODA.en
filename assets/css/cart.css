@@ -620,6 +620,9 @@ body.cart-page {
   cursor: pointer;
   font-family: inherit;
 }
+.cart-sticky-toggle .material-icons-outlined {
+  font-size: 18px;
+}
 .cart-sticky-details {
   padding: var(--gap-text) 0;
   border-top: var(--border-width-thin) solid var(--color-divider);
