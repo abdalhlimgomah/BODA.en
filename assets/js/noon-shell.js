@@ -1251,6 +1251,41 @@ function hideBottomNavOnDesktop() {
     doSubscribe();
   }
 
+  // Rotating search placeholder like big marketplaces
+  function initRotatingPlaceholder() {
+    var phrases = [
+      "ابحث عن تلفونات",
+      "ابحث عن مراوح",
+      "ابحث عن أجهزة منزلية",
+      "ابحث عن ألعاب",
+      "ابحث عن شنط",
+      "ابحث عن أزياء",
+      "ابحث عن إكسسوارات",
+      "ابحث عن عطور",
+      "ابحث عن ساعات",
+      "ابحث عن إلكترونيات"
+    ];
+    function findInput() {
+      var input = document.getElementById("buda-header-search-input");
+      if (!input) input = document.getElementById("search-input");
+      return input;
+    }
+    var input = findInput();
+    if (!input || input.dataset.rotating) { setTimeout(initRotatingPlaceholder, 400); return; }
+    input.dataset.rotating = "1";
+    var idx = 0;
+    function swap() {
+      if (document.activeElement === input || (input.value && input.value.trim())) return;
+      input.classList.add("buda-ph-fade");
+      setTimeout(function () {
+        idx = (idx + 1) % phrases.length;
+        input.setAttribute("placeholder", phrases[idx]);
+        input.classList.remove("buda-ph-fade");
+      }, 180);
+    }
+    setInterval(swap, 3000);
+  }
+
   document.addEventListener("DOMContentLoaded", function () {
     injectDesktopElements();
     injectFloatingSearch();
@@ -1267,6 +1302,7 @@ function hideBottomNavOnDesktop() {
     initNoonHeaderUI();
     initSupportBadge();
     initCountrySelector();
+    initRotatingPlaceholder();
     if (window.BudaUI && window.BudaUI.refreshShell) window.BudaUI.refreshShell();
   });
   window.addEventListener("resize", function () {
