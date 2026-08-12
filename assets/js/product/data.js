@@ -267,12 +267,15 @@
   function buildDelivery(product, badges) {
     var cutoff = nextCutoff();
     var shippingDays = badges.express ? 1 : 3;
-    var eta = new Date(cutoff);
-    eta.setDate(eta.getDate() + shippingDays);
+    var etaStart = new Date(cutoff);
+    etaStart.setDate(etaStart.getDate() + shippingDays);
+    var etaEnd = new Date(etaStart);
+    etaEnd.setDate(etaEnd.getDate() + 3);
     var fee = Number(product && (product.shipping_fee || product.shippingFee));
     return {
       express: badges.express,
-      etaDate: formatArabicDate(eta),
+      etaDate: formatArabicDate(etaStart),
+      etaEndDate: formatArabicDate(etaEnd),
       cutoffTs: cutoff.getTime(),
       feeText: fee > 0 ? utils().money(fee) : (badges.freeShipping ? "مجاني" : "يُحسب عند الدفع"),
     };
@@ -589,10 +592,13 @@
     var u = utils();
     var fb = u.fallbackImage();
     var eta = new Date(Date.now() + 3 * 86400000);
-    var etaStr;
+    var etaEnd = new Date(eta);
+    etaEnd.setDate(etaEnd.getDate() + 3);
+    var etaStr, etaEndStr;
       try {
         etaStr = formatArabicDate(eta);
-      } catch (e) { etaStr = eta.toDateString(); }
+        etaEndStr = formatArabicDate(etaEnd);
+      } catch (e) { etaStr = eta.toDateString(); etaEndStr = etaEnd.toDateString(); }
     return {
       id: "demo",
       raw: null,
@@ -605,7 +611,7 @@
       rating: { average: 4.2, count: 15 },
       stock: { quantity: 10, status: "in_stock" },
       badges: { express: true, freeShipping: true, bestSeller: true },
-      delivery: { express: true, etaDate: etaStr, cutoffTs: Date.now() + 3600000, feeText: "مجاني" },
+      delivery: { express: true, etaDate: etaStr, etaEndDate: etaEndStr, cutoffTs: Date.now() + 3600000, feeText: "مجاني" },
       installment: { provider: "ValU", months: 6, perMonthText: u.money(33.33), providers: ["ValU", "Premium", "Visa", "Mastercard"] },
       offers: { coupons: [], bankOffers: [], hasAny: false },
       variants: [],
