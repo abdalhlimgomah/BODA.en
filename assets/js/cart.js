@@ -538,6 +538,8 @@ function setCheckoutDetailsOpen(isOpen) {
   isCheckoutDetailsOpen = Boolean(isOpen);
   panel.classList.toggle("open", isCheckoutDetailsOpen);
   toggleBtn.classList.toggle("open", isCheckoutDetailsOpen);
+  var icon = toggleBtn.querySelector(".material-icons-outlined");
+  if (icon) icon.textContent = isCheckoutDetailsOpen ? "expand_less" : "expand_more";
 }
 
 function bindCheckoutDetailsEvents() {
