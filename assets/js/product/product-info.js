@@ -78,7 +78,7 @@
 
     var exploreEl = U.qs(".pdp-explore-link", root);
     if (exploreEl && vm.category) {
-      exploreEl.href = "category.html?cat=" + encodeURIComponent(vm.category);
+      exploreEl.href = "sections.html";
       exploreEl.querySelector("span:last-child") &&
         (exploreEl.querySelector("span:last-child").textContent =
           "استكشف الأفضل مبيعاً في " + vm.category);

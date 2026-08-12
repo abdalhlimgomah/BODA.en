@@ -223,14 +223,12 @@
 
     var product = await D.resolveProduct();
     if (!product) {
-      U.notify("لم يتم العثور على المنتج — عرض تجريبي", { type: "info" });
-      vm = D.buildFallbackViewModel();
-      renderBuybox();
-      renderOverview();
-      renderSpecs();
-      renderReviews();
-      initTabs();
-      S.revealAll();
+      var paramId = (window.PDP && window.PDP.Utils && window.PDP.Utils.getQueryParam) ? window.PDP.Utils.getQueryParam("id") : new URLSearchParams(window.location.search).get("id");
+      if (paramId) {
+        window.location.replace("../410.html");
+      } else {
+        window.location.replace("../404.html");
+      }
       return;
     }
     var reviews = await D.fetchRatings(product.id);
