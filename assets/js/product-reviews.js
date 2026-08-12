@@ -6,6 +6,8 @@ const reviewsMoneyFormatter = new Intl.NumberFormat("ar-EG", {
 });
 
 const REVIEW_TITLE_MARKER = "__buda_title__:";
+const REVIEW_MAX_IMAGES = 3;
+const REVIEW_ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
 const reviewPageState = {
   product: null,
@@ -13,6 +15,8 @@ const reviewPageState = {
   primaryItem: null,
   rating: 0,
   submitting: false,
+  images: [],
+  uploadingImages: false,
 };
 
 const getQueryParam = (key) => new URLSearchParams(window.location.search).get(key);
@@ -247,6 +251,7 @@ function mapRatingsRows(rows = []) {
         name: String(row?.reviewer_name || row?.name || row?.user_name || row?.author_name || "عميل").trim() || "عميل",
         title: parsedComment.title,
         text: parsedComment.body,
+        images: Array.isArray(row?.images) ? row.images.filter(Boolean) : [],
         createdAt: row?.created_at || new Date().toISOString(),
       };
     })
@@ -367,6 +372,15 @@ function renderCommentsList(comments = []) {
     .map((comment) => {
       const commentDate = comment.createdAt ? new Date(comment.createdAt).toLocaleDateString("ar-EG") : "";
       const titleHtml = comment.title ? `<p class="comment-title">${escapeHtml(comment.title)}</p>` : "";
+      const imagesHtml =
+        Array.isArray(comment.images) && comment.images.length
+          ? `<div class="comment-images">${comment.images
+              .map(
+                (image) =>
+                  `<div class="comment-image-item"><img src="${image}" alt="صورة من التقييم" loading="lazy" onerror="this.closest('.comment-image-item').style.display='none'" /></div>`
+              )
+              .join("")}</div>`
+          : "";
       return `
         <article class="comment-item">
           <div class="comment-head">
@@ -378,6 +392,7 @@ function renderCommentsList(comments = []) {
           </div>
           ${titleHtml}
           <p class="comment-body">${escapeHtml(comment.text || "")}</p>
+          ${imagesHtml}
         </article>
       `;
     })
@@ -437,7 +452,12 @@ function updateSubmitButtonState() {
 
   const title = String(document.getElementById("review-title")?.value || "").trim();
   const body = String(document.getElementById("review-body")?.value || "").trim();
-  const canSubmit = reviewPageState.rating >= 1 && title.length >= 3 && body.length >= 10 && !reviewPageState.submitting;
+  const canSubmit =
+    reviewPageState.rating >= 1 &&
+    title.length >= 3 &&
+    body.length >= 10 &&
+    !reviewPageState.submitting &&
+    !reviewPageState.uploadingImages;
   submitButton.disabled = !canSubmit;
 }
 
@@ -493,7 +513,7 @@ async function resolveSupabaseUserId() {
   return "";
 }
 
-async function submitRating(productId, rating, title, body, reviewerName) {
+async function submitRating(productId, rating, title, body, reviewerName, images) {
   const userId = await resolveSupabaseUserId();
 
   const basePayload = cleanPayload({
@@ -502,6 +522,7 @@ async function submitRating(productId, rating, title, body, reviewerName) {
     comment: buildStoredComment(title, body),
     reviewer_name: String(reviewerName || "").trim(),
     user_id: userId || undefined,
+    images: Array.isArray(images) && images.length ? images : undefined,
   });
 
   const attempts = [basePayload];
@@ -538,6 +559,181 @@ async function submitRating(productId, rating, title, body, reviewerName) {
   return { success: false, message: "تعذر إرسال التقييم الآن. حاول مرة أخرى." };
 }
 
+function getReviewImageElements() {
+  return {
+    upload: document.getElementById("review-image-upload"),
+    input: document.getElementById("review-image-input"),
+    previews: document.getElementById("review-image-previews"),
+    error: document.getElementById("review-image-error"),
+  };
+}
+
+function showReviewImageError(message) {
+  const { error } = getReviewImageElements();
+  if (!error) return;
+  error.textContent = message || "";
+  error.classList.toggle("hidden", !message);
+}
+
+function renderReviewImagePreviews() {
+  const { previews, upload } = getReviewImageElements();
+  if (!previews) return;
+
+  previews.innerHTML = reviewPageState.images
+    .map(
+      (image) => `
+      <div class="review-image-preview">
+        <img src="${image.objectUrl}" alt="صورة التقييم" />
+        <button type="button" class="review-image-preview-remove" data-image-id="${escapeHtml(image.id)}" aria-label="حذف الصورة">
+          <span class="material-icons-outlined">close</span>
+        </button>
+      </div>
+    `
+    )
+    .join("");
+
+  if (upload) {
+    upload.classList.toggle("hidden", reviewPageState.images.length >= REVIEW_MAX_IMAGES);
+  }
+  updateSubmitButtonState();
+}
+
+function addReviewImageFiles(fileList) {
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+
+  const remaining = REVIEW_MAX_IMAGES - reviewPageState.images.length;
+  const accepted = [];
+  let rejectedType = false;
+
+  for (const file of files) {
+    if (!REVIEW_ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      rejectedType = true;
+      continue;
+    }
+    accepted.push(file);
+  }
+
+  if (rejectedType) {
+    showReviewImageError("صيغة الصورة غير مدعومة. JPG/PNG/WebP فقط.");
+  } else {
+    showReviewImageError("");
+  }
+
+  if (!accepted.length) return;
+
+  const toAdd = accepted.slice(0, remaining);
+  toAdd.forEach((file) => {
+    reviewPageState.images.push({
+      id: `img-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      file,
+      objectUrl: URL.createObjectURL(file),
+      status: "pending",
+    });
+  });
+
+  if (accepted.length > remaining) {
+    showReviewImageError(`الحد الأقصى ${REVIEW_MAX_IMAGES} صور فقط.`);
+  }
+
+  renderReviewImagePreviews();
+}
+
+function removeReviewImage(imageId) {
+  const index = reviewPageState.images.findIndex((image) => image.id === imageId);
+  if (index === -1) return;
+  const [removed] = reviewPageState.images.splice(index, 1);
+  if (removed?.objectUrl) {
+    try {
+      URL.revokeObjectURL(removed.objectUrl);
+    } catch {
+      // ignore revoke failures
+    }
+  }
+  showReviewImageError("");
+  renderReviewImagePreviews();
+}
+
+function bindImageUploadSection() {
+  const { upload, input } = getReviewImageElements();
+  if (!upload || !input) return;
+
+  const openPicker = (event) => {
+    if (event) event.preventDefault();
+    if (reviewPageState.uploadingImages) return;
+    if (reviewPageState.images.length >= REVIEW_MAX_IMAGES) {
+      showReviewImageError(`الحد الأقصى ${REVIEW_MAX_IMAGES} صور فقط.`);
+      return;
+    }
+    input.click();
+  };
+
+  upload.addEventListener("click", openPicker);
+  upload.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      openPicker(event);
+    }
+  });
+
+  input.addEventListener("change", () => {
+    addReviewImageFiles(input.files);
+    input.value = "";
+  });
+
+  document.addEventListener("click", (event) => {
+    const removeButton = event.target.closest(".review-image-preview-remove");
+    if (removeButton) {
+      removeReviewImage(removeButton.getAttribute("data-image-id"));
+    }
+  });
+}
+
+async function uploadReviewImages(productId) {
+  const pending = reviewPageState.images.filter((image) => image.status !== "uploaded");
+  if (!pending.length) return [];
+
+  const rawClient = window.supabaseClient?.raw ? window.supabaseClient.raw() : null;
+  if (!rawClient?.storage) {
+    showReviewImageError("تعذر الاتصال بخادم الصور.");
+    return [];
+  }
+
+  const uploadedUrls = [];
+  for (const image of pending) {
+    image.status = "uploading";
+    renderReviewImagePreviews();
+
+    const extMatch = String(image.file.name || "").split(".").pop();
+    const ext = extMatch && extMatch.length <= 5 ? extMatch.toLowerCase() : "jpg";
+    const path = `reviews/${String(productId)}/${Date.now()}-${Math.random().toString(36).slice(2, 10)}.${ext}`;
+
+    try {
+      const { error } = await rawClient.storage.from("review-images").upload(path, image.file, {
+        contentType: image.file.type,
+        upsert: false,
+      });
+      if (error) {
+        console.warn("review image upload failed", error);
+        image.status = "error";
+        showReviewImageError("تعذر رفع إحدى الصور. حاول مرة أخرى.");
+        continue;
+      }
+      const { data: publicData } = rawClient.storage.from("review-images").getPublicUrl(path);
+      image.status = "uploaded";
+      image.url = publicData?.publicUrl || `${window.SUPABASE_URL}/storage/v1/object/public/review-images/${path}`;
+      uploadedUrls.push(image.url);
+    } catch (uploadError) {
+      console.warn("review image upload exception", uploadError);
+      image.status = "error";
+      showReviewImageError("تعذر رفع إحدى الصور. حاول مرة أخرى.");
+    }
+  }
+
+  renderReviewImagePreviews();
+  return uploadedUrls;
+}
+
 function bindComposeForm() {
   const form = document.getElementById("review-form");
   const titleInput = document.getElementById("review-title");
@@ -547,6 +743,8 @@ function bindComposeForm() {
   const anonymousInput = document.getElementById("review-anonymous");
 
   if (!form || !titleInput || !bodyInput) return;
+
+  bindImageUploadSection();
 
   document.querySelectorAll(".review-star-btn").forEach((button) => {
     button.addEventListener("click", () => setSelectedRating(button.getAttribute("data-star-value")));
@@ -594,12 +792,23 @@ function bindComposeForm() {
     }
 
     reviewPageState.submitting = true;
+    reviewPageState.uploadingImages = reviewPageState.images.some((image) => image.status !== "uploaded");
     updateSubmitButtonState();
-    reviewsNotify("جاري إرسال التقييم...", "info");
+
+    if (reviewPageState.images.length) {
+      reviewsNotify("جاري رفع الصور...", "info");
+    } else {
+      reviewsNotify("جاري إرسال التقييم...", "info");
+    }
 
     try {
+      const uploadedImages = await uploadReviewImages(productId);
+      if (reviewPageState.images.some((image) => image.status === "error")) {
+        return;
+      }
+
       const reviewerName = isAnonymousReview() ? "مجهول" : getCurrentPublicName();
-      const result = await submitRating(productId, reviewPageState.rating, title, body, reviewerName);
+      const result = await submitRating(productId, reviewPageState.rating, title, body, reviewerName, uploadedImages);
 
       if (!result.success) {
         reviewsNotify(result.message || "تعذر إرسال التقييم.", "error");
@@ -612,6 +821,19 @@ function bindComposeForm() {
       setSelectedRating(0);
       refreshCounters();
 
+      reviewPageState.images.forEach((image) => {
+        if (image.objectUrl) {
+          try {
+            URL.revokeObjectURL(image.objectUrl);
+          } catch {
+            // ignore revoke failures
+          }
+        }
+      });
+      reviewPageState.images = [];
+      renderReviewImagePreviews();
+      showReviewImageError("");
+
       const stats = await fetchRatings(productId);
       renderSummary(stats);
       renderCommentsList(stats.comments || []);
@@ -619,6 +841,7 @@ function bindComposeForm() {
       syncProductRatingCache(reviewPageState.product, stats);
     } finally {
       reviewPageState.submitting = false;
+      reviewPageState.uploadingImages = false;
       updateSubmitButtonState();
     }
   });
