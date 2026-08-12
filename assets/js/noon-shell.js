@@ -1264,13 +1264,25 @@ function hideBottomNavOnDesktop() {
       "ابحث عن ساعات",
       "ابحث عن إلكترونيات"
     ];
-    function findInput() {
-      var input = document.getElementById("buda-header-search-input");
-      if (!input) input = document.getElementById("search-input");
-      return input;
+    // Pick the search box that is actually visible (floating one on mobile, header one on desktop)
+    var candidates = [
+      document.getElementById("buda-header-search-input"),
+      document.getElementById("search-input"),
+      document.getElementById("home-search")
+    ];
+    var input = null;
+    for (var ci = 0; ci < candidates.length; ci++) {
+      var c = candidates[ci];
+      if (!c) continue;
+      if (c.offsetParent === null) continue;
+      if (c.getBoundingClientRect().width === 0) continue;
+      input = c;
+      break;
     }
-    var input = findInput();
-    if (!input || input.dataset.rotating) { setTimeout(initRotatingPlaceholder, 400); return; }
+    if (!input || input.dataset.rotating) {
+      setTimeout(initRotatingPlaceholder, 400);
+      return;
+    }
     input.dataset.rotating = "1";
     var box = input.closest(".buda-search-box");
     if (!box) return;
