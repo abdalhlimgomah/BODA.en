@@ -1251,16 +1251,15 @@ function hideBottomNavOnDesktop() {
     doSubscribe();
   }
 
-  // Rotating search placeholder like big marketplaces
+  // Rotating search placeholder like big marketplaces (vertical slide-up carousel)
   function initRotatingPlaceholder() {
     var phrases = [
       "ابحث عن تلفونات",
       "ابحث عن مراوح",
-      "ابحث عن أجهزة منزلية",
+      "ابحث عن أجهزة",
       "ابحث عن ألعاب",
       "ابحث عن شنط",
       "ابحث عن أزياء",
-      "ابحث عن إكسسوارات",
       "ابحث عن عطور",
       "ابحث عن ساعات",
       "ابحث عن إلكترونيات"
@@ -1273,17 +1272,49 @@ function hideBottomNavOnDesktop() {
     var input = findInput();
     if (!input || input.dataset.rotating) { setTimeout(initRotatingPlaceholder, 400); return; }
     input.dataset.rotating = "1";
+    var box = input.closest(".buda-search-box");
+    if (!box) return;
+    if (box.querySelector(".buda-search-rotator")) return;
+
+    var rotator = document.createElement("div");
+    rotator.className = "buda-search-rotator";
+    rotator.setAttribute("aria-hidden", "true");
+    var track = document.createElement("div");
+    track.className = "buda-search-rotator-track";
+    var list = phrases.concat(phrases);
+    list.forEach(function (p) {
+      var span = document.createElement("span");
+      span.textContent = p;
+      track.appendChild(span);
+    });
+    rotator.appendChild(track);
+    box.appendChild(rotator);
+
+    var lineH = 26;
     var idx = 0;
-    function swap() {
-      if (document.activeElement === input || (input.value && input.value.trim())) return;
-      input.classList.add("buda-ph-fade");
-      setTimeout(function () {
-        idx = (idx + 1) % phrases.length;
-        input.setAttribute("placeholder", phrases[idx]);
-        input.classList.remove("buda-ph-fade");
-      }, 180);
+    var timer = null;
+    function animate() {
+      idx = (idx + 1) % phrases.length;
+      if (idx === 0) {
+        track.style.transition = "none";
+        track.style.transform = "translateY(0px)";
+        void track.offsetHeight;
+        track.style.transition = "";
+        track.style.transform = "translateY(-" + (idx * lineH) + "px)";
+      } else {
+        track.style.transform = "translateY(-" + (idx * lineH) + "px)";
+      }
     }
-    setInterval(swap, 3000);
+    function syncVisibility() {
+      var hasText = input.value && input.value.trim();
+      rotator.style.visibility = hasText ? "hidden" : "visible";
+    }
+    timer = setInterval(animate, 2800);
+    input.addEventListener("input", syncVisibility);
+    document.addEventListener("focusin", function (e) {
+      if (e.target === input) syncVisibility();
+    });
+    syncVisibility();
   }
 
   document.addEventListener("DOMContentLoaded", function () {
