@@ -661,21 +661,23 @@ function bindImageUploadSection() {
   if (!upload || !input || reviewImageSectionBound) return;
   reviewImageSectionBound = true;
 
-  const openPicker = (event) => {
-    if (event) event.preventDefault();
-    if (reviewPageState.uploadingImages) return;
-    if (reviewPageState.images.length >= REVIEW_MAX_IMAGES) {
-      showReviewImageError(`الحد الأقصى ${REVIEW_MAX_IMAGES} صور فقط.`);
+  const blockIfFull = (event) => {
+    if (reviewPageState.uploadingImages) {
+      if (event && event.cancelable) event.preventDefault();
       return;
     }
-    input.click();
+    if (reviewPageState.images.length >= REVIEW_MAX_IMAGES) {
+      if (event && event.cancelable) event.preventDefault();
+      showReviewImageError(`الحد الأقصى ${REVIEW_MAX_IMAGES} صور فقط.`);
+    }
   };
 
-  upload.addEventListener("click", openPicker);
+  upload.addEventListener("click", blockIfFull);
   upload.addEventListener("keydown", (event) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
-      openPicker(event);
+      blockIfFull(event);
+      input.click();
     }
   });
 
