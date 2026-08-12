@@ -1279,6 +1279,8 @@ function hideBottomNavOnDesktop() {
     var rotator = document.createElement("div");
     rotator.className = "buda-search-rotator";
     rotator.setAttribute("aria-hidden", "true");
+    input.setAttribute("placeholder", "");
+    input.setAttribute("aria-label", "ابحث عن منتجاتك المفضلة");
     var track = document.createElement("div");
     track.className = "buda-search-rotator-track";
     var list = phrases.concat(phrases);
