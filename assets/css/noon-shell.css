@@ -400,8 +400,10 @@ html, body {
   font-family: inherit;
   color: #111111;
   font-weight: 500;
+  transition: opacity 0.18s ease;
 }
 .buda-search-box__input::placeholder { color: #B0B7C3; font-weight: 400; }
+.buda-search-box__input.buda-ph-fade { opacity: 0.25; }
 
 /* Bottom Navigation V2 */
 .bottom-nav {
