@@ -15,7 +15,7 @@
     if (window.BudaStore && typeof window.BudaStore.formatMoney === "function") {
       return BudaStore.formatMoney(value, { plain: true });
     }
-    return `${Number(value).toFixed(2)} ج.م`;
+    return `${Number(value).toFixed(2).replace(/\.00$/, "")} ج.م`;
   }
 
   function renderCartItems() {

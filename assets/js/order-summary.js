@@ -33,7 +33,7 @@ function formatInvoiceMoney(value, context) {
     ? window.BudaOrders.resolveOrderCountryCode(context)
     : "EG";
   var num = Number(value) || 0;
-  var formatted = new Intl.NumberFormat(code === "SA" ? "ar-SA" : "ar-EG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+  var formatted = new Intl.NumberFormat(code === "SA" ? "ar-SA" : "ar-EG", { maximumFractionDigits: 2 }).format(num);
   return formatted + (code === "SA" ? " ريال" : " جنيه");
 }
 

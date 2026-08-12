@@ -45,7 +45,7 @@ const TOP_SELLING_SLIDER_COUNT = 4;
 const RECOMMENDED_SLIDER_COUNT = 4;
 
 function formatMoney(value) {
-  return (Number(value) || 0).toFixed(2);
+  return (Number(value) || 0).toFixed(2).replace(/\.00$/, "");
 }
 
 function escapeHtml(value) {
@@ -80,7 +80,7 @@ function invalidateSuggestionsCache() {
 }
 
 function formatEgp(value) {
-  return window.BudaStore ? window.BudaStore.formatMoney(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (Number(value) || 0).toFixed(2);
+  return window.BudaStore ? window.BudaStore.formatMoney(value) : (Number(value) || 0).toFixed(2).replace(/\.00$/, "");
 }
 
 function parseAmount(value) {

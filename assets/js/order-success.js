@@ -36,7 +36,7 @@ function getOrderCurrencyConfig() {
 function formatOrderMoney(value) {
   var cfg = getOrderCurrencyConfig();
   var num = Number(value) || 0;
-  var formatted = new Intl.NumberFormat(cfg.locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+  var formatted = new Intl.NumberFormat(cfg.locale, { maximumFractionDigits: 2 }).format(num);
   return formatted + " " + cfg.label;
 }
 

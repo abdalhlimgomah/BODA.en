@@ -1,7 +1,7 @@
 const reviewsMoneyFormatter = new Intl.NumberFormat("ar-EG", {
   style: "currency",
   currency: "EGP",
-  minimumFractionDigits: 2,
+  minimumFractionDigits: 0,
   maximumFractionDigits: 2,
 });
 

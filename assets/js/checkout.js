@@ -6,7 +6,7 @@ const DEFAULT_COUPON_RATE = 0.02;
 const GOVERNORATE_STORAGE_KEY = "buda_governorate";
 
 function formatCheckoutMoney(value, plain) {
-  return window.BudaStore ? window.BudaStore.formatMoney(value, { minimumFractionDigits: 2, maximumFractionDigits: 2, plain: !!plain }) : (Number(value) || 0).toFixed(2);
+  return window.BudaStore ? window.BudaStore.formatMoney(value, { plain: !!plain }) : (Number(value) || 0).toFixed(2).replace(/\.00$/, "");
 }
 
 function getCheckoutCurrency() {
@@ -618,7 +618,7 @@ function setupGovernorateSection() {
     var currency = getCheckoutCurrency();
     if (displayFee) {
       displayFee.textContent = (Number(fee) || 0) > 0
-        ? "رسوم الشحن " + (Number(fee) || 0).toFixed(2) + " " + currency
+        ? "رسوم الشحن " + (Number(fee) || 0).toFixed(2).replace(/\.00$/, "") + " " + currency
         : "";
     }
   } else {
@@ -728,7 +728,7 @@ function renderCheckoutItems() {
     html += '<div class="ch-item-title-row">';
     html += '<div class="ch-item-name">' + name + '</div>';
     html += '<div class="ch-item-price-area">';
-    html += '<span class="ch-item-price-num">' + (Number(lineTotal) || 0).toFixed(2) + '</span>';
+    html += '<span class="ch-item-price-num">' + (Number(lineTotal) || 0).toFixed(2).replace(/\.00$/, "") + '</span>';
     html += '<span class="ch-item-price-cur">' + getCheckoutCurrency() + '</span>';
     html += '</div>';
     html += '</div>';
@@ -822,7 +822,7 @@ function setGovernorate(name) {
     var currency = getCheckoutCurrency();
     if (displayFee) {
       displayFee.textContent = (Number(governorateShippingFee) || 0) > 0
-        ? "رسوم الشحن " + (Number(governorateShippingFee) || 0).toFixed(2) + " " + currency
+        ? "رسوم الشحن " + (Number(governorateShippingFee) || 0).toFixed(2).replace(/\.00$/, "") + " " + currency
         : "";
     }
   }

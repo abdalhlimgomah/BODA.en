@@ -1,5 +1,5 @@
 function formatWishlistMoney(value) {
-  return window.BudaStore ? window.BudaStore.formatMoney(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : (Number(value) || 0).toFixed(2);
+  return window.BudaStore ? window.BudaStore.formatMoney(value) : (Number(value) || 0).toFixed(2).replace(/\.00$/, "");
 }
 
 function escapeHtml(value) {

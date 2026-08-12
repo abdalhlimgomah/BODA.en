@@ -32,10 +32,10 @@
 
   function money(value, options) {
     if (global.BudaStore && typeof global.BudaStore.formatMoney === "function") {
-      return global.BudaStore.formatMoney(value, { minimumFractionDigits: 2, maximumFractionDigits: 2, plain: true });
+      return global.BudaStore.formatMoney(value, { plain: true });
     }
     var v = Number(value) || 0;
-    var formatted = v.toFixed(2);
+    var formatted = v.toFixed(2).replace(/\.00$/, "");
     return arabicNumeral(formatted) + " " + (global.BudaStore?.getCurrencyLabel?.() || "جنيه");
   }
 

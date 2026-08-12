@@ -3,7 +3,7 @@ function escapeHtml(v) {
 }
 
 function fmt(v) {
-  var num = (Number(v) || 0).toFixed(2);
+  var num = (Number(v) || 0).toFixed(2).replace(/\.00$/, "");
   if (window.BudaStore) {
     var cfg = window.BudaStore.resolveCurrencyConfig ? window.BudaStore.resolveCurrencyConfig() : {};
     var labels = { EGP: "ج.م.", SAR: "ريال" };

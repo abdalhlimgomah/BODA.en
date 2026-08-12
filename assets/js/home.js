@@ -473,7 +473,7 @@ function normalizeProducts(rows) {
 function formatMoney(value) {
   return window.BudaStore
     ? window.BudaStore.formatMoney(value)
-    : (Number(value) || 0).toFixed(2);
+    : (Number(value) || 0).toFixed(2).replace(/\.00$/, "");
 }
 function escapeHtml(value) {
   return String(value ?? "")

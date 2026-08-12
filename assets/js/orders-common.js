@@ -86,12 +86,12 @@
     var code = resolveOrderCountryCode(context);
     var num = Number(value) || 0;
     if (code === "SA") {
-      return new Intl.NumberFormat("ar-SA", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num) + " ريال";
+      return new Intl.NumberFormat("ar-SA", { maximumFractionDigits: 2 }).format(num) + " ريال";
     }
     if (window.BudaStore) {
-      return window.BudaStore.formatMoney(value, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return window.BudaStore.formatMoney(value);
     }
-    return (Number(value) || 0).toFixed(2) + " ج.م.";
+    return (Number(value) || 0).toFixed(2).replace(/\.00$/, "") + " ج.م.";
   }
 
   function toTimestamp(value) {
