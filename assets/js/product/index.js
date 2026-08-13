@@ -76,7 +76,7 @@
     if (global.PDP.PriceCard) global.PDP.PriceCard.render(document.querySelector("[data-pdp-price]"), vm);
     if (global.PDP.Info) global.PDP.Info.render(document.querySelector("[data-pdp-info]"), vm);
     if (global.PDP.SizeSelector) { global.PDP.SizeSelector.render(document.querySelector("[data-pdp-sizes]"), vm); S.reveal(document.querySelector("[data-pdp-scope=sizes]")); }
-    if (global.PDP.Variants) global.PDP.Variants.render(document.querySelector("[data-pdp-variants]"), vm);
+    if (global.PDP.Variants) { global.PDP.Variants.render(document.querySelector("[data-pdp-variants]"), vm); S.reveal(document.querySelector("[data-pdp-scope=variants]")); }
     if (global.PDP.Delivery) global.PDP.Delivery.render(document.querySelector("[data-pdp-delivery]"), vm);
     if (global.PDP.Installment) global.PDP.Installment.render(document.querySelector("[data-pdp-installment]"), vm);
     if (global.PDP.Seller) global.PDP.Seller.render(document.querySelector("[data-pdp-seller]"), vm, { onAddToCart: onAddToCart, onToggleWishlist: onToggleWishlist });
