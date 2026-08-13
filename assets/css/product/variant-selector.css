@@ -97,14 +97,21 @@
   font-weight: 800;
 }
 
-/* Swatch cards (color) — global-style circles with name below */
+/* Swatch cards (color) — minimal: small circle + name, no boxes */
 .pdp-variants-section .pdp-variant-card--swatch {
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
   width: auto;
-  min-width: 72px;
-  padding: 10px 8px;
-  border-radius: 14px;
+  min-width: 0;
+  padding: 4px 6px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+}
+.pdp-variants-section .pdp-variant-card--swatch:hover {
+  border-color: transparent;
+  box-shadow: none;
+  background: rgba(0, 0, 0, 0.03);
 }
 .pdp-variants-section .pdp-variant-card--swatch img {
   width: 100%;
@@ -115,12 +122,12 @@
   border-radius: 50%;
 }
 .pdp-variants-section .pdp-swatch-box {
-  width: 46px;
-  height: 46px;
+  width: 30px;
+  height: 30px;
   border-radius: 50%;
   overflow: hidden;
   display: block;
-  box-shadow: 0 0 0 1px rgba(0,0,0,0.12);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
 }
 .pdp-variants-section .pdp-variant-card--swatch .pdp-variant-color-dot {
   width: 100%;
@@ -128,19 +135,27 @@
   border-radius: 50%;
 }
 .pdp-variants-section .pdp-swatch-name {
-  font-size: 0.74rem;
-  font-weight: 800;
+  font-size: 0.72rem;
+  font-weight: 700;
   color: var(--pdp-text);
-  max-width: 76px;
+  max-width: 60px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .pdp-variants-section .pdp-variant-card--swatch.is-selected {
-  background: #f0f7ff;
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
 }
 .pdp-variants-section .pdp-variant-card--swatch.is-selected .pdp-swatch-box {
-  box-shadow: 0 0 0 2px var(--pdp-blue);
+  box-shadow: 0 0 0 2px var(--pdp-blue), 0 0 0 4px rgba(0, 113, 227, 0.15);
+}
+.pdp-variants-section .pdp-variant-card--swatch.is-selected .pdp-swatch-name {
+  color: var(--pdp-blue);
+}
+.pdp-variants-section .pdp-variant-card--swatch.is-selected::after {
+  display: none;
 }
 
 /* Section title */
@@ -165,7 +180,8 @@
   }
   .pdp-variants-section .pdp-variant-card--swatch {
     width: auto;
-    min-width: 64px;
+    min-width: 0;
+    padding: 4px 5px;
   }
 }
 
@@ -177,11 +193,11 @@
     font-size: 1.05rem;
   }
   .pdp-variants-section .pdp-variant-card--swatch {
-    min-width: 80px;
-    padding: 12px 10px;
+    min-width: 0;
+    padding: 4px 6px;
   }
   .pdp-variants-section .pdp-swatch-box {
-    width: 52px;
-    height: 52px;
+    width: 30px;
+    height: 30px;
   }
 }
