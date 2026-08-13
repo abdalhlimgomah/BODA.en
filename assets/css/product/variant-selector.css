@@ -97,13 +97,12 @@
   font-weight: 800;
 }
 
-/* Swatch cards (color) — minimal: small circle + name, no boxes */
+/* Swatch capsules (color) — color-filled pill with the name inside */
 .pdp-variants-section .pdp-variant-card--swatch {
-  flex-direction: column;
-  gap: 5px;
+  flex-direction: row;
   width: auto;
   min-width: 0;
-  padding: 4px 6px;
+  padding: 3px;
   border: none;
   background: transparent;
   border-radius: 10px;
@@ -113,35 +112,22 @@
   box-shadow: none;
   background: rgba(0, 0, 0, 0.03);
 }
-.pdp-variants-section .pdp-variant-card--swatch img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-  pointer-events: none;
-  border-radius: 50%;
-}
 .pdp-variants-section .pdp-swatch-box {
-  width: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 44px;
   height: 30px;
-  border-radius: 50%;
-  overflow: hidden;
-  display: block;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
-}
-.pdp-variants-section .pdp-variant-card--swatch .pdp-variant-color-dot {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-}
-.pdp-variants-section .pdp-swatch-name {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--pdp-text);
-  max-width: 60px;
+  padding: 0 12px;
+  border-radius: 9px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  line-height: 1;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.14);
+  color: #ffffff;
 }
 .pdp-variants-section .pdp-variant-card--swatch.is-selected {
   background: transparent;
@@ -149,10 +135,7 @@
   box-shadow: none;
 }
 .pdp-variants-section .pdp-variant-card--swatch.is-selected .pdp-swatch-box {
-  box-shadow: 0 0 0 2px var(--pdp-blue), 0 0 0 4px rgba(0, 113, 227, 0.15);
-}
-.pdp-variants-section .pdp-variant-card--swatch.is-selected .pdp-swatch-name {
-  color: var(--pdp-blue);
+  box-shadow: 0 0 0 2px var(--pdp-blue), 0 0 0 4px rgba(31, 111, 235, 0.18);
 }
 .pdp-variants-section .pdp-variant-card--swatch.is-selected::after {
   display: none;
@@ -181,7 +164,13 @@
   .pdp-variants-section .pdp-variant-card--swatch {
     width: auto;
     min-width: 0;
-    padding: 4px 5px;
+    padding: 3px;
+  }
+  .pdp-variants-section .pdp-swatch-box {
+    min-width: 40px;
+    height: 28px;
+    padding: 0 10px;
+    font-size: 0.7rem;
   }
 }
 
@@ -194,10 +183,12 @@
   }
   .pdp-variants-section .pdp-variant-card--swatch {
     min-width: 0;
-    padding: 4px 6px;
+    padding: 3px;
   }
   .pdp-variants-section .pdp-swatch-box {
-    width: 30px;
-    height: 30px;
+    min-width: 46px;
+    height: 32px;
+    padding: 0 14px;
+    font-size: 0.78rem;
   }
 }
