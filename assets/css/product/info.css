@@ -76,7 +76,40 @@
 }
 
 .pdp-sold-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #fff7ed, #ffedd5);
+    border: 1px solid #ffd8a8;
+    border-radius: 999px;
+    padding: 5px 14px 5px 10px;
+    font-size: 0.8rem;
+    color: var(--pdp-ink);
+    width: fit-content;
+}
+.pdp-sold-count .pdp-sold-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #ff6b1a, #ff9d3c);
+    color: #fff;
+    flex: none;
+}
+.pdp-sold-count .pdp-sold-icon .material-icons-outlined {
+    font-size: 14px;
+}
+.pdp-sold-count .pdp-sold-text {
+    font-weight: 600;
     color: var(--pdp-muted);
+}
+.pdp-sold-count .pdp-sold-text strong {
+    font-weight: 900;
+    color: #ea580c;
+    font-size: 0.9rem;
+    margin: 0 2px;
 }
 
 .pdp-nudges {
