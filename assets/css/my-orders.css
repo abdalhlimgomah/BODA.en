@@ -502,6 +502,29 @@
   font-weight: 800;
 }
 
+.noon-order-variant {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0 0;
+  padding: 2px 10px;
+  background: #eef2ff;
+  border: 1px solid #e0e7ff;
+  border-radius: 999px;
+  color: #4338ca;
+  font-size: 0.74rem;
+  font-weight: 800;
+  line-height: 1.6;
+}
+
+.noon-order-variant-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px #c7d2fe;
+}
+
 .noon-old-price {
   margin: 2px 0 0;
   color: #94a3b8;

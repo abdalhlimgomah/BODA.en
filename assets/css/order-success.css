@@ -140,6 +140,29 @@ body.app-shell--success {
   direction: ltr;
   text-align: left;
 }
+
+.os-product-variant {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  padding: 3px 10px;
+  background: var(--os-blue-light);
+  border: 1px solid var(--os-border);
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--os-blue-dark);
+  line-height: 1.6;
+}
+
+.os-variant-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px var(--os-border);
+}
 .os-product-meta {
   font-size: 0.75rem;
   color: var(--os-muted);

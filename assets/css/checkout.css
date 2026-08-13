@@ -599,6 +599,31 @@ body.checkout-page {
   font-weight: var(--weight-bold);
 }
 .ch-item-details-content { flex: 1; }
+.ch-item-variant {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: 100%;
+  margin-top: 6px;
+  font-size: 0.72rem;
+  font-weight: var(--weight-medium, 500);
+  color: var(--color-text-secondary, #6b7280);
+  background: var(--color-surface-muted, #f4f5f8);
+  border: 1px solid var(--color-divider, #e5e7eb);
+  border-radius: 999px;
+  padding: 3px 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ch-variant-swatch {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  flex: none;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.14);
+}
 .ch-item-strip {
   padding: var(--gap-text) var(--pad-card);
   background: linear-gradient(135deg, #FAFBFF, #F8F9FE);

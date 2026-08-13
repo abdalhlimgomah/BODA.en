@@ -59,6 +59,14 @@
 }
 .inv-download-btn:hover { background: rgba(255,255,255,0.25); }
 .inv-download-btn .material-icons-outlined { font-size: 18px; }
+a.inv-download-btn { text-decoration: none; }
+a.inv-print-btn { border-color: rgba(255,255,255,0.45); }
+
+@media print {
+  .inv-header, .invoice-back-link { display: none !important; }
+  .inv-card { box-shadow: none !important; }
+  .inv-text { background: #fff !important; color: #000 !important; padding: 0 !important; }
+}
 .inv-text {
   padding: 20px 24px;
   margin: 0;
