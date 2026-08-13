@@ -10,6 +10,16 @@
 
   var U = global.PDP.Utils;
 
+  function readableTextColor(hex) {
+    var c = String(hex || "").replace(/[^0-9a-fA-F]/g, "");
+    if (c.length < 6) return "#ffffff";
+    var r = parseInt(c.slice(0, 2), 16);
+    var g = parseInt(c.slice(2, 4), 16);
+    var b = parseInt(c.slice(4, 6), 16);
+    var lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    return lum > 0.62 ? "#141414" : "#ffffff";
+  }
+
   function render(root, vm) {
     var section = root.closest("#pdp-variants-section") || root.parentElement;
     if (!vm.variants.length) { root.innerHTML = ""; if (section) section.style.display = "none"; return; }
@@ -23,10 +33,7 @@
         var isSwatch = group.type === "color";
         var classes = "pdp-variant-card " + (isSwatch ? "pdp-variant-card--swatch" : "pdp-variant-card--text") + (selected ? " is-selected" : "") + (opt.available ? "" : " is-disabled");
         var inner = isSwatch
-          ? '<span class="pdp-swatch-box">' +
-            (opt.image ? '<img src="' + U.safeImage(opt.image) + '" alt="' + U.escapeHtml(opt.label) + '" loading="lazy" decoding="async" />' : '<span class="pdp-variant-color-dot" style="background:' + U.escapeHtml(opt.value) + '"></span>') +
-            "</span>" +
-            '<span class="pdp-swatch-name">' + U.escapeHtml(opt.label) + "</span>"
+          ? '<span class="pdp-swatch-box" style="background:' + U.escapeHtml(opt.value) + ";color:" + readableTextColor(opt.value) + '">' + U.escapeHtml(opt.label) + "</span>"
           : U.escapeHtml(opt.label);
         return (
           '<button type="button" class="' + classes + '" data-group="' + U.escapeHtml(group.key) + '" data-index="' + i + '"' +
