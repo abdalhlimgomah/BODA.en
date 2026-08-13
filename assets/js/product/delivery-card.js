@@ -47,10 +47,19 @@
 
     var trustEl = U.qs(".pdp-trust-row", root);
     if (trustEl) {
+      var raw = vm.raw || {};
+      var ret = raw.return_allowed;
+      var canReturn = ret === true || ret === "true" || ret === 1 || ret === "1";
+      var declaredReturn = ret !== undefined && ret !== null && ret !== "";
+      var warranty = raw.warranty ? String(raw.warranty).trim() : "";
+      var warrantyLabel = warranty
+        ? (warranty.indexOf("ضمان") === 0 ? warranty : "ضمان " + warranty)
+        : "ضمان لمدة عام";
+      var deliveryLabel = vm.badges.freeShipping ? "توصيل مجاني خلال 2-5 أيام" : "توصيل سريع خلال 2-5 أيام";
       var items = [
-        { icon: "local_shipping", label: vm.badges.freeShipping ? "توصيل مجاني" : "توصيل سريع" },
-        { icon: "verified", label: "ضمان لمدة عام" },
-        { icon: "published_with_changes", label: "إرجاع مجاني 14 يوم" },
+        { icon: "local_shipping", label: deliveryLabel },
+        { icon: "verified", label: warrantyLabel },
+        { icon: declaredReturn && !canReturn ? "block" : "published_with_changes", label: canReturn || !declaredReturn ? "إرجاع مجاني 14 يوم" : "لا يمكن إرجاع هذا المنتج" },
         { icon: "lock", label: "مدفوعات آمنة" },
         { icon: "storefront", label: "استلام من نقاط BudoQ" },
       ];

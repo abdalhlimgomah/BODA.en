@@ -34,9 +34,19 @@
       if (starsEl) starsEl.innerHTML = "";
       if (linkEl) linkEl.textContent = "";
     }
-    if (soldEl)
-      soldEl.textContent =
-        vm.soldCount > 0 ? "تم بيع " + vm.soldCount + " قطعة" : "";
+    if (soldEl) {
+      soldEl.style.display = vm.soldCount > 0 ? "" : "none";
+      if (vm.soldCount > 0) {
+        var digits = String(vm.soldCount).replace(/[0-9]/g, function (d) {
+          return "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669"[Number(d)];
+        });
+        soldEl.innerHTML =
+          '<span class="pdp-sold-icon"><span class="material-icons-outlined">local_fire_department</span></span>' +
+          '<span class="pdp-sold-text">تم بيع <strong>' + digits + "</strong> قطعة</span>";
+      } else {
+        soldEl.innerHTML = "";
+      }
+    }
 
     var nudgesEl = U.qs(".pdp-nudges", root);
     if (nudgesEl) {
