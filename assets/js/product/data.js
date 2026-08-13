@@ -675,7 +675,7 @@
       if (!Array.isArray(raw) || !raw.length) return [];
     }
     return raw.map(function (s) {
-      if (typeof s === "string") return { name: s, stock: 0, is_available: true };
+      if (typeof s === "string") return { name: s, stock: 999, is_available: true };
       return {
         name: s.name || s.size || s.label || String(s),
         stock: Math.max(0, Number(s.stock) || 0),
