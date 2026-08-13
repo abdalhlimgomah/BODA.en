@@ -847,24 +847,41 @@ async function loadCartFromSupabase() {
     if (error) return null;
     if (!Array.isArray(data) || !data.length) return [];
 
-    return data.map((row) => ({
-      id: row.product_id,
-      product_id: row.product_id,
-      name: row.name,
-      price: Number(row.price) || 0,
-      quantity: Math.max(1, Number(row.quantity) || 1),
-      image: row.image,
-      image_url: row.image || "",
-      category: row.category,
-      description: row.description,
-      seller_id: row.seller_id,
-      seller_email: row.seller_email,
-      owner_id: row.owner_id,
-      owner_email: row.owner_email,
-      source: row.source || "internal",
-      taager_product_id: row.taager_product_id || "",
-      country_code: row.country_code || "",
-    }));
+    return data.map((row) => {
+      var pid = String(row.product_id || "");
+      var legacyColor = row.selected_color || null;
+      var legacySize = row.selected_size || null;
+      var m = pid.match(/_c_(.+)_s_(.+)$/);
+      if (!legacyColor && m) legacyColor = m[1];
+      if (!legacySize && m) legacySize = m[2];
+      if (!legacySize) {
+        var m2 = pid.match(/_size_(.+)$/);
+        if (m2) legacySize = m2[1];
+      }
+      return {
+        id: pid,
+        product_id: pid,
+        name: row.name,
+        price: Number(row.price) || 0,
+        quantity: Math.max(1, Number(row.quantity) || 1),
+        image: row.image,
+        image_url: row.image || "",
+        category: row.category,
+        description: row.description,
+        seller_id: row.seller_id,
+        seller_email: row.seller_email,
+        owner_id: row.owner_id,
+        owner_email: row.owner_email,
+        source: row.source || "internal",
+        taager_product_id: row.taager_product_id || "",
+        country_code: row.country_code || "",
+        selected_color: row.selected_color || legacyColor || null,
+        selected_color_value: row.selected_color_value || "",
+        selected_size: row.selected_size || legacySize || null,
+        selected_options: (function () { try { var v = JSON.parse(row.selected_options || "[]"); return Array.isArray(v) ? v : []; } catch (e) { return []; } })(),
+        variant_label: row.variant_label || null,
+      };
+    });
   } catch (e) {
     console.warn("loadCartFromSupabase error (non-fatal):", e);
     return null;
@@ -1202,7 +1219,17 @@ const addToCart = (product, quantity = 1, options = {}) => {
 
   const cart = getCart();
   var selectedSize = options.selectedSize || null;
-  const targetId = String(product.id) + (selectedSize ? '_size_' + String(selectedSize.name || selectedSize) : '');
+  var selectedColor = options.selectedColor || null;
+  var otherOptions = Array.isArray(options.otherOptions) ? options.otherOptions : [];
+  var variantSuffix = "";
+  if (selectedColor) {
+    var colorName = selectedColor.name || String(selectedColor);
+    variantSuffix += "_c_" + String(colorName).replace(/\s+/g, "_");
+  }
+  if (selectedSize) {
+    variantSuffix += "_s_" + String(selectedSize.name || selectedSize).replace(/\s+/g, "_");
+  }
+  const targetId = String(product.id) + variantSuffix;
   const priceInfo = resolveProductPrice(product);
   if (window.PricingEngine?.tiersLoaded) {
     priceInfo.currentPrice = window.PricingEngine.calculate(priceInfo.currentPrice);
@@ -1243,6 +1270,10 @@ const addToCart = (product, quantity = 1, options = {}) => {
       taager_product_id: taagerProductId,
       country_code: countryCode,
       selected_size: selectedSize ? (selectedSize.name || String(selectedSize)) : null,
+      selected_color: selectedColor ? (selectedColor.name || String(selectedColor)) : null,
+      selected_color_value: selectedColor ? (selectedColor.value || "") : "",
+      selected_options: otherOptions.length ? otherOptions : [],
+      variant_label: [selectedColor ? "اللون: " + (selectedColor.name || String(selectedColor)) : "", selectedSize ? "المقاس: " + (selectedSize.name || String(selectedSize)) : ""].concat(otherOptions).filter(Boolean).join(" / "),
     });
   }
 

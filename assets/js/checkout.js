@@ -732,6 +732,14 @@ function renderCheckoutItems() {
     html += '<span class="ch-item-price-cur">' + getCheckoutCurrency() + '</span>';
     html += '</div>';
     html += '</div>';
+    if (item.selected_color || item.selected_size || (Array.isArray(item.selected_options) && item.selected_options.length)) {
+      var chipColor = item.selected_color_value ? '<span class="ch-variant-swatch" style="background:' + escapeHtml(item.selected_color_value) + ';"></span>' : '';
+      var variantParts = [
+        item.selected_color ? "اللون: " + item.selected_color : "",
+        item.selected_size ? "المقاس: " + item.selected_size : "",
+      ].concat(Array.isArray(item.selected_options) ? item.selected_options : []).filter(Boolean);
+      html += '<div class="ch-item-variant">' + chipColor + String(variantParts.join(" / ") || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") + '</div>';
+    }
     html += '<div class="ch-item-details-content"></div>';
     html += '</div>';
     html += '</div>';

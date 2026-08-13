@@ -32,13 +32,30 @@ function buildInvoiceText(order) {
   var phone = order.phone || "-";
   var address = order.address || order.customer_address || "-";
   var payment = order.payment_method || "الدفع عند الاستلام";
-  var shipping = Number(order.shipping_cost || order.shipping_fee || order.shipping || 0);
-  var tax = Number(order.tax || order.vat || order.cod_fee || 0);
-  var discount = Number(order.discount || 0);
+  var discount = Number(order.discount || order.discount_amount || order.coupon_discount || 0);
   var total = Number(order.total_price || order.total || order.amount || 0);
   var coupon = order.coupon_code || "";
 
-  var sub = items.reduce(function(s, it) { return s + (Number(it.price) || 0) * (Number(it.quantity) || 1); }, 0);
+  var rawTotal = total;
+  var itemsTotal = items.reduce(function(s, it) { return s + (Number(it.price) || 0) * (Number(it.quantity) || 1); }, 0);
+  var subtotal = itemsTotal > 0 ? itemsTotal : 0;
+
+  var code = String((order && (order.country_code || order.countryCode)) || "").toUpperCase();
+  if (!code) {
+    try {
+      var selected = window.TaagerIntegration?.getSelectedCountry?.();
+      code = selected ? String(selected.code || "").toUpperCase() : "";
+    } catch (e) {}
+  }
+  var tax = Number(order.tax || order.vat || 0) || 0;
+  var shipping = Number(order.shipping_cost || order.shipping_fee || order.shipping || 0) || 0;
+  if (code !== "SA" && tax === 0) tax = 12; else if (code === "SA" && tax === 0) tax = 5;
+  if (rawTotal > 0 && shipping <= 0) {
+    var diff = rawTotal - (subtotal - discount + shipping + tax);
+    if (diff > 0.001) shipping = diff;
+  }
+
+  var sub = subtotal;
   if (sub === 0) sub = total + discount - shipping - tax;
 
   var lines = [];
@@ -72,6 +89,16 @@ function buildInvoiceText(order) {
     var taagerId = itm.taager_product_id || "";
     var sku = itm.sku || itm.code || "";
     lines.push("  [" + (i + 1) + "] " + itmName);
+    var variantParts = [];
+    if (itm.selected_color) variantParts.push("اللون: " + itm.selected_color);
+    if (itm.selected_size) variantParts.push("المقاس: " + itm.selected_size);
+    if (Array.isArray(itm.selected_options)) {
+      for (var vi = 0; vi < itm.selected_options.length; vi++) {
+        if (itm.selected_options[vi]) variantParts.push(String(itm.selected_options[vi]));
+      }
+    }
+    if (!variantParts.length && itm.variant_label) variantParts.push(itm.variant_label);
+    if (variantParts.length) lines.push("      " + variantParts.join(" / "));
     if (taagerId) lines.push("      كود تاجر: " + taagerId);
     if (sku) lines.push("      كود المنتج: " + sku);
     lines.push("      السعر:      " + fmt(price));
@@ -84,7 +111,7 @@ function buildInvoiceText(order) {
   lines.push("── ملخص الدفع ──");
   lines.push("  مجموع المنتجات:    " + fmt(sub));
   if (shipping > 0) lines.push("  رسوم الشحن:        " + fmt(shipping));
-  if (tax > 0) lines.push("  رسوم الدفع:        " + fmt(tax));
+  if (tax > 0) lines.push("  رسوم الدفع عند الاستلام: " + fmt(tax));
   if (discount > 0) lines.push("  الخصم:             -" + fmt(discount));
   if (coupon) lines.push("  كود الخصم:         " + coupon);
   lines.push(dash);
@@ -110,6 +137,7 @@ function renderInvoicePage(order) {
     '<div class="inv-card">' +
     '<div class="inv-header">' +
     '<h2 class="inv-title">الفاتورة</h2>' +
+    '<a class="inv-download-btn inv-print-btn" onclick="window.print()" style="margin-left:10px;"><span class="material-icons-outlined">print</span> طباعة</a>' +
     '<button class="inv-download-btn" onclick="downloadInvoice(\'' + escapeHtml(fileName) + '\')">' +
     '<span class="material-icons-outlined">download</span> تحميل الفاتورة' +
     '</button>' +

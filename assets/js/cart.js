@@ -416,6 +416,9 @@ function resolveCartItemView(item = {}) {
   const variant = Array.from(
     new Set(
       [
+        item.variant_label,
+        item.selected_color ? "اللون: " + item.selected_color : "",
+        item.selected_size ? "المقاس: " + item.selected_size : "",
         item.variant_name,
         item.variant,
         item.color,
@@ -467,7 +470,12 @@ function renderCartItem(viewItem) {
   var sellerHtml = viewItem.sellerName
     ? '<div class="cart-product-seller"><span class="material-icons-outlined" style="font-size:14px;vertical-align:middle">store</span>' + escapeHtml(viewItem.sellerName) + '</div>'
     : '';
-  var variantHtml = viewItem.variant ? '<div class="cart-product-variant">' + escapeHtml(viewItem.variant) + '</div>' : '';
+  var variantHtml = "";
+  if (viewItem.variant) variantHtml = '<div class="cart-product-variant">' + escapeHtml(viewItem.variant) + '</div>';
+  if (viewItem.selected_color || viewItem.selected_size) {
+    var chipColor = viewItem.selected_color_value ? '<span class="cart-variant-swatch" style="background:' + escapeHtml(viewItem.selected_color_value) + ';"></span>' : '';
+    variantHtml = '<div class="cart-product-variant">' + chipColor + escapeHtml([viewItem.selected_color ? "اللون: " + viewItem.selected_color : "", viewItem.selected_size ? "المقاس: " + viewItem.selected_size : ""].filter(Boolean).join(" / ")) + '</div>';
+  }
   var lineTotal = (Number(viewItem.currentPrice) || 0) * (Number(viewItem.quantity) || 0);
   var badges = "";
   if (viewItem.bestSeller) badges += '<span class="cart-product-badge best-seller">الأكثر مبيعاً</span>';

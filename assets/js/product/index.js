@@ -27,6 +27,21 @@
        var sz = global.PDP.SizeSelector.getSelectedSize();
        if (sz) opts.selectedSize = sz;
      }
+     if (global.PDP.Variants && typeof global.PDP.Variants.getSelectedOptions === "function") {
+       var varsRoot = document.querySelector("[data-pdp-variants]");
+       var selections = varsRoot ? global.PDP.Variants.getSelectedOptions(varsRoot) : {};
+       var colorOpt = selections.color || null;
+       if (colorOpt && colorOpt.value) {
+         opts.selectedColor = { name: colorOpt.label, value: colorOpt.value };
+       }
+       var extraOpts = [];
+       Object.keys(selections).forEach(function (key) {
+         if (key === "color") return;
+         var opt = selections[key];
+         if (opt && opt.label) extraOpts.push(opt.label);
+       });
+       if (extraOpts.length) opts.otherOptions = extraOpts;
+     }
      if (window.BudaStore) {
        window.BudaStore.addToCart(vm.raw, qty, opts);
        window.BudaStore.updateCartCount();

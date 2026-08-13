@@ -79,6 +79,24 @@ function computeFinancials(order, items) {
   return { subtotal, shipping, tax, discount, total };
 }
 
+function buildSummaryVariantChip(item) {
+  if (!item) return "";
+  const parts = [];
+  if (item.selected_color) parts.push("اللون: " + item.selected_color);
+  if (item.selected_size) parts.push("المقاس: " + item.selected_size);
+  if (Array.isArray(item.selected_options)) {
+    for (const opt of item.selected_options) {
+      if (opt) parts.push(String(opt));
+    }
+  }
+  if (!parts.length && item.variant_label) parts.push(item.variant_label);
+  if (!parts.length) return "";
+  const dot = item.selected_color_value
+    ? `<span class="os-v2-variant-swatch" style="background:${window.BudaOrders.escapeHtml(item.selected_color_value)};"></span>`
+    : "";
+  return `<div class="os-v2-variant">${dot}${window.BudaOrders.escapeHtml(parts.join(" / "))}</div>`;
+}
+
 function renderSummaryPage(order) {
   const container = document.getElementById("order-summary-content");
   if (!container) return;
@@ -97,7 +115,6 @@ function renderSummaryPage(order) {
   const itemSubtotal = (Number(primaryItem.price) || 0) * (Number(primaryItem.quantity) || 1);
   const address = window.BudaOrders.resolveOrderAddress(order) || "غير متوفر";
   const payment = window.BudaOrders.resolvePaymentLabel(order);
-  const invoiceUrl = String(order.invoice_url || "").trim();
   const hasDiscount = finances.discount > 0;
   const finalPrice = finances.total - finances.shipping;
 
@@ -127,6 +144,14 @@ function renderSummaryPage(order) {
             <p>${window.BudaOrders.escapeHtml(orderDate)}</p>
           </div>
         </div>
+        <div class="os-v2-delivery-strip">
+          <div class="os-v2-delivery-strip-text">احصل عليها <b>${window.BudaOrders.escapeHtml(window.BudaOrders.formatDeliveryEta(order))}</b> بحد أقصى</div>
+          <div class="os-v2-delivery-strip-badge">
+            <span class="os-v2-delivery-strip-icon">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 5H14V13C14 13.5523 13.5523 14 13 14H3C2.44772 14 2 13.5523 2 13V5Z" fill="#3866df" opacity="0.2"/><path d="M2 5H14M6 2V5M10 2V5M3 8H5M7 8H9M11 8H13M3 11H5M7 11H9M11 11H13" stroke="#3866df" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </span>
+          </div>
+        </div>
       </div>
 
       <!-- Product Card -->
@@ -141,6 +166,7 @@ function renderSummaryPage(order) {
           </div>
           <div class="os-v2-product-details">
             <h4>${window.BudaOrders.escapeHtml(primaryItem.name)}</h4>
+            ${buildSummaryVariantChip(primaryItem)}
             <p>الكمية: ${items.reduce((q, i) => q + (Number(i.quantity) || 1), 0) || 1}</p>
           </div>
           <div class="os-v2-product-price">
@@ -193,80 +219,8 @@ function renderSummaryPage(order) {
 
   const downloadButton = document.getElementById("summary-download-invoice-btn");
   if (!downloadButton) return;
-
-  downloadButton.addEventListener("click", () => {
-    const paidPrice = Number(primaryItem.currentPrice || primaryItem.price_after_discount || primaryItem.price || 0);
-    const displayPrice = finalPrice;
-
-    const invoiceText = [
-      `فاتورة الطلب ${orderRef}`,
-      `تاريخ الطلب: ${orderDate}`,
-      `─────────────────────────────`,
-      `${primaryItem.name} × ${primaryItem.quantity}`,
-      `  السعر: ${formatInvoiceMoney(paidPrice, order)} / ${primaryItem.quantity}  المجموع: ${formatInvoiceMoney(displayPrice, order)}`,
-      `─────────────────────────────`,
-      `قيمة المنتجات: ${formatInvoiceMoney(finances.subtotal, order)}`,
-      `رسوم الشحن: ${formatInvoiceMoney(finances.shipping, order)}`,
-      `رسوم الدفع عند الاستلام: ${formatInvoiceMoney(finances.tax, order)}`,
-      ...(finances.discount > 0 ? [`الخصم: -${formatInvoiceMoney(finances.discount, order)}`] : []),
-      `─────────────────────────────`,
-      `المجموع الكلي: ${formatInvoiceMoney(finances.total, order)}`,
-      `─────────────────────────────`,
-      `عنوان التوصيل: ${address}`,
-      `طريقة الدفع: ${payment}`,
-      ...(invoiceUrl ? [`رابط الفاتورة: ${invoiceUrl}`] : []),
-    ].join("\n");
-
-    const htmlContent = `<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>فاتورة ${orderRef}</title>
-  <style>
-    body { font-family: Cairo, sans-serif; direction: rtl; text-align: right; padding: 20px; background: #fafbfd; color: #102c43; margin: 0; }
-    .container { max-width: 700px; margin: 0 auto; text-align: center; }
-    .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 2px solid #3866df; flex-wrap: wrap; gap: 10px; }
-    .header h2 { margin: 0; color: #3866df; }
-    #dl-btn { min-height: 36px; border: 0; border-radius: 8px; background: #3866df; color: #fff; font-family: inherit; font-size: 0.85rem; font-weight: 700; cursor: pointer; padding: 0 14px; display: inline-flex; align-items: center; gap: 5px; }
-    #dl-btn:hover { background: #2d55c4; }
-    pre { width: 100%; min-height: 300px; font-family: 'Courier New', monospace; font-size: 0.82rem; line-height: 1.7; background: #fff; border: 1px solid #dbe4f3; border-radius: 10px; padding: 12px; direction: ltr; white-space: pre-wrap; overflow-x: auto; }
-  </style>
-</head>
-<body>
-  <div class="container">
-    <div class="header">
-      <h2>فاتورة الطلب</h2>
-      <button id="dl-btn"><span>⬇</span> تحميل الملف النصي</button>
-    </div>
-    <pre>${invoiceText.replace(/</g, '<').replace(/>/g, '>')}</pre>
-  </div>
-  <script>
-    document.getElementById('dl-btn').addEventListener('click', function() {
-      const text = ${JSON.stringify(invoiceText)};
-      const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = 'invoice-${orderRef || orderId}.txt';
-      a.click();
-      URL.revokeObjectURL(url);
-    });
-  <\/script>
-</body>
-</html>`;
-
-    const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
-    const blobUrl = URL.createObjectURL(blob);
-
-    // Download the invoice file directly without leaving the page
-    const a = document.createElement("a");
-    a.href = blobUrl;
-    a.download = "invoice-" + (orderRef || orderId) + ".html";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(function () { URL.revokeObjectURL(blobUrl); }, 5000);
+downloadButton.addEventListener("click", () => {
+    window.location.href = "invoice.html?id=" + encodeURIComponent(orderId);
   });
 }
 

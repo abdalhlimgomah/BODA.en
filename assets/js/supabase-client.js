@@ -77,23 +77,28 @@ if (typeof window._keyValidated === 'undefined') {
 if (typeof DEFAULT_ORDERS_COLUMNS === 'undefined') {
   var DEFAULT_ORDERS_COLUMNS = [
     "user_name",
+    "email",
+    "phone",
+    "address",
+    "status",
+    "total_price",
+    "type",
+    "order_source",
+    "country_code",
+    "taager_order_status",
+    "seller_id",
+    "created_at",
     "name",
     "customer_name",
     "user_email",
-    "email",
     "customer_email",
-    "phone",
     "customer_phone",
-    "address",
     "customer_address",
-    "status",
     "order_status",
-    "total_price",
     "total",
     "amount",
     "payment_method",
     "user_id",
-    "type",
     "items_json",
     "items",
     "order_items",
@@ -813,6 +818,7 @@ function isPermissionError(error) {
 async function detectOrdersColumns(client) {
   if (_ordersColumnsCache) return _ordersColumnsCache;
 
+  // Try to learn real columns from an existing row first.
   try {
     const { data, error } = await client.from("orders").select("*").limit(1);
     if (error) {
@@ -821,17 +827,45 @@ async function detectOrdersColumns(client) {
     }
 
     const firstRow = Array.isArray(data) && data.length ? data[0] : null;
-    if (!firstRow || typeof firstRow !== "object") {
-      _ordersColumnsCache = new Set(DEFAULT_ORDERS_COLUMNS);
+    if (firstRow && typeof firstRow === "object") {
+      _ordersColumnsCache = new Set(Object.keys(firstRow));
       return _ordersColumnsCache;
     }
-
-    _ordersColumnsCache = new Set(Object.keys(firstRow));
-    return _ordersColumnsCache;
   } catch {
     _ordersColumnsCache = new Set(DEFAULT_ORDERS_COLUMNS);
     return _ordersColumnsCache;
   }
+
+  // Empty table: probe each candidate column individually, because a
+  // `select * limit 1` on zero rows tells us nothing about the schema.
+  const existing = [];
+  const seen = new Set();
+  for (const col of DEFAULT_ORDERS_COLUMNS) {
+    if (seen.has(col)) continue;
+    seen.add(col);
+    try {
+      const { error: probeError } = await client.from("orders").select(col).limit(1);
+      if (!probeError) existing.push(col);
+    } catch (_probeErr) {
+      // Column does not exist or not readable - skip.
+    }
+  }
+
+  if (existing.length) {
+    const columnCandidates = existing.slice();
+    if (!columnCandidates.includes("created_at")) {
+      try {
+        const { error: caErr } = await client.from("orders").select("created_at").limit(1);
+        if (!caErr) columnCandidates.push("created_at");
+      } catch (_e2) {}
+    }
+    if (!columnCandidates.includes("id")) columnCandidates.push("id");
+    _ordersColumnsCache = new Set(columnCandidates);
+    return _ordersColumnsCache;
+  }
+
+  _ordersColumnsCache = new Set(DEFAULT_ORDERS_COLUMNS);
+  return _ordersColumnsCache;
 }
 
 function pickColumn(columnsSet, options) {
@@ -1150,37 +1184,6 @@ async function insertOrderWithFallbackPatterns(client, order, items = []) {
     owner_email: sellerEmail || undefined,
   });
   const orderStatus = order.status || "Ù‚ÙŠØ¯ Ø§Ù„Ù…Ø±Ø§Ø¬Ø¹Ø©";
-  const shippingVal = Number(order.shipping_cost) || 0;
-  const baseUser = {
-    user_name: order.user_name,
-    user_email: order.user_email,
-    phone: order.phone,
-    address: order.address,
-    status: orderStatus,
-    total_price: order.total_price,
-    shipping_fee: shippingVal || undefined,
-    type: typeSnapshot || undefined,
-  };
-  const baseName = {
-    name: order.user_name,
-    email: order.user_email,
-    phone: order.phone,
-    address: order.address,
-    status: orderStatus,
-    total: order.total_price,
-    shipping_fee: shippingVal || undefined,
-    type: typeSnapshot || undefined,
-  };
-  const baseCustomer = {
-    customer_name: order.user_name,
-    customer_email: order.user_email,
-    customer_phone: order.phone,
-    customer_address: order.address,
-    order_status: orderStatus,
-    amount: order.total_price,
-    shipping_fee: shippingVal || undefined,
-    type: typeSnapshot || undefined,
-  };
   const patterns = [
     {
       user_name: order.user_name,
@@ -1189,17 +1192,37 @@ async function insertOrderWithFallbackPatterns(client, order, items = []) {
       address: order.address,
       status: orderStatus,
       total_price: order.total_price,
-      shipping_fee: shippingVal || undefined,
+      type: typeSnapshot || undefined,
+      order_source: order.order_source || undefined,
+      country_code: order.country_code || undefined,
+      taager_order_status: order.taager_order_status || undefined,
+    },
+    {
+      user_name: order.user_name,
+      user_email: order.user_email,
+      phone: order.phone,
+      address: order.address,
+      status: orderStatus,
+      total_price: order.total_price,
       type: typeSnapshot || undefined,
     },
     {
-      ...baseUser,
+      name: order.user_name,
+      email: order.user_email,
+      phone: order.phone,
+      address: order.address,
+      status: orderStatus,
+      total: order.total_price,
+      type: typeSnapshot || undefined,
     },
     {
-      ...baseName,
-    },
-    {
-      ...baseCustomer,
+      customer_name: order.user_name,
+      customer_email: order.user_email,
+      customer_phone: order.phone,
+      customer_address: order.address,
+      order_status: orderStatus,
+      amount: order.total_price,
+      type: typeSnapshot || undefined,
     },
     {
       user_name: order.user_name,
@@ -1591,6 +1614,10 @@ async function createOrder(order, items) {
         owner_id: itemSeller.id || undefined,
         seller_email: itemSeller.email || undefined,
         owner_email: itemSeller.email || undefined,
+        selected_color: item.selected_color ?? item.selectedColor ?? null,
+        selected_size: item.selected_size ?? item.selectedSize ?? null,
+        selected_color_value: item.selected_color_value ?? item.selectedColorValue ?? "",
+        variant_label: item.variant_label ?? item.variantLabel ?? null,
       });
     });
 
@@ -1606,6 +1633,10 @@ async function createOrder(order, items) {
           price: item.price,
           seller_email: itemSeller.email || undefined,
           owner_email: itemSeller.email || undefined,
+          selected_color: item.selected_color ?? item.selectedColor ?? null,
+          selected_size: item.selected_size ?? item.selectedSize ?? null,
+          selected_color_value: item.selected_color_value ?? item.selectedColorValue ?? "",
+          variant_label: item.variant_label ?? item.variantLabel ?? null,
         });
       });
       ({ error: itemsError } = await client.from("order_items").insert(fallbackRows));
@@ -1617,6 +1648,10 @@ async function createOrder(order, items) {
             product_id: item.product_id ?? item.productId ?? item.id ?? null,
             quantity: item.quantity,
             price: item.price,
+            selected_color: item.selected_color ?? item.selectedColor ?? null,
+            selected_size: item.selected_size ?? item.selectedSize ?? null,
+            selected_color_value: item.selected_color_value ?? item.selectedColorValue ?? "",
+            variant_label: item.variant_label ?? item.variantLabel ?? null,
           })
         );
         ({ error: itemsError } = await client.from("order_items").insert(minimalRows));

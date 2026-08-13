@@ -26,6 +26,7 @@
     if (section) section.style.display = "";
     root.style.display = "";
     var currentId = U.getQueryParam("id") || vm.id;
+    root.__pdpVariants = vm.variants;
 
     root.innerHTML = vm.variants.map(function (group) {
       var optionsHtml = group.options.map(function (opt, i) {
@@ -78,11 +79,29 @@
       btn.setAttribute("aria-pressed", "true");
       var labelEl = U.qs("[data-selected-label]", groupEl);
       if (labelEl) labelEl.textContent = option.label;
+      if (root.__pdpSelection) root.__pdpSelection[groupKey] = option;
 
       root.dispatchEvent(new CustomEvent("pdp:variant-change", { bubbles: true, detail: { groupKey: groupKey, option: option } }));
     });
+
+    var selection = {};
+    U.qsa(".pdp-variant-group", root).forEach(function (groupEl) {
+      var groupKey = groupEl.getAttribute("data-group-key");
+      var group = vm.variants.find(function (g) { return g.key === groupKey; });
+      var idx = Number((U.qs(".pdp-variant-card.is-selected", groupEl) || {}).getAttribute ? U.qs(".pdp-variant-card.is-selected", groupEl).getAttribute("data-index") : 0) || 0;
+      if (group && group.options[idx]) selection[groupKey] = group.options[idx];
+    });
+    root.__pdpSelection = selection;
+  }
+
+  function getSelectedOptions(root) {
+    var sel = root && root.__pdpSelection;
+    if (!sel) return {};
+    var out = {};
+    Object.keys(sel).forEach(function (key) { if (sel[key]) out[key] = sel[key]; });
+    return out;
   }
 
   global.PDP = global.PDP || {};
-  global.PDP.Variants = { render: render };
+  global.PDP.Variants = { render: render, getSelectedOptions: getSelectedOptions };
 })(window);

@@ -95,6 +95,18 @@ function renderOrderSuccess() {
       var itemDiscount = subtotal > 0 ? Math.round((itemTotal / subtotal) * couponDiscount * 100) / 100 : 0;
       var itemDiscounted = Math.max(itemTotal - itemDiscount, 0);
       var showOriginal = itemDiscount > 0;
+      var itemColor = item.selected_color || null;
+      var itemSize = item.selected_size || null;
+      var otherOpts = Array.isArray(item.selected_options) ? item.selected_options : [];
+      var variantParts = [];
+      if (itemColor) variantParts.push("اللون: " + itemColor);
+      if (itemSize) variantParts.push("المقاس: " + itemSize);
+      variantParts = variantParts.concat(otherOpts).filter(Boolean);
+      var variantHtml = "";
+      if (variantParts.length) {
+        var chipDot = item.selected_color_value ? '<span class="os-variant-swatch" style="background:' + escapeHtml(item.selected_color_value) + ';"></span>' : '';
+        variantHtml = '<div class="os-product-variant">' + chipDot + escapeHtml(variantParts.join(" / ")) + '</div>';
+      }
       return '<div class="os-product">' +
         '<div class="os-product-img-wrap">' +
           '<img class="os-product-img" src="' + img + '" alt="' + escapeHtml(name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'../assets/images/unnamed.png\'" />' +
@@ -102,6 +114,7 @@ function renderOrderSuccess() {
         '</div>' +
         '<div class="os-product-info">' +
           '<p class="os-product-name">' + escapeHtml(name) + '</p>' +
+          variantHtml +
           '<span class="os-product-meta"' + (showOriginal ? ' style="text-decoration:line-through;color:#9CA3AF;margin-left:6px"' : '') + '>' + formatOrderMoney(itemTotal) + '</span>' +
           (showOriginal ? '<span class="os-product-meta" style="color:#16a34a;font-weight:700">' + formatOrderMoney(itemDiscounted) + '</span>' : '') +
         '</div>' +

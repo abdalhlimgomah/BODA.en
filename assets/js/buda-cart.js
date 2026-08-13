@@ -49,7 +49,7 @@
                 <div class="product-details">
                     <div class="product-info">
                         <h3 class="product-name">${item.name}</h3>
-                        ${item.selected_size ? `<p class="product-variant">المقاس: ${item.selected_size}</p>` : ''}
+                        ${(item.selected_color || item.selected_size) ? `<p class="product-variant">${item.selected_color ? `اللون: ${item.selected_color}` : ''}${item.selected_color && item.selected_size ? ' / ' : ''}${item.selected_size ? `المقاس: ${item.selected_size}` : ''}</p>` : ''}
                         ${item.seller ? `<p class="product-store">المتجر: ${item.seller}</p>`: ''}
                     </div>
                     <div class="price-area">

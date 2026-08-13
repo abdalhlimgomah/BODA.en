@@ -1,6 +1,13 @@
 (function () {
   "use strict";
 
+  const dateFormatter = new Intl.DateTimeFormat("ar-EG", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    hour: "numeric",
+    minute: "2-digit",
+  });
   const UNKNOWN_PRODUCT_NAME = "اسم المنتج غير متوفر";
   const neutralFallbackSvg =
     '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240">' +
@@ -30,15 +37,7 @@
     const text = sanitizeText(value);
     if (!text) return true;
     const normalized = text.toLowerCase().replace(/\s+/g, " ");
-    return (
-      normalized === "منتج" ||
-      normalized === "product" ||
-      normalized === "item" ||
-      normalized === "unknown" ||
-      normalized === "اسم المنتج غير متوفر" ||
-      normalized === "unknown product" ||
-      normalized === "produto desconhecido"
-    );
+    return normalized === "منتج" || normalized === "product" || normalized === "item" || normalized === "unknown";
   }
 
   function pickFirstMeaningfulText(values, allowGeneric = false) {
@@ -102,56 +101,10 @@
     return date.getTime();
   }
 
-  function formatOrderDate(value, context) {
+  function formatOrderDate(value) {
     const stamp = toTimestamp(value);
     if (!stamp) return "وقت غير محدد";
-    const code = String((context && context.country_code) || resolveOrderCountryCode(context) || "").toUpperCase();
-    const timeZone = code === "SA" ? "Asia/Riyadh" : "Africa/Cairo";
-    const formatter = new Intl.DateTimeFormat("ar-EG", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-      timeZone,
-    });
-    return formatter.format(new Date(stamp));
-  }
-
-  function formatDeliveryEta(context) {
-    var code = String((context && context.country_code) || resolveOrderCountryCode(context) || "").toUpperCase();
-    var timeZone = code === "SA" ? "Asia/Riyadh" : "Africa/Cairo";
-    var days = ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس", "الجمعة", "السبت"];
-    var monthNames = ["يناير", "فبراير", "مارس", "أبريل", "مايو", "يونيو", "يوليو", "أغسطس", "سبتمبر", "أكتوبر", "نوفمبر", "ديسمبر"];
-    var now = new Date();
-    var parts = new Intl.DateTimeFormat("en-GB", {
-      timeZone: timeZone,
-      day: "numeric",
-      month: "numeric",
-      year: "numeric",
-    }).formatToParts(now);
-    var map = {};
-    parts.forEach(function (part) {
-      if (part.type !== "literal") map[part.type] = Number(part.value);
-    });
-    var future = new Date(map.year, map.month - 1, map.day);
-    future.setDate(future.getDate() + 5 + Math.floor(Math.random() * 2));
-    var futureParts = new Intl.DateTimeFormat("en-GB", {
-      timeZone: timeZone,
-      weekday: "short",
-      day: "numeric",
-      month: "numeric",
-      year: "numeric",
-    }).formatToParts(future);
-    var fmap = {};
-    futureParts.forEach(function (part) {
-      if (part.type !== "literal") fmap[part.type] = part.value;
-    });
-    var weekdayIndex = ["sun", "mon", "tue", "wed", "thu", "fri", "sat"].indexOf(String(fmap.weekday || "").toLowerCase());
-    var dayName = weekdayIndex >= 0 ? days[weekdayIndex] : days[future.getDay()];
-    return dayName + "، " + Number(fmap.day) + " " + monthNames[Number(fmap.month) - 1];
+    return dateFormatter.format(new Date(stamp));
   }
 
   function normalizeStatusKey(value) {
@@ -786,7 +739,6 @@
 
   function extractItemsCandidate(order) {
     const typeSnapshot = parseOrderTypeSnapshot(order?.type);
-    const typeRecord = Array.isArray(typeSnapshot) ? coerceOrderItemRecord(typeSnapshot[0]) : coerceOrderItemRecord(typeSnapshot);
     const localSnapshot = getLocalOrderSnapshot(order);
     const candidates = [
       order?.items_json,
@@ -800,45 +752,8 @@
       const parsed = parseItemsValue(candidate);
       if (parsed.length) {
         const normalized = parsed
-          .map((entry) => {
-            const record = coerceOrderItemRecord(entry);
-            if (!record || typeof record !== "object") return null;
-            const merged = {
-              ...record,
-              name: (() => {
-                const recordName = record?.name || record?.product_name || record?.productName || "";
-                if (recordName && !isGenericProductName(recordName)) return recordName;
-                return (
-                  typeRecord?.name ||
-                  typeRecord?.product_name ||
-                  typeRecord?.productName ||
-                  recordName ||
-                  ""
-                );
-              })(),
-              product_name: record?.product_name || record?.productName || typeRecord?.product_name || "",
-              image: (() => {
-                const recordImage =
-                  record?.image ||
-                  record?.image_url ||
-                  record?.product_image ||
-                  record?.images?.[0] ||
-                  "";
-                if (recordImage && !isFallbackImageSource(recordImage)) return recordImage;
-                return (
-                  typeRecord?.image ||
-                  typeRecord?.image_url ||
-                  typeRecord?.product_image ||
-                  recordImage ||
-                  ""
-                );
-              })(),
-              price: Number(record?.price ?? record?.unit_price ?? record?.amount ?? typeRecord?.price ?? 0) || 0,
-              quantity: Number(record?.quantity ?? record?.qty ?? typeRecord?.quantity ?? 1) || 1,
-            };
-            return merged;
-          })
-          .filter((entry) => entry && Object.keys(entry).length > 0);
+          .map((entry) => coerceOrderItemRecord(entry))
+          .filter((entry) => entry && typeof entry === "object" && Object.keys(entry).length > 0);
         if (normalized.length) return normalized;
       }
     }
@@ -1007,12 +922,7 @@
     const items = extractItemsCandidate(order);
     if (!items.length) return true;
 
-    return items.some(
-      (item) =>
-        !hasMeaningfulItemName(item) ||
-        !hasItemImageData(item) ||
-        (!item?.selected_color && !item?.selected_size && !item?.variant_label)
-    );
+    return items.some((item) => !hasMeaningfulItemName(item) || !hasItemImageData(item));
   }
 
   async function hydrateOrdersWithOrderItems(orders) {
@@ -1110,12 +1020,6 @@
             order_id: row?.order_id || "",
             brand: row?.brand || row?.vendor || row?.store_name || linkedProduct?.brand || linkedProduct?.vendor || "",
             product: linkedProduct || null,
-            source: row?.source || row?.order_source || linkedProduct?.source || null,
-            selected_color: row?.selected_color ?? row?.selectedColor ?? null,
-            selected_size: row?.selected_size ?? row?.selectedSize ?? null,
-            selected_color_value: row?.selected_color_value ?? row?.selectedColorValue ?? "",
-            selected_options: row?.selected_options ?? [],
-            variant_label: row?.variant_label ?? row?.variantLabel ?? null,
           },
           index
         );
@@ -1196,7 +1100,6 @@
     formatMoney,
     resolveOrderCountryCode,
     formatOrderDate,
-    formatDeliveryEta,
     toTimestamp,
     normalizeStatusKey,
     statusMeta,

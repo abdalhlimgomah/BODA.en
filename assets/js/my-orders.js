@@ -158,6 +158,24 @@ function goToOrderReviewPage(orderId, productId) {
   )}&order=${encodeURIComponent(cleanOrderId)}`;
 }
 
+function buildOrderItemVariantChip(item) {
+  if (!item) return "";
+  const parts = [];
+  if (item.selected_color) parts.push("اللون: " + item.selected_color);
+  if (item.selected_size) parts.push("المقاس: " + item.selected_size);
+  if (Array.isArray(item.selected_options)) {
+    for (const opt of item.selected_options) {
+      if (opt) parts.push(String(opt));
+    }
+  }
+  if (!parts.length && item.variant_label) parts.push(item.variant_label);
+  if (!parts.length) return "";
+  const dot = item.selected_color_value
+    ? `<span class="noon-order-variant-swatch" style="background:${window.BudaOrders.escapeHtml(item.selected_color_value)};"></span>`
+    : "";
+  return `<p class="noon-order-variant">${dot}${window.BudaOrders.escapeHtml(parts.join(" / "))}</p>`;
+}
+
 function renderOrderCard(order) {
   const status = window.BudaOrders.statusMeta(order.status || order.order_status);
   const orderId = window.BudaOrders.getOrderId(order);
@@ -242,6 +260,7 @@ function renderOrderCard(order) {
         <div class="noon-order-copy">
           ${primaryItem.brand ? `<small>${window.BudaOrders.escapeHtml(primaryItem.brand)}</small>` : ""}
           <h3 class="noon-order-title">${window.BudaOrders.escapeHtml(primaryItem.name)}</h3>
+          ${buildOrderItemVariantChip(primaryItem)}
           <p class="noon-order-price">${window.BudaOrders.formatMoney(displayPrice, order)}</p>
           ${moreCount ? `<p class="noon-order-more">+ ${moreCount} منتج إضافي</p>` : ""}
         </div>
