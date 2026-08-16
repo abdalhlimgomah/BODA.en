@@ -25,14 +25,14 @@ function _getClient() {
       
       <!-- Panel 1: Enter Phone Number -->
       <div id="panelPhoneInput" class="phone-modal-panel active">
-        <div class="phone-modal-header">
-          <h3 class="phone-modal-title">تغيير رقم الهاتف</h3>
-          <button type="button" class="phone-modal-close" id="closePhoneModalBtn">
+        <div class="noon-stepper">
+          <button type="button" class="phone-modal-close noon-close-btn" id="closePhoneModalBtn" aria-label="إغلاق">
             <span class="material-icons-outlined">close</span>
           </button>
         </div>
-        <p class="phone-modal-subtitle">أضف معلومات الهاتف للتحقق من حسابك</p>
-        
+        <h3 class="noon-step-title">تحقق من حسابك</h3>
+        <p class="noon-step-desc">أدخل رقم هاتفك، وسنرسل رمز التحقق إليه عبر واتساب</p>
+
         <div class="phone-input-row" id="phoneInputRow">
           <!-- Country Select -->
           <div class="country-select-wrap">
@@ -44,49 +44,38 @@ function _getClient() {
           <!-- Number Input -->
           <input type="tel" id="modalPhoneInput" class="phone-modal-input" placeholder="أدخل رقم الجوال" />
         </div>
-        
+
         <span class="phone-error-msg" id="phoneErrorMsg"></span>
-        
+
         <div id="phoneCountryWarning" class="phone-warning-msg" style="display:none;">
           <span class="material-icons-outlined" style="font-size:16px;vertical-align:middle;"></span>
           <span id="phoneCountryWarningText"></span>
         </div>
-        
-        <div class="channel-title">اختر طريقة استلام الرمز</div>
-        <div class="channel-options">
-          <label class="channel-card active whatsapp" id="channelWhatsappLabel">
-            <input type="radio" name="otp_channel" value="whatsapp" checked />
-            ${WHATSAPP_SVG}
-            <span>📱 WhatsApp (موصى به)</span>
-          </label>
-          <label class="channel-card sms" id="channelSmsLabel">
-            <input type="radio" name="otp_channel" value="sms" />
-            ${SMS_SVG}
-            <span>💬 رسالة SMS</span>
-          </label>
-        </div>
-        
-        <button type="button" class="phone-primary-btn" id="sendOtpBtn" disabled>إرسال رمز التحقق</button>
+
+        <button type="button" class="phone-primary-btn wa" id="sendOtpBtn" disabled>إرسال رمز التحقق</button>
+        <p class="pm-secure-note">
+          <span class="material-icons-outlined" aria-hidden="true">verified_user</span>
+          <span>بياناتك محمية ولا تُشارك مع أي جهة أخرى</span>
+        </p>
       </div>
       
       <!-- Panel 2: Enter OTP -->
       <div id="panelOtpInput" class="phone-modal-panel">
         <div id="otpEntryScreen">
-          <div class="phone-modal-header">
-            <h3 class="phone-modal-title">تحقق من حسابك</h3>
-            <button type="button" class="phone-modal-close" id="closeOtpModalBtn">
+          <div class="noon-stepper">
+            <button type="button" class="phone-modal-close noon-close-btn" id="closeOtpModalBtn" aria-label="إغلاق">
               <span class="material-icons-outlined">close</span>
             </button>
           </div>
-          <p class="phone-modal-subtitle">
-            أدخل رمز التحقق المكون من 6 أرقام والمرسل إلى:
-            <span class="otp-target-phone" id="otpTargetPhoneText"></span>
-          </p>
           
-          <!-- Channel indicator badge -->
-          <div style="text-align: center;">
-            <div class="otp-channel-badge" id="otpChannelBadge"></div>
-          </div>
+          <h3 class="noon-step-title">تحقق من حسابك</h3>
+          
+          <p class="noon-otp-desc">
+            ادخل الـOTP المكون من 6 أرقام والمرسل إلى
+            <span class="noon-phone-val" id="otpTargetPhoneText"></span>
+            على
+            <span class="otp-channel-badge" id="otpChannelBadge"></span>
+          </p>
           
           <!-- OTP digit input row -->
           <div class="otp-inputs-row" id="otpInputsGrid">
@@ -98,6 +87,8 @@ function _getClient() {
             <input type="text" maxlength="1" class="otp-digit-input" inputmode="numeric" autocomplete="one-time-code" />
           </div>
           
+          <p class="otp-error-msg" id="otpErrorMsg"></p>
+          
           <!-- Countdown timer -->
           <div class="otp-timer-container" id="otpTimerContainer">
             إعادة إرسال الرمز بعد: <span class="otp-time-val" id="otpTimerVal">00:59</span>
@@ -105,14 +96,17 @@ function _getClient() {
           
           <!-- Resend options -->
           <div class="otp-resend-container" id="otpResendContainer">
-            <button type="button" class="otp-resend-btn whatsapp" id="resendWhatsappBtn">
-              ${WHATSAPP_SVG}
-              <span>📱 WhatsApp</span>
-            </button>
-            <button type="button" class="otp-resend-btn sms" id="resendSmsBtn">
-              ${SMS_SVG}
-              <span>💬 رسالة SMS</span>
-            </button>
+            <p class="otp-resend-title">الـOTP لسه موصلش؟</p>
+            <div class="otp-resend-options">
+              <button type="button" class="otp-resend-btn whatsapp" id="resendWhatsappBtn">
+                ${WHATSAPP_SVG}
+                <span>الواتس آب</span>
+              </button>
+              <button type="button" class="otp-resend-btn sms" id="resendSmsBtn">
+                ${SMS_SVG}
+                <span>الرسائل النصية</span>
+              </button>
+            </div>
           </div>
           
           <!-- Attempts counter -->
@@ -260,6 +254,7 @@ function _getClient() {
         this.classList.add("active");
         const radio = this.querySelector("input[type='radio']");
         if (radio) radio.checked = true;
+        if (sendOtpBtn) sendOtpBtn.classList.toggle("wa", radio && radio.value === "whatsapp");
       });
     });
 
@@ -545,10 +540,10 @@ function _getClient() {
         if (otpChannelBadge) {
           if (finalChannel === "whatsapp") {
             otpChannelBadge.className = "otp-channel-badge whatsapp";
-            otpChannelBadge.innerHTML = `${WHATSAPP_SVG} <span>📱 WhatsApp</span>`;
+            otpChannelBadge.innerHTML = `${WHATSAPP_SVG}<span>الواتس آب</span>`;
           } else {
             otpChannelBadge.className = "otp-channel-badge sms";
-            otpChannelBadge.innerHTML = `${SMS_SVG} <span>💬 الرسائل النصية (SMS)</span>`;
+            otpChannelBadge.innerHTML = `${SMS_SVG}<span>الرسائل النصية</span>`;
           }
         }
 
@@ -587,6 +582,7 @@ function _getClient() {
     const otpInputs = document.getElementById("otpInputsGrid").querySelectorAll("input");
     const verifyOtpBtn = document.getElementById("verifyOtpBtn");
     const otpAttemptsLeftText = document.getElementById("otpAttemptsLeftText");
+    const otpErrorMsg = document.getElementById("otpErrorMsg");
     const panelSuccess = document.getElementById("panelSuccess");
 
     var digits = [];
@@ -605,6 +601,7 @@ function _getClient() {
       origHtml = verifyOtpBtn.innerHTML;
       verifyOtpBtn.innerHTML = 'تحقق <span class="btn-loader"></span>';
     }
+    if (otpErrorMsg) otpErrorMsg.textContent = "";
 
     otpInputs.forEach(input => input.disabled = true);
 
@@ -683,7 +680,7 @@ function _getClient() {
       } catch (e) {}
 
       showToast(msg);
-      if (otpAttemptsLeftText) otpAttemptsLeftText.textContent = msg;
+      if (otpErrorMsg) otpErrorMsg.textContent = msg;
 
       if (verifyOtpBtn) {
         verifyOtpBtn.disabled = false;
@@ -707,7 +704,7 @@ function _getClient() {
     if (attemptsLeft <= 0) {
       otpAttemptsLeftText.textContent = "تم قفل العملية بسبب محاولات خاطئة كثيرة. يرجى المحاولة بعد 15 دقيقة.";
     } else if (attemptsLeft < 7) {
-      otpAttemptsLeftText.textContent = `متبقي: ${attemptsLeft} محاولات`;
+      otpAttemptsLeftText.textContent = `بَقيَ ${attemptsLeft} محاولات`;
     } else {
       otpAttemptsLeftText.textContent = "";
     }
