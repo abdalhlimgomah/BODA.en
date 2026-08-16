@@ -814,6 +814,59 @@ async function getHomeSourceProducts(options) {
   return [].concat(homeSourceCache);
 }
 
+// ========== REAL TRUST BADGES (same logic as PDP delivery-card) ==========
+function buildProductBadges(raw) {
+  raw = raw || {};
+  var ret = raw.return_allowed;
+  var canReturn = ret === true || ret === "true" || ret === 1 || ret === "1";
+  var declaredReturn = ret !== undefined && ret !== null && ret !== "";
+  var warranty = raw.warranty ? String(raw.warranty).trim() : "";
+  var warrantyLabel = warranty
+    ? warranty.indexOf("ضمان") === 0
+      ? warranty
+      : "ضمان " + warranty
+    : "ضمان لمدة عام";
+  var freeShip = !!(raw.free_shipping || raw.freeShipping);
+  return [
+    {
+      icon: "local_shipping",
+      label: freeShip ? "توصيل مجاني خلال 2-5 أيام" : "توصيل سريع خلال 2-5 أيام",
+    },
+    { icon: "verified", label: warrantyLabel },
+    {
+      icon: declaredReturn && !canReturn ? "block" : "published_with_changes",
+      label:
+        canReturn || !declaredReturn
+          ? "إرجاع مجاني 14 يوم"
+          : "لا يمكن إرجاع هذا المنتج",
+    },
+    { icon: "storefront", label: "استلام من نقاط BudoQ" },
+  ];
+}
+
+// ========== ROTATING TRUST BADGES (like the search rotator) ==========
+var _noonBadgeTimer = null;
+function startNoonBadgeRotator() {
+  if (_noonBadgeTimer) return;
+  if (
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches
+  )
+    return;
+  _noonBadgeTimer = window.setInterval(function () {
+    var strips = document.querySelectorAll(".noon-badges");
+    strips.forEach(function (strip) {
+      var track = strip.querySelector(".noon-badge-track");
+      if (!track || track.children.length < 2) return;
+      var cur = (Number(strip.getAttribute("data-badge-idx")) || 0) + 1;
+      if (cur >= track.children.length) cur = 0;
+      strip.setAttribute("data-badge-idx", String(cur));
+      var itemH = track.children[0].offsetHeight || 18;
+      track.style.transform = "translateY(-" + cur * itemH + "px)";
+    });
+  }, 2600);
+}
+
 // ========== BUILD PRODUCT CARD ==========
 function buildProductCard(product) {
   var rp = resolvePrice(product);
@@ -864,8 +917,7 @@ function buildProductCard(product) {
     counter = '<span class="noon-img-counter"><span class="noon-img-current">1</span>/<span class="noon-img-total">' + images.length + '</span></span>';
   }
   var sellerName = product.seller || product.brand || "";
-  var hasFreeShipping = product.free_shipping || product.freeShipping || false;
-  var hasInstallment = product.installment || product.installment_available || false;
+  var instMonths = Math.min(24, Math.max(3, Number(product.installment_months) || 3));
   var isOfficial = product.official_store || product.is_official || false;
   return (
     '<article class="noon-product-card">' +
@@ -920,18 +972,31 @@ function buildProductCard(product) {
     formatMoney(rp.finalPrice) +
     "</span>" +
     (rp.hasDiscount
-      ? '<span class="noon-old-price">' + formatMoney(rp.originalPrice) + "</span>"
-      : "") +
-    (rp.hasDiscount
-      ? '<span class="noon-discount-pill">' + rp.discountPercent + "%</span>"
+      ? '<span class="noon-price-compare"><span class="noon-old-price">' +
+        formatMoney(rp.originalPrice) +
+        '</span><span class="noon-discount-pill">' +
+        rp.discountPercent +
+        "%</span></span>"
       : "") +
     "</div>" +
-    (hasFreeShipping
-      ? '<div class="noon-delivery"><span class="material-icons-outlined" style="font-size:12px;">local_shipping</span> شحن مجاني</div>'
-      : '<div class="noon-delivery"><span class="material-icons-outlined" style="font-size:12px;">local_shipping</span> توصيل سريع</div>') +
-    (hasInstallment
-      ? '<div class="noon-installment"><span class="material-icons-outlined" style="font-size:12px;">credit_card</span> تقسيط يبدأ من ' + formatMoney(rp.finalPrice / 6) + '/شهر</div>'
-      : "") +
+    '<div class="noon-installment" data-months="' +
+    instMonths +
+    '"><span class="material-icons-outlined">bolt</span><span class="noon-install-text">' +
+    formatMoney(rp.finalPrice / instMonths) +
+    " / شهر</span></div>" +
+    '<div class="noon-badges"><div class="noon-badge-track">' +
+    buildProductBadges(product)
+      .map(function (b2) {
+        return (
+          '<div class="noon-badge-item"><span class="material-icons-outlined">' +
+          b2.icon +
+          "</span><span>" +
+          b2.label +
+          "</span></div>"
+        );
+      })
+      .join("") +
+    "</div></div>" +
     "</div></article>"
   );
 }
@@ -954,7 +1019,11 @@ document.addEventListener("boda:pricing-updated", function () {
     if (priceEl) priceEl.textContent = formatMoney(rp.finalPrice);
     if (oldPriceEl) oldPriceEl.textContent = rp.hasDiscount ? formatMoney(rp.originalPrice) : "";
     if (discountEl) discountEl.textContent = rp.hasDiscount ? rp.discountPercent + "%" : "";
-    if (installmentEl) installmentEl.textContent = " تقسيط يبدأ من " + formatMoney(rp.finalPrice / 6) + "/شهر";
+    if (installmentEl) {
+      var months = Number(installmentEl.getAttribute("data-months")) || 3;
+      var instTextEl = installmentEl.querySelector(".noon-install-text");
+      if (instTextEl) instTextEl.textContent = formatMoney(rp.finalPrice / months) + " / شهر";
+    }
   });
 });
 function navigateToProduct(pid) {
@@ -1617,7 +1686,14 @@ HM.renderFeatures = function () {
 // ========== SMART CATEGORY SHOWCASE (4 premium cards) ==========
 HM.renderSmartCategories = function (section) {
   var cards = HOME_CONFIG._smartCategories || [];
-  if (!cards || !cards.length) return null;
+  if (!cards || !cards.length) {
+    cards = [
+      { title: 'العناية بالبشرة', subtitle: 'مستحضرات التجميل والعناية', link_url: 'category-landing.html?slug=skincare', gradient_from: '#4facfe', gradient_to: '#00f2fe', icon: 'spa' },
+      { title: 'أزياء الصيف', subtitle: 'تشكيلات الموسم', link_url: 'category-landing.html?slug=fashion', gradient_from: '#667eea', gradient_to: '#764ba2', icon: 'checkroom' },
+      { title: 'إلكترونيات', subtitle: 'أجهزة وسماعات', link_url: 'category-landing.html?slug=electronics', gradient_from: '#f093fb', gradient_to: '#f5576c', icon: 'devices' },
+      { title: 'أحذية رياضية', subtitle: 'لأداء أفضل', link_url: 'category-landing.html?slug=shoes', gradient_from: '#43e97b', gradient_to: '#38f9d7', icon: 'directions_run' }
+    ];
+  }
   var html =
     '<section class="hm-section hm-fade hm-smart-cats" id="sec-' + (section.id || 'hm-smart-cats') + '">' +
     '<div class="hm-section-head"><h2>' + escapeHtml(section.title || 'تسوق حسب الفئة') + '</h2>' +
@@ -1625,10 +1701,12 @@ HM.renderSmartCategories = function (section) {
     '<div class="hm-section-body"><div class="hm-cats-scroll-wrap"><button class="hm-cats-btn prev" type="button" aria-label="السابق">❮</button><div class="hm-smart-cats-grid">';
   cards.forEach(function (card, i) {
     html +=
-      '<a class="hm-smart-cat-card" href="' + escapeHtml(card.link_url || '#') + '" style="--sc-gradient-from:' + (card.gradient_from || '#000') + ';--sc-gradient-to:' + (card.gradient_to || '#000') + '">' +
-      '<div class="hm-smart-cat-media">' +
+      '<a class="hm-smart-cat-card' + (card.icon ? ' hm-smart-cat-fallback' : '') + '" href="' + escapeHtml(card.link_url || '#') + '" style="--sc-gradient-from:' + (card.gradient_from || '#1e2a3a') + ';--sc-gradient-to:' + (card.gradient_to || '#33404f') + '">' +
+      (card.icon
+        ? '<span class="material-icons-outlined hm-smart-cat-icon">' + card.icon + '</span>'
+        : '<div class="hm-smart-cat-media">' +
       '<img src="' + card.image_url + '" alt="' + escapeHtml(card.title) + '" loading="' + (i < 2 ? 'eager' : 'lazy') + '" onerror="this.style.display=\'none\'" />' +
-      '</div>' +
+      '</div>') +
       '<div class="hm-smart-cat-overlay"></div>' +
       '<div class="hm-smart-cat-content">' +
       '<h3 class="hm-smart-cat-title">' + escapeHtml(card.title) + '</h3>' +
@@ -1656,15 +1734,30 @@ HM.renderSmartCategories = function (section) {
 
 HM.renderOffers = function (section) {
   var taagerOnly = HM.taagerOnly;
+  var excludeMap = {};
+  (section.excludeIds || []).forEach(function (pid) {
+    excludeMap[String(pid)] = true;
+  });
   var offers = taagerOnly
     .filter(function (p) {
+      if (excludeMap[String(p.id)]) return false;
       var rp = resolvePrice(p);
       return rp.hasDiscount && rp.discountPercent > 30;
     })
     .sort(function (a, b) {
       return resolvePrice(b).discountPercent - resolvePrice(a).discountPercent;
-    })
-    .slice(0, 12);
+    });
+  if (section.rotate && offers.length > 12) {
+    var rot = 0;
+    try {
+      rot =
+        (parseInt(localStorage.getItem("hm_summer_rotate") || "0", 10) + 5) %
+        offers.length;
+      localStorage.setItem("hm_summer_rotate", String(rot));
+    } catch (e) { rot = 0; }
+    offers = offers.slice(rot).concat(offers.slice(0, rot));
+  }
+  offers = offers.slice(0, 12);
   return HM.renderProductCarousel(section, offers.length ? offers : null);
 };
 
@@ -2264,6 +2357,7 @@ HM.renderAll = function () {
   HOME_CONFIG.sections.forEach(function (section) {
     HM.renderSection(section);
   });
+  startNoonBadgeRotator();
 };
 
 HM.renderSectionIntoSkeleton = function (skeletonEl, section, index) {
@@ -2327,6 +2421,7 @@ HM.promoteHydratedSkeleton(skeletonEl);
          document.body.classList.remove("home-hydrating");
          document.body.classList.add("home-loaded");
          HM.initHeroSlider();
+         startNoonBadgeRotator();
          resolve();
         return;
       }
@@ -2688,6 +2783,36 @@ async function renderSupabaseSections() {
   }
 }
 
+// ========== SUMMER OFFERS (mobile-only, above Most Sold / mega offers) ==========
+function renderSummerSection() {
+  if (!HM.contentEl) return;
+  if (window.innerWidth >= 768) return;
+  var megaEl = HM.contentEl.querySelector(".buda-mega-offers");
+  if (!megaEl) return;
+  var existing = document.getElementById("sec-hm-summer");
+  if (existing) return;
+  var forYouIds = [];
+  var forYouSec = document.getElementById("sec-hm-offers");
+  if (forYouSec) {
+    forYouSec.querySelectorAll("[data-view-product]").forEach(function (el) {
+      forYouIds.push(el.getAttribute("data-view-product"));
+    });
+  }
+  var container = HM.renderOffers({
+    id: "hm-summer",
+    title: "عروض الصيف",
+    excludeIds: forYouIds,
+    rotate: true,
+  });
+  var secEl = container ? container.closest(".hm-section") : null;
+  if (!secEl) {
+    var hidden = document.getElementById("sec-hm-summer");
+    if (hidden) hidden.remove();
+    return;
+  }
+  HM.contentEl.insertBefore(secEl, megaEl);
+}
+
 // ========== MEGA OFFERS RENDERER (Noon-style 3 columns) ==========
 HM.renderMegaOffers = function (section) {
   if (!HM.allProducts.length) return null;
@@ -2971,35 +3096,46 @@ HM.loadDynamicConfig = async function () {
       }
     }
 
-    // 5. Smart Category Showcase (fall back to EG when the selected country has no showcase rows)
-    var smartCc = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || localStorage.getItem('userCountry') || 'EG';
-    var smartRows = null;
-    var scReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', smartCc).order('sort_order');
-    if (!scReq.error && scReq.data && scReq.data.length) smartRows = scReq.data;
-    if (!smartRows) {
-      var scFbReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', 'EG').order('sort_order');
-      if (!scFbReq.error && scFbReq.data && scFbReq.data.length) smartRows = scFbReq.data;
-    }
-    if (smartRows && smartRows.length) {
-      var smartCats = smartRows;
-      HOME_CONFIG._smartCategories = smartCats.map(function(c) {
-        return {
-          title: c.title,
-          subtitle: c.subtitle || '',
-          image_url: c.image_url,
-          link_url: c.link_url || '#',
-          gradient_from: c.gradient_from || '#000',
-          gradient_to: c.gradient_to || '#000',
-        };
-      });
+    // 5. Smart Category Showcase — runs independently so a failing step
+    //    above never leaves the section empty (renderer shows default cards)
+    try {
+      var smartCc = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || localStorage.getItem('userCountry') || 'EG';
+      var smartRows = null;
+      var scReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', smartCc).order('sort_order');
+      if (!scReq.error && scReq.data && scReq.data.length) smartRows = scReq.data;
+      if (!smartRows) {
+        var scFbReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', 'EG').order('sort_order');
+        if (!scFbReq.error && scFbReq.data && scFbReq.data.length) smartRows = scFbReq.data;
+      }
+      if (smartRows && smartRows.length) {
+        var smartCats = smartRows;
+        HOME_CONFIG._smartCategories = smartCats.map(function(c) {
+          var gf = /^#[0-9a-fA-F]{6}$/.test(String(c.gradient_from || '')) ? c.gradient_from : '#1e2a3a';
+          var gt = /^#[0-9a-fA-F]{6}$/.test(String(c.gradient_to || '')) ? c.gradient_to : '#33404f';
+          return {
+            title: c.title,
+            subtitle: c.subtitle || '',
+            image_url: c.image_url,
+            link_url: c.link_url || '#',
+            gradient_from: gf,
+            gradient_to: gt,
+          };
+        });
+      }
+    } catch (e) {
+      console.warn('[HM] Failed to load smart categories:', e);
     }
 
-    // 5. Ad banners
-    if (sectionMap.ad_banners) {
-      var { data: adBanners } = await client.from('home_ad_banners').select('*').eq('section_id', sectionMap.ad_banners).eq('is_active', true).order('sort_order');
-      if (adBanners && adBanners.length) {
-        HOME_CONFIG._adBanners = adBanners;
+    // 6. Ad banners
+    try {
+      if (sectionMap && sectionMap.ad_banners) {
+        var { data: adBanners } = await client.from('home_ad_banners').select('*').eq('section_id', sectionMap.ad_banners).eq('is_active', true).order('sort_order');
+        if (adBanners && adBanners.length) {
+          HOME_CONFIG._adBanners = adBanners;
+        }
       }
+    } catch (e) {
+      console.warn('[HM] Failed to load ad banners:', e);
     }
   } catch (e) {
     console.warn('[HM] Failed to load dynamic config:', e);
@@ -3091,12 +3227,99 @@ function initCountryGate() {
   setTimeout(maybeOpen, 250);
 }
 
+// ========== MOBILE: HIDE HEADER TOP-ROW ON SCROLL DOWN (search stays) ==========
+function initScrollHeaderHider() {
+  if (window._budaScrollHeaderHider) return;
+  window._budaScrollHeaderHider = true;
+  if (
+    window.matchMedia &&
+    !window.matchMedia("(max-width: 767px)").matches
+  )
+    return;
+
+  var HIDE_DELAY = 750;
+  var SHOW_DELAY = 1250;
+  var lastY = Math.max(0, window.pageYOffset || 0);
+  var timer = null;
+  var ignoreUntil = 0;
+
+  function clearTimer() {
+    if (timer) {
+      clearTimeout(timer);
+      timer = null;
+    }
+  }
+  function hideHeader() {
+    if (!document.body.classList.contains("hm-scrolled-down"))
+      document.body.classList.add("hm-scrolled-down");
+    ignoreUntil = Date.now() + 500;
+  }
+  function showHeader() {
+    if (document.body.classList.contains("hm-scrolled-down"))
+      document.body.classList.remove("hm-scrolled-down");
+    ignoreUntil = Date.now() + 500;
+  }
+
+  function evalState() {
+    var y = Math.max(0, window.pageYOffset || 0);
+    if (Date.now() < ignoreUntil) {
+      lastY = y;
+      return;
+    }
+    var down = y > lastY + 10;
+    var up = y < lastY - 10;
+    lastY = y;
+    if (y <= 60) {
+      clearTimer();
+      showHeader();
+      return;
+    }
+    var hidden = document.body.classList.contains("hm-scrolled-down");
+    if (down) {
+      if (hidden) {
+        clearTimer();
+        return;
+      }
+      if (timer) return;
+      timer = setTimeout(function () {
+        timer = null;
+        hideHeader();
+      }, HIDE_DELAY);
+    } else if (up) {
+      if (!hidden) {
+        clearTimer();
+        return;
+      }
+      if (timer) return;
+      timer = setTimeout(function () {
+        timer = null;
+        showHeader();
+      }, SHOW_DELAY);
+    }
+  }
+
+  var ticking = false;
+  window.addEventListener(
+    "scroll",
+    function () {
+      if (ticking) return;
+      ticking = true;
+      window.requestAnimationFrame(function () {
+        ticking = false;
+        evalState();
+      });
+    },
+    { passive: true }
+  );
+}
+
 // ========== INIT ==========
 HM.init = async function () {
   var isHome = document.getElementById("hm-content") !== null;
   if (!isHome) return;
   HM.contentEl = document.getElementById("hm-content");
   initBudaUI();
+  initScrollHeaderHider();
   initCountryGate();
   if (
     window.skeletonLoader &&
@@ -3147,6 +3370,7 @@ HM.init = async function () {
 
   // Render skeleton -> content progressively, preserving section order and data behavior.
   await HM.renderInitialProgressively();
+  renderSummerSection();
 
   // Render dynamic sections from Supabase
   renderSupabaseSections();
@@ -3180,6 +3404,7 @@ HM.init = async function () {
     });
     HM.contentEl.innerHTML = "";
     HM.renderAll();
+    renderSummerSection();
   });
 
   // Country changed
@@ -3195,6 +3420,7 @@ HM.init = async function () {
     });
     HM.contentEl.innerHTML = "";
     HM.renderAll();
+    renderSummerSection();
   });
 };
 

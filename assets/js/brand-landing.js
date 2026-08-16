@@ -646,8 +646,12 @@ BL.init = async function () {
       } catch (e) {}
     }
     if (!allProducts.length && window.TaagerIntegration && typeof window.TaagerIntegration.getCachedProducts === "function") {
-      allProducts = window.TaagerIntegration.getCachedProducts() || [];
+      try {
+        var cachedProds = await window.TaagerIntegration.getCachedProducts();
+        if (Array.isArray(cachedProds)) allProducts = cachedProds;
+      } catch (e2) {}
     }
+    if (!Array.isArray(allProducts)) allProducts = [];
     BL.allProducts = allProducts;
 
     var brandTerm = String(BL.brand.name || '').trim().toLowerCase();
