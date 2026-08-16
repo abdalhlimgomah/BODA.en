@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BudoQ - تشخيص قسم الفئات</title>
+  <style>
+    body { font-family: Tahoma, Arial, sans-serif; background: #0f172a; color: #e2e8f0; margin: 0; padding: 16px; }
+    h1 { font-size: 18px; margin: 0 0 12px; }
+    #out { background: #1e293b; border: 1px solid #334155; border-radius: 8px; padding: 12px; font-size: 13px; line-height: 1.7; white-space: pre-wrap; word-break: break-all; min-height: 300px; }
+    .ok { color: #4ade80; } .bad { color: #f87171; }
+    iframe { display: none; }
+    #tip { color: #94a3b8; font-size: 12px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>تشخيص قسم تسوق حسب الفئة</h1>
+  <div id="out">جارِ التشخيص...</div>
+  <iframe id="f" src="home.html"></iframe>
+  <div id="tip">سيب الصفحة مفتوحة ثواني واقرأ النتيجة اللي هتظهر فوق. ابعتلي نصها.</div>
+
+  <script>
+    var out = document.getElementById("out");
+    var lines = [];
+    function log(s) { lines.push(s); out.textContent = lines.join("\n"); }
+
+    function grab() {
+      var f = document.getElementById("f");
+      try {
+        var d = f.contentDocument;
+        var w = f.contentWindow;
+        if (!d || !d.body) { log("...الانتظار"); return false; }
+
+        var smart = null;
+        var hm = null;
+        try { hm = w.HOME_CONFIG; } catch (e) { hm = null; }
+        if (hm) smart = hm._smartCategories;
+
+        var sec = d.querySelector(".hm-smart-cats");
+        var secStyle = sec ? getComputedStyle(sec) : null;
+        var cards = sec ? sec.querySelectorAll(".hm-smart-cat-card").length : -1;
+        var icons = sec ? sec.querySelectorAll(".hm-smart-cat-icon").length : -1;
+        var imgs = sec ? sec.querySelectorAll(".hm-smart-cat-media img").length : -1;
+
+        var scripts = [];
+        d.querySelectorAll("script[src]").forEach(function (s) {
+          var p = (s.getAttribute("src") || "");
+          if (/home\.js|noon-shell|home\.css/.test(p)) scripts.push(p);
+        });
+
+        log(
+          "نظام المتصفح: " + navigator.userAgent + "\n" +
+          "دقة الشاشة: " + window.innerWidth + "x" + window.innerHeight + " (DPR " + (window.devicePixelRatio || 1) + ")\n\n" +
+          "الملفات المحملة:\n" + (scripts.join("\n") || "(لا شيء)") + "\n\n" +
+          (hm ? ("صفحة HM موجودة: نعم" + (smart ? " - عدد الفئات: " + smart.length + " (أولها: " + (smart[0] && smart[0].title) + ")" : " - _smartCategories غير محملة!")) : "صفحة HM: لا (home.js لم يعمل!)") + "\n\n" +
+          "قسم تسوق حسب الفئة: " + (sec ? "موجود" : "غير موجود!") + "\n" +
+          "عدد البطاقات: " + cards + " | أيقونات (احتياطية): " + icons + " | صور: " + imgs + "\n" +
+          "حالة القسم: display=" + (secStyle ? secStyle.display : "-") + " opacity=" + (secStyle ? secStyle.opacity : "-") + "\n" +
+          "جسم الصفحة: " + (d.body.className || "") + "\n"
+        );
+        return true;
+      } catch (e) {
+        log("خطأ قراءة الصفحة: " + e.message + " (لو ظهر ده قولنا)");
+        return false;
+      }
+    }
+
+    var tries = 0;
+    var timer = setInterval(function () {
+      tries++;
+      if (grab() || tries > 30) clearInterval(timer);
+    }, 2000);
+  </script>
+</body>
+</html>
