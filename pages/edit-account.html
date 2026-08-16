@@ -12,8 +12,8 @@
   <link href="../assets/css/desktop.css?v=20260808" rel="stylesheet" />
   <link href="../assets/css/noon-components.css" rel="stylesheet" />
   <link href="../assets/css/account.css?v=20260630d" rel="stylesheet" />
-  <link href="../assets/css/phone-verification.css?v=20260704" rel="stylesheet" />
-  <link href="../assets/css/edit-account-v2.css?v=20260812" rel="stylesheet" />
+  <link href="../assets/css/phone-verification.css?v=20260819" rel="stylesheet" />
+  <link href="../assets/css/edit-account-v2.css?v=20260819" rel="stylesheet" />
 <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
@@ -58,8 +58,8 @@
           <div class="edit-field ea2-field">
             <label for="editPhoneTriggerBtn" data-i18n="رقم الجوّال">رقم الجوّال</label>
             <div id="editPhoneWrap">
-              <div class="readonly-phone-card ea2-phone-card">
-                <span class="ea2-phone-ico" aria-hidden="true">
+              <div class="readonly-phone-card ea2-phone-card" id="phoneCard">
+                <span class="ea2-phone-ico" id="phoneIcoWrap" aria-hidden="true">
                   <span class="material-icons-outlined">smartphone</span>
                 </span>
                 <div class="phone-text-wrap">
@@ -69,15 +69,14 @@
                     <span id="phoneStatusBadgeText">غير متحقق</span>
                   </span>
                 </div>
-                <button type="button" class="phone-edit-trigger ea2-phone-edit" id="editPhoneTriggerBtn">
+                <button type="button" class="phone-edit-trigger ea2-phone-edit" id="editPhoneTriggerBtn" aria-label="تغيير رقم الهاتف">
                   <span class="material-icons-outlined" aria-hidden="true">edit</span>
-                  <span>تعديل</span>
                 </button>
               </div>
               <!-- Hidden input to keep compatibility with existing submit logic -->
               <input id="editPhone" type="hidden" />
             </div>
-            <p class="field-note" data-i18n="استخدمه لتسجيل الدخول على جميع تطبيقات نون.">استخدمه لتسجيل الدخول على جميع تطبيقات BudoQ.</p>
+            <p class="field-note" data-i18n="يُستخدم هذا الرقم لتسجيل الدخول واستلام رمز التحقق عبر واتساب.">يُستخدم هذا الرقم لتسجيل الدخول واستلام رمز التحقق عبر واتساب.</p>
           </div>
 
         </div>
@@ -183,8 +182,8 @@
   <script src="../assets/js/supabase-client.js?v=20260812"></script>
   <script src="../assets/js/taager-integration.js?v=20260810"></script>
   <script src="../assets/js/store.js?v=20260812"></script>
-  <script src="../assets/js/edit-account.js?v=20260813"></script>
-  <script src="../assets/js/phone-verification-modal.js?v=20260809-3"></script>
+  <script src="../assets/js/edit-account.js?v=20260819"></script>
+  <script src="../assets/js/phone-verification-modal.js?v=20260819"></script>
   <script src="../assets/js/noon-shell.js?v=20260817"></script>
 </body>
 </html>
