@@ -358,12 +358,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
-    var target = categoryMap[urlCategory.toLowerCase()] || null;
-    if (target) {
-      var targetBtn = buttons.find(function (b) { return b.textContent.trim() === target; });
-      if (targetBtn) { targetBtn.click(); return; }
-    }
-
     handleKeywordCategory(urlCategory);
   }
 
