@@ -811,6 +811,13 @@
   }
 }
 
+/* ========== FOOTER - hidden on mobile ========== */
+@media (max-width: 767px) {
+  .hm-footer {
+    display: none;
+  }
+}
+
 /* ========== REDUCED MOTION ========== */
 @media (prefers-reduced-motion: reduce) {
   .bl-fade {

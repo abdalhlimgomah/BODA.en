@@ -242,6 +242,7 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
 .hm-smart-cat-card { position: relative; border-radius: var(--radius-xl); overflow: hidden; cursor: pointer; text-decoration: none; display: block; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--sc-gradient-from, #000), var(--sc-gradient-to, #000)); transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s ease; box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
 .hm-smart-cat-card:hover { transform: translateY(-6px); box-shadow: 0 16px 48px rgba(0,0,0,0.15); }
 .hm-smart-cat-media { position: absolute; inset: 0; overflow: hidden; border-radius: var(--radius-xl); }
+.hm-smart-cat-card.hm-smart-cat-fallback .hm-smart-cat-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 72px; color: rgba(255,255,255,0.92); z-index: 1; pointer-events: none; text-shadow: 0 4px 16px rgba(0,0,0,0.25); }
 .hm-smart-cat-media img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
 .hm-smart-cat-card:hover .hm-smart-cat-media img { transform: scale(1.08); }
 .hm-smart-cat-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0.2) 40%, rgba(0,0,0,0.05) 100%); border-radius: var(--radius-xl); transition: opacity 0.4s ease; z-index: 1; }
@@ -252,7 +253,8 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
 .hm-smart-cat-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 20px; background: rgba(255,255,255,0.15); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; font-size: var(--text-body-sm); font-weight: var(--weight-bold); color: var(--color-text-inverse); transition: all 0.3s ease; }
 .hm-smart-cat-card:hover .hm-smart-cat-btn { background: rgba(255,255,255,0.25); border-color: rgba(255,255,255,0.4); }
 @media (max-width: 768px) {
-  .hm-smart-cats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .hm-cats-scroll-wrap { display: block; }
+  .hm-smart-cats-grid { width: 100%; grid-template-columns: repeat(2, 1fr); gap: 10px; }
   .hm-smart-cat-content { padding: 16px 14px; }
   .hm-smart-cat-title { font-size: var(--text-body); }
   .hm-smart-cat-subtitle { font-size: var(--text-caption); margin-bottom: 8px; }
@@ -751,13 +753,20 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
 .noon-rating-stars { color: var(--color-success); font-size: var(--text-caption); line-height: 1; }
 .noon-rating-count { color: var(--color-text-muted); font-size: 0.62rem; }
 .noon-title { margin: 0; min-height: 2.4em; line-height: 1.2; font-size: var(--text-body-sm); font-weight: var(--weight-bold); color: var(--color-text); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-.noon-price-line { display: flex; align-items: baseline; gap: 6px; flex-wrap: wrap; }
+.noon-price-line { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; margin-top: 2px; }
 .noon-price { margin: 0; color: var(--color-text); font-size: var(--text-body); font-weight: var(--weight-black, 900); }
+.noon-price-compare { display: inline-flex; align-items: center; gap: 6px; }
 .noon-old-price { margin: 0; color: var(--color-text-muted); font-size: var(--text-caption); text-decoration: line-through; }
 .noon-discount-pill { display: inline-flex; align-items: center; justify-content: center; background: var(--color-danger); color: var(--color-text-inverse); border-radius: 4px; padding: 1px 6px; font-size: var(--text-caption); font-weight: var(--weight-black, 900); line-height: 1.5; }
 .noon-seller { font-size: 0.6rem; color: var(--color-text-muted); font-weight: var(--weight-medium); margin: 2px 0 0; }
 .noon-delivery { font-size: 0.6rem; color: var(--color-success); font-weight: var(--weight-bold); display: flex; align-items: center; gap: 3px; margin: 2px 0 0; }
-.noon-installment { font-size: 0.6rem; color: var(--color-primary); font-weight: var(--weight-bold); margin: 2px 0 0; }
+.noon-badges { height: 18px; overflow: hidden; margin-top: 2px; }
+.noon-badge-track { display: flex; flex-direction: column; will-change: transform; transition: transform 0.45s cubic-bezier(0.25, 0.8, 0.35, 1); }
+.noon-badge-item { height: 18px; line-height: 18px; display: flex; align-items: center; gap: 3px; font-size: 0.6rem; color: var(--color-success); font-weight: var(--weight-bold); white-space: nowrap; direction: rtl; }
+.noon-badge-item .material-icons-outlined { font-size: 12px; }
+.noon-installment { display: flex; align-items: center; gap: 3px; margin-top: 3px; color: var(--color-primary); font-size: 0.6rem; font-weight: var(--weight-bold); direction: rtl; }
+.noon-installment .material-icons-outlined { font-size: 12px; }
+.noon-install-text { color: inherit; font-weight: inherit; font-size: inherit; }
 
 /* ===== BRANDS CAROUSEL ===== */
 .hm-brands { display: flex; gap: 16px; overflow-x: auto; padding: 4px 0 8px; }
@@ -1346,6 +1355,27 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
     background: #d9363e; color: #fff; font-size: 0.62rem; font-weight: var(--weight-extrabold);
     padding: 3px 10px; border-radius: 999px;
     box-shadow: 0 2px 8px rgba(217,54,62,0.4);
+}
+
+/* ========== MOBILE: hide header top-row on scroll down (search stays) ========== */
+@media (max-width: 767px) {
+  .buda-header__inner {
+    max-height: 64px;
+    overflow: hidden;
+    transition: max-height 0.28s cubic-bezier(0.25, 0.8, 0.35, 1), padding 0.28s cubic-bezier(0.25, 0.8, 0.35, 1), opacity 0.18s ease, transform 0.28s cubic-bezier(0.25, 0.8, 0.35, 1);
+  }
+  body.hm-scrolled-down .buda-header__inner {
+    max-height: 0;
+    min-height: 0;
+    padding-top: 0;
+    padding-bottom: 0;
+    opacity: 0;
+    transform: translateY(-110%);
+    visibility: hidden;
+  }
+  body.hm-scrolled-down #buda-search-float {
+    padding-top: 6px;
+  }
 }
 
 /* ============================================
