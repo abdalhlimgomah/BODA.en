@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <!-- Google tag (gtag.js) -->
         <script async src="https://www.googletagmanager.com/gtag/js?id=G-PRZGJW879Z"></script>
         <script>
@@ -20,15 +20,15 @@
         <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
-        <title>بودوكيو BudoQ - منصة التسوق الاكتروني المتعددة | تسوق آمن وسهل</title>
+        <title>بودوكيو BudoQ - منصة التسوق الرقمية المتعددة | تسوق آمن وسهل</title>
         <link rel="preload" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" as="style" />
         <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" />
-        <link href="../assets/css/noon-shell.css?v=20260817" rel="stylesheet" />
-        <link href="../assets/css/desktop.css?v=20260808" rel="stylesheet" media="screen and (min-width: 768px)" />
+        <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+        <link href="../assets/css/desktop.css?v=20260723" rel="stylesheet" media="screen and (min-width: 768px)" />
         <link href="../assets/css/desktop-animations.css?v=20260723" rel="stylesheet" media="screen and (min-width: 768px)" />
         <link href="../assets/css/design-system.css" rel="stylesheet" />
-        <link href="../assets/css/home.css?v=20260815" rel="stylesheet" />
+        <link href="../assets/css/home.css?v=20260815a" rel="stylesheet" />
         <link rel="preconnect" href="https://media.taager.com" />
         <link rel="preconnect" href="https://msgqzgzoslearaprgiqq.supabase.co" />
         <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
@@ -66,43 +66,6 @@
                 .buda-footer { display: block; }
             }
             @media (min-width: 1200px) { .sk-bottomnav-overlay { display: none !important; } }
-            /* ===== Country gate (mandatory country selection) ===== */
-            .hm-country-gate {
-                position: fixed; inset: 0; z-index: 1500; display: flex; align-items: center; justify-content: center;
-                padding: 20px; background: rgba(248, 250, 255, 0.96); opacity: 0; pointer-events: none;
-                transition: opacity 200ms ease;
-            }
-            .hm-country-gate.is-open { opacity: 1; pointer-events: auto; }
-            body.hm-gate-open { overflow: hidden; }
-            .hm-country-gate__card {
-                width: min(430px, 100%); background: var(--color-surface, #fff); border: 1px solid #E5E9F2;
-                border-radius: 24px; box-shadow: 0 24px 60px rgba(15, 23, 42, 0.16);
-                padding: 32px 26px; text-align: center;
-            }
-            .hm-country-gate__icon {
-                width: 64px; height: 64px; margin: 0 auto 14px; border-radius: 50%;
-                background: linear-gradient(135deg, #F5F3FF, #EDE9FE); display: flex; align-items: center; justify-content: center;
-                font-size: 1.9rem;
-            }
-            .hm-country-gate__card h2 { margin: 0 0 8px; font-size: 1.35rem; font-weight: 900; color: #111827; }
-            .hm-country-gate__card p { margin: 0 0 22px; font-size: 0.92rem; color: #6B7280; line-height: 1.7; }
-            .hm-country-gate__options { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-            .hm-country-gate__option {
-                display: flex; align-items: center; justify-content: center; gap: 10px; padding: 16px 12px;
-                border: 1.5px solid #E2E8F0; border-radius: 16px; background: #FFFFFF; cursor: pointer;
-                font-family: inherit; font-size: 1rem; font-weight: 800; color: #1E293B;
-                transition: border-color 160ms ease, background 160ms ease, transform 160ms ease, box-shadow 160ms ease;
-            }
-            .hm-country-gate__option:hover {
-                border-color: #6D28D9; background: #FAF5FF;
-                transform: translateY(-2px); box-shadow: 0 10px 24px rgba(109, 40, 217, 0.14);
-            }
-            .hm-country-gate__option:active { transform: scale(0.98); }
-            .hm-country-gate__flag { font-size: 1.5rem; line-height: 1; }
-            .hm-country-gate__hint { margin-top: 16px; font-size: 0.8rem; color: #9CA3AF; }
-            @media (max-width: 379px) {
-                .hm-country-gate__options { grid-template-columns: 1fr; }
-            }
                       body {
                 overflow-x: clip;
                 width: 100%;
@@ -274,7 +237,7 @@
                         <a href="about.html">من نحن</a>
                         <a href="contact.html">اتصل بنا</a>
                         <a href="privacy.html">سياسة الخصوصية</a>
-                        <a href="sections.html">جميع المنتجات</a>
+                        <a href="products.html">جميع المنتجات</a>
                     </div>
                 </div>
                 <div class="buda-footer__col">
@@ -284,6 +247,14 @@
                         <a href="returns.html">سياسة الاسترجاع</a>
                         <a href="shipping.html">سياسة الشحن</a>
                         <a href="support.html">الدعم الفني</a>
+                    </div>
+                </div>
+                <div class="buda-footer__col">
+                    <h4 class="buda-footer__col-title">طرق الدفع</h4>
+                    <div class="buda-footer__links">
+                        <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg> Visa</a>
+                        <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="14" x="2" y="5" rx="2"/><line x1="2" x2="22" y1="10" y2="10"/></svg> Mastercard</a>
+                        <a href="#"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> تويل بنكي</a>
                     </div>
                 </div>
             </div>
@@ -329,27 +300,16 @@
             },1200);
         </script>
 
-        <!-- ========== COUNTRY GATE (mandatory country selection) ========== -->
-        <div id="hm-country-gate" class="hm-country-gate" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="hmCountryGateTitle">
-            <div class="hm-country-gate__card">
-                <div class="hm-country-gate__icon">🌍</div>
-                <h2 id="hmCountryGateTitle">اختر دولتك</h2>
-                <p>اختر الدولة لعرض المنتجات والأسعار المتوفرة لديك والمتابعة</p>
-                <div class="hm-country-gate__options" id="hmCountryGateOptions"></div>
-                <div class="hm-country-gate__hint">يمكنك تغيير الدولة لاحقاً من أعلى الصفحة</div>
-            </div>
-        </div>
-
-        <script src="../assets/js/noon-shell.js?v=20260817"></script>
+        <script src="../assets/js/noon-shell.js?v=20260815b"></script>
         <script src="../assets/js/skeleton-loader.js?v=20260723"></script>
-        <script src="../assets/js/store.js?v=20260812"></script>
+        <script src="../assets/js/store.js?v=20260814-4"></script>
         <script src="../assets/js/pricing-engine.js?v=20260718"></script>
-        <script src="../assets/js/taager-integration.js?v=20260810"></script>
-        <script src="../assets/js/cart.js?v=20260815"></script>
-        <script src="../assets/vendor/supabase/supabase-js@2.js?v=20260810"></script>
-        <script src="../assets/js/supabase-client.js?v=20260823"></script>
-        <script src="../assets/js/home.js?v=20260815"></script>
-        <script src="../assets/js/orders-common.js?v=20260826"></script>
+        <script src="../assets/js/taager-integration.js?v=20260814"></script>
+        <script src="../assets/js/cart.js?v=20260814-1"></script>
+        <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+        <script src="../assets/js/supabase-client.js?v=20260712f"></script>
+        <script src="../assets/js/home.js?v=20260815d"></script>
+        <script src="../assets/js/orders-common.js?v=20260309-1"></script>
         <script src="../assets/js/my-orders.js?v=20260405-3"></script>
         <script src="../assets/js/ahsab.js?v=20260630f"></script>
         <script src="../assets/js/pricing-engine.js"></script>

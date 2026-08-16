@@ -2,14 +2,14 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>إتمام الطلب - BudoQ</title>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link href="../assets/css/noon-shell.css?v=20260817" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
   <link href="../assets/design-system/index.css" rel="stylesheet" />
-  <link href="../assets/css/desktop.css?v=20260808" rel="stylesheet" />
+  <link href="../assets/css/desktop.css" rel="stylesheet" />
   <link href="../assets/css/desktop-animations.css" rel="stylesheet" />
-  <link href="../assets/css/checkout.css?v=20260812" rel="stylesheet" />
+  <link href="../assets/css/checkout.css" rel="stylesheet" />
   <link href="../assets/css/phone-verification.css" rel="stylesheet" />
   <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
   <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
@@ -31,8 +31,8 @@
         <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><polyline points="12 19 5 12 12 5"/></svg>
       </button>
       <div class="ch-header-center">
-        <img src="../assets/images/buda-logo.svg" alt="Buda" class="ch-logo-img" onerror="this.style.display='none'" />
-        <span class="ch-brand-title">BudoQ</span>
+        <img src="../assets/images/logo/buda-logo.png" alt="Buda" class="ch-logo-img" onerror="this.style.display='none'" />
+        <span class="ch-brand-title">Buda</span>
       </div>
       <div class="ch-secure-badge">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
@@ -117,26 +117,26 @@
         <div class="ch-summary-prices-col">
           <div class="ch-summary-line">
             <span class="ch-summary-label">المجموع الفرعي</span>
-            <span class="ch-summary-value" id="ch-subtotal">0 ج.م</span>
+            <span class="ch-summary-value" id="ch-subtotal">0.00 ج.م</span>
           </div>
           <div class="ch-summary-line">
             <span class="ch-summary-label">الشحن</span>
-            <span class="ch-summary-value" id="ch-shipping">0 ج.م</span>
+            <span class="ch-summary-value" id="ch-shipping">0.00 ج.م</span>
           </div>
           <div class="ch-summary-line" id="ch-cod-fee-line" style="display:none;">
             <span class="ch-summary-label">رسوم الدفع عند الاستلام</span>
-            <span class="ch-summary-value" id="ch-cod-fee">0 ج.م</span>
+            <span class="ch-summary-value" id="ch-cod-fee">0.00 ج.م</span>
           </div>
           <div class="ch-summary-line" id="ch-discount-row" style="display:none;">
             <span class="ch-summary-label">الخصم</span>
-            <span class="ch-summary-value ch-discount-value" id="ch-discount">- 0 ج.م</span>
+            <span class="ch-summary-value ch-discount-value" id="ch-discount">- 0.00 ج.م</span>
           </div>
           <!-- hidden tax (JS requires this ID) -->
           <div id="ch-tax" style="display:none;"></div>
           <div class="ch-summary-divider"></div>
           <div class="ch-summary-line ch-summary-total-line">
             <span class="ch-summary-total-label">الإجمالي الكلي</span>
-            <span class="ch-summary-total-value" id="ch-grand-total">0 ج.م</span>
+            <span class="ch-summary-total-value" id="ch-grand-total">0.00 ج.م</span>
           </div>
         </div>
       </div>
@@ -193,33 +193,6 @@
       </button>
     </div>
 
-    <!-- ===== DELIVERY CITY (GOVERNORATE) ===== -->
-    <div class="ch-card ch-gov-card" id="ch-gov-card">
-      <div class="ch-section-title">
-        <span class="ch-brand-dot"></span>
-        <span id="ch-gov-card-title">المحافظة</span>
-      </div>
-      <div id="ch-gov-display" class="ch-gov-display" style="display:none;">
-        <div class="ch-gov-display-row">
-          <div class="ch-gov-display-body">
-            <span class="ch-gov-display-label" id="ch-gov-display-label">المحافظة</span>
-            <div class="ch-gov-display-main">
-              <span class="ch-gov-display-name" id="ch-gov-display-name"></span>
-              <span class="ch-gov-display-fee" id="ch-gov-display-fee"></span>
-            </div>
-          </div>
-          <button class="ch-gov-change-btn" id="ch-gov-change-btn" type="button">تغيير</button>
-        </div>
-      </div>
-      <div id="ch-gov-selector">
-        <div id="ch-governorate" class="ch-gov-select" role="button" tabindex="0">
-          <span id="ch-gov-placeholder" class="ch-gov-placeholder">اختر المحافظة</span>
-          <svg class="ch-gov-arrow" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </div>
-      </div>
-      <input type="hidden" id="ch-gov-input" value="" />
-    </div>
-
     <!-- ===== FORM FIELDS ===== -->
     <div class="ch-card" id="ch-address-form">
       <div class="ch-section-title">
@@ -237,6 +210,28 @@
       <div class="ch-field">
         <label for="ch-phone">رقم الهاتف</label>
         <input id="ch-phone" type="tel" placeholder="01XXXXXXXXX" required />
+      </div>
+      <div class="ch-field" id="ch-gov-field">
+        <label>المحافظة</label>
+        <div id="ch-gov-selector">
+          <div id="ch-governorate" class="ch-gov-select" role="button" tabindex="0">
+            <span id="ch-gov-placeholder" class="ch-gov-placeholder">اختر المحافظة</span>
+            <svg class="ch-gov-arrow" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+        <input type="hidden" id="ch-gov-input" value="" />
+      </div>
+      <div id="ch-gov-display" class="ch-gov-display" style="display:none;">
+        <div class="ch-gov-display-row">
+          <div class="ch-gov-display-body">
+            <span class="ch-gov-display-label">المحافظة</span>
+            <div class="ch-gov-display-main">
+              <span class="ch-gov-display-name" id="ch-gov-display-name"></span>
+              <span class="ch-gov-display-fee" id="ch-gov-display-fee"></span>
+            </div>
+          </div>
+          <button class="ch-gov-change-btn" id="ch-gov-change-btn" type="button">تغيير</button>
+        </div>
       </div>
       <div class="ch-field">
         <label for="ch-address">العنوان التفصيلي</label>
@@ -402,22 +397,47 @@
   <div id="ch-confirm-overlay" class="ch-confirm-overlay">
     <div class="ch-confirm-bg"></div>
     <div class="ch-confirm-scene">
-      <div class="ch-brand-lockup" id="ch-brand-lockup">
-        <span class="ch-brand-name">BUDOQ</span>
-      </div>
       <div class="ch-confirm-stage" id="ch-stage-1">
-        <div class="ch-fill-dots" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="ch-icon-3d">
+          <div class="ch-cube">
+            <div class="ch-cube-face ch-cube-front">
+              <div class="ch-cube-brand">BUDA</div>
+              <div class="ch-cube-lines">
+                <span></span><span></span><span></span>
+              </div>
+            </div>
+            <div class="ch-cube-face ch-cube-top"></div>
+            <div class="ch-cube-face ch-cube-right"></div>
+          </div>
+        </div>
         <p class="ch-confirm-text">جاري تأكيد طلبك...</p>
         <div class="ch-progress-bar"><span></span></div>
       </div>
       <div class="ch-confirm-stage hidden" id="ch-stage-2">
-        <div class="ch-lottie-holder" id="ch-lottie-truck"></div>
+        <div class="ch-map-ani">
+          <div class="ch-map-dot ch-map-dot-from"></div>
+          <svg class="ch-map-arc" viewBox="0 0 148 60" fill="none">
+            <path class="ch-arc-travel" d="M0 58 C37 10, 111 10, 148 58" stroke="rgba(109,40,217,0.3)" stroke-width="2" stroke-dasharray="200" stroke-dashoffset="200"/>
+          </svg>
+          <div class="ch-ship-wrap">
+            <div class="ch-ship">
+              <div class="ch-ship-body"><span class="ch-ship-brand">B</span></div>
+              <div class="ch-ship-window"></div>
+            </div>
+          </div>
+          <div class="ch-map-dot ch-map-dot-to"></div>
+        </div>
         <p class="ch-confirm-text">يجري تجهيز طلبك للتوصيل...</p>
         <div class="ch-progress-bar"><span></span></div>
       </div>
       <div class="ch-confirm-stage hidden" id="ch-stage-3">
-        <div class="ch-lottie-holder" id="ch-lottie-success"></div>
-        <p class="ch-confirm-text ch-confirm-success">تم تأكيد طلبك بنجاح!</p>
+        <div class="ch-success-ring">
+          <svg viewBox="0 0 110 110" fill="none">
+            <circle class="ch-sr-progress" cx="55" cy="55" r="48" stroke="rgba(34,197,94,0.15)" stroke-width="6" stroke-dasharray="301" stroke-dashoffset="301"/>
+            <polyline class="ch-sr-check" points="35,55 48,68 77,39" stroke="#22c55e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="60" stroke-dashoffset="60"/>
+          </svg>
+        </div>
+        <p class="ch-confirm-text ch-confirm-success">تم تأكيد الطلب بنجاح!</p>
       </div>
     </div>
   </div>
@@ -426,7 +446,7 @@
   <div class="ch-footer">
     <div class="ch-footer-left">
       <span class="ch-footer-label">الإجمالي</span>
-      <span class="ch-footer-total" id="ch-footer-total">0 ج.م</span>
+      <span class="ch-footer-total" id="ch-footer-total">0.00 ج.م</span>
     </div>
     <button class="ch-confirm-btn" id="ch-confirm-mobile" type="button">
       <span class="ch-btn-text">ادفع الآن</span>
@@ -434,22 +454,20 @@
     </button>
   </div>
 
-  <script src="../assets/vendor/supabase/supabase-js@2.js?v=20260810"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
   <script>
     window.SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
     window.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
   </script>
-  <script src="../assets/js/supabase-client.js?v=20260823"></script>
+  <script src="../assets/js/supabase-client.js?v=20260712f"></script>
   <script src="../assets/js/auth.config.js?v=20260630"></script>
-  <script src="../assets/js/taager-integration.js?v=20260810"></script>
-  <script src="../assets/js/store.js?v=20260812"></script>
+  <script src="../assets/js/taager-integration.js?v=20260814"></script>
+  <script src="../assets/js/store.js?v=20260814-4"></script>
   <script src="../assets/js/pricing-engine.js?v=20260703"></script>
   <script src="../assets/js/shipping-zones.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='../assets/vendor/lottie/lottie.min.js';document.head.appendChild(s)"></script>
-  <script src="../assets/js/checkout-lottie-data.js?v=20260814"></script>
-  <script src="../assets/js/checkout.js?v=20260818"></script>
-  <script src="../assets/js/phone-verification-modal.js?v=20260809-3"></script>
-  <script src="../assets/js/noon-shell.js?v=20260817"></script>
+  <script src="../assets/js/checkout.js?v=20260707"></script>
+  <script src="../assets/js/phone-verification-modal.js"></script>
+  <script src="../assets/js/noon-shell.js"></script>
   <script>
   (function() {
     function renderSummaryImages() {
@@ -487,7 +505,7 @@
         var name = item.name || item.title || "منتج";
         var qty = item.quantity || item.qty || 1;
         var price = item.price || item.total || 0;
-        var currency = item.currency || (typeof window.getCheckoutCurrency === "function" ? window.getCheckoutCurrency() : "ج.م");
+        var currency = item.currency || "ج.م";
         html += '<div class="ch-summary-detail-item">';
         html += '<div class="ch-summary-detail-img"><img src="' + img.replace(/"/g, "&quot;") + '" alt="" loading="lazy" onerror="this.style.display=\'none\'" /></div>';
         html += '<div class="ch-summary-detail-body">';
@@ -517,8 +535,8 @@
       var isCod = selected && selected.getAttribute("data-payment") === "cod";
       line.style.display = isCod ? "flex" : "none";
       if (isCod) {
-        var fee = typeof window.getCheckoutCodFee === "function" ? window.getCheckoutCodFee() : 12;
-        var currency = typeof window.getCheckoutCurrency === "function" ? window.getCheckoutCurrency() : "جنيه";
+        var fee = 12;
+        var currency = "ج.م";
         feeEl.textContent = fee.toFixed(2) + " " + currency;
       }
     }

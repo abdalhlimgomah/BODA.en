@@ -1,8 +1,8 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>من نحن - بودوكيو BudoQ | منصة التجارة الإلكترونية</title>
   <meta name="description" content="بودوكيو (BudoQ) منصة تجارة إلكترونية تقدم أفضل المنتجات والعلامات التجارية الموثوقة مع تجربة تسوق سهلة وآمنة وتوصيل سريع لكل مصر والسعودية." />
   <meta name="robots" content="index, follow" />
@@ -19,8 +19,8 @@
   <link href="../assets/fonts/inter.css" rel="stylesheet" />
   <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
   <link href="../assets/css/noon-theme.css" rel="stylesheet" />
-  <link href="../assets/css/noon-shell.css?v=20260817" rel="stylesheet" />
-  <link href="../assets/css/desktop.css?v=20260808" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260630" rel="stylesheet" />
   <link href="../assets/css/noon-components.css" rel="stylesheet" />
 <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
@@ -30,7 +30,7 @@
 <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="../assets/icons/site.webmanifest">
 <meta name="theme-color" content="#6D28D9">
-<link href="../assets/css/home.css?v=20260808" rel="stylesheet" />
+<link href="../assets/css/home.css?v=20260711a" rel="stylesheet" />
 <style>
   .about-hero {
     background: linear-gradient(135deg, #6D28D9 0%, #A855F7 50%, #7C3AED 100%);
@@ -357,7 +357,7 @@
       <p>سواء كنت تبحث عن أفضل المنتجات أو تريد تجربة تسوق موثوقة — نحن هنا من أجلك في مصر والسعودية.</p>
       <a href="signup/index.html" class="btn-cta">
         <span class="material-icons-outlined">person_add</span>
-        أنشئ حسابك 
+        أنشئ حسابك مجاناً
       </a>
     </div>
 
@@ -370,6 +370,28 @@
 
   </main>
 
+  <nav class="bottom-nav">
+    <a href="home.html" data-nav="home">
+      <span class="material-icons-outlined">home</span>
+      <small>الرئيسية</small>
+    </a>
+    <a href="products.html" data-nav="products">
+      <span class="material-icons-outlined">category</span>
+      <small>الفئات</small>
+    </a>
+    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="الرئيسية">
+      <img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" />
+    </button>
+    <a href="ahsab.html" data-nav="account">
+      <span class="material-icons-outlined">person</span>
+      <small>حسابي</small>
+    </a>
+    <a href="empty-cart.html" data-nav="cart">
+      <span class="material-icons-outlined">shopping_cart</span>
+      <small>العربة</small>
+      <span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span>
+    </a>
+  </nav>
 
   <script>
     if (localStorage.getItem("isLoggedIn") === "true") {
@@ -377,10 +399,9 @@
       if (el) el.style.display = "none";
     }
   </script>
-  <script src="../assets/vendor/supabase/supabase-js@2.js?v=20260810"></script>
-  <script src="../assets/js/supabase-client.js?v=20260823"></script>
-  <script src="../assets/js/store.js?v=20260812"></script>
-  <script src="../assets/js/taager-integration.js?v=20260810"></script>
-  <script src="../assets/js/noon-shell.js?v=20260817"></script>
+  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
+  <script src="../assets/js/supabase-client.js?v=20260327-1"></script>
+  <script src="../assets/js/store.js?v=20260814-4"></script>
+  <script src="../assets/js/noon-shell.js"></script>
 </body>
 </html>
