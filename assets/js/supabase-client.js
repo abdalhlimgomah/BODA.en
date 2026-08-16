@@ -111,11 +111,6 @@ if (typeof DEFAULT_ORDERS_COLUMNS === 'undefined') {
     "shipping_fee",
     "shipping",
     "shipping_cost",
-    "order_batch_id",
-    "tax",
-    "tax_amount",
-    "cod_fee",
-    "payment_fee",
   ];
 }
 
@@ -253,13 +248,6 @@ function normalizeTaagerDbProduct(item) {
     seller_id: sanitizeText(item.seller_id || "taager") || "taager",
     seller_email: sanitizeText(item.seller_email || item.vendor_email || item.owner_email),
     brand: sanitizeText(item.brand || item.vendor || item.store_name),
-    return_allowed: item.return_allowed,
-    warranty: sanitizeText(item.warranty),
-    colors: Array.isArray(item.colors) ? item.colors : [],
-    sizes: Array.isArray(item.sizes) ? item.sizes : [],
-    sales_count: safeNumber(item.sales_count),
-    vendor: sanitizeText(item.vendor),
-    company_name: sanitizeText(item.company_name),
     stock: safeNumber(item.stock ?? item.quantity ?? 999) || 0,
     stockStatus: sanitizeText(item.stock_status || item.stockStatus || "in_stock") || "in_stock",
     stock_status: sanitizeText(item.stock_status || item.stockStatus || "in_stock") || "in_stock",
@@ -314,7 +302,7 @@ function filterTaagerProductsByCountry(products = [], countryCode = "") {
 }
 
 const TAAGER_LIST_COLUMNS =
-  "id,taager_product_id,name,created_at,description,quick_details,content_ideas,how_to_use,videos,category,price,original_price,image,images,image1,image2,image3,image4,image5,image6,image7,image8,available_countries,stock,stock_status,brand,seller,source,is_active,updated_at,last_synced_at,return_allowed,warranty,colors,sizes,sales_count,vendor,company_name";
+  "id,taager_product_id,name,created_at,description,quick_details,content_ideas,how_to_use,videos,category,price,original_price,image,images,image1,image2,image3,image4,image5,image6,image7,image8,available_countries,stock,stock_status,brand,seller,source,is_active,updated_at,last_synced_at";
 
 const _taagerListMemoryCache = {};
 const TAAGER_LIST_CACHE_TTL = 10 * 60 * 1000;
@@ -1128,18 +1116,6 @@ function buildOrderPayload(order, items, columnsSet) {
     payload[shippingCol] = Number(order.shipping_cost) || 0;
   }
 
-  // معرف مجموعة الطلبات (نفس السلة / نفس صفحة الدفع)
-  const batchCol = pickColumn(columnsSet, ["order_batch_id"]);
-  if (batchCol && order.order_batch_id) {
-    payload[batchCol] = String(order.order_batch_id).trim();
-  }
-
-  // رسوم الدفع (COD) - تُحسب مرة واحدة لكل سلة
-  const taxCol = pickColumn(columnsSet, ["tax", "tax_amount", "cod_fee", "payment_fee"]);
-  if (taxCol && order.tax !== undefined && order.tax !== null) {
-    payload[taxCol] = Number(order.tax) || 0;
-  }
-
   // Taager integration fields
   const orderSourceCol = pickColumn(columnsSet, ["order_source"]);
   const countryCodeCol = pickColumn(columnsSet, ["country_code"]);
@@ -1329,14 +1305,9 @@ async function insertOrderWithFallbackPatterns(client, order, items = []) {
     taager_order_status: order.taager_order_status || undefined,
   });
 
-  const batchFields = cleanPayload({
-    order_batch_id: order.order_batch_id || undefined,
-    tax: order.tax || undefined,
-  });
-
   let lastError = null;
   for (const raw of patterns) {
-    const payload = cleanPayload({ ...sellerFields, ...taagerFields, ...batchFields, ...(raw || {}) });
+    const payload = cleanPayload({ ...sellerFields, ...taagerFields, ...(raw || {}) });
     const { error } = await client.from("orders").insert([payload]);
     if (!error) return { payload, error: null };
     lastError = error;
