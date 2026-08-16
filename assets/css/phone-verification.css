@@ -774,3 +774,362 @@
   flex-shrink: 0;
 }
 
+/* ========================================================
+   Premium Redesign — Header Title Group
+   ======================================================== */
+.pm-title-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pm-title-icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--ea-v2-primary-softer, #f3e8ff);
+  color: var(--ea-v2-primary, #6D28D9);
+}
+.pm-title-icon .material-icons-outlined {
+  font-size: 20px;
+}
+.pm-title-icon.wa {
+  background: var(--whatsapp-light);
+}
+.pm-title-icon.wa svg {
+  width: 20px;
+  height: 20px;
+}
+
+.pm-title-sub {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #8a8a8a;
+  margin: 2px 0 0;
+  line-height: 1.4;
+}
+
+/* ========================================================
+   Premium Redesign — Channel Cards
+   ======================================================== */
+.channel-card {
+  flex-direction: column;
+  gap: 6px;
+  padding: 14px 10px;
+  text-align: center;
+  position: relative;
+}
+.channel-card svg {
+  width: 24px;
+  height: 24px;
+}
+.channel-card .cc-txt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  line-height: 1.3;
+}
+.channel-card .cc-title {
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+.channel-card .cc-title .cc-rec {
+  display: inline-block;
+  font-style: normal;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #128c7e;
+  background: var(--whatsapp-light);
+  border-radius: 999px;
+  padding: 2px 8px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+.channel-card .cc-sub {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #9a9a9a;
+}
+.channel-card.active {
+  border-color: #1a1a1a;
+  background: #fff;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+}
+.channel-card.active.whatsapp {
+  border-color: var(--whatsapp-green);
+  background: var(--whatsapp-light);
+  box-shadow: 0 2px 10px rgba(37, 211, 102, 0.18);
+}
+.channel-card.active.whatsapp .cc-sub {
+  color: #128c7e;
+}
+
+/* ========================================================
+   Premium Redesign — CTA Buttons
+   ======================================================== */
+.phone-primary-btn {
+  border-radius: 10px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.phone-primary-btn.wa {
+  background: linear-gradient(135deg, #128C7E, #25D366);
+  color: #fff;
+}
+.phone-primary-btn.wa:disabled {
+  background: #f2f2f2 !important;
+  color: #b2b2b2 !important;
+}
+
+/* ========================================================
+   Premium Redesign — Secure Note
+   ======================================================== */
+.pm-secure-note {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #9a9a9a;
+  margin: 12px 0 0;
+}
+.pm-secure-note .material-icons-outlined {
+  font-size: 15px;
+  color: #10b981;
+}
+
+/* ========================================================
+   Premium Redesign — OTP Channel Badge & Arrival Note
+   ======================================================== */
+.otp-channel-badge {
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  box-shadow: 0 2px 8px rgba(37, 211, 102, 0.22);
+  animation: badge-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.otp-channel-badge.sms {
+  box-shadow: 0 2px 8px rgba(75, 85, 99, 0.18);
+}
+.otp-channel-badge svg {
+  width: 16px;
+  height: 16px;
+}
+@keyframes badge-in {
+  from { transform: scale(0.85); opacity: 0; }
+  to   { transform: scale(1);    opacity: 1; }
+}
+
+.otp-arrival-note {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #999;
+  text-align: center;
+  margin: -6px 0 14px;
+  padding: 0 6px;
+  line-height: 1.5;
+}
+
+/* ========================================================
+   Premium Redesign — Verified Phone Card in Edit Account
+   ======================================================== */
+.readonly-phone-card.verified .ea2-phone-ico {
+  background: linear-gradient(135deg, #128C7E, #25D366);
+  color: #fff;
+}
+.readonly-phone-card .ea2-wa-ico {
+  width: 20px;
+  height: 20px;
+}
+
+/* ========================================================
+   Noon Exact Match — Modal Shell
+   ======================================================== */
+.phone-modal {
+  border-radius: 16px;
+  padding: 18px 24px 20px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.18);
+}
+
+.noon-stepper {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 4px;
+}
+.noon-close-btn.phone-modal-close {
+  width: 36px;
+  height: 36px;
+}
+.noon-close-btn.phone-modal-close .material-icons-outlined {
+  font-size: 20px;
+}
+
+.noon-step-title {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--noon-text);
+  text-align: center;
+  margin: 0 0 6px;
+}
+
+.noon-step-desc {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #777;
+  text-align: center;
+  margin: 0 0 20px;
+  line-height: 1.6;
+}
+
+.noon-otp-desc {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #777;
+  text-align: center;
+  margin: 0 0 18px;
+  line-height: 1.7;
+}
+.noon-otp-desc .noon-phone-val {
+  direction: ltr;
+  display: inline-block;
+  font-weight: 800;
+  color: var(--noon-text);
+  unicode-bidi: plaintext;
+}
+
+/* Channel badge → inline chip inside the OTP description (Noon style) */
+.otp-channel-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  vertical-align: middle;
+  margin: 0 2px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  border-radius: 999px;
+  animation: badge-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.otp-channel-badge svg {
+  width: 16px;
+  height: 16px;
+}
+.otp-channel-badge.whatsapp {
+  background: var(--whatsapp-light);
+  color: #128c7e;
+  box-shadow: 0 1px 6px rgba(37, 211, 102, 0.25);
+}
+.otp-channel-badge.sms {
+  background: var(--sms-light);
+  color: var(--sms-gray);
+  box-shadow: 0 1px 6px rgba(75, 85, 99, 0.15);
+}
+
+/* OTP boxes — Noon style */
+.otp-inputs-row {
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.otp-digit-input {
+  width: 46px;
+  height: 50px;
+  border: 1.5px solid var(--noon-border);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 1.3rem;
+}
+.otp-digit-input:focus {
+  border-color: #1a1a1a;
+  border-bottom-width: 2.5px;
+}
+
+.otp-timer-container {
+  font-size: 0.8rem;
+  margin-bottom: 10px;
+}
+
+/* Resend — Noon: "الـOTP لسه موصلش؟" + two option buttons */
+.otp-resend-container {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.otp-resend-title {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #555;
+  margin: 0;
+}
+.otp-resend-options {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+.otp-resend-btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 11px 8px;
+  border: 1.5px solid var(--noon-border);
+  border-radius: 10px;
+  background: #fff;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #333;
+  cursor: pointer;
+  transition: all 0.15s;
+  user-select: none;
+}
+.otp-resend-btn svg {
+  width: 22px;
+  height: 22px;
+}
+.otp-resend-btn:hover {
+  border-color: #888;
+  background: #f9f9f9;
+}
+.otp-resend-btn.whatsapp:hover {
+  border-color: var(--whatsapp-green);
+  background: var(--whatsapp-light);
+}
+
+/* Attempts — Noon muted style */
+.otp-error-msg {
+  color: var(--danger-red);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-align: center;
+  margin: -6px 0 10px;
+  min-height: 16px;
+}
+
+.otp-attempts-left {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--sms-gray);
+  margin-bottom: 12px;
+  min-height: 16px;
+}
+
+@media (max-width: 480px) {
+  .phone-modal {
+    padding: 14px 18px 18px;
+  }
+  .otp-digit-input {
+    width: 42px;
+    height: 46px;
+  }
+}
+
