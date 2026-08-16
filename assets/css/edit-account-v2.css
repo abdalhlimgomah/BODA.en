@@ -320,21 +320,21 @@ body.app-shell:has(.edit-account-page) {
   flex-shrink: 0;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 8px 14px;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
   border: 1px solid var(--ea-v2-primary-light);
-  border-radius: 999px;
+  border-radius: 10px;
   background-color: var(--ea-v2-primary-softer);
   color: var(--ea-v2-primary);
   font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 700;
   cursor: pointer;
   text-decoration: none;
   transition: background-color 0.2s, color 0.2s, border-color 0.2s, transform 0.15s;
 }
 .edit-account-page .phone-edit-trigger .material-icons-outlined {
-  font-size: 16px;
+  font-size: 19px;
 }
 .edit-account-page .phone-edit-trigger:hover {
   background-color: var(--ea-v2-primary);
