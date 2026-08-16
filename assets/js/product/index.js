@@ -280,18 +280,59 @@
     initTabs();
     renderBanner();
 
-    // Listen for pricing engine tiers loaded — re-render price
-    function onPricingUpdated() {
+    // Shared price recompute: used by BOTH the size-click handler and the
+    // pricing-engine "tiers loaded" event — so the displayed price can never
+    // revert to the base price while a priced size is selected (and it stays in
+    // sync with what addToCart stores: the selected size's price).
+    function applyPriceForSize(size) {
       if (!vm || !vm.raw) return;
-      var price = D.buildPrice(vm.raw);
-      vm.price = price;
-      var buyboxRoot = document.querySelector("[data-pdp-scope=buybox]");
-      if (buyboxRoot) {
-        global.PDP.PriceCard.render(buyboxRoot, vm);
-        if (global.PDP.StickyAddToCart) global.PDP.StickyAddToCart.render(vm);
+      var perSize = size ? Number(size.price) || 0 : 0;
+      var base = D.buildPrice(vm.raw);
+      var fallback = base && base.current > 0 ? base.current : (Number((vm.price || {}).current) || 0);
+      var current = perSize > 0 ? perSize : fallback;
+      var previous = vm.price || {};
+      var original = Number(previous.original) || 0;
+      if (original <= current) original = current;
+      vm.price = {
+        current: current,
+        original: original,
+        hasDiscount: original > current,
+        discountPercent: original > current ? Math.round(((original - current) / original) * 100) : 0,
+        savings: original > current ? original - current : 0,
+        currentText: U.money(current),
+        originalText: U.money(original),
+      };
+      var priceRoot = document.querySelector("[data-pdp-price]");
+      if (global.PDP.PriceCard && priceRoot) global.PDP.PriceCard.render(priceRoot, vm);
+      var stickyEl = document.querySelector("[data-pdp-sticky]");
+      if (stickyEl) {
+        var sp = stickyEl.querySelector(".pdp-sticky-price");
+        var sop = stickyEl.querySelector(".pdp-sticky-price-old");
+        if (sp) sp.textContent = vm.price.currentText;
+        if (sop) {
+          sop.textContent = vm.price.hasDiscount ? vm.price.originalText : "";
+          sop.style.display = vm.price.hasDiscount ? "" : "none";
+        }
       }
     }
+
+    // Listen for pricing engine tiers loaded — re-render price
+    function onPricingUpdated() {
+      var sz = null;
+      if (global.PDP.SizeSelector && typeof global.PDP.SizeSelector.getSelectedSize === "function") {
+        sz = global.PDP.SizeSelector.getSelectedSize();
+      }
+      applyPriceForSize(sz);
+    }
     document.addEventListener("boda:pricing-updated", onPricingUpdated);
+
+    // Size selection — per-size price (from the admin matrix editor) REPLACES the buybox price.
+    // Never feed a selling price back into PricingEngine.calculate(): that compounds the markup
+    // on every click (the price grows each time a size is clicked). Size prices are final; when a
+    // size has no price, fall back to the clean base price of the product — never to a transient.
+    document.addEventListener("pdp:size-change", function (e) {
+      applyPriceForSize(e.detail && e.detail.size);
+    });
 
     // Size guide button
     document.addEventListener("click", function (e) {

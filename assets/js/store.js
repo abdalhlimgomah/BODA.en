@@ -1231,12 +1231,21 @@ const addToCart = (product, quantity = 1, options = {}) => {
   }
   const targetId = String(product.id) + variantSuffix;
   const priceInfo = resolveProductPrice(product);
-  if (window.PricingEngine?.tiersLoaded) {
-    priceInfo.currentPrice = window.PricingEngine.calculate(priceInfo.currentPrice);
+  var perSizePrice =
+    selectedSize && typeof selectedSize === "object" && !Array.isArray(selectedSize)
+      ? Number(selectedSize.price) || 0
+      : 0;
+  var finalPrice = perSizePrice > 0 ? perSizePrice : priceInfo.currentPrice;
+  if (perSizePrice <= 0 && window.PricingEngine?.tiersLoaded) {
+    finalPrice = window.PricingEngine.calculate(finalPrice);
   }
   const existingItem = cart.find(function (item) { return String(item.id) === targetId; });
   if (existingItem) {
     existingItem.quantity += quantity;
+    if (perSizePrice > 0) {
+      existingItem.price = perSizePrice;
+      existingItem.selected_size_price = perSizePrice;
+    }
   } else {
     var source = product.source || "internal";
     var taagerProductId = product.taager_product_id || "";
@@ -1256,7 +1265,8 @@ const addToCart = (product, quantity = 1, options = {}) => {
       legacy_product_id: product.legacy_product_id ?? "",
       product_uuid: product.product_uuid ?? product.uuid ?? "",
       name: product.name,
-      price: priceInfo.currentPrice,
+      price: finalPrice,
+      selected_size_price: perSizePrice > 0 ? perSizePrice : undefined,
       quantity,
       image: productImage,
       image_url: product.image_url || product.imageUrl || productImage,
@@ -1280,7 +1290,13 @@ const addToCart = (product, quantity = 1, options = {}) => {
   saveCart(cart);
 
   if (options?.silent !== true) {
-    notifyCartAdded(product, quantity, priceInfo);
+    var toastInfo =
+      perSizePrice > 0
+        ? { currentPrice: finalPrice }
+        : finalPrice !== priceInfo.currentPrice
+          ? Object.assign({}, priceInfo, { currentPrice: finalPrice })
+          : priceInfo;
+    notifyCartAdded(product, quantity, toastInfo);
   }
 };
 

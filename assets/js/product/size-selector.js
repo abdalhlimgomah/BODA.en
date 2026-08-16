@@ -43,18 +43,21 @@
 
     root.innerHTML = header + '<div class="pdp-size-options' + scrollClass + '">' + btns + '</div>';
 
-    root.addEventListener('click', function (e) {
-      var btn = e.target.closest('.pdp-size-btn');
-      if (!btn || btn.disabled) return;
-      var idx = Number(btn.getAttribute('data-size-idx'));
-      var size = sizes[idx];
-      if (!size) return;
-      if (size._siblingId && size._siblingId !== U.getQueryParam("id")) {
-        window.location.href = "product.html?id=" + encodeURIComponent(size._siblingId);
-        return;
-      }
-      selectSize(size, btn);
-    });
+    if (!root.dataset.sizeBound) {
+      root.dataset.sizeBound = "1";
+      root.addEventListener('click', function (e) {
+        var btn = e.target.closest('.pdp-size-btn');
+        if (!btn || btn.disabled) return;
+        var idx = Number(btn.getAttribute('data-size-idx'));
+        var size = sizes[idx];
+        if (!size) return;
+        if (size._siblingId && size._siblingId !== U.getQueryParam("id")) {
+          window.location.href = "product.html?id=" + encodeURIComponent(size._siblingId);
+          return;
+        }
+        selectSize(size, btn);
+      });
+    }
   }
 
   function selectSize(size, btn) {

@@ -233,6 +233,7 @@ function injectFloatingSearch() {
   if (document.getElementById('buda-search-float')) return;
   var header = document.querySelector('.app-header');
   if (!header) return;
+  var isHome = document.getElementById('hm-content') !== null;
   var wrap = document.createElement('div');
   wrap.id = 'buda-search-float';
   wrap.innerHTML =
@@ -241,8 +242,21 @@ function injectFloatingSearch() {
     '    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>' +
     '  </span>' +
     '  <input id="search-input" class="buda-search-box__input" type="text" data-search-target="search.html" placeholder="ابحث عن منتجاتك المفضلة..." autocomplete="off" />' +
+    (isHome
+      ? '  <button type="button" class="buda-search-box__btn buda-search-camera" aria-label="فتح الكاميرا">' +
+        '    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>' +
+        '  </button>'
+      : '') +
     '</div>';
   header.appendChild(wrap);
+  if (isHome) {
+    var cameraBtn = wrap.querySelector('.buda-search-camera');
+    if (cameraBtn) {
+      cameraBtn.addEventListener('click', function () {
+        window.location.href = 'search.html';
+      });
+    }
+  }
 }
 
 function injectStandardBottomNav() {
@@ -1254,15 +1268,15 @@ function hideBottomNavOnDesktop() {
   // Rotating search placeholder like big marketplaces (vertical slide-up carousel)
   function initRotatingPlaceholder() {
     var phrases = [
-      "ابحث عن تلفونات",
-      "ابحث عن مراوح",
-      "ابحث عن أجهزة",
-      "ابحث عن ألعاب",
-      "ابحث عن شنط",
-      "ابحث عن أزياء",
-      "ابحث عن عطور",
-      "ابحث عن ساعات",
-      "ابحث عن إلكترونيات"
+      "موبايلات حديثة",
+      "سماعات بلوتوث",
+      "عطور فاخرة",
+      "ساعات ذكية",
+      "إلكترونيات منزلية",
+      "ألعاب أطفال",
+      "حقائب نسائية",
+      "ملابس رياضية",
+      "عناية بالبشرة"
     ];
     // Pick the search box that is actually visible (floating one on mobile, header one on desktop)
     var candidates = [

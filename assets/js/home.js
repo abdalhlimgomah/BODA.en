@@ -191,6 +191,7 @@ var HOME_CONFIG = {
   sections: [
     { type: "banner", index: 0 },
     { type: "hero" },
+    { type: "ad-hero" },
     { type: "categories" },
     { type: "features" },
     { type: "mega-offers", id: "hm-mega-offers" },
@@ -1383,7 +1384,7 @@ HM.renderBanner = function (section) {
     var html = '';
     var dyn = banner._dynamic;
     if (dyn && dyn.type === 'image_banner' && banner.url) {
-      html = '<div class="hm-banner-top-wrap hm-fade" style="padding:0 16px 6px;">' +
+      html = '<div class="hm-banner-top-wrap hm-fade" style="padding:0 16px var(--hm-top-gap,6px);">' +
         '<a href="' + escapeHtml(banner.link || '#') + '" style="display:block;border-radius:10px;overflow:hidden;">' +
         '<div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + banner.url + '" style="width:100%;display:block;border-radius:10px;" onerror="this.style.display=\'none\'" /></div>' +
         '</a></div>';
@@ -1439,6 +1440,36 @@ HM.renderBanner = function (section) {
   var temp = document.createElement("div");
   temp.innerHTML = html;
   HM.contentEl.appendChild(temp.firstElementChild);
+};
+
+// Mobile-only ad strip directly under the hero.
+// Picks the first home_ad_banners row NOT already shown by the regular ad slots
+// (slots use adBanners[idx-1] for banner index 1..n), so no image is duplicated.
+HM.renderAdHero = function () {
+  var adBanners = HOME_CONFIG._adBanners;
+  if (!adBanners || !adBanners.length) return null;
+  var usedSlots = 0;
+  HOME_CONFIG.sections.forEach(function (s) {
+    if (s.type === "banner" && s.index >= 1) usedSlots++;
+  });
+  var ad = null;
+  for (var i = 0; i < adBanners.length; i++) {
+    if (i >= usedSlots) {
+      ad = adBanners[i];
+      break;
+    }
+  }
+  if (!ad || !ad.image_url) return null;
+  var html =
+    '<div class="buda-home-banner-wrap hm-fade">' +
+    '<div class="buda-home-banner">' +
+    '<a href="' + escapeHtml(ad.link_url || "#") + '"><div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + ad.image_url + '" alt="" loading="lazy" /></div></a>' +
+    '<span class="ad-badge">' + escapeHtml(ad.badge_text || "مدفوع") + '</span>' +
+    "</div></div>";
+  var temp = document.createElement("div");
+  temp.innerHTML = html;
+  HM.contentEl.appendChild(temp.firstElementChild);
+  return temp.firstElementChild;
 };
 
 HM.renderCategories = function () {
@@ -1586,10 +1617,7 @@ HM.renderFeatures = function () {
 // ========== SMART CATEGORY SHOWCASE (4 premium cards) ==========
 HM.renderSmartCategories = function (section) {
   var cards = HOME_CONFIG._smartCategories || [];
-  if (!cards || !cards.length) {
-    cards = [
-    ];
-  }
+  if (!cards || !cards.length) return null;
   var html =
     '<section class="hm-section hm-fade hm-smart-cats" id="sec-' + (section.id || 'hm-smart-cats') + '">' +
     '<div class="hm-section-head"><h2>' + escapeHtml(section.title || 'تسوق حسب الفئة') + '</h2>' +
@@ -2191,6 +2219,8 @@ HM.renderSection = function (section) {
   switch (section.type) {
     case "hero":
       return HM.renderHero();
+    case "ad-hero":
+      return HM.renderAdHero();
     case "banner":
       return HM.renderBanner(section);
     case "categories":
@@ -2844,8 +2874,13 @@ HM.loadDynamicConfig = async function () {
     if (!client) return;
     var country = localStorage.getItem('userCountry') || 'EG';
 
-    // Get section IDs for this country
-    var { data: pageSections } = await client.from('home_page_sections').select('id,section_type').eq('country', country).eq('is_active', true);
+    // Get section IDs for this country (fall back to EG when the stored country has no page config)
+    var pageSecReq = await client.from('home_page_sections').select('id,section_type').eq('country', country).eq('is_active', true);
+    var pageSections = pageSecReq.data;
+    if (!pageSecReq.error && (!pageSections || !pageSections.length)) {
+      var psFb = await client.from('home_page_sections').select('id,section_type').eq('country', 'EG').eq('is_active', true);
+      if (psFb.data && psFb.data.length) pageSections = psFb.data;
+    }
     if (!pageSections || !pageSections.length) return;
 
     var sectionMap = {};
@@ -2936,10 +2971,17 @@ HM.loadDynamicConfig = async function () {
       }
     }
 
-    // 5. Smart Category Showcase
+    // 5. Smart Category Showcase (fall back to EG when the selected country has no showcase rows)
     var smartCc = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || localStorage.getItem('userCountry') || 'EG';
-    var { data: smartCats } = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', smartCc).order('sort_order');
-    if (smartCats && smartCats.length) {
+    var smartRows = null;
+    var scReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', smartCc).order('sort_order');
+    if (!scReq.error && scReq.data && scReq.data.length) smartRows = scReq.data;
+    if (!smartRows) {
+      var scFbReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', 'EG').order('sort_order');
+      if (!scFbReq.error && scFbReq.data && scFbReq.data.length) smartRows = scFbReq.data;
+    }
+    if (smartRows && smartRows.length) {
+      var smartCats = smartRows;
       HOME_CONFIG._smartCategories = smartCats.map(function(c) {
         return {
           title: c.title,
@@ -3145,6 +3187,7 @@ HM.init = async function () {
     invalidateHomeProductsSourceCache();
     lastRandomProductIds = [];
     taagerExtraRotationOffset = 0;
+    await HM.loadDynamicConfig();
     var source = await getHomeSourceProducts({ forceRefresh: true });
     HM.allProducts = normalizeProducts(source);
     HM.taagerOnly = HM.allProducts.filter(function (p) {

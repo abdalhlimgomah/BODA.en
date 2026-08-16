@@ -1063,6 +1063,10 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
     ? window.TaagerIntegration.getSelectedCountry()
     : null;
 
+  // نفس المعرف على كل الطلبات الصادرة من نفس السلة / نفس صفحة الدفع
+  // حتى تظهر مجمعة معًا في لوحة التحكم
+  var orderBatchId = "BT" + Date.now().toString(36) + Math.random().toString(36).slice(2, 8).toUpperCase();
+
   const totalItems = cart.length;
   var completedItems = 0;
   var hasError = false;
@@ -1094,7 +1098,12 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
 
     var itemCouponDiscount = totals.subtotal > 0 ? Math.round((itemTotal / totals.subtotal) * totals.couponDiscount * 100) / 100 : 0;
     var discountedTotal = Math.max(itemTotal - itemCouponDiscount, 0);
-    var grandTotal = discountedTotal + totals.shipping + getCheckoutCodFee();
+    // الشحن ورسوم الدفع تُحسب مرة واحدة فقط على أول طلب في نفس السلة
+    // حتى لا يتكرر سعر الشحن في كل طلب (سيظهر مجمعًا في لوحة التحكم)
+    var isFirstBatchOrder = i === 0;
+    var itemShipping = isFirstBatchOrder ? (Number(totals.shipping) || 0) : 0;
+    var itemCodFee = isFirstBatchOrder ? getCheckoutCodFee() : 0;
+    var grandTotal = discountedTotal + itemShipping + itemCodFee;
 
     var singleOrder = {
       user_name: fields.name,
@@ -1108,8 +1117,8 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
       coupon_code: totals.couponCode || null,
       payment_method: selectedPayment,
       shipping_method: "standard",
-      shipping_cost: totals.shipping,
-      tax: getCheckoutCodFee(),
+      shipping_cost: itemShipping,
+      tax: itemCodFee,
       user_id: getCurrentUserId(),
       items_json: JSON.stringify([item]),
       order_source: "taager",
@@ -1119,6 +1128,7 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
       owner_email: ownerEmail || undefined,
       receiver_name: localStorage.getItem("userFullName") || "",
       receiver_phone: localStorage.getItem("userPhone") || "",
+      order_batch_id: orderBatchId,
     };
 
     try {

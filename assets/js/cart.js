@@ -317,16 +317,37 @@ function resolveCartItemView(item = {}) {
 
   const quantity = Math.max(1, Number(item.quantity) || 1);
   const currentPriceFromCart = parseAmount(item.price);
+
+  // Per-size price wins: look up the LIVE product (by its bare product_id) and match the
+  // selected size — this also self-heals items added by older builds that stored the base price.
+  var perSizeFromLive = 0;
+  var rawProduct =
+    item.product_id && window.BudaStore && typeof window.BudaStore.getProductById === "function"
+      ? window.BudaStore.getProductById(String(item.product_id))
+      : null;
+  if (rawProduct && item.selected_size && Array.isArray(rawProduct.sizes)) {
+    for (var si = 0; si < rawProduct.sizes.length; si++) {
+      var soName = rawProduct.sizes[si] ? String(rawProduct.sizes[si].name || rawProduct.sizes[si]) : "";
+      if (soName === String(item.selected_size)) {
+        var perSizeNum = Number(rawProduct.sizes[si].price) || 0;
+        if (perSizeNum > 0) perSizeFromLive = perSizeNum;
+        break;
+      }
+    }
+  }
+
   const currentPriceCandidate =
-    currentPriceFromCart > 0
-      ? currentPriceFromCart
-      : firstPositive(
-          item.currentPrice,
-          item.finalPrice,
-          linkedProduct?.price,
-          linkedProduct?.price_after_discount,
-          linkedProduct?.discountPrice
-        );
+    perSizeFromLive > 0
+      ? perSizeFromLive
+      : currentPriceFromCart > 0
+        ? currentPriceFromCart
+        : firstPositive(
+            item.currentPrice,
+            item.finalPrice,
+            linkedProduct?.price,
+            linkedProduct?.price_after_discount,
+            linkedProduct?.discountPrice
+          );
 
   const resolvedPrice =
     window.BudaStore?.resolveProductPrice?.({

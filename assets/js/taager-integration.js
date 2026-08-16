@@ -503,6 +503,13 @@
       seller_id: sanitizeText(item.seller_id || "taager") || "taager",
       seller_email: sanitizeText(item.seller_email || item.vendor_email || item.owner_email),
       brand: sanitizeText(item.brand || item.vendor || item.store_name),
+      return_allowed: item.return_allowed,
+      warranty: sanitizeText(item.warranty),
+      colors: Array.isArray(item.colors) ? item.colors : [],
+      sizes: Array.isArray(item.sizes) ? item.sizes : [],
+      sales_count: safeNumber(item.sales_count),
+      vendor: sanitizeText(item.vendor),
+      company_name: sanitizeText(item.company_name),
       stock: safeNumber(item.stock || item.quantity || 999) || 0,
       stockStatus: sanitizeText(item.stock_status || item.stockStatus || "in_stock") || "in_stock",
       stock_status: sanitizeText(item.stock_status || item.stockStatus || "in_stock") || "in_stock",
@@ -600,6 +607,31 @@
     return [];
   }
 
+  async function mergeDeliveredSales(products) {
+    if (!window.supabaseClient || !products || !products.length) return products;
+    try {
+      const res = await window.supabaseClient.from("taager_products").select("taager_product_id,sales_count");
+      if (!res || !res.data || !res.data.length) return products;
+      const map = {};
+      for (let i = 0; i < res.data.length; i++) {
+        const k = String(res.data[i].taager_product_id || "");
+        if (k) map[k] = Number(res.data[i].sales_count) || 0;
+      }
+      for (let j = 0; j < products.length; j++) {
+        const p = products[j];
+        if (!p || !p.id) continue;
+        const key = String(
+          p.taager_product_id || (String(p.id).indexOf("taager_") === 0 ? p.id.slice(7) : p.id)
+        );
+        const dbCount = map[key];
+        if (dbCount > 0 && dbCount > (Number(p.sales_count) || 0)) {
+          p.sales_count = dbCount;
+        }
+      }
+    } catch (_e) {}
+    return products;
+  }
+
   async function fetchTaagerProducts(countryCode) {
     var requestKey = getCountryRequestKey(countryCode);
     if (inFlightProductsRequests[requestKey]) {
@@ -609,7 +641,7 @@
     var requestPromise = (async function () {
     var cached = await getCachedProducts(countryCode);
     if (cached && cached.length) {
-      return filterByCountry(cached, countryCode);
+      return mergeDeliveredSales(filterByCountry(cached, countryCode));
     }
 
     var storedProducts = await fetchStoredTaagerProducts(countryCode);
@@ -618,7 +650,7 @@
       document.dispatchEvent(new CustomEvent("boda:products-updated", {
         detail: { source: "taager-stored", count: storedProducts.length },
       }));
-      return filterByCountry(storedProducts, countryCode);
+      return mergeDeliveredSales(filterByCountry(storedProducts, countryCode));
     }
 
     var supabaseProducts = await fetchTaagerProductsFromSupabase(countryCode);
@@ -627,7 +659,7 @@
       document.dispatchEvent(new CustomEvent("boda:products-updated", {
         detail: { source: "taager-supabase", count: supabaseProducts.length },
       }));
-      return filterByCountry(supabaseProducts, countryCode);
+      return mergeDeliveredSales(filterByCountry(supabaseProducts, countryCode));
     }
 
     return [];

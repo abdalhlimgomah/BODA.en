@@ -680,6 +680,7 @@
         name: s.name || s.size || s.label || String(s),
         stock: Math.max(0, Number(s.stock) || 0),
         is_available: s.is_available !== false && s.stock !== 0,
+        price: (typeof s.price === "number" && s.price > 0) ? s.price : (typeof s.price === "string" && Number(s.price) > 0 ? Number(s.price) : undefined),
       };
     }).filter(function (s) { return s.name; });
   }
@@ -817,6 +818,7 @@
     buildViewModel: buildViewModel,
     buildVariants: buildVariants,
     buildSizes: buildSizes,
+    buildPrice: buildPrice,
     buildFallbackViewModel: buildFallbackViewModel,
     pickBoughtTogether: pickBoughtTogether,
     pickRecommended: pickRecommended,
