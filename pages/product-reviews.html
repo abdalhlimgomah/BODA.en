@@ -2,16 +2,16 @@
 <html lang="ar" dir="rtl">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>تقييمات المنتج - BudoQ</title>
   <link href="../assets/fonts/cairo.css" rel="stylesheet" />
   <link href="../assets/fonts/inter.css" rel="stylesheet" />
   <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
   <link href="../assets/css/noon-theme.css" rel="stylesheet" />
-  <link href="../assets/css/noon-shell.css" rel="stylesheet" />
-  <link href="../assets/css/desktop.css?v=20260630" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css?v=20260817" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260808" rel="stylesheet" />
   <link href="../assets/css/noon-components.css" rel="stylesheet" />
-  <link href="../assets/css/product-reviews.css?v=20260405-3" rel="stylesheet" />
+  <link href="../assets/css/product-reviews.css?v=20260811c" rel="stylesheet" />
 <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
@@ -20,117 +20,9 @@
 <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="../assets/icons/site.webmanifest">
 <meta name="`theme-color" content="#6D28D9`">
-  <link href="../assets/css/desktop.css?v=20260709" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260808" rel="stylesheet" />
   <link href="../assets/css/desktop-animations.css?v=20260709" rel="stylesheet" />
-  <link href="../assets/css/home.css?v=20260711a" rel="stylesheet" />
-  <style>
-    /* Saudi Reviews Iframe Styles */
-    .returns-iframe-wrapper {
-      background: #ffffff;
-      border-radius: 14px;
-      border: 1px solid #f1f5f9;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 200px);
-      min-height: 450px;
-    }
-    .returns-iframe-header {
-      background: #f8fafc;
-      border-bottom: 1px solid #e2e8f0;
-      padding: 12px 16px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
-    }
-    .returns-iframe-title {
-      font-size: 0.95rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin: 0;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .returns-iframe-title .material-icons-outlined {
-      font-size: 20px;
-      color: #ffd500;
-    }
-    .returns-iframe-container {
-      flex: 1;
-      overflow: hidden;
-      position: relative;
-    }
-    .returns-iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: #ffffff;
-      display: block;
-    }
-    .returns-iframe-loading {
-      position: absolute;
-      inset: 0;
-      background: #f7f9fa;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 12px;
-      z-index: 1;
-      transition: opacity 0.3s ease;
-    }
-    .returns-iframe-loading.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .spinner {
-      width: 32px;
-      height: 32px;
-      border: 3px solid #e2e8f0;
-      border-top-color: #ffd500;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Mobile adjustments */
-    @media (max-width: 768px) {
-      .returns-iframe-wrapper {
-        height: calc(100vh - 160px);
-        min-height: 400px;
-        border-radius: 12px;
-      }
-      .returns-iframe-header {
-        padding: 10px 12px;
-      }
-      .returns-iframe-title {
-        font-size: 0.85rem;
-      }
-    }
-    @media (max-width: 480px) {
-      .returns-iframe-wrapper {
-        height: calc(100vh - 140px);
-        min-height: 350px;
-        border-radius: 0;
-        border-left: none;
-        border-right: none;
-      }
-      main.app-main {
-        padding: 12px !important;
-      }
-    }
-
-    @supports (padding: max(0px)) {
-      @media (max-width: 768px) {
-        .returns-iframe-wrapper {
-          height: calc(100vh - 160px - env(safe-area-inset-bottom));
-        }
-      }
-    }
-  </style>
+  <link href="../assets/css/home.css?v=20260808" rel="stylesheet" />
   <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
   <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
 </head>
@@ -174,12 +66,12 @@
         <p id="review-rating-hint" class="review-rating-hint" data-i18n="اختر عدد النجوم">اختر عدد النجوم</p>
 
         <div id="review-images-section" class="review-images-section">
-          <div id="review-image-upload" class="review-image-upload" role="button" tabindex="0" aria-label="إضافة صور للتقييم">
-            <input id="review-image-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden />
+          <label id="review-image-upload" class="review-image-upload" for="review-image-input" role="button" tabindex="0" aria-label="إضافة صور للتقييم">
+            <input id="review-image-input" class="review-image-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden />
             <span class="material-icons-outlined review-image-upload-icon"></span>
             <span class="review-image-upload-text">أضف صوراً (اختياري)</span>
-            <small class="review-image-upload-hint">أقصى 7 صور • JPG/PNG/WebP</small>
-          </div>
+            <small class="review-image-upload-hint">أقصى 3 صور • JPG/PNG/WebP</small>
+          </label>
           <div id="review-image-previews" class="review-image-previews"></div>
           <small id="review-image-error" class="review-image-error hidden"></small>
         </div>
@@ -230,47 +122,6 @@
 
       <div id="comments-list" class="comments-list"></div>
     </section>
-
-    <!-- Saudi Arabia Reviews Iframe -->
-    <section id="saudi-reviews-section" class="section-block hidden">
-      <div class="section-head">
-        <h2 data-i18n="تقييمات العملاء في السعودية">تقييمات العملاء في السعودية</h2>
-      </div>
-      <div class="returns-iframe-wrapper">
-        <div class="returns-iframe-header">
-          <h3 class="returns-iframe-title">
-            <span class="material-icons-outlined"></span>
-            تقييمات دامينكم - السعودية
-          </h3>
-        </div>
-        <div class="returns-iframe-container">
-          <iframe 
-            class="returns-iframe" 
-            id="saudi-reviews-iframe"
-            src="https://damenkom.com/ksa-request"
-            title="تقييمات العملاء في السعودية"
-            sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
-            loading="lazy"
-          ></iframe>
-          <div class="returns-iframe-loading" id="saudi-reviews-loading">
-            <div class="spinner"></div>
-            <p>جاري تحميل التقييمات...</p>
-          </div>
-        </div>
-        <!-- Always-visible fallback button for X-Frame-Options blocked sites -->
-        <div class="returns-iframe-fallback" id="saudi-reviews-fallback" style="padding: 16px; text-align: center; background: #f8fafc; border-top: 1px solid #e2e8f0;">
-          <p style="color: #64748b; margin-bottom: 12px; font-size: 0.9rem;">إذا لم تظهر التقييمات أعلاه، اضغط الزر أدناه:</p>
-          <a href="https://damenkom.com/ksa-request" target="_blank" rel="noopener noreferrer" class="btn-empty-action" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 24px; background: linear-gradient(135deg, #ffd500 0%, #f5c600 100%); color: #383838; font-weight: 800; font-size: 1rem; border-radius: 10px; text-decoration: none; box-shadow: 0 4px 14px rgba(255, 213, 0, 0.3); transition: all 0.2s ease;">
-            <span class="material-icons-outlined"></span>
-            فتح تقييمات دامينكم في تبويب جديد
-          </a>
-        </div>
-      </div>
-    </section>
-          </a>
-        </div>
-      </div>
-    </section>
   </main>
 
   <nav class="bottom-nav">
@@ -296,81 +147,17 @@
     </a>
   </nav>
 
-  <script src="../assets/vendor/supabase/supabase-js@2.js"></script>
-  <script src="../assets/js/supabase-client.js?v=20260710"></script>
-  <script src="../assets/js/store.js?v=20260814-4"></script>
-  <script src="../assets/js/orders-common.js?v=20260309-1"></script>
-  <script src="../assets/js/product-reviews.js?v=20260405-3"></script>
-  <script src="../assets/js/noon-shell.js?v=20260709"></script>
+  <script src="../assets/vendor/supabase/supabase-js@2.js?v=20260810"></script>
+  <script src="../assets/js/supabase-client.js?v=20260823"></script>
+  <script src="../assets/js/store.js?v=20260812"></script>
+  <script src="../assets/js/orders-common.js?v=20260826"></script>
+  <script src="../assets/js/product-reviews.js?v=20260815"></script>
+  <script src="../assets/js/noon-shell.js?v=20260817"></script>
   <script src="../assets/js/pricing-engine.js"></script>
-  <script src="../assets/js/taager-integration.js?v=20260814"></script>
-  <script src="../assets/js/cart.js?v=20260814-1"></script>
-  <script src="../assets/js/home.js?v=20260711a"></script>
+  <script src="../assets/js/taager-integration.js?v=20260810"></script>
+  <script src="../assets/js/cart.js?v=20260815"></script>
+  <script src="../assets/js/home.js?v=20260815"></script>
 
-  <script>
-    // Saudi Arabia Reviews Iframe Handler
-    (function () {
-      function isSaudiArabia() {
-        try {
-          if (window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry) {
-            var selected = window.TaagerIntegration.getSelectedCountry();
-            return selected && selected.code === "SA";
-          }
-        } catch (e) {}
-        return false;
-      }
-
-      function initSaudiReviews() {
-        var saudiSection = document.getElementById("saudi-reviews-section");
-        var iframe = document.getElementById("saudi-reviews-iframe");
-        var loading = document.getElementById("saudi-reviews-loading");
-        var fallback = document.getElementById("saudi-reviews-fallback");
-
-        if (!saudiSection) return;
-
-        if (isSaudiArabia()) {
-          saudiSection.classList.remove("hidden");
-          if (iframe && loading) {
-            iframe.addEventListener("load", function () {
-              setTimeout(function () { loading.classList.add("hidden"); }, 300);
-            });
-            iframe.addEventListener("error", function () {
-              loading.style.display = "none";
-              if (fallback) fallback.style.display = "block";
-            });
-            // Also check for X-Frame-Options blocking (timeout fallback)
-            setTimeout(function () {
-              if (loading && !loading.classList.contains("hidden") && iframe) {
-                try {
-                  // Try to access iframe content to check if blocked
-                  var doc = iframe.contentDocument || iframe.contentWindow.document;
-                  if (!doc || doc.body.innerHTML.includes("خدمة الإرجاع متاحة لمصر فقط")) {
-                    loading.style.display = "none";
-                    if (fallback) fallback.style.display = "block";
-                  }
-                } catch (e) {
-                  // Cross-origin, likely blocked
-                  loading.style.display = "none";
-                  if (fallback) fallback.style.display = "block";
-                }
-              }
-            }, 3000);
-          }
-        } else {
-          saudiSection.classList.add("hidden");
-        }
-      }
-
-      if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", initSaudiReviews);
-      } else {
-        initSaudiReviews();
-      }
-
-      // Listen for country changes
-      document.addEventListener("boda:country-changed", initSaudiReviews);
-    })();
-  </script>
 </body>
 </html>
 
