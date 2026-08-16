@@ -1347,3 +1347,94 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
     padding: 3px 10px; border-radius: 999px;
     box-shadow: 0 2px 8px rgba(217,54,62,0.4);
 }
+
+/* ============================================
+   MOBILE-ONLY HOMEPAGE UX POLISH (≤767px)
+   Order: Header → Search row → Announcement → Hero → Ad strip → Categories
+   All gaps unified on the 8pt grid via design-system tokens.
+   Desktop (≥768px) is untouched.
+   ============================================ */
+@media (max-width: 767px) {
+  .hm-page {
+    --hm-top-gap: var(--space-0-5);
+  }
+
+  /* Floating search = its own row directly under the header row */
+  body:is(.home-loading, .home-hydrating, .home-loaded) #buda-search-float {
+    padding: var(--space-0-5) var(--space-2) var(--space-1);
+  }
+  body:is(.home-loading, .home-hydrating, .home-loaded) #buda-search-float .buda-search-rotator {
+    left: var(--space-8);
+  }
+
+  /* Top announcement banner — slimmer (8pt grid) */
+  .hm-banner-top-wrap {
+    padding: 0 var(--space-2) var(--space-0-5);
+  }
+  .hm-banner-top {
+    padding: var(--space-1) var(--space-2);
+    gap: var(--space-1);
+  }
+  .hm-banner-top-icon {
+    width: var(--space-4);
+    height: var(--space-4);
+  }
+  .hm-banner-top-icon svg {
+    width: var(--space-2);
+    height: var(--space-2);
+  }
+
+  /* Hero — gap down to the ad strip */
+  .hm-hero-wrap {
+    margin: var(--space-0-5) 0 0;
+  }
+
+  /* New ad strip under the hero (home_ad_banners row #1 — CSS-only, CLS-safe) */
+  .buda-home-banner-wrap {
+    padding: 0 var(--space-2);
+    margin: var(--space-0-5) 0 0;
+  }
+  .buda-home-banner {
+    position: relative;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    background: var(--color-skeleton);
+    aspect-ratio: 16/5;
+  }
+  .buda-home-banner a {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  .buda-home-banner img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+  .buda-home-banner .ad-badge {
+    position: absolute;
+    bottom: var(--space-1);
+    left: var(--space-1);
+    font-size: var(--text-caption);
+    font-weight: var(--weight-bold);
+    color: rgba(255, 255, 255, 0.4);
+    background: rgba(0, 0, 0, 0.15);
+    padding: 1px 6px;
+    border-radius: 999px;
+    backdrop-filter: blur(2px);
+    z-index: 2;
+  }
+
+  /* Categories — gap from the ad strip */
+  .hm-cats-wrap {
+    margin-top: var(--space-1);
+  }
+}
+
+/* The ad strip under the hero is a mobile-only element — never on desktop */
+@media (min-width: 768px) {
+  .buda-home-banner-wrap {
+    display: none;
+  }
+}
