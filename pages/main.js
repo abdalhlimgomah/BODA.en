@@ -358,23 +358,30 @@ document.addEventListener("DOMContentLoaded", async () => {
       return;
     }
 
+    var target = categoryMap[urlCategory.toLowerCase()] || null;
+    if (target) {
+      var targetBtn = buttons.find(function (b) { return b.textContent.trim() === target; });
+      if (targetBtn) { targetBtn.click(); return; }
+    }
+
     handleKeywordCategory(urlCategory);
   }
 
   async function handleKeywordCategory(slug) {
     var cat = await getCategoryBySlug(slug);
-    if (!cat) { renderProducts([]); return; }
+    if (!cat) { renderProducts(allProducts); return; }
     var keywords = cat.keywords || [];
-    if (!keywords.length) { renderProducts([]); return; }
+    if (!keywords.length) { renderProducts(allProducts); return; }
     var filtered = allProducts.filter(function (p) { return matchProductByKeywords(p, keywords); });
+    if (!filtered.length) { renderProducts(allProducts); return; }
     renderProducts(filtered);
   }
 
   async function handleBranchFilter(categorySlug, branchName) {
     var cat = await getCategoryBySlug(categorySlug);
-    if (!cat || !cat.branches) { renderProducts([]); return; }
+    if (!cat || !cat.branches) { handleKeywordCategory(categorySlug); return; }
     var branch = cat.branches.find(function (b) { return b.branch_name === branchName; });
-    if (!branch || !branch.branch_keywords || !branch.branch_keywords.length) { renderProducts([]); return; }
+    if (!branch || !branch.branch_keywords || !branch.branch_keywords.length) { handleKeywordCategory(categorySlug); return; }
     var filtered = allProducts.filter(function (p) { return matchProductByKeywords(p, branch.branch_keywords); });
     renderProducts(filtered);
   }
