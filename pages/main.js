@@ -369,19 +369,18 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   async function handleKeywordCategory(slug) {
     var cat = await getCategoryBySlug(slug);
-    if (!cat) { renderProducts(allProducts); return; }
+    if (!cat) { renderProducts([]); return; }
     var keywords = cat.keywords || [];
-    if (!keywords.length) { renderProducts(allProducts); return; }
+    if (!keywords.length) { renderProducts([]); return; }
     var filtered = allProducts.filter(function (p) { return matchProductByKeywords(p, keywords); });
-    if (!filtered.length) { renderProducts(allProducts); return; }
     renderProducts(filtered);
   }
 
   async function handleBranchFilter(categorySlug, branchName) {
     var cat = await getCategoryBySlug(categorySlug);
-    if (!cat || !cat.branches) { handleKeywordCategory(categorySlug); return; }
+    if (!cat || !cat.branches) { renderProducts([]); return; }
     var branch = cat.branches.find(function (b) { return b.branch_name === branchName; });
-    if (!branch || !branch.branch_keywords || !branch.branch_keywords.length) { handleKeywordCategory(categorySlug); return; }
+    if (!branch || !branch.branch_keywords || !branch.branch_keywords.length) { renderProducts([]); return; }
     var filtered = allProducts.filter(function (p) { return matchProductByKeywords(p, branch.branch_keywords); });
     renderProducts(filtered);
   }
