@@ -170,7 +170,6 @@ body.app-shell:has(.edit-account-page) {
 }
 
 .edit-account-page .ea2-field label {
-  display: block;
   font-size: 0.82rem;
   font-weight: 600;
   color: var(--ea-v2-text-secondary);
