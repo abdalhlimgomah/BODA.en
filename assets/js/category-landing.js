@@ -659,6 +659,17 @@ CL.init = async function () {
   clShowSkeleton();
 
   var slug = clGetSlug();
+  // لو في صفحة ذكية معرّفة للـ slug ده في اللوحة → ارسمها وسيب الدنيا ليها
+  if (window.SmartPage && typeof window.SmartPage.tryRender === 'function') {
+    var spRendered = false;
+    try { spRendered = await window.SmartPage.tryRender({ slug: slug, pageType: 'category' }); }
+    catch (spE) { spRendered = false; }
+    if (spRendered) {
+      var hmFooter = document.getElementById('hm-footer');
+      if (hmFooter) hmFooter.style.display = 'none';
+      console.log('[CL] smart page rendered for', slug); return;
+    }
+  }
   var loadOk = false;
 
   try {

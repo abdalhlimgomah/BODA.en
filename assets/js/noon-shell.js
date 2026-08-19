@@ -78,7 +78,7 @@ function ensureHeaderCSS() {
 
   var nightCssId = "boda-night-css";
   if (!document.getElementById(nightCssId)) {
-    var nightUrl = resolveAssetUrl("../css/noon.css?v=20260722");
+    var nightUrl = resolveAssetUrl("../css/noon.css?v=20260826");
     var nightLink = document.createElement("link");
     nightLink.id = nightCssId;
     nightLink.rel = "stylesheet";
@@ -108,7 +108,7 @@ function getNoonHeaderHTML() {
     '      <span class="buda-search-icon">',
     '        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>',
     '      </span>',
-    '      <input id="buda-header-search-input" class="buda-search-box__input" type="text" data-search-target="search.html" placeholder="ابحث..." autocomplete="off" />',
+    '      <input id="buda-header-search-input" class="buda-search-box__input" type="text" data-search-target="search.html" data-desktop-search="1" placeholder="ابحث..." autocomplete="off" />',
     '    </div>',
     '  </div>',
     '  <div class="buda-header__nav-group">',
@@ -591,6 +591,8 @@ function hideBottomNavOnDesktop() {
   function initSearchRedirect() {
     document.querySelectorAll("[data-search-target]").forEach((input) => {
       const target = input.getAttribute("data-search-target") || "search.html";
+      // Desktop: البحث يفتح لوحة مدمجة في الصفحة بدل الانتقال لصفحة البحث
+      if (input.hasAttribute("data-desktop-search")) return;
       const redirect = () => {
         if (window.location.pathname.toLowerCase().includes("/search.html")) return;
         window.location.href = target;
@@ -614,6 +616,203 @@ function hideBottomNavOnDesktop() {
           redirect();
         });
       }
+    });
+  }
+
+  // ===== Desktop search panel (Noon-style inline dropdown) =====
+  function initDesktopSearchPanel() {
+    if (!window.matchMedia("(min-width: 1200px)").matches) return;
+    var input = document.getElementById("buda-header-search-input");
+    if (!input || !input.hasAttribute("data-desktop-search")) return;
+    var wrap = input.closest(".buda-header__search-inline");
+    if (!wrap) return;
+
+    var RECENT_KEY = "buda_recent_searches";
+    var MAX_RECENT = 5;
+    var activeIdx = -1;
+
+    var panel = document.createElement("div");
+    panel.className = "buda-search-panel";
+    panel.hidden = true;
+    panel.innerHTML =
+      '<div class="buda-search-panel__sec" data-sec="recent">' +
+      '  <div class="buda-search-panel__title">عمليات البحث الأخيرة</div>' +
+      '  <div class="buda-search-panel__chips" data-recent></div>' +
+      '</div>' +
+      '<div class="buda-search-panel__sec" data-sec="results" hidden>' +
+      '  <div class="buda-search-panel__title">منتجات مقترحة</div>' +
+      '  <div class="buda-search-panel__results" data-results></div>' +
+      '</div>' +
+      '<div class="buda-search-panel__all" data-all hidden></div>';
+    wrap.appendChild(panel);
+
+    var recentSec = panel.querySelector('[data-sec="recent"]');
+    var resultsSec = panel.querySelector('[data-sec="results"]');
+    var chipsEl = panel.querySelector("[data-recent]");
+    var resultsEl = panel.querySelector("[data-results]");
+    var allEl = panel.querySelector("[data-all]");
+
+    function getRecentList() {
+      try {
+        var list = JSON.parse(localStorage.getItem(RECENT_KEY) || "[]");
+        return Array.isArray(list) ? list : [];
+      } catch (_e) { return []; }
+    }
+
+    function saveRecent(term) {
+      var t = String(term || "").trim();
+      if (!t) return;
+      var list = getRecentList().filter(function (q) { return q.toLowerCase() !== t.toLowerCase(); });
+      list.unshift(t);
+      if (list.length > MAX_RECENT) list.length = MAX_RECENT;
+      try { localStorage.setItem(RECENT_KEY, JSON.stringify(list)); } catch (_e) {}
+    }
+
+    function getProducts() {
+      if (window.BudaStore && typeof window.BudaStore.getAllProducts === "function") {
+        try {
+          var all = window.BudaStore.getAllProducts();
+          return Object.keys(all).map(function (k) { return all[k]; }).filter(function (p) { return p && p.id != null; });
+        } catch (_e) { return []; }
+      }
+      return [];
+    }
+
+    function openPanel(term) {
+      panel.hidden = false;
+      render(term);
+    }
+
+    function closePanel() {
+      panel.hidden = true;
+      activeIdx = -1;
+    }
+
+    function render(term) {
+      var t = String(term || "").trim();
+      activeIdx = -1;
+
+      if (!t) {
+        var list = getRecentList();
+        if (list.length) {
+          chipsEl.innerHTML = list.map(function (q) {
+            return '<button type="button" class="buda-search-chip" data-q="' + escapeHtml(q) + '">' +
+              '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>' +
+              escapeHtml(q) + '</button>';
+          }).join("");
+        } else {
+          chipsEl.innerHTML = '<div class="buda-search-panel__hint">اكتب اسم منتج للبحث عنه...</div>';
+        }
+        recentSec.hidden = false;
+        resultsSec.hidden = true;
+        allEl.hidden = true;
+        return;
+      }
+
+      recentSec.hidden = true;
+      var re = null;
+      try { re = new RegExp(t.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"); } catch (_e) {}
+      var matched = [];
+      if (re) {
+        matched = getProducts().filter(function (p) {
+          return re.test(String(p.name || ""));
+        }).slice(0, 7);
+      }
+
+      if (!matched.length) {
+        resultsEl.innerHTML = '<div class="buda-search-panel__hint">لا توجد نتائج مطابقة لـ "' + escapeHtml(t) + '"</div>';
+      } else {
+        resultsEl.innerHTML = matched.map(function (p) {
+          var img = p.image || "";
+          try {
+            var imgs = window.BudaStore.getProductImages ? window.BudaStore.getProductImages(p) : null;
+            if (imgs && imgs.length) img = imgs[0];
+            if (window.BudaStore.getImagePath) img = window.BudaStore.getImagePath(img);
+          } catch (_e2) {}
+          var priceHtml = "";
+          try {
+            var pi = window.BudaStore.resolveProductPrice ? window.BudaStore.resolveProductPrice(p) : null;
+            var curPrice = pi ? Number(pi.currentPrice || pi.price) : 0;
+            if (curPrice > 0) {
+              var fmt = function (v) {
+                return window.BudaStore.formatMoney ? window.BudaStore.formatMoney(v, { plain: true }) : String(v);
+              };
+              priceHtml = '<span class="buda-search-result__price">' + fmt(curPrice) + '</span>';
+              var oldPrice = pi ? Number(pi.originalPrice) : 0;
+              if (oldPrice > curPrice) {
+                priceHtml += '<span class="buda-search-result__old">' + fmt(oldPrice) + '</span>';
+              }
+            }
+          } catch (_e3) {}
+          return '<div class="buda-search-result" data-id="' + escapeHtml(String(p.id)) + '" role="button" tabindex="-1">' +
+            '<img class="buda-search-result__img" src="' + escapeHtml(img) + '" alt="" loading="lazy" />' +
+            '<div class="buda-search-result__body">' +
+            '  <div class="buda-search-result__name">' + escapeHtml(String(p.name || "")) + '</div>' +
+            '  <div class="buda-search-result__meta">' + priceHtml + '</div>' +
+            '</div></div>';
+        }).join("");
+      }
+      resultsSec.hidden = false;
+      allEl.hidden = false;
+      allEl.innerHTML = '<a href="search.html?q=' + encodeURIComponent(t) + '">عرض كل النتائج لـ "' + escapeHtml(t) + '" <span aria-hidden="true">←</span></a>';
+    }
+
+    input.addEventListener("focus", function () { openPanel(input.value); });
+    input.addEventListener("click", function () { openPanel(input.value); });
+    input.addEventListener("input", function () { openPanel(input.value); });
+
+    input.addEventListener("keydown", function (e) {
+      if (e.key === "Escape") {
+        closePanel();
+        input.blur();
+        return;
+      }
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+        var items = resultsSec.hidden ? [] : Array.prototype.slice.call(resultsEl.querySelectorAll(".buda-search-result"));
+        if (!items.length) return;
+        e.preventDefault();
+        activeIdx = e.key === "ArrowDown"
+          ? (activeIdx + 1) % items.length
+          : (activeIdx <= 0 ? items.length - 1 : activeIdx - 1);
+        items.forEach(function (it, i) { it.classList.toggle("is-active", i === activeIdx); });
+        items[activeIdx].scrollIntoView({ block: "nearest" });
+        return;
+      }
+      if (e.key === "Enter") {
+        var items2 = resultsSec.hidden ? [] : Array.prototype.slice.call(resultsEl.querySelectorAll(".buda-search-result"));
+        var picked = activeIdx >= 0 && items2[activeIdx] ? items2[activeIdx] : null;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (picked) {
+          picked.click();
+          return;
+        }
+        saveRecent(input.value);
+        var q = encodeURIComponent(input.value.trim());
+        window.location.href = q ? "search.html?q=" + q : "search.html";
+      }
+    });
+
+    chipsEl.addEventListener("click", function (e) {
+      var chip = e.target.closest(".buda-search-chip");
+      if (!chip) return;
+      input.value = chip.getAttribute("data-q") || "";
+      openPanel(input.value);
+      input.focus();
+    });
+
+    resultsEl.addEventListener("click", function (e) {
+      var row = e.target.closest(".buda-search-result");
+      if (!row) return;
+      var pid = row.getAttribute("data-id");
+      if (!pid) return;
+      var nameEl = row.querySelector(".buda-search-result__name");
+      saveRecent(input.value.trim() || (nameEl ? nameEl.textContent : ""));
+      window.location.href = "product.html?id=" + encodeURIComponent(pid);
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!panel.hidden && !wrap.contains(e.target)) closePanel();
     });
   }
 
@@ -1357,6 +1556,7 @@ function hideBottomNavOnDesktop() {
     initSidebar();
     initNavHomeBtn();
     initSearchRedirect();
+    initDesktopSearchPanel();
     initBrandBadge();
     initNoonHeaderUI();
     initSupportBadge();

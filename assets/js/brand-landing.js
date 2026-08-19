@@ -572,6 +572,18 @@ BL.init = async function () {
 
   var slug = getQueryParam('slug');
 
+  // لو في صفحة ذكية معرّفة للـ slug ده في اللوحة → ارسمها وسيب الدنيا ليها
+  if (window.SmartPage && typeof window.SmartPage.tryRender === 'function') {
+    var spRendered = false;
+    try { spRendered = await window.SmartPage.tryRender({ slug: slug, pageType: 'brand' }); }
+    catch (spE) { spRendered = false; }
+    if (spRendered) {
+      var hmFooter = document.getElementById('hm-footer');
+      if (hmFooter) hmFooter.style.display = 'none';
+      console.log('[BL] smart page rendered for', slug); return;
+    }
+  }
+
   try {
     if (BL_DEMO) throw "demo";
     if (!slug) throw "no slug";

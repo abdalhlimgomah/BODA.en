@@ -1437,6 +1437,8 @@ HM.renderHero = function () {
     '<div class="hm-hero-bar-wrap">' +
     bars +
     "</div>" +
+    '<button class="hm-hero-arrow hm-hero-arrow-prev" type="button" aria-label="السابق"><span class="material-icons-outlined">chevron_right</span></button>' +
+    '<button class="hm-hero-arrow hm-hero-arrow-next" type="button" aria-label="التالي"><span class="material-icons-outlined">chevron_left</span></button>' +
     "</div></div>";
   var temp = document.createElement("div");
   temp.innerHTML = html;
@@ -2450,6 +2452,26 @@ HM.initHeroSlider = function () {
   HM.heroSlideCount = realSlides.length;
   if (!HM.heroSlideCount) return;
 
+  // ── Hover arrows (desktop) ──
+  var arrowPrev = hero.querySelector(".hm-hero-arrow-prev");
+  var arrowNext = hero.querySelector(".hm-hero-arrow-next");
+  function viaArrow(dirFn) {
+    stopAuto();
+    dirFn();
+    setTimeout(function () {
+      if (!isDragging) startAuto();
+    }, autoInterval + 500);
+  }
+  [arrowPrev, arrowNext].forEach(function (a) {
+    if (!a) return;
+    a.addEventListener("mousedown", function (e) { e.stopPropagation(); });
+    a.addEventListener("click", function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      viaArrow(a === arrowPrev ? prev : next);
+    });
+  });
+
   // ── Config ──
   var slidesPerView = 1; // full slide at a time
   var gap = 0; // px between slides
@@ -3011,11 +3033,23 @@ HM.loadDynamicConfig = async function () {
     var sectionMap = {};
     pageSections.forEach(function (s) { sectionMap[s.section_type] = s.id; });
 
+    // Device-aware image selection: desktop rows are used on wide screens,
+    // otherwise the mobile rows (fallback keeps old data working).
+    function _currentDevice() { return window.innerWidth >= 1024 ? 'desktop' : 'mobile'; }
+    function _pickDeviceRows(rows, device) {
+      if (!rows || !rows.length) return rows;
+      var exact = rows.filter(function (r) { return r.device === device; });
+      if (exact.length) return exact;
+      var fallback = rows.filter(function (r) { return !r.device || r.device === 'mobile'; });
+      return fallback.length ? fallback : rows;
+    }
+
     // 1. Hero slides
     if (sectionMap.hero) {
       var { data: heroSlides } = await client.from('home_hero_slides').select('*').eq('section_id', sectionMap.hero).order('sort_order');
-      if (heroSlides && heroSlides.length) {
-        HOME_CONFIG.heroSlides = heroSlides.map(function (s) {
+      var devSlides = _pickDeviceRows(heroSlides, _currentDevice());
+      if (devSlides && devSlides.length) {
+        HOME_CONFIG.heroSlides = devSlides.map(function (s) {
           return { img: s.image_url, link: s.link_url && s.link_url !== '#' ? s.link_url : undefined };
         });
       }
@@ -3033,9 +3067,10 @@ HM.loadDynamicConfig = async function () {
 
     // 3. Banner top — replace the first banner entry with dynamic data
     if (sectionMap.banner_top) {
-      var { data: banners } = await client.from('home_banners').select('*').eq('section_id', sectionMap.banner_top).order('sort_order').limit(1);
-      if (banners && banners.length) {
-        var b = banners[0];
+      var { data: banners } = await client.from('home_banners').select('*').eq('section_id', sectionMap.banner_top).order('sort_order');
+      var devBanners = _pickDeviceRows(banners, _currentDevice());
+      if (devBanners && devBanners.length) {
+        var b = devBanners[0];
         if (b.type === 'image_banner' && b.image_url) {
           HOME_CONFIG.banners[0] = {
             url: b.image_url,

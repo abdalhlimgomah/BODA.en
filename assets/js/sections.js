@@ -29,6 +29,12 @@
   }
 
   async function fetchTaagerProducts() {
+    if (window.supabaseClient && typeof window.supabaseClient.fetchAllProductsWithTaager === 'function') {
+      try {
+        var countryCode = localStorage.getItem('userCountry') || 'EG';
+        return (await window.supabaseClient.fetchAllProductsWithTaager(countryCode)) || [];
+      } catch (_) {}
+    }
     if (window.supabaseClient && typeof window.supabaseClient.fetchTaagerProducts === 'function') {
       try {
         var countryCode = localStorage.getItem('userCountry') || 'EG';
