@@ -295,7 +295,7 @@ body, .app-shell, .hm-page {
 .auth-btn, button[type="submit"].auth-btn,
 .buda-btn, .buda-btn-primary, .buda-btn-secondary, .buda-btn-outline,
 .btn, button.btn,
-button:not(.icon-btn):not(.menu-btn):not(.support-close):not(.buda-modal-close):not(.buda-address-action):not(.noon-gallery-overlay-close):not(.hm-carousel-nav):not(.buda-nav-arrow):not(.wishlist-remove-btn):not(.noon-wishlist-btn):not(.noon-gallery-arrow):not(.search-clear-btn):not(.noon-add-square):not(.nav-home-btn) {
+button:not(.icon-btn):not(.menu-btn):not(.support-close):not(.buda-modal-close):not(.buda-address-action):not(.noon-gallery-overlay-close):not(.hm-carousel-nav):not(.buda-nav-arrow):not(.wishlist-remove-btn):not(.noon-wishlist-btn):not(.noon-gallery-arrow):not(.search-clear-btn):not(.noon-add-square):not(.nav-home-btn):not(.hm-hero-arrow) {
   align-items: center !important;
   justify-content: center !important;
   gap: 8px !important;

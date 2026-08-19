@@ -11,7 +11,6 @@
    TABLET (768px – 1199px)
    ============================================= */
 @media (min-width: 768px) {
-  .hm-banner-top-wrap { display: none !important; }
   .noon-product-card { max-width: 180px !important; }
   .noon-product-media { max-width: 100%; height: auto; }
 }
@@ -520,4 +519,28 @@
   /* ===== SIDEBAR — hidden on desktop ===== */
   .sidebar-overlay,
   .sidebar { display: none; }
+}
+
+/* =============================================
+   TOP AD BANNER (فوق الهيرو) — full-width ≥1200px
+   ============================================= */
+@media (min-width: 1024px) {
+  .hm-content > .hm-banner-top-wrap {
+    order: 0;
+    flex: 0 0 100%;
+  }
+}
+@media (min-width: 1200px) {
+  .hm-content > .hm-banner-top-wrap {
+    width: 100vw;
+    margin-inline: calc(-1 * var(--space-6));
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    padding-inline: 0 !important;
+  }
+  .hm-banner-top-wrap > a,
+  .hm-banner-top-wrap > a .hm-banner-img,
+  .hm-banner-top-wrap .hm-banner-img img { border-radius: 0 !important; }
+  .hm-banner-top-wrap .hm-banner-img img { height: clamp(80px, 7vw, 112px); }
+  .hm-banner-top-wrap .hm-banner-top { border-radius: 0; }
 }

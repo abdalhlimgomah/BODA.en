@@ -79,6 +79,16 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
 .sk-product-old { width: 42px; height: 10px; border-radius: 999px; }
 .sk-product-discount { width: 34px; height: 14px; border-radius: 6px; }
 
+/* Mega section (mobile default) */
+.sk-mega-row { margin: 0 12px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.sk-mega-tile { background: var(--color-surface); border-radius: var(--radius-lg); padding: 14px; display: flex; flex-direction: column; gap: 8px; }
+.sk-mega-tile-title { width: 60%; height: 12px; border-radius: 4px; }
+.sk-mega-tile-img { width: 100%; border-radius: 8px; }
+.sk-mega-img-square { aspect-ratio: 1; }
+.sk-mega-img-wide { aspect-ratio: 1.6; }
+.sk-mega-tile-line { width: 50%; height: 10px; border-radius: 4px; }
+.sk-mega-tile-line-short { width: 40%; }
+
 /* ========== PAGE LAYOUT ========== */
 .hm-page { display: flex; flex-direction: column; background: var(--color-bg); min-height: 100vh; }
 .hm-content { display: flex; flex-direction: column; gap: 0; padding: 0; max-width: 100%; }
@@ -1466,5 +1476,148 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
 @media (min-width: 768px) {
   .buda-home-banner-wrap {
     display: none;
+  }
+}
+
+/* ============================================
+   DESKTOP SKELETON (≥1200px) — تصميم مستقل تماماً عن موبايل
+   ============================================ */
+@media (min-width: 1200px) {
+  /* حاوية السكلتون مطابقة لعرض المحتوى الحقيقي */
+  .hm-skeleton {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 4px 48px 0;
+    gap: 26px;
+  }
+
+  /* رأس الديسكتوب: صف واحد — شعار + بحث ضخم + أيقونات */
+  .sk-header-overlay .buda-header__inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 14px 48px;
+  }
+  .sk-header-overlay .buda-search-box { height: 48px; border-radius: 999px; }
+  .sk-search-mobile { display: none !important; }
+
+  /* شريط الإعلان العلوي */
+  .sk-banner-top-wrap { padding: 0; }
+  .sk-banner-top { min-height: 64px; padding: 14px 22px; border-radius: 18px; gap: 14px; }
+  .sk-banner-top-icon { width: 42px; height: 42px; border-radius: 14px; }
+  .sk-banner-top-copy { gap: 10px; }
+  .sk-line-lg { width: 280px; height: 14px; }
+  .sk-line-sm { width: 190px; height: 10px; }
+  .sk-banner-top-arrow { width: 24px; height: 24px; }
+
+  /* البانر الرئيسي الكبير */
+  .sk-hero-wrap { padding: 0; margin: 6px 0 0; }
+  .sk-hero { aspect-ratio: 3.4 / 1; border-radius: 26px; max-height: 430px; }
+
+  /* التصنيفات: شبكة 8 خانات كاملة بدل الشريط الدوّار */
+  .sk-cats-section, .sk-smart-cats, .sk-product-section { margin: 0 !important; border-radius: 24px; }
+  .sk-cats-head { padding: 20px 24px 0; }
+  .sk-cats-title { width: 180px; height: 18px; }
+  .sk-cats-body { padding: 16px 20px 22px; }
+  .sk-cats-scroll { display: grid; grid-template-columns: repeat(8, 1fr); gap: 14px; overflow: visible; }
+  .sk-cat-card { width: auto; height: 136px; border-radius: 16px; gap: 12px; }
+  .sk-cat-circle { width: 62px; height: 62px; }
+  .sk-cat-label { width: 62px; height: 10px; }
+  .sk-cats-indicator { display: none !important; }
+
+  /* البانرات العريضة */
+  .sk-banner-wrap { padding: 0; }
+  .sk-banner-half { aspect-ratio: 6.5 / 1; border-radius: 24px; }
+
+  /* الميجا: 3 كروت بصور 16/9 موحّدة */
+  .sk-mega-row { margin: 0; gap: 18px; }
+  .sk-mega-tile { padding: 18px; border-radius: 22px; gap: 12px; }
+  .sk-mega-tile-title { height: 16px; width: 55%; }
+  .sk-mega-tile-img { border-radius: 14px; }
+  .sk-mega-img-square, .sk-mega-img-wide { aspect-ratio: 16 / 9; }
+  .sk-mega-tile-line { width: 45%; height: 12px; }
+
+  /* التصنيفات الذكية: 6 كروت */
+  .sk-smart-cats-body { padding: 18px 22px 24px; }
+  .sk-smart-cats-grid { grid-template-columns: repeat(6, 1fr); gap: 16px; }
+  .sk-smart-cat-skeleton { aspect-ratio: 2 / 3; border-radius: 20px; }
+
+  /* المنتجات: شبكة 6 أعمدة بدل صفّ التمرير */
+  .sk-product-head { padding: 20px 24px 0; }
+  .sk-section-title { width: 200px; height: 18px; }
+  .sk-section-link { width: 70px; height: 12px; }
+  .sk-products-body { padding: 18px 22px 24px; }
+  .sk-products-row { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; overflow: visible; }
+  .sk-product-card { width: auto; border-radius: 18px; }
+  .sk-product-body { padding: 12px; gap: 8px; }
+  .sk-product-name { height: 12px; }
+  .sk-product-price { width: 66px; height: 18px; }
+  .sk-product-wish { top: 12px; right: 12px; }
+}
+
+/* ========== HERO FULL-WIDTH (desktop only ≥1200px) ========== */
+.hm-hero-arrow { display: none; }
+@media (min-width: 1200px) {
+  .hm-hero-wrap {
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    order: 0;
+    width: 100vw;
+    margin: 0 -48px 14px;
+    padding: 0;
+    max-width: none;
+  }
+  .hm-features-wrap {
+    order: 1;
+    flex: 0 0 100%;
+  }
+  .hm-hero {
+    aspect-ratio: 3.4 / 1;
+    max-height: 540px;
+    border-radius: 0;
+  }
+  .hm-hero-slide { border-radius: 0; }
+  .hm-hero-bar-wrap { bottom: 26px; }
+
+  /* Arrows — تظهر عند مرور الماوس وتختفي عند الخروج */
+  .hm-hero-arrow {
+    display: flex;
+    position: absolute !important;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 6;
+    width: 46px;
+    height: 46px;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.92);
+    color: #1e293b;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.2);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease, transform 0.25s ease, background 0.25s ease;
+  }
+  .hm-hero-arrow span { font-size: 26px; }
+  .hm-hero:hover .hm-hero-arrow { opacity: 1; pointer-events: auto; }
+  .hm-hero-arrow:hover { background: #fff; transform: translateY(-50%) scale(1.08); color: var(--color-primary, #7c3aed); }
+  .hm-hero-arrow-prev { right: 18px !important; }
+  .hm-hero-arrow-next { left: 18px !important; }
+}
+
+/* ========== CATEGORIES FULL-WIDTH (desktop only ≥1200px) ========== */
+@media (min-width: 1200px) {
+  .hm-cats-wrap {
+    flex: 0 0 auto;
+    flex-shrink: 0;
+    width: 100vw;
+    margin: 0 -48px 18px;
+    padding: 0;
+    max-width: none;
+  }
+  .hm-cats-section {
+    border-radius: 0 !important;
+    box-shadow: none !important;
   }
 }
