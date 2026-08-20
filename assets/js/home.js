@@ -8,37 +8,37 @@ var HOME_CONFIG = {
   // Banners array — images, links, sizes
   banners: [
     {
-      url: "../assets/images/Home/635dfc4a-f491-4ddc-b387-779481dcd825_20260630152617.png",
+      url: "",
       link: "category.html?cat=beauty-and-care",
       size: "wide",
     },
     {
-      url: "../assets/images/Home/ar_mb_eg-top-01_(14).1781699877.4536443_20260701034725.png",
+      url: "",
       link: "category.html?cat=phones",
       size: "half",
     },
     {
-      url: "../assets/images/Home/ar_mb_eg-sfu-01.1781687106.8404653_20260701054336.png",
+      url: "",
       link: "category.html?cat=headphones",
       size: "half",
     },
     {
-      url: "../assets/images/Home/ar_mb_eg-sfu-01_(36).1779700929.093184_20260701054401.png",
+      url: "",
       link: "category.html?cat=sports",
       size: "wide",
     },
     {
-      url: "../assets/images/Home/ar_mb_eg-ump-01_(2).1782398198.6748698_20260701054420.png",
+      url: "",
       link: "products.html",
       size: "wide",
     },
     {
-      url: "../assets/images/Home/ar_mb_eg-sfu-01_(14).1782231635.9679332_20260701054344.png",
+      url: "",
       link: "products.html",
       size: "half",
     },
     {
-      url: "../assets/images/Home/ar_mb_eg-sfu-01.1782196424.5733478_20260701065112.png",
+      url: "",
       link: "products.html",
       size: "half",
     },
@@ -46,29 +46,29 @@ var HOME_CONFIG = {
   // Hero slides
   heroSlides: [
     {
-      img: "../assets/images/Home/b4962b5d-b1ac-403b-b7fe-5fa53bf556b4_20260703174859.png",
+      img: "",
     },
     {
       img: "",
       link: "category.html?cat=beauty-and-care",
     },
-    { img: "../assets/images/Home/ChatGPT Image Jul 4, 2026, 05_06_56 AM.png" },
+    { img: "" },
     {
       img: "",
       link: "category.html?cat=phones",
     },
-    { img: "../assets/images/Home/Jul 4, 2026, 05_00_52 AM.png" },
+    { img: "" },
     {
       img: "",
       link: "category.html?cat=headphones",
     },
-    { img: "../assets/images/Home/ChatGPT Image Jul 4, 2026, 05_04_03 AM.png" },
+    { img: "" },
     {
       img: "",
       link: "category.html?cat=sports",
     },
     {
-      img: "../assets/images/Home/ChatGPT Image Jul 4, 2026, 04_06_37 AM - Copy.png",
+      img: "",
     },
   ],
   // Categories — curated product images matching each category
@@ -233,7 +233,6 @@ var HOME_CONFIG = {
       mapKey: "electronics-products",
     },
     { type: "banner", index: 4 },
-    { type: "brands" },
     { type: "daily", id: "hm-daily", title: "اكتشافات جديدة كل يوم" },
     {
       type: "shein-trend",
@@ -1496,6 +1495,8 @@ HM.renderBanner = function (section) {
     HM.contentEl.appendChild(temp.firstElementChild);
     return;
   }
+  // No ad set for this slot: hide the section instead of showing a broken image
+  if (!banner.url) return;
   var html =
     '<div class="hm-banner-wrap hm-fade">' +
     '<div class="hm-banner ' +
