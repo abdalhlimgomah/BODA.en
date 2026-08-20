@@ -326,6 +326,16 @@
     }
     document.addEventListener("boda:pricing-updated", onPricingUpdated);
 
+    // Fake original prices loaded/refreshed from Supabase — re-render the price so a
+    // newly set (or just-synced) fake price appears without requiring a full reload.
+    document.addEventListener("boda:fake-prices-updated", function () {
+      var sz = null;
+      if (global.PDP.SizeSelector && typeof global.PDP.SizeSelector.getSelectedSize === "function") {
+        sz = global.PDP.SizeSelector.getSelectedSize();
+      }
+      applyPriceForSize(sz);
+    });
+
     // Size selection — per-size price (from the admin matrix editor) REPLACES the buybox price.
     // Never feed a selling price back into PricingEngine.calculate(): that compounds the markup
     // on every click (the price grows each time a size is clicked). Size prices are final; when a
