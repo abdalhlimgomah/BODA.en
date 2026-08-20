@@ -287,6 +287,13 @@
   direction: ltr;
 }
 
+.review-optional-hint {
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: #798aa6;
+}
+
 .review-anonymous-toggle {
   display: inline-flex;
   align-items: center;
