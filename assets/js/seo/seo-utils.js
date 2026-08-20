@@ -179,9 +179,10 @@
       logo: SEOUtils.getFullUrl("assets/icons/apple-touch-icon.png"),
       sameAs: [
         "https://www.facebook.com/profile.php?id=61592007926624",
-        "https://instagram.com/buda0o",
-        "https://www.tiktok.com/@buda1077",
-        "https://www.youtube.com/@Buda_1-l8w",
+        "https://www.instagram.com/budoq__",
+        "https://www.tiktok.com/@budoq_",
+        "https://www.youtube.com/@budoq",
+        "https://www.threads.net/@budoq__",
       ],
     });
   };
@@ -190,7 +191,7 @@
     return JSON.stringify({
       "@context": "https://schema.org",
       "@type": "WebSite",
-      name: "Buda",
+      name: "بودوكيو BudoQ",
       url: SEOUtils.getSiteUrl(),
       potentialAction: {
         "@type": "SearchAction",

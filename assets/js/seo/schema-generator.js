@@ -37,11 +37,11 @@
     var schema = {
       "@context": "https://schema.org",
       "@type": opts.type || "Store",
-      name: opts.name || "BudoQs",
+      name: opts.name || "بودوكيو BudoQ",
       description: opts.description || "منصة تجارة إلكترونية متعددة البائعين",
       url: U.getSiteUrl(),
       telephone: opts.phone || undefined,
-      email: opts.email || "buda.requests@gmail.com",
+      email: opts.email || "budoq.com@gmail.com",
       image: U.getFullUrl("assets/icons/apple-touch-icon.png"),
       address: opts.address
         ? {
@@ -51,9 +51,10 @@
         : undefined,
       sameAs: [
         "https://www.facebook.com/profile.php?id=61592007926624",
-        "https://instagram.com/buda0o",
-        "https://www.tiktok.com/@buda1077",
-        "https://www.youtube.com/@Buda_1-l8w",
+        "https://www.instagram.com/budoq__",
+        "https://www.tiktok.com/@budoq_",
+        "https://www.youtube.com/@budoq",
+        "https://www.threads.net/@budoq__",
       ],
     };
     U.injectJsonLd(JSON.stringify(schema));
