@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>كل التقييمات - BudoQ</title>
+  <link href="../assets/fonts/cairo.css" rel="stylesheet" />
+  <link href="../assets/fonts/inter.css" rel="stylesheet" />
+  <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
+  <link href="../assets/css/noon-theme.css" rel="stylesheet" />
+  <link href="../assets/css/noon-shell.css?v=20260817" rel="stylesheet" />
+  <link href="../assets/css/noon-components.css" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260808" rel="stylesheet" />
+  <link href="../assets/css/product/base.css" rel="stylesheet" />
+  <link href="../assets/css/product/review-section.css" rel="stylesheet" />
+  <link href="../assets/css/product/review-all.css?v=20260823a" rel="stylesheet" />
+  <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="../assets/icons/favicon-48x48.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="../assets/icons/favicon-64x64.png">
+  <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
+  <link rel="manifest" href="../assets/icons/site.webmanifest">
+  <meta name="theme-color" content="#FFD500">
+  <link href="../assets/css/desktop.css?v=20260808" rel="stylesheet" />
+  <link href="../assets/css/desktop-animations.css?v=20260709" rel="stylesheet" />
+  <link href="../assets/css/home.css?v=20260808" rel="stylesheet" />
+  <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+</head>
+<body class="app-shell">
+  <header class="app-header buda-header"></header>
+
+  <main class="app-main pra-page">
+    <nav class="pra-crumb" id="pra-crumb" style="display:none;">
+      <a href="home.html">الرئيسية</a><span>/</span>
+      <span id="pra-crumb-name"></span>
+    </nav>
+
+    <p id="pra-status" class="pra-status" aria-live="polite"></p>
+
+    <!-- Product mini card -->
+    <section class="pra-card" id="pra-product" style="display:none;">
+      <a class="pra-thumb" id="pra-thumb-link" href="#">
+        <img id="pra-thumb-img" src="" alt="" loading="lazy" decoding="async" />
+      </a>
+      <div class="pra-product-info">
+        <h1 id="pra-name"></h1>
+        <div class="pra-meta">
+          <div class="pra-avg" id="pra-avg-stars"></div>
+          <span class="pra-count" id="pra-count"></span>
+        </div>
+        <a class="pra-back-link" id="pra-back-link" href="#">عرض تفاصيل المنتج</a>
+      </div>
+    </section>
+
+    <!-- Analysis: features + description + specs -->
+    <section class="pra-card pra-analysis" id="pra-analysis" style="display:none;">
+      <div class="pdp-review-summary-card" id="pra-distribution"></div>
+      <div class="pra-analysis-block" id="pra-features" style="display:none;">
+        <h3 class="pra-block-title"><span class="material-icons-outlined">auto_awesome</span> مزايا المنتج</h3>
+        <div class="pra-features-grid" id="pra-features-grid"></div>
+      </div>
+    </section>
+
+    <!-- All reviews -->
+    <section class="pra-card pra-reviews" id="pra-reviews-sec" style="display:none;">
+      <h2 class="pra-block-title"><span class="material-icons-outlined">rate_review</span> كل التقييمات <span class="pra-count-inline" id="pra-reviews-count"></span></h2>
+      <div class="pra-review-controls">
+        <div class="pdp-review-filter-row" id="pra-filter-row">
+          <button type="button" class="pdp-review-filter-chip is-active" data-filter-star="all">الكل</button>
+          <button type="button" class="pdp-review-filter-chip" data-filter-star="5">5 نجوم</button>
+          <button type="button" class="pdp-review-filter-chip" data-filter-star="4">4 نجوم</button>
+          <button type="button" class="pdp-review-filter-chip" data-filter-star="3">3 نجوم</button>
+          <button type="button" class="pdp-review-filter-chip" data-filter-star="2">2 نجوم</button>
+          <button type="button" class="pdp-review-filter-chip" data-filter-star="1">1 نجوم</button>
+        </div>
+        <select class="pdp-review-sort" id="pra-sort" aria-label="ترتيب">
+          <option value="newest">الأحدث</option>
+          <option value="oldest">الأقدم</option>
+          <option value="highest">الأعلى تقييماً</option>
+          <option value="lowest">الأدنى تقييماً</option>
+        </select>
+      </div>
+      <div class="pdp-review-list" id="pra-reviews"></div>
+    </section>
+  </main>
+
+  <nav class="bottom-nav">
+    <a href="home.html" data-nav="home">
+      <span class="material-icons-outlined">home</span>
+      <small data-i18n="الرئيسية">الرئيسية</small>
+    </a>
+    <a href="products.html" data-nav="products">
+      <span class="material-icons-outlined">category</span>
+      <small data-i18n="الفئات">الفئات</small>
+    </a>
+    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="الرئيسية">
+      <img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" />
+    </button>
+    <a href="ahsab.html" data-nav="account">
+      <span class="material-icons-outlined">person</span>
+      <small data-i18n="حسابي">حسابي</small>
+    </a>
+    <a href="empty-cart.html" data-nav="cart">
+      <span class="material-icons-outlined">shopping_cart</span>
+      <small data-i18n="العربة">العربة</small>
+      <span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span>
+    </a>
+  </nav>
+
+  <script src="../assets/vendor/supabase/supabase-js@2.js?v=20260810"></script>
+  <script src="../assets/js/supabase-client.js?v=20260823"></script>
+  <script src="../assets/js/auth.config.js?v=20260630"></script>
+  <script src="../assets/js/taager-integration.js?v=20260814"></script>
+  <script src="../assets/js/store.js?v=20260820"></script>
+  <script src="../assets/js/pricing-engine.js"></script>
+  <script src="../assets/js/product/utils.js?v=20260815"></script>
+  <script src="../assets/js/product/data.js?v=20260814-1"></script>
+  <script src="../assets/js/product/review-section.js?v=20260823"></script>
+  <script src="../assets/js/product/review-all.js?v=20260823a"></script>
+  <script src="../assets/js/noon-shell.js?v=20260817"></script>
+  <script src="../assets/js/cart.js?v=20260815"></script>
+  <script src="../assets/js/home.js?v=20260815"></script>
+</body>
+</html>
