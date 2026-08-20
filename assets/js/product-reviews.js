@@ -454,6 +454,8 @@ function updateSubmitButtonState() {
   const body = String(document.getElementById("review-body")?.value || "").trim();
   const canSubmit =
     reviewPageState.rating >= 1 &&
+    title.length >= 3 &&
+    body.length >= 10 &&
     !reviewPageState.submitting &&
     !reviewPageState.uploadingImages;
   submitButton.disabled = !canSubmit;
@@ -782,6 +784,14 @@ function bindComposeForm() {
     }
     if (reviewPageState.rating < 1) {
       reviewsNotify("اختر عدد النجوم أولًا.", "error");
+      return;
+    }
+    if (title.length < 3) {
+      reviewsNotify("اكتب عنوانًا للتقييم (3 أحرف على الأقل).", "error");
+      return;
+    }
+    if (body.length < 10) {
+      reviewsNotify("اكتب تفاصيل التقييم (10 أحرف على الأقل).", "error");
       return;
     }
 
