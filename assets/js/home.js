@@ -3165,8 +3165,9 @@ HM.loadDynamicConfig = async function () {
     try {
       if (sectionMap && sectionMap.ad_banners) {
         var { data: adBanners } = await client.from('home_ad_banners').select('*').eq('section_id', sectionMap.ad_banners).eq('is_active', true).order('sort_order');
-        if (adBanners && adBanners.length) {
-          HOME_CONFIG._adBanners = adBanners;
+        var devAdBanners = _pickDeviceRows(adBanners, _currentDevice());
+        if (devAdBanners && devAdBanners.length) {
+          HOME_CONFIG._adBanners = devAdBanners;
         }
       }
     } catch (e) {
