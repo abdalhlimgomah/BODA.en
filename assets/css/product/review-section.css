@@ -305,6 +305,31 @@
   cursor: not-allowed;
 }
 
+/* ---------- View All ---------- */
+.pdp-review-viewall {
+  display: flex;
+  justify-content: center;
+  padding-top: 14px;
+}
+.pdp-review-viewall-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 22px;
+  border-radius: 10px;
+  border: 1.5px solid var(--pdp-blue);
+  background: #fff;
+  color: var(--pdp-blue);
+  font-weight: 800;
+  font-size: 0.85rem;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+.pdp-review-viewall-btn:hover {
+  background: var(--pdp-blue);
+  color: #fff;
+}
+
 /* ---------- Empty ---------- */
 .pdp-reviews .pdp-empty-note {
   text-align: center;
