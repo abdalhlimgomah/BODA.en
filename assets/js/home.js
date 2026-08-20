@@ -409,29 +409,51 @@ async function annotateProductsWithSupabaseRatings(products) {
     for (var i = 0; i < ids.length; i += chunkSize) {
       chunks.push(ids.slice(i, i + chunkSize));
     }
-    var results = await Promise.all(chunks.map(function(chunk) {
-      return client.from("ratings").select("item_id,rating").in("item_id", chunk);
-    }));
+    async function fetchRatingsFor(chunk) {
+      var res;
+      try {
+        res = await client.from("ratings_summary").select("item_id,star1,star2,star3,star4,star5,total").in("item_id", chunk);
+        if (res.error) throw res.error;
+      } catch (e) {
+        res = await client.from("ratings").select("item_id,rating").in("item_id", chunk);
+      }
+      return res;
+    }
+    var results = await Promise.all(chunks.map(fetchRatingsFor));
     for (var ri = 0; ri < results.length; ri++) {
       var result = results[ri];
-      if (result.error) {
-        console.warn("ratings fetch error", result.error);
+      if (!result || result.error) {
+        console.warn("ratings fetch error", result && result.error);
         continue;
       }
       if (Array.isArray(result.data)) {
         result.data.forEach(function (row) {
           var itemId = String(row.item_id || "");
+          if (!itemId) return;
+          if (row.total !== undefined) {
+            var total = Math.round(Number(row.total)) || 0;
+            if (total <= 0) return;
+            if (!ratingMap[itemId]) ratingMap[itemId] = { sum: 0, total: 0 };
+            ratingMap[itemId].total = total;
+            ratingMap[itemId].sum = (Math.round(Number(row.star1)) || 0) * 1 +
+              (Math.round(Number(row.star2)) || 0) * 2 +
+              (Math.round(Number(row.star3)) || 0) * 3 +
+              (Math.round(Number(row.star4)) || 0) * 4 +
+              (Math.round(Number(row.star5)) || 0) * 5;
+            return;
+          }
           var v = Number(row.rating) || 0;
           if (!itemId || v <= 0) return;
-          if (!ratingMap[itemId]) ratingMap[itemId] = [];
-          ratingMap[itemId].push(v);
+          if (!ratingMap[itemId]) ratingMap[itemId] = { sum: 0, total: 0 };
+          ratingMap[itemId].sum += v;
+          ratingMap[itemId].total++;
         });
       }
     }
     return products.map(function (product) {
       var itemId = String(product?.id || "");
-      var values = ratingMap[itemId] || [];
-      if (!values.length)
+      var r = ratingMap[itemId];
+      if (!r || !r.total)
         return Object.assign({}, product, {
           rating: 0,
           reviewCount: 0,
@@ -439,16 +461,10 @@ async function annotateProductsWithSupabaseRatings(products) {
           rating_source: "ratings",
           hasSupabaseRatings: true,
         });
-      var avg = Number(
-        (
-          values.reduce(function (t, v) {
-            return t + v;
-          }, 0) / values.length
-        ).toFixed(1),
-      );
+      var avg = Number((r.sum / r.total).toFixed(1));
       return Object.assign({}, product, {
         rating: avg,
-        reviewCount: values.length,
+        reviewCount: r.total,
         ratingSource: "ratings",
         rating_source: "ratings",
         hasSupabaseRatings: true,

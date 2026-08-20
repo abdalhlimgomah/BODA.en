@@ -600,6 +600,53 @@
     return [];
   }
 
+  async function annotateTaagerRatings(products) {
+    if (!products || !products.length) return products;
+    var client = window.getSupabaseClient ? window.getSupabaseClient() : window.supabaseClient;
+    if (!client || typeof client.from !== "function") return products;
+    var need = products.filter(function (p) { return !p || !(Number(p.reviewCount) > 0); });
+    if (!need.length) return products;
+    var ids = need.map(function (p) { return String(p.id || "").trim(); }).filter(Boolean);
+    if (!ids.length) return products;
+    var sumMap = {};
+    try {
+      var chunks = [];
+      for (var i = 0; i < ids.length; i += 100) chunks.push(ids.slice(i, i + 100));
+      var results = await Promise.all(chunks.map(async function (c) {
+        var res = await client.from("ratings_summary").select("item_id,star1,star2,star3,star4,star5,total").in("item_id", c);
+        if (res.error) return [];
+        return res.data || [];
+      }));
+      results.forEach(function (arr) {
+        arr.forEach(function (row) {
+          var id = String(row.item_id || "");
+          var total = Math.round(Number(row.total)) || 0;
+          if (!id || total <= 0) return;
+          var sum = (Math.round(Number(row.star1)) || 0) * 1
+            + (Math.round(Number(row.star2)) || 0) * 2
+            + (Math.round(Number(row.star3)) || 0) * 3
+            + (Math.round(Number(row.star4)) || 0) * 4
+            + (Math.round(Number(row.star5)) || 0) * 5;
+          sumMap[id] = { sum: sum, total: total };
+        });
+      });
+    } catch (e) {
+      console.warn("taager ratings annotation error", e);
+      return products;
+    }
+    need.forEach(function (p) {
+      var id = String(p.id || "").trim();
+      var s = sumMap[id];
+      if (s && !(Number(p.reviewCount) > 0)) {
+        p.rating = Number((s.sum / s.total).toFixed(1));
+        p.reviewCount = s.total;
+        p.ratingSource = "ratings";
+        p.rating_source = "ratings";
+      }
+    });
+    return products;
+  }
+
   async function fetchTaagerProducts(countryCode) {
     var requestKey = getCountryRequestKey(countryCode);
     if (inFlightProductsRequests[requestKey]) {
@@ -609,11 +656,13 @@
     var requestPromise = (async function () {
     var cached = await getCachedProducts(countryCode);
     if (cached && cached.length) {
+      await annotateTaagerRatings(cached);
       return filterByCountry(cached, countryCode);
     }
 
     var storedProducts = await fetchStoredTaagerProducts(countryCode);
     if (storedProducts.length) {
+      await annotateTaagerRatings(storedProducts);
       setCachedProducts(storedProducts, countryCode);
       document.dispatchEvent(new CustomEvent("boda:products-updated", {
         detail: { source: "taager-stored", count: storedProducts.length },
@@ -623,6 +672,7 @@
 
     var supabaseProducts = await fetchTaagerProductsFromSupabase(countryCode);
     if (supabaseProducts.length) {
+      await annotateTaagerRatings(supabaseProducts);
       setCachedProducts(supabaseProducts, countryCode);
       document.dispatchEvent(new CustomEvent("boda:products-updated", {
         detail: { source: "taager-supabase", count: supabaseProducts.length },

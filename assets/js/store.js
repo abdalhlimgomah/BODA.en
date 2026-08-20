@@ -242,7 +242,7 @@ function resolveProductPrice(product = {}) {
       var _fop = window._fakeOriginalPrices && window._fakeOriginalPrices[String(_pid)];
       if (_fop) {
         var _fp = Number(_fop.fake_original_price) || 0;
-        if (_fp > listedPrice && _fp <= listedPrice * 3) {
+        if (_fp > listedPrice) {
           originalCandidate = _fp;
         }
       }
@@ -548,7 +548,7 @@ async function loadFakeOriginalPrices() {
   var nowMs = Date.now();
   try {
     var tsPrev = localStorage.getItem("_fakeOriginalPrices_ts");
-    if (tsPrev && nowMs - Number(tsPrev) < 15 * 60 * 1000 && Object.keys(window._fakeOriginalPrices || {}).length) {
+    if (tsPrev && nowMs - Number(tsPrev) < 60 * 1000 && Object.keys(window._fakeOriginalPrices || {}).length) {
       return;
     }
   } catch (_e) {}
@@ -572,6 +572,10 @@ async function loadFakeOriginalPrices() {
     try {
       localStorage.setItem("_fakeOriginalPrices", JSON.stringify(map));
       localStorage.setItem("_fakeOriginalPrices_ts", String(Date.now()));
+    } catch (_e) {}
+
+    try {
+      window.dispatchEvent(new CustomEvent("boda:fake-prices-updated", { detail: { count: Object.keys(map).length } }));
     } catch (_e) {}
   } catch (e) {
     if (!isNetworkResolutionError(e)) console.warn("loadFakeOriginalPrices error:", e);

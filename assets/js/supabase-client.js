@@ -470,7 +470,9 @@ async function fetchTaagerProducts(countryCode = "") {
       : [];
 
     const products = items.map(normalizeTaagerProduct).filter(Boolean);
-    return filterTaagerProductsByCountry(products, countryCode);
+    const filtered = filterTaagerProductsByCountry(products, countryCode);
+    const annotated = await annotateProductsWithRatingsTable(client, filtered);
+    return annotated;
   } catch (error) {
     console.warn("failed fetching Taager products", error);
     return [];
@@ -1343,9 +1345,16 @@ async function annotateProductsWithRatingsTable(client, products = []) {
       chunks.push(ids.slice(i, i + chunkSize));
     }
 
-    const results = await Promise.all(chunks.map(chunk =>
-      client.from("ratings").select("item_id,rating").in("item_id", chunk)
-    ));
+    const results = await Promise.all(chunks.map(async (chunk) => {
+      let res;
+      try {
+        res = await client.from("ratings_summary").select("item_id,star1,star2,star3,star4,star5,total").in("item_id", chunk);
+        if (res.error) throw res.error;
+      } catch (e) {
+        res = await client.from("ratings").select("item_id,rating").in("item_id", chunk);
+      }
+      return res;
+    }));
 
     for (const { data, error } of results) {
       if (error) {
@@ -1355,19 +1364,33 @@ async function annotateProductsWithRatingsTable(client, products = []) {
       if (Array.isArray(data)) {
         data.forEach((row) => {
           const itemId = String(row.item_id || "");
+          if (!itemId) return;
+          if (row.total !== undefined) {
+            const total = Math.round(Number(row.total)) || 0;
+            if (total <= 0) return;
+            if (!ratingsMap[itemId]) ratingsMap[itemId] = { sum: 0, total: 0 };
+            ratingsMap[itemId].total = total;
+            ratingsMap[itemId].sum = (Math.round(Number(row.star1)) || 0) * 1
+              + (Math.round(Number(row.star2)) || 0) * 2
+              + (Math.round(Number(row.star3)) || 0) * 3
+              + (Math.round(Number(row.star4)) || 0) * 4
+              + (Math.round(Number(row.star5)) || 0) * 5;
+            return;
+          }
           const ratingValue = Number(row.rating) || 0;
           if (!itemId || ratingValue <= 0) return;
-          if (!ratingsMap[itemId]) ratingsMap[itemId] = [];
-          ratingsMap[itemId].push(ratingValue);
+          if (!ratingsMap[itemId]) ratingsMap[itemId] = { sum: 0, total: 0 };
+          ratingsMap[itemId].sum += ratingValue;
+          ratingsMap[itemId].total++;
         });
       }
     }
 
     return products.map((product) => {
       const itemId = String(product?.id || "");
-      const values = ratingsMap[itemId] || [];
+      const r = ratingsMap[itemId];
 
-      if (!values.length) {
+      if (!r || !r.total) {
         return {
           ...product,
           rating: 0,
@@ -1378,12 +1401,11 @@ async function annotateProductsWithRatingsTable(client, products = []) {
         };
       }
 
-      const sum = values.reduce((total, value) => total + value, 0);
-      const average = Number((sum / values.length).toFixed(1));
+      const average = Number((r.sum / r.total).toFixed(1));
       return {
         ...product,
         rating: average,
-        reviewCount: values.length,
+        reviewCount: r.total,
         ratingSource: "ratings",
         rating_source: "ratings",
         hasSupabaseRatings: true,
