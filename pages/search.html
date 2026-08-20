@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-  <title>??? ???????? - BudoQ</title>
+  <title>بحث المنتجات - BudoQ</title>
   <link href="../assets/fonts/cairo.css" rel="stylesheet" />
   <link href="../assets/fonts/inter.css" rel="stylesheet" />
   <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
@@ -32,37 +32,37 @@
   <main class="app-main search-page-layout">
     <!-- Sidebar for Filters (Desktop only) -->
     <aside class="search-sidebar">
-        <h3>???????</h3>
+        <h3>الفلاتر</h3>
         <div class="filter-group">
-            <h4>?????</h4>
+            <h4>الفئة</h4>
             <ul id="category-filters">
-                <!-- ???? ????? ????? ????? ??? ?????? JS -->
-                <li><a href="#">??????????</a></li>
-                <li><a href="#">?????</a></li>
-                <li><a href="#">???????? ??????</a></li>
-                <li><a href="#">???? ?????</a></li>
+                <!-- سيتم تحميل فلاتر الفئة هنا بواسطة JS -->
+                <li><a href="#">إلكترونيات</a></li>
+                <li><a href="#">أزياء</a></li>
+                <li><a href="#">مستلزمات منزلية</a></li>
+                <li><a href="#">جمال وعطور</a></li>
             </ul>
         </div>
         <div class="filter-group">
-            <h4>??????? ????????</h4>
+            <h4>العلامة التجارية</h4>
             <ul id="brand-filters">
-                 <!-- ???? ????? ????? ??????? ???????? ??? ?????? JS -->
-                <li><a href="#">???????</a></li>
-                <li><a href="#">???</a></li>
-                <li><a href="#">?????</a></li>
-                <li><a href="#">????</a></li>
+                 <!-- سيتم تحميل فلاتر العلامة التجارية هنا بواسطة JS -->
+                <li><a href="#">سامسونج</a></li>
+                <li><a href="#">آبل</a></li>
+                <li><a href="#">نايكي</a></li>
+                <li><a href="#">سوني</a></li>
             </ul>
         </div>
          <div class="filter-group">
-            <h4>?????</h4>
+            <h4>السعر</h4>
             <input type="range" min="0" max="5000" value="5000" style="width:100%;" id="price-range-slider">
             <div class="price-range-inputs">
                 <div class="price-range-field">
-                    <span>??</span>
+                    <span>من</span>
                     <input type="text" id="price-min-display" value="0" readonly>
                 </div>
                 <div class="price-range-field">
-                    <span>???</span>
+                    <span>إلى</span>
                     <input type="text" id="price-max-display" value="5000" readonly>
                 </div>
             </div>
@@ -72,13 +72,13 @@
     <!-- Main Search Content -->
     <div class="search-content-main">
       <section class="section-block search-shell" data-skeleton-container data-skeleton-type="products-grid">
-        <ul id="suggestions" class="search-list hidden" aria-label="???????? ?????"></ul>
-        <ul id="search-history" class="search-list search-history-list" aria-label="?????? ????? ???????"></ul>
+        <ul id="suggestions" class="search-list hidden" aria-label="اقتراحات البحث"></ul>
+        <ul id="search-history" class="search-list search-history-list" aria-label="عمليات البحث السابقة"></ul>
         
-        <!-- ???? ??????? -->
+        <!-- شريط الترتيب -->
         <div id="search-sort-bar" class="hidden"></div>
         
-        <!-- ????? ??????? ?????? ????? -->
+        <!-- فلاتر الأقسام لنتائج البحث -->
         <div id="search-filter-container" class="chip-row hidden" style="margin-bottom: 16px; padding: 4px 8px; overflow-x: auto; display: flex; gap: 8px; scrollbar-width: none;"></div>
         
         <div id="search-results" class="search-results-grid" data-skeleton-container></div>

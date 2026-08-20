@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>????? ?????? - BudoQ</title>
+  <title>تعديل الحساب - BudoQ</title>
   <link href="../assets/fonts/cairo.css" rel="stylesheet" />
   <link href="../assets/fonts/inter.css" rel="stylesheet" />
   <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
@@ -35,20 +35,20 @@
         <span class="material-icons-outlined">manage_accounts</span>
       </div>
       <div class="ea2-head-text">
-        <h1 class="page-title" data-i18n="?????? ? ??? ?????? ??????? ? ??????? ?????">?????? ? ??? ?????? ??????? ? ??????? ?????</h1>
-        <p class="page-subtitle" data-i18n="?? ?????? ???????? ??????? ??????? ???????">?? ?????? ???????? ??????? ??????? ???????</p>
+        <h1 class="page-title" data-i18n="استعرض و حدث بيانات التواصل و معلومات حسابك">استعرض و حدث بيانات التواصل و معلومات حسابك</h1>
+        <p class="page-subtitle" data-i18n="قم بتحديث معلوماتك الشخصية وبيانات الاتصال">قم بتحديث معلوماتك الشخصية وبيانات الاتصال</p>
       </div>
     </header>
 
     <div class="ea2-form">
 
       <section class="edit-section ea2-card">
-        <h2 class="edit-section-title" data-i18n="??????? ???????">??????? ???????</h2>
+        <h2 class="edit-section-title" data-i18n="معلومات الاتصال">معلومات الاتصال</h2>
 
         <div class="ea2-card-body">
 
           <div class="edit-field ea2-field">
-            <label for="editEmail" data-i18n="?????? ??????????">?????? ??????????</label>
+            <label for="editEmail" data-i18n="البريد الإلكتروني">البريد الإلكتروني</label>
             <div class="ea2-input-shell">
               <span class="material-icons-outlined ea2-input-icon" aria-hidden="true">mail</span>
               <input id="editEmail" class="noon-input ea2-input" type="email" readonly />
@@ -56,66 +56,66 @@
           </div>
 
           <div class="edit-field ea2-field">
-            <label for="editPhoneTriggerBtn" data-i18n="??? ???????">??? ???????</label>
+            <label for="editPhoneTriggerBtn" data-i18n="رقم الجوّال">رقم الجوّال</label>
             <div id="editPhoneWrap">
               <div class="readonly-phone-card ea2-phone-card" id="phoneCard">
                 <span class="ea2-phone-ico" id="phoneIcoWrap" aria-hidden="true">
                   <span class="material-icons-outlined">smartphone</span>
                 </span>
                 <div class="phone-text-wrap">
-                  <span class="phone-text" id="phoneDisplayVal">?? ??? ????? ??? ????</span>
+                  <span class="phone-text" id="phoneDisplayVal">لم يتم تعيين رقم هاتف</span>
                   <span class="phone-badge unverified" id="phoneStatusBadge">
                     <span class="material-icons-outlined"></span>
-                    <span id="phoneStatusBadgeText">??? ?????</span>
+                    <span id="phoneStatusBadgeText">غير متحقق</span>
                   </span>
                 </div>
-                <button type="button" class="phone-edit-trigger ea2-phone-edit" id="editPhoneTriggerBtn" aria-label="????? ??? ??????">
+                <button type="button" class="phone-edit-trigger ea2-phone-edit" id="editPhoneTriggerBtn" aria-label="تغيير رقم الهاتف">
                   <span class="material-icons-outlined" aria-hidden="true">edit</span>
                 </button>
               </div>
               <!-- Hidden input to keep compatibility with existing submit logic -->
               <input id="editPhone" type="hidden" />
             </div>
-            <p class="field-note" data-i18n="??????? ??? ????? ?????? ?????? ??????? ??? ?????? ??? ??????.">??????? ??? ????? ?????? ?????? ??????? ??? ?????? ??? ??????.</p>
+            <p class="field-note" data-i18n="يُستخدم هذا الرقم لتسجيل الدخول واستلام رمز التحقق عبر واتساب.">يُستخدم هذا الرقم لتسجيل الدخول واستلام رمز التحقق عبر واتساب.</p>
           </div>
 
         </div>
       </section>
 
       <section class="edit-section ea2-card">
-        <h2 class="edit-section-title" data-i18n="???????? ???????">???????? ???????</h2>
+        <h2 class="edit-section-title" data-i18n="معلوماتك الشخصية">معلوماتك الشخصية</h2>
 
         <div class="ea2-card-body">
 
           <div class="ea2-grid">
             <div class="edit-field ea2-field">
-              <label for="editFirstName" data-i18n="????? ?????">????? ?????</label>
+              <label for="editFirstName" data-i18n="الاسم الأول">الاسم الأول</label>
               <div class="ea2-input-shell">
                 <span class="material-icons-outlined ea2-input-icon" aria-hidden="true">person</span>
-                <input id="editFirstName" class="noon-input ea2-input" type="text" placeholder="????? ?????" />
+                <input id="editFirstName" class="noon-input ea2-input" type="text" placeholder="الاسم الأول" />
               </div>
             </div>
 
             <div class="edit-field ea2-field">
-              <label for="editLastName" data-i18n="??? ???????">??? ???????</label>
+              <label for="editLastName" data-i18n="اسم العائلة">اسم العائلة</label>
               <div class="ea2-input-shell">
                 <span class="material-icons-outlined ea2-input-icon" aria-hidden="true">person_outline</span>
-                <input id="editLastName" class="noon-input ea2-input" type="text" placeholder="??? ???????" />
+                <input id="editLastName" class="noon-input ea2-input" type="text" placeholder="اسم العائلة" />
               </div>
             </div>
           </div>
 
           <div class="edit-field ea2-field">
-            <label for="editBirthDay" data-i18n="??? ???????">??? ???????</label>
+            <label for="editBirthDay" data-i18n="يوم الميلاد">يوم الميلاد</label>
             <div class="birthday-selects ea2-birthday">
               <select id="editBirthDay">
-                <option value="">?????</option>
+                <option value="">اليوم</option>
               </select>
               <select id="editBirthMonth">
-                <option value="">?????</option>
+                <option value="">الشهر</option>
               </select>
               <select id="editBirthYear">
-                <option value="">?????</option>
+                <option value="">السنة</option>
               </select>
             </div>
             <p class="birthday-display ea2-birthday-display" id="birthdayDisplay"></p>
@@ -123,26 +123,26 @@
 
           <div class="ea2-grid">
             <div class="edit-field ea2-field">
-              <label for="genderMale" data-i18n="?????">?????</label>
+              <label for="genderMale" data-i18n="الجنس">الجنس</label>
               <div class="gender-options ea2-gender">
                 <label class="gender-option ea2-gender-option" id="genderMale">
                   <input type="radio" name="gender" value="male" />
                   <span class="ea2-gender-radio" aria-hidden="true"></span>
-                  <span data-i18n="???">???</span>
+                  <span data-i18n="ذكر">ذكر</span>
                 </label>
                 <label class="gender-option ea2-gender-option" id="genderFemale">
                   <input type="radio" name="gender" value="female" />
                   <span class="ea2-gender-radio" aria-hidden="true"></span>
-                  <span data-i18n="????">????</span>
+                  <span data-i18n="أنثى">أنثى</span>
                 </label>
               </div>
             </div>
 
             <div class="edit-field ea2-field">
-              <label for="editNationality" data-i18n="???????">???????</label>
+              <label for="editNationality" data-i18n="الجنسية">الجنسية</label>
               <select id="editNationality" class="nationality-select ea2-select">
-                <option value="???">???</option>
-                <option value="????????">????????</option>
+                <option value="مصر">مصر</option>
+                <option value="السعودية">السعودية</option>
               </select>
             </div>
           </div>
@@ -150,7 +150,7 @@
         </div>
       </section>
 
-      <button id="editSubmitBtn" class="edit-submit-btn ea2-submit" type="button" data-i18n="????? ?????">????? ?????</button>
+      <button id="editSubmitBtn" class="edit-submit-btn ea2-submit" type="button" data-i18n="تحديث حسابك">تحديث حسابك</button>
 
     </div>
   </main>
@@ -158,22 +158,22 @@
   <nav class="bottom-nav">
     <a href="home.html" data-nav="home">
       <span class="material-icons-outlined"></span>
-      <small data-i18n="????????">????????</small>
+      <small data-i18n="الرئيسية">الرئيسية</small>
     </a>
     <a href="products.html" data-nav="products">
       <span class="material-icons-outlined"></span>
-      <small data-i18n="??????">??????</small>
+      <small data-i18n="الفئات">الفئات</small>
     </a>
-    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="????????">
+    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="الرئيسية">
       <img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" />
     </button>
     <a href="ahsab.html" data-nav="account">
       <span class="material-icons-outlined"></span>
-      <small data-i18n="?????">?????</small>
+      <small data-i18n="حسابي">حسابي</small>
     </a>
     <a href="empty-cart.html" data-nav="cart">
       <span class="material-icons-outlined"></span>
-      <small data-i18n="??????">??????</small>
+      <small data-i18n="العربة">العربة</small>
       <span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span>
     </a>
   </nav>

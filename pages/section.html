@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>??? - BudoQ</title>
+  <title>قسم - BudoQ</title>
   <link href="../assets/fonts/cairo.css" rel="stylesheet" />
   <link href="../assets/fonts/inter.css" rel="stylesheet" />
   <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
@@ -67,8 +67,8 @@
 
   <main>
     <div class="sec-page-header">
-      <button class="sec-page-back" onclick="history.back()" aria-label="????"><span class="material-icons-outlined">arrow_back</span></button>
-      <h1 id="sec-page-title">???</h1>
+      <button class="sec-page-back" onclick="history.back()" aria-label="رجوع"><span class="material-icons-outlined">arrow_back</span></button>
+      <h1 id="sec-page-title">قسم</h1>
     </div>
     <div id="sec-page-skeleton" class="sec-page-skeleton">
       <div class="sec-page-sk-card"><div class="sec-page-sk-img"></div><div class="sec-page-sk-line"></div><div class="sec-page-sk-line sec-page-sk-line-sm"></div></div>
@@ -81,11 +81,11 @@
   </main>
 
   <nav class="bottom-nav">
-    <a href="home.html" data-nav="home"><span class="material-icons-outlined"></span><small>????????</small></a>
-    <a href="products.html" data-nav="products"><span class="material-icons-outlined"></span><small>??????</small></a>
-    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="????????"><img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" /></button>
-    <a href="ahsab.html" data-nav="account"><span class="material-icons-outlined"></span><small>?????</small></a>
-    <a href="empty-cart.html" data-nav="cart"><span class="material-icons-outlined"></span><small>??????</small><span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span></a>
+    <a href="home.html" data-nav="home"><span class="material-icons-outlined"></span><small>الرئيسية</small></a>
+    <a href="products.html" data-nav="products"><span class="material-icons-outlined"></span><small>الفئات</small></a>
+    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="الرئيسية"><img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" /></button>
+    <a href="ahsab.html" data-nav="account"><span class="material-icons-outlined"></span><small>حسابي</small></a>
+    <a href="empty-cart.html" data-nav="cart"><span class="material-icons-outlined"></span><small>العربة</small><span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span></a>
   </nav>
 
   <script src="../assets/vendor/supabase/supabase-js@2.js?v=20260810"></script>
@@ -99,7 +99,7 @@
     (function () {
       var params = new URLSearchParams(window.location.search);
       var type = params.get("type") || "";
-      var title = params.get("title") || "???";
+      var title = params.get("title") || "قسم";
       var sortKey = params.get("sort") || "";
       var discountFilter = parseInt(params.get("discountFilter")) || 0;
 
@@ -159,7 +159,7 @@
 
         if (!allFiltered.length) {
           grid.style.display = "block";
-          grid.innerHTML = '<div class="sec-page-empty">?? ???? ?????? ?? ??? ?????</div>';
+          grid.innerHTML = '<div class="sec-page-empty">لا توجد منتجات في هذا القسم</div>';
           paginationEl.style.display = "none";
           return;
         }
@@ -179,7 +179,7 @@
             '<div class="sec-page-card-img"><img src="' + img + '" alt="' + escapeHtml(p.name||"") + '" loading="lazy" onerror="this.style.display=\'none\'" />' +
             (rp.hasDiscount ? '<span class="sec-page-discount">-' + rp.discountPercent + '%</span>' : '') + '</div>' +
             '<div class="sec-page-card-info"><h4>' + escapeHtml((p.name||"").slice(0,40)) + '</h4>' +
-            (rr.reviews > 0 ? '<div class="sec-page-rating">? ' + rr.rating.toFixed(1) + ' (' + rr.reviews + ')</div>' : '') +
+            (rr.reviews > 0 ? '<div class="sec-page-rating">★ ' + rr.rating.toFixed(1) + ' (' + rr.reviews + ')</div>' : '') +
             '<div class="sec-page-prices"><span class="sec-page-current">' + formatMoney(rp.finalPrice) + '</span>' +
             (rp.hasDiscount ? '<span class="sec-page-old">' + formatMoney(rp.originalPrice) + '</span>' : '') + '</div></div></div>';
         });
@@ -206,9 +206,9 @@
         var parts = [];
 
         // First
-        parts.push('<button class="sp-btn" data-page="1"' + (currentPage === 1 ? ' disabled' : '') + '>�</button>');
+        parts.push('<button class="sp-btn" data-page="1"' + (currentPage === 1 ? ' disabled' : '') + '>«</button>');
         // Prev
-        parts.push('<button class="sp-btn" data-page="' + (currentPage - 1) + '"' + (currentPage === 1 ? ' disabled' : '') + '>�</button>');
+        parts.push('<button class="sp-btn" data-page="' + (currentPage - 1) + '"' + (currentPage === 1 ? ' disabled' : '') + '>‹</button>');
 
         // Page numbers
         var rangeStart = Math.max(1, currentPage - 2);
@@ -227,9 +227,9 @@
         }
 
         // Next
-        parts.push('<button class="sp-btn" data-page="' + (currentPage + 1) + '"' + (currentPage === totalPages ? ' disabled' : '') + '>�</button>');
+        parts.push('<button class="sp-btn" data-page="' + (currentPage + 1) + '"' + (currentPage === totalPages ? ' disabled' : '') + '>›</button>');
         // Last
-        parts.push('<button class="sp-btn" data-page="' + totalPages + '"' + (currentPage === totalPages ? ' disabled' : '') + '>�</button>');
+        parts.push('<button class="sp-btn" data-page="' + totalPages + '"' + (currentPage === totalPages ? ' disabled' : '') + '>»</button>');
 
         paginationEl.innerHTML = parts.join("");
 

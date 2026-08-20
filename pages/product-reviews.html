@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>??????? ?????? - BudoQ</title>
+  <title>تقييمات المنتج - BudoQ</title>
   <link href="../assets/fonts/cairo.css" rel="stylesheet" />
   <link href="../assets/fonts/inter.css" rel="stylesheet" />
   <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
@@ -40,56 +40,56 @@
 
     <section id="review-compose-section" class="section-block review-compose-section hidden">
       <div class="section-head">
-        <h2 data-i18n="??? ??????">??? ??????</h2>
-        <span class="pill" data-i18n="??? ??????">??? ??????</span>
+        <h2 data-i18n="أضف تقييمك">أضف تقييمك</h2>
+        <span class="pill" data-i18n="بعد الشراء">بعد الشراء</span>
       </div>
       <p id="review-compose-note" class="review-compose-note"></p>
 
       <form id="review-form" class="review-form" novalidate>
-        <div id="review-stars-select" class="review-stars-select" role="radiogroup" aria-label="???? ????? ??????">
-          <button type="button" class="review-star-btn" data-star-value="1" aria-label="???? ?????">
+        <div id="review-stars-select" class="review-stars-select" role="radiogroup" aria-label="اختر تقييم المنتج">
+          <button type="button" class="review-star-btn" data-star-value="1" aria-label="نجمة واحدة">
             <span class="material-icons-outlined"></span>
           </button>
-          <button type="button" class="review-star-btn" data-star-value="2" aria-label="??????">
+          <button type="button" class="review-star-btn" data-star-value="2" aria-label="نجمتان">
             <span class="material-icons-outlined"></span>
           </button>
-          <button type="button" class="review-star-btn" data-star-value="3" aria-label="3 ????">
+          <button type="button" class="review-star-btn" data-star-value="3" aria-label="3 نجوم">
             <span class="material-icons-outlined"></span>
           </button>
-          <button type="button" class="review-star-btn" data-star-value="4" aria-label="4 ????">
+          <button type="button" class="review-star-btn" data-star-value="4" aria-label="4 نجوم">
             <span class="material-icons-outlined"></span>
           </button>
-          <button type="button" class="review-star-btn" data-star-value="5" aria-label="5 ????">
+          <button type="button" class="review-star-btn" data-star-value="5" aria-label="5 نجوم">
             <span class="material-icons-outlined"></span>
           </button>
         </div>
-        <p id="review-rating-hint" class="review-rating-hint" data-i18n="???? ??? ??????">???? ??? ??????</p>
+        <p id="review-rating-hint" class="review-rating-hint" data-i18n="اختر عدد النجوم">اختر عدد النجوم</p>
 
         <div id="review-images-section" class="review-images-section">
-          <label id="review-image-upload" class="review-image-upload" for="review-image-input" role="button" tabindex="0" aria-label="????? ??? ???????">
+          <label id="review-image-upload" class="review-image-upload" for="review-image-input" role="button" tabindex="0" aria-label="إضافة صور للتقييم">
             <input id="review-image-input" class="review-image-input" type="file" accept="image/jpeg,image/png,image/webp" multiple hidden />
             <span class="material-icons-outlined review-image-upload-icon"></span>
-            <span class="review-image-upload-text">??? ????? (???????)</span>
-            <small class="review-image-upload-hint">???? 3 ??? � JPG/PNG/WebP</small>
+            <span class="review-image-upload-text">أضف صوراً (اختياري)</span>
+            <small class="review-image-upload-hint">أقصى 3 صور • JPG/PNG/WebP</small>
           </label>
           <div id="review-image-previews" class="review-image-previews"></div>
           <small id="review-image-error" class="review-image-error hidden"></small>
         </div>
 
         <label class="noon-field">
-          <span data-i18n="????? ???????">????? ???????</span>
-          <input id="review-title" class="noon-input" type="text" maxlength="100" placeholder="??? ?????" />
+          <span data-i18n="عنوان التقييم">عنوان التقييم</span>
+          <input id="review-title" class="noon-input" type="text" maxlength="100" placeholder="أضف عنوان" />
           <small class="review-counter"><span id="review-title-count">0</span>/100</small>
         </label>
 
         <label class="noon-field">
-          <span data-i18n="?????? ???????">?????? ???????</span>
+          <span data-i18n="تفاصيل التقييم">تفاصيل التقييم</span>
           <textarea
             id="review-body"
             class="noon-textarea"
             rows="4"
             maxlength="1000"
-            placeholder="???? ?????? ?? ??????..."
+            placeholder="اكتب تجربتك مع المنتج..."
           ></textarea>
           <small class="review-counter"><span id="review-body-count">0</span>/1000</small>
         </label>
@@ -99,25 +99,25 @@
             <input id="review-anonymous" type="checkbox" />
             <span class="review-switch-ui" aria-hidden="true"></span>
           </span>
-          <span class="review-anonymous-label" data-i18n="?????">?????</span>
+          <span class="review-anonymous-label" data-i18n="مجهول">مجهول</span>
         </label>
         <p id="review-publish-note" class="review-publish-note"></p>
 
         <button id="review-submit-btn" class="btn-primary review-submit-btn" type="submit" disabled>
-          <span data-i18n="????? ???????">????? ???????</span>
+          <span data-i18n="إرسال التقييم">إرسال التقييم</span>
         </button>
       </form>
     </section>
 
     <section class="section-block comments-section">
       <div class="section-head">
-        <h2 data-i18n="????????? ??????????">????????? ??????????</h2>
-        <span id="comments-count" class="pill">0 ?????</span>
+        <h2 data-i18n="التقييمات والتعليقات">التقييمات والتعليقات</h2>
+        <span id="comments-count" class="pill">0 تعليق</span>
       </div>
 
       <div class="comments-summary">
         <strong id="comments-average">0.0</strong>
-        <span data-i18n="????? ???????">????? ???????</span>
+        <span data-i18n="متوسط التقييم">متوسط التقييم</span>
       </div>
 
       <div id="comments-list" class="comments-list"></div>
@@ -127,22 +127,22 @@
   <nav class="bottom-nav">
     <a href="home.html" data-nav="home">
       <span class="material-icons-outlined">home</span>
-      <small data-i18n="????????">????????</small>
+      <small data-i18n="الرئيسية">الرئيسية</small>
     </a>
     <a href="products.html" data-nav="products">
       <span class="material-icons-outlined">category</span>
-      <small data-i18n="??????">??????</small>
+      <small data-i18n="الفئات">الفئات</small>
     </a>
-    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="????????">
+    <button id="nav-home-btn" class="nav-home-btn" type="button" aria-label="الرئيسية">
       <img src="../assets/images/Home/0363f57a-d4a4-4d3c-a142-ba49eb1a21a8_20260630152703.png" alt="Home" />
     </button>
     <a href="ahsab.html" data-nav="account">
       <span class="material-icons-outlined">person</span>
-      <small data-i18n="?????">?????</small>
+      <small data-i18n="حسابي">حسابي</small>
     </a>
     <a href="empty-cart.html" data-nav="cart">
       <span class="material-icons-outlined">shopping_cart</span>
-      <small data-i18n="??????">??????</small>
+      <small data-i18n="العربة">العربة</small>
       <span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span>
     </a>
   </nav>

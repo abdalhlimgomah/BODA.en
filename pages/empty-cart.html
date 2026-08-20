@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta name="robots" content="noindex, nofollow" />
-  <title>??? ?????? - BudoQ</title>
+  <title>سلة التسوق - BudoQ</title>
   <link href="../assets/fonts/cairo.css" rel="stylesheet" />
   <link href="../assets/fonts/inter.css" rel="stylesheet" />
   <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
@@ -107,17 +107,17 @@
             <path d="M88 74 Q100 80 112 74" stroke="#b8c8e8" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.3"/>
           </svg>
         </div>
-        <h2 class="cart-empty-title">?????? ?????</h2>
-        <p class="cart-empty-sub">????? ??? ?</p>
+        <h2 class="cart-empty-title">العربة فاضية</h2>
+        <p class="cart-empty-sub">مستني إيه ؟</p>
         <button id="start-shopping" class="cart-empty-btn" type="button">
-          ??? ???? ?????? ??????
+          يلا نبدأ شوبينج دلوقتي
         </button>
       </div>
 
       <!-- EMPTY SLIDER -->
       <div id="empty-slider-section" class="cart-card cart-slider-section hidden">
         <div class="cart-slider-header">
-          <h3>????? ??</h3>
+          <h3>مقترح لك</h3>
         </div>
         <div id="empty-slider-list"></div>
       </div>
@@ -131,14 +131,14 @@
         <!-- OFFERS SLIDER -->
         <div id="offers-section" class="cart-card cart-slider-section hidden">
           <div class="cart-slider-header">
-            <h3>???? ?????</h3>
+            <h3>عروض اليوم</h3>
           </div>
           <div id="offers-list"></div>
         </div>
         <!-- RECOMMENDED SLIDER -->
         <div id="recommended-section" class="cart-card cart-slider-section hidden">
           <div class="cart-slider-header">
-            <h3>????? ??</h3>
+            <h3>مقترح لك</h3>
           </div>
           <div id="recommended-list"></div>
         </div>
@@ -148,17 +148,17 @@
           <div class="cart-coupon-card">
             <div class="cart-coupon-title">
               <span class="material-icons-outlined"></span>
-              ?? ???? ??? ????
+              هل لديك كود خصم؟
             </div>
             <div class="cart-coupon-row">
-              <input id="coupon-input" type="text" class="cart-coupon-input" placeholder="???? ??? ?????" autocomplete="off" />
-              <button id="coupon-apply-btn" class="cart-coupon-btn" type="button">?????</button>
+              <input id="coupon-input" type="text" class="cart-coupon-input" placeholder="أدخل كود الخصم" autocomplete="off" />
+              <button id="coupon-apply-btn" class="cart-coupon-btn" type="button">تطبيق</button>
             </div>
             <div id="coupon-status" class="cart-coupon-status"></div>
             <div id="coupon-applied" class="cart-coupon-applied hidden">
               <span class="material-icons-outlined"></span>
               <span id="coupon-applied-text"></span>
-              <button id="coupon-remove-btn" class="cart-coupon-remove" type="button" aria-label="?????"><span class="material-icons-outlined">close</span></button>
+              <button id="coupon-remove-btn" class="cart-coupon-remove" type="button" aria-label="إزالة"><span class="material-icons-outlined">close</span></button>
             </div>
           </div>
         </div>
@@ -171,29 +171,29 @@
       <!-- Order Summary -->
       <div class="cart-card">
         <div class="cart-summary-card">
-          <h3>???? ?????</h3>
+          <h3>ملخص الطلب</h3>
           <div class="cart-summary-row">
-            <span id="s-items-label">???????? (0)</span>
-            <span id="s-subtotal" class="cart-summary-value">0 ?.?</span>
+            <span id="s-items-label">المنتجات (0)</span>
+            <span id="s-subtotal" class="cart-summary-value">0 ج.م</span>
           </div>
           <div id="s-discount-row" class="cart-summary-row hidden">
-            <span style="color:var(--cart-success)">????????</span>
-            <span id="s-savings" class="cart-summary-value" style="color:var(--cart-success)">- 0 ?.?</span>
+            <span style="color:var(--cart-success)">الخصومات</span>
+            <span id="s-savings" class="cart-summary-value" style="color:var(--cart-success)">- 0 ج.م</span>
           </div>
           <div class="cart-summary-row">
-            <span>???? ?????</span>
+            <span>رسوم الشحن</span>
             <span id="s-shipping" class="cart-summary-value">--</span>
           </div>
           <div class="cart-summary-row">
-            <span>???? ????? ??? ????????</span>
-            <span id="s-tax" class="cart-summary-value">12 ?.?</span>
+            <span>رسوم الدفع عند الاستلام</span>
+            <span id="s-tax" class="cart-summary-value">12 ج.م</span>
           </div>
           <div class="cart-summary-row total">
-            <span>????????</span>
-            <span id="s-grand-total">0 ?.?</span>
+            <span>الإجمالي</span>
+            <span id="s-grand-total">0 ج.م</span>
           </div>
           <button id="checkout-btn" class="cart-checkout-btn" type="button">
-            ?????? ?????
+            متابعة للدفع
             <span class="material-icons-outlined">arrow_left</span>
           </button>
         </div>
@@ -205,7 +205,7 @@
       <div class="cart-card" id="offers-card">
         <div class="cart-offers-link" id="offers-link">
           <span class="material-icons-outlined"></span>
-          <span>?????? ?????? ???????</span>
+          <span>مشاهدة العروض المتاحة</span>
           <span class="spacer"></span>
           <span class="material-icons-outlined"></span>
         </div>
@@ -219,23 +219,23 @@
   <div id="cart-sticky-mobile" class="cart-sticky-mobile hidden">
     <div class="cart-sticky-row">
       <div>
-        <div id="m-grand-total" class="cart-sticky-price">0 ?.?</div>
+        <div id="m-grand-total" class="cart-sticky-price">0 ج.م</div>
         <div id="m-savings" class="cart-sticky-savings hidden"></div>
       </div>
       <button id="m-toggle" class="cart-sticky-toggle" type="button">
-        <span>?????? ?????</span>
+        <span>تفاصيل الطلب</span>
         <span class="material-icons-outlined">expand_more</span>
       </button>
     </div>
     <div id="m-details" class="cart-sticky-details">
-      <div class="detail-row"><span>???????? (<span id="m-count">0</span>)</span><span id="m-subtotal">0 ?.?</span></div>
-      <div id="m-discount-row" class="detail-row hidden" style="color:var(--cart-success)"><span>????????</span><span id="m-savings-val">- 0 ?.?</span></div>
-      <div class="detail-row"><span>?????</span><span id="m-shipping">--</span></div>
-      <div class="detail-row"><span>???? ????? ??? ????????</span><span id="m-tax">12 ?.?</span></div>
-      <div class="detail-row total"><span>????????</span><span id="m-grand-total-val">0 ?.?</span></div>
+      <div class="detail-row"><span>المنتجات (<span id="m-count">0</span>)</span><span id="m-subtotal">0 ج.م</span></div>
+      <div id="m-discount-row" class="detail-row hidden" style="color:var(--cart-success)"><span>الخصومات</span><span id="m-savings-val">- 0 ج.م</span></div>
+      <div class="detail-row"><span>الشحن</span><span id="m-shipping">--</span></div>
+      <div class="detail-row"><span>رسوم الدفع عند الاستلام</span><span id="m-tax">12 ج.م</span></div>
+      <div class="detail-row total"><span>الإجمالي</span><span id="m-grand-total-val">0 ج.م</span></div>
     </div>
     <button id="checkout-btn-mobile" class="cart-checkout-btn" type="button">
-      ?????? ?????
+      متابعة للدفع
       <span class="material-icons-outlined"></span>
     </button>
   </div>
@@ -247,18 +247,18 @@
     <div class="cart-sheet-header">
       <span class="material-icons-outlined"></span>
       <div>
-        <div class="cart-sheet-title">??? ??????? ????? ?????</div>
+        <div class="cart-sheet-title">تمت الإضافة للسلة بنجاح</div>
         <div id="cart-sheet-count" class="cart-sheet-subtitle"></div>
       </div>
     </div>
     <div id="cart-sheet-product" class="cart-sheet-product"></div>
     <div id="cart-sheet-total" class="cart-sheet-cart-count"></div>
     <div class="cart-sheet-btns">
-      <button id="cart-sheet-continue" class="cart-sheet-btn secondary" type="button">?????? ??????</button>
-      <a id="cart-sheet-goto" href="empty-cart.html" class="cart-sheet-btn primary">??? ?????</a>
+      <button id="cart-sheet-continue" class="cart-sheet-btn secondary" type="button">متابعة التسوق</button>
+      <a id="cart-sheet-goto" href="empty-cart.html" class="cart-sheet-btn primary">عرض السلة</a>
     </div>
     <div id="cart-sheet-suggestions" class="cart-sheet-suggestions hidden">
-      <h4>?????? ?? ????</h4>
+      <h4>منتجات قد تهمك</h4>
       <div id="cart-sheet-suggestions-list"></div>
     </div>
   </div>
@@ -283,22 +283,22 @@
   <nav class="bottom-nav" id="bottom-nav">
     <a href="home.html" data-nav="home">
       <span class="material-icons-outlined"></span>
-      <small>????????</small>
+      <small>الرئيسية</small>
     </a>
     <a href="products.html" data-nav="products">
       <span class="material-icons-outlined"></span>
-      <small>??????</small>
+      <small>الفئات</small>
     </a>
-    <button class="nav-home-btn" id="nav-home-btn" type="button" aria-label="????????">
+    <button class="nav-home-btn" id="nav-home-btn" type="button" aria-label="الرئيسية">
       <span class="material-icons-outlined" style="font-size:24px;"></span>
     </button>
     <a href="ahsab.html" data-nav="account">
       <span class="material-icons-outlined"></span>
-      <small>?????</small>
+      <small>حسابي</small>
     </a>
     <a href="empty-cart.html" data-nav="cart">
       <span class="material-icons-outlined"></span>
-      <small>??????</small>
+      <small>العربة</small>
       <span class="nav-cart-count nav-cart-0" id="nav-cart-count">0</span>
     </a>
   </nav>

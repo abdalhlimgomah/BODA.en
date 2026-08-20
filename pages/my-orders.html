@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>??????? - BudoQ</title>
+  <title>الطلبات - BudoQ</title>
   <link href="../assets/fonts/cairo.css" rel="stylesheet" />
   <link href="../assets/fonts/material-icons-outlined.css" rel="stylesheet" />
   <link href="../assets/css/noon-theme.css" rel="stylesheet" />
@@ -27,36 +27,36 @@
   <main class="my-orders-noon-main">
     <p id="orders-status" class="status-note hidden" aria-live="polite"></p>
 
-    <section class="orders-top-controls" aria-label="?????? ?? ???????">
+    <section class="orders-top-controls" aria-label="التحكم في الطلبات">
       <div class="orders-control-grid">
         <label class="orders-control orders-control-search" for="orders-search-input">
           <span class="material-icons-outlined">search</span>
           <input
             id="orders-search-input"
             type="search"
-            placeholder="???? ?? ??? ????? ?? ??? ??????"
+            placeholder="ابحث عن رقم الطلب أو اسم المنتج"
             autocomplete="off"
           />
         </label>
         <label class="orders-control orders-control-period" for="orders-period-select">
           <span class="material-icons-outlined">expand_more</span>
-          <select id="orders-period-select" aria-label="???? ?????? ???????">
-            <option value="3m" selected>??? 3 ????</option>
-            <option value="6m">??? 6 ????</option>
-            <option value="12m">??? 12 ???</option>
-            <option value="all">????</option>
+          <select id="orders-period-select" aria-label="فلتر الفترة الزمنية">
+            <option value="3m" selected>آخر 3 أشهر</option>
+            <option value="6m">آخر 6 أشهر</option>
+            <option value="12m">آخر 12 شهر</option>
+            <option value="all">الكل</option>
           </select>
         </label>
       </div>
     </section>
 
-    <section class="orders-status-tabs" aria-label="???? ???? ?????">
-      <button class="orders-tab active" data-status-tab="all">????</button>
-      <button class="orders-tab" data-status-tab="pending">??? ????????</button>
-      <button class="orders-tab" data-status-tab="shipped">?? ?????</button>
-      <button class="orders-tab" data-status-tab="on-way">?? ??????</button>
-      <button class="orders-tab" data-status-tab="delivered">?? ???????</button>
-      <button class="orders-tab" data-status-tab="returns">?????????</button>
+    <section class="orders-status-tabs" aria-label="فلتر حالة الطلب">
+      <button class="orders-tab active" data-status-tab="all">الكل</button>
+      <button class="orders-tab" data-status-tab="pending">قيد المراجعة</button>
+      <button class="orders-tab" data-status-tab="shipped">تم الشحن</button>
+      <button class="orders-tab" data-status-tab="on-way">في الطريق</button>
+      <button class="orders-tab" data-status-tab="delivered">تم التوصيل</button>
+      <button class="orders-tab" data-status-tab="returns">المرتجعات</button>
     </section>
 
     <section id="orders-list" class="orders-list" aria-live="polite"></section>
