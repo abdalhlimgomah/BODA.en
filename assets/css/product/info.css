@@ -112,6 +112,59 @@
     margin: 0 2px;
 }
 
+/* ── إجمالي المبيعات: بانر عريض مدمج بنفس عائلة شارة المبيعات ── */
+.pdp-total-sales {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    margin-top: 10px;
+    padding: 8px 14px;
+    background:
+        radial-gradient(130% 180% at 100% 0%, rgba(124, 58, 237, 0.14), transparent 55%),
+        linear-gradient(120deg, #eef2ff, #e0e7ff 60%, #f3e8ff);
+    border: 1px solid #c7d2fe;
+    border-radius: 14px;
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.7),
+        0 4px 12px -8px rgba(79, 70, 229, 0.55);
+}
+.pdp-total-sales[hidden] {
+    display: none;
+}
+.pdp-total-sales-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    flex: none;
+    background: linear-gradient(135deg, #4f46e5, #8b5cf6);
+    color: #fff;
+    box-shadow: 0 3px 8px -3px rgba(79, 70, 229, 0.65);
+}
+.pdp-total-sales-icon .material-icons-outlined {
+    font-size: 18px;
+}
+.pdp-total-sales-body {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    min-width: 0;
+}
+.pdp-total-sales-label {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #4338ca;
+}
+.pdp-total-sales-num {
+    font-size: 1.05rem;
+    font-weight: 900;
+    color: #1e1b4b;
+    line-height: 1.1;
+}
+
 .pdp-nudges {
     display: flex;
     flex-wrap: wrap;
@@ -158,30 +211,167 @@
 .pdp-stock.is-ok {
     color: var(--pdp-stock-ok);
 }
-.pdp-stock.is-low {
-    color: var(--pdp-stock-low-text);
-    background: var(--pdp-stock-low-bg);
-    padding: 4px 10px;
-    border-radius: 8px;
+.pdp-stock.is-ok .pdp-stock-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    font-weight: 900;
+    color: var(--pdp-stock-ok, #0d9459);
+    background: #e7f6ee;
+    border: 1px solid #bfe8d2;
+    padding: 5px 10px;
+    border-radius: 999px;
+}
+.pdp-stock.is-ok .pdp-stock-badge .material-icons-outlined {
+    font-size: 15px;
+}
+.pdp-stock.is-ok .pdp-stock-badge strong {
+    font-weight: 900;
 }
 .pdp-stock.is-out {
     color: var(--pdp-stock-out);
 }
 
-.pdp-explore-link {
+/* Scarcity card (1-10 units) — big-retailer style */
+.pdp-stock.is-low {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    width: 100%;
+    max-width: 320px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #fff7ed, #fdeeea);
+    border: 1px solid #fed7aa;
+}
+.pdp-stock-low-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.pdp-stock-flame {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    font-size: 0.8rem;
-    font-weight: 800;
-    color: var(--pdp-blue);
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #f97316, #ef4444);
+    color: #fff;
+    flex-shrink: 0;
+    animation: pdpFlamePulse 1.6s ease-in-out infinite;
+}
+.pdp-stock-flame .material-icons-outlined {
+    font-size: 16px;
+}
+@keyframes pdpFlamePulse {
+    0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.35); }
+    50% { transform: scale(1.08); box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+}
+.pdp-stock-low-text {
+    color: #9a3412;
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+.pdp-stock-low-text strong {
+    color: #c2410c;
+    font-size: 1rem;
+    font-weight: 900;
+    padding: 0 2px;
+}
+.pdp-stock-bar {
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: #ffe4c7;
+    overflow: hidden;
+}
+.pdp-stock-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #f97316, #ef4444);
+    transition: width 0.6s ease;
+}
+
+.pdp-explore-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    padding: 9px 12px;
+    background: #f7f8fa;
+    border-radius: 8px;
+    text-decoration: none;
+    width: 100%;
+}
+.pdp-explore-link:hover {
+    background: #f0f2f5;
+}
+.pdp-explore-trophy {
+    display: inline-flex;
+    color: #f5a623;
+}
+.pdp-explore-trophy .material-icons-outlined {
+    font-size: 18px;
+}
+.pdp-explore-text {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--pdp-ink);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.pdp-explore-text strong {
+    font-weight: 900;
+}
+.pdp-explore-caret {
+    font-size: 16px;
+    color: var(--pdp-ink);
+    margin-inline-start: auto;
+}
+
+/* ---------- Rating row under the explore link (noon style) ---------- */
+.pdp-explore-rating {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 10px;
     text-decoration: none;
     width: fit-content;
 }
-.pdp-explore-link .material-icons-outlined {
+.pdp-explore-rating[hidden] {
+    display: none;
+}
+.pdp-explore-rating-num {
+    font-size: 0.95rem;
+    font-weight: 900;
+    color: var(--pdp-ink);
+}
+.pdp-explore-rating-stars {
+    display: inline-flex;
+    align-items: center;
+    gap: 1px;
+    color: var(--pdp-yellow);
+}
+.pdp-explore-rating-stars .material-icons-outlined {
     font-size: 16px;
 }
-.pdp-explore-link:hover {
+.pdp-explore-rating-stars .is-empty {
+    color: #e2e8f0;
+}
+.pdp-explore-rating-divider {
+    width: 1px;
+    height: 16px;
+    background: var(--pdp-border);
+}
+.pdp-explore-rating-count {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--pdp-blue);
+}
+.pdp-explore-rating:hover .pdp-explore-rating-count {
     text-decoration: underline;
 }
 

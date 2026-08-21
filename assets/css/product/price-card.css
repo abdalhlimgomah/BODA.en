@@ -41,14 +41,35 @@
 }
 
 .pdp-price-savings {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--pdp-savings);
+  line-height: 1;
+}
+
+.pdp-savings-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8rem;
+  font-weight: 900;
+  color: var(--pdp-savings, #0d9459);
+  background: #e7f6ee;
+  border: 1px solid #bfe8d2;
+  padding: 5px 10px;
+  border-radius: 999px;
+}
+.pdp-savings-badge .material-icons-outlined {
+  font-size: 15px;
 }
 
 .pdp-price-vat {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: 0.72rem;
   color: var(--pdp-muted);
+}
+.pdp-price-vat .material-icons-outlined {
+  font-size: 14px;
+  color: var(--pdp-savings, #0d9459);
 }
 
 @media (min-width: 768px) {

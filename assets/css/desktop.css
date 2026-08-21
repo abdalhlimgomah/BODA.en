@@ -1,4 +1,4 @@
-﻿/* =============================================
+/* =============================================
    Desktop & Tablet Responsive Layout (≥768px)
    Uses design-system tokens.
    ============================================= */
@@ -59,8 +59,8 @@
   }
   .buda-header__inner {
     max-width: 1200px;
-    padding: 0 32px;
-    min-height: 84px;
+    padding: 0 24px;
+    min-height: 58px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -70,14 +70,14 @@
   /* Brand on the right (RTL) */
   .buda-header__brand {
     order: 0;
-    gap: 12px;
+    gap: 10px;
   }
   .buda-header__brand-name {
-    font-size: 36px;
+    font-size: 25px;
   }
   .buda-header__logo-img {
-    width: 48px;
-    height: 48px;
+    width: 34px;
+    height: 34px;
   }
 
   /* Inline search in center */
@@ -88,20 +88,20 @@
   }
   .buda-header__search-inline .buda-search-box {
     width: 100%;
-    height: 48px;
+    height: 38px;
     margin: 0;
-    padding: 0 18px;
+    padding: 0 14px;
   }
   .buda-header__search-inline .buda-search-box__input {
-    font-size: 15px;
+    font-size: 13.5px;
   }
   .buda-header__search-inline .buda-search-icon {
-    width: 28px;
-    height: 28px;
+    width: 24px;
+    height: 24px;
   }
   .buda-header__search-inline .buda-search-icon svg {
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
   }
 
   /* Hide floating search on desktop */
@@ -118,16 +118,18 @@
   }
   .buda-header__nav-group .buda-header__notif {
     position: static;
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
   }
   .buda-header__nav-group .buda-header__desktop-link {
     display: flex;
+    padding: 5px 10px;
+    font-size: 12.5px;
   }
   .buda-header__nav-group .buda-header__menu-btn {
     position: static;
-    width: 40px;
-    height: 40px;
+    width: 34px;
+    height: 34px;
   }
   /* Country selector: visible only on desktop (far end of the bar) */
   .buda-country-select {

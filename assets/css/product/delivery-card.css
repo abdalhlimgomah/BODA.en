@@ -109,3 +109,13 @@
   .pdp-trust-row { flex-direction: column; gap: 12px; }
   .pdp-trust-item { min-width: 0; }
 }
+
+/* ---------- Inside the seller card (desktop buybox column) ---------- */
+@media (min-width: 1200px) {
+  .pdp-seller-card > [data-pdp-delivery],
+  .pdp-seller-card > [data-pdp-installment] {
+    border-top: 1px solid var(--pdp-border);
+    margin-top: 14px;
+    padding-top: 14px;
+  }
+}

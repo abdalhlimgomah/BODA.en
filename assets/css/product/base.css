@@ -60,7 +60,7 @@
   /* Layout */
   --pdp-shell-width: var(--noon-shell-width, 1200px);
   --pdp-gutter: 14px;
-  --pdp-gallery-col: 460px;
+  --pdp-gallery-col: 390px;
   --pdp-seller-col: 300px;
 }
 
@@ -72,14 +72,14 @@
 }
 @media (min-width: 1440px) {
   :root {
-    --pdp-gallery-col: 500px;
+    --pdp-gallery-col: 420px;
     --pdp-seller-col: 320px;
   }
 }
 @media (min-width: 1920px) {
   :root {
     --pdp-shell-width: 1480px;
-    --pdp-gallery-col: 560px;
+    --pdp-gallery-col: 470px;
     --pdp-seller-col: 340px;
   }
 }

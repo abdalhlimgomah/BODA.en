@@ -58,20 +58,46 @@
   .pdp-tab-btn { padding: 16px 18px 14px; font-size: 0.9rem; }
 }
 
+/* ---------- Section titles ---------- */
+.pdp-section-title {
+  margin: 0 0 12px;
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--pdp-ink);
+}
+
 /* ---------- Overview highlights grid ---------- */
 .pdp-overview-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-  gap: 10px 16px;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 10px;
 }
 .pdp-overview-item {
   display: flex;
-  align-items: flex-start;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  background: #f8f9fb;
+  border: 1px solid #eef1f5;
+  border-radius: 10px;
   font-size: 0.82rem;
+  font-weight: 600;
   color: var(--pdp-text);
 }
-.pdp-overview-item .material-icons-outlined { font-size: 18px; color: var(--pdp-blue); flex: none; margin-top: 1px; }
+.pdp-overview-item .material-icons-outlined {
+  flex: none;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  color: var(--pdp-blue);
+  background: #eaf2ff;
+  border-radius: 8px;
+}
+
+.pdp-desc-block { margin-top: 18px; }
 
 .pdp-overview-more {
   margin-top: 12px;

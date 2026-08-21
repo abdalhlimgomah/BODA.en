@@ -45,83 +45,59 @@
   font-size: 16px;
 }
 
-/* Size buttons row — horizontal scroll on mobile, wrap on desktop */
+/* Size options — always wrap into rows, exactly like Noon */
 .pdp-size-options {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 .pdp-size-options.pdp-size-scroll {
-  flex-wrap: nowrap;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  padding-bottom: 4px;
-}
-.pdp-size-options.pdp-size-scroll::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;
+  overflow: visible;
 }
 
-/* Individual size button */
+/* Individual size button — flat square style like Noon */
 .pdp-size-btn {
   position: relative;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 56px;
-  height: 48px;
-  padding: 0 18px;
-  border: 1.5px solid var(--pdp-border);
-  border-radius: 12px;
+  min-width: 52px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid #c9ccd4;
+  border-radius: 4px;
   background: #fff;
   color: var(--pdp-text);
-  font-size: 0.9rem;
-  font-weight: 800;
+  font-size: 0.85rem;
+  font-weight: 700;
   font-family: inherit;
   cursor: pointer;
-  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.12s ease, background 0.18s ease;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
   user-select: none;
   flex: none;
 }
 .pdp-size-btn:hover {
-  border-color: #b9c8de;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  border-color: #7c818c;
 }
 .pdp-size-btn:active {
-  transform: scale(0.95);
+  transform: scale(0.97);
 }
 
-/* Selected state */
+/* Selected state — thick dark border, no badge (Noon style) */
 .pdp-size-btn.is-selected {
-  border-color: var(--pdp-blue);
-  background: #fff;
-  box-shadow: 0 0 0 1.5px var(--pdp-blue) inset;
-}
-.pdp-size-btn.is-selected::after {
-  content: "check";
-  font-family: "Material Icons Outlined";
-  position: absolute;
-  bottom: -5px;
-  left: -5px;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--pdp-blue);
-  color: #fff;
-  font-size: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  border-color: var(--pdp-ink);
+  box-shadow: inset 0 0 0 1px var(--pdp-ink);
+  color: var(--pdp-ink);
+  font-weight: 900;
 }
 
-/* Unavailable state — grey with diagonal line like Noon */
+/* Unavailable state — grey text + diagonal strike like Noon */
 .pdp-size-btn.is-unavailable {
   cursor: not-allowed;
-  opacity: 0.5;
-  background: #f8fafc;
-  border-color: var(--pdp-border);
+  color: #b6bac3;
+  background: #fcfcfc;
+  border-color: #eceef2;
   position: relative;
   overflow: hidden;
 }
@@ -129,14 +105,14 @@
   content: "";
   position: absolute;
   top: 50%;
-  left: -10%;
-  right: -10%;
-  height: 1px;
-  background: #94a3b8;
-  transform: rotate(-25deg);
+  left: -8%;
+  right: -8%;
+  height: 1.5px;
+  background: #c3c7cf;
+  transform: rotate(-22deg);
 }
 .pdp-size-btn.is-unavailable:hover {
-  border-color: var(--pdp-border);
+  border-color: #eceef2;
   box-shadow: none;
 }
 
@@ -284,19 +260,11 @@
 
 /* Responsive */
 @media (max-width: 767px) {
-  .pdp-size-options {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    padding-bottom: 4px;
-  }
-  .pdp-size-options::-webkit-scrollbar { display: none; }
   .pdp-size-btn {
-    min-width: 48px;
-    height: 42px;
-    padding: 0 14px;
-    font-size: 0.82rem;
+    min-width: 46px;
+    height: 38px;
+    padding: 0 12px;
+    font-size: 0.8rem;
   }
   .pdp-size-guide-modal {
     padding: 20px 16px;
@@ -306,9 +274,20 @@
 
 @media (min-width: 1200px) {
   .pdp-size-btn {
-    min-width: 64px;
-    height: 52px;
-    padding: 0 22px;
-    font-size: 0.95rem;
+    min-width: 56px;
+    height: 44px;
+    padding: 0 18px;
+    font-size: 0.88rem;
+  }
+}
+
+/* ---------- Desktop: card parked under the gallery ---------- */
+@media (min-width: 1200px) {
+  #pdp-sizes-section.pdp-size-desktop-card {
+    margin-top: 16px;
+    padding: 16px 18px;
+    background: var(--pdp-surface);
+    border-radius: var(--pdp-radius);
+    box-shadow: var(--pdp-shadow-sm);
   }
 }

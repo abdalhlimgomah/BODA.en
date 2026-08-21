@@ -1,4 +1,4 @@
-﻿/* ============================================
+/* ============================================
    Home Page — Design System v2.0
    Skeleton loading + section rendering styles
    (Design system handles header, footer, modal, search, dropdown)
@@ -115,10 +115,10 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
   .hm-hero-wrap { padding: 0; margin: 12px 0 8px; max-width: 100%; }
   .hm-hero { 
     border-radius: var(--radius-xl); 
-    aspect-ratio: 3/1; 
+    aspect-ratio: 5/1; 
     box-shadow: var(--shadow-lg); 
     width: 100%;
-    max-height: 500px;
+    max-height: 300px;
   }
   .hm-hero-slide { border-radius: var(--radius-lg); }
   .hm-hero-bar-wrap { bottom: 16px; }
@@ -192,7 +192,7 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
   .hm-section-head { padding: 24px 32px 0; }
   .hm-section-body { padding: 20px 32px 24px; }
   
-  .hm-hero { aspect-ratio: 3/1; max-height: 500px; }
+  .hm-hero { aspect-ratio: 5/1; max-height: 300px; }
   .hm-hero-bar-wrap { bottom: 24px; }
 
   .hm-banner-top-wrap { padding: 0 0 16px; }
@@ -473,8 +473,8 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
   .hm-smart-cat-subtitle { font-size: var(--text-body-sm); }
   
   /* Hero carousel */
-  .hm-hero-wrap { max-width: 100%; margin: 16px 0 8px; padding: 0; width: 100%; }
-  .hm-hero { aspect-ratio: 3/1; border-radius: var(--radius-xl); max-height: 500px; }
+  .hm-hero-wrap { max-width: 100%; margin: -4px 0 8px; padding: 0; width: 100%; }
+  .hm-hero { aspect-ratio: 5/1; border-radius: var(--radius-xl); max-height: 300px; }
   
   /* Top banner */
   .hm-banner-top-wrap { padding: 0 24px 12px; }
@@ -486,9 +486,9 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
   .hm-banner-third,
   .hm-banner-small,
   .hm-banner-large,
-  .hm-banner-wide { 
-    aspect-ratio: 6/1; 
-    max-height: 280px; 
+  .hm-banner-wide {
+    aspect-ratio: 6/1;
+    max-height: 140px;
   }
   .hm-banner img {
     width: 100%;
@@ -497,12 +497,12 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
   }
   
   /* Categories */
-  .hm-cats-wrap { padding: 0 24px 12px; margin: 24px 0; }
+  .hm-cats-wrap { padding: 0 24px 1px; margin: 1px 0; }
   .hm-cats-section { border-radius: var(--radius-xl); }
-  .hm-cats-head { padding: 16px 20px 0; }
+  .hm-cats-head { padding: 1px 1px 0; }
   .hm-cats-head h2 { font-size: var(--text-heading-sm); }
-  .hm-cats-body { padding: 16px 20px; }
-  .hm-cats-grid { gap: 16px; padding: 8px 20px 16px; margin: 0 -20px; }
+  .hm-cats-body { padding: 8px 20px; }
+  .hm-cats-grid { gap: 16px; padding: 8px 1px 16px; margin: 0 -20px; }
   .hm-cats-scroll { gap: 20px; }
   .hm-cats-pair { gap: 20px; }
   .hm-cat-card-img { width: 130px; }
@@ -615,7 +615,7 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
   .hm-smart-cat-subtitle { font-size: var(--text-body-sm); }
   
   /* Hero */
-  .hm-hero { aspect-ratio: 3/1; max-height: 500px; }
+  .hm-hero { aspect-ratio: 5/1; max-height: 300px; }
   .hm-hero-bar-wrap { bottom: 24px; }
   
   /* Categories - more visible */
@@ -654,10 +654,10 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
   .buda-mega-product-price { font-size: 0.8rem !important; }
   
   /* Banners - large desktop */
-  .hm-banner-half { aspect-ratio: 16/5; }
-  .hm-banner-third { aspect-ratio: 3/2; }
-  .hm-banner-large { aspect-ratio: 16/5; }
-  .hm-banner-wide { aspect-ratio: 16/5; }
+  .hm-banner-half { aspect-ratio: 32/5; max-height: 140px; }
+  .hm-banner-third { aspect-ratio: 3/1; max-height: 140px; }
+  .hm-banner-large { aspect-ratio: 32/5; max-height: 140px; }
+  .hm-banner-wide { aspect-ratio: 32/5; max-height: 140px; }
   
   /* Footer - multi column handled by design-system/footer.css */
   .buda-footer { padding: 48px 32px 24px; }
@@ -748,6 +748,15 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
     box-shadow: 0 2px 6px rgba(0,0,0,0.04);
 }
 .noon-add-square:hover { background: var(--color-primary); color: var(--color-text-inverse); border-color: var(--color-primary); transform: scale(1.08); }
+.noon-variants-badge {
+    position: absolute; left: 10px; bottom: 52px; z-index: 3;
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; background: rgba(255,255,255,0.95);
+    border-radius: 999px; box-shadow: 0 1px 5px rgba(0,0,0,0.14);
+    pointer-events: none;
+}
+.noon-variants-badge img { width: 18px; height: 18px; display: block; }
+.noon-variants-badge .noon-variants-count { font-size: 0.72rem; font-weight: var(--weight-extrabold, 800); color: var(--color-text); line-height: 1; }
 .noon-product-media-wrap .buda-badge {
     position: absolute; top: 8px; left: 8px; z-index: 3;
     background: var(--color-primary); color: var(--color-text-inverse); font-size: 0.6rem; font-weight: var(--weight-extrabold);
@@ -1511,7 +1520,7 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
 
   /* البانر الرئيسي الكبير */
   .sk-hero-wrap { padding: 0; margin: 6px 0 0; }
-  .sk-hero { aspect-ratio: 3.4 / 1; border-radius: 26px; max-height: 430px; }
+  .sk-hero { aspect-ratio: 5 / 1; border-radius: 26px; max-height: 300px; }
 
   /* التصنيفات: شبكة 8 خانات كاملة بدل الشريط الدوّار */
   .sk-cats-section, .sk-smart-cats, .sk-product-section { margin: 0 !important; border-radius: 24px; }
@@ -1526,7 +1535,7 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
 
   /* البانرات العريضة */
   .sk-banner-wrap { padding: 0; }
-  .sk-banner-half { aspect-ratio: 6.5 / 1; border-radius: 24px; }
+  .sk-banner-half { aspect-ratio: 6.5 / 1; border-radius: 24px; max-height: 140px; }
 
   /* الميجا: 3 كروت بصور 16/9 موحّدة */
   .sk-mega-row { margin: 0; gap: 18px; }
@@ -1562,7 +1571,7 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
     flex-shrink: 0;
     order: 0;
     width: 100vw;
-    margin: 0 -48px 14px;
+    margin: -16.5px -48px -3.5px;
     padding: 0;
     max-width: none;
   }
@@ -1571,8 +1580,8 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
     flex: 0 0 100%;
   }
   .hm-hero {
-    aspect-ratio: 3.4 / 1;
-    max-height: 540px;
+    aspect-ratio: 5 / 1;
+    max-height: 300px;
     border-radius: 0;
   }
   .hm-hero-slide { border-radius: 0; }
@@ -1612,12 +1621,87 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
     flex: 0 0 auto;
     flex-shrink: 0;
     width: 100vw;
-    margin: 0 -48px 18px;
+    margin: -5px -48px 18px;
     padding: 0;
     max-width: none;
   }
   .hm-cats-section {
     border-radius: 0 !important;
     box-shadow: none !important;
+  }
+}
+
+/* ========== أسهم عايمة شفافة تظهر مع الماوس — كل الكاروسيلات (ديسكتوب فقط) ========== */
+@media (min-width: 768px) {
+  .hm-cats-wrap,
+  .hm-cats-scroll-wrap,
+  .hm-shein-grid-wrap,
+  .hm-shein-deal-row-wrap,
+  .hm-shein-side-wrap { position: relative; }
+
+  .hm-cats-wrap .hm-cats-btn,
+  .hm-section .hm-cats-btn,
+  .hm-shein-grid-btn,
+  .hm-shein-row-btn,
+  .hm-shein-side-btn {
+    position: absolute !important;
+    top: 50% !important;
+    transform: translateY(-50%);
+    z-index: 6;
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: rgba(255, 255, 255, 0.72) !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.18) !important;
+    backdrop-filter: blur(6px);
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transition: opacity 0.25s ease, background 0.25s ease, transform 0.25s ease !important;
+  }
+
+  /* prev يمين / next يسار (RTL) */
+  .hm-cats-wrap .hm-cats-btn.prev,
+  .hm-section .hm-cats-btn.prev,
+  .hm-shein-grid-btn.prev,
+  .hm-shein-row-btn.prev,
+  .hm-shein-side-btn.prev { right: 14px !important; }
+  .hm-cats-wrap .hm-cats-btn.next,
+  .hm-section .hm-cats-btn.next,
+  .hm-shein-grid-btn.next,
+  .hm-shein-row-btn.next,
+  .hm-shein-side-btn.next { left: 14px !important; }
+
+  /* تظهر عند مرور الماوس وتختفي عند الخروج */
+  .hm-cats-wrap:hover .hm-cats-btn,
+  .hm-section:hover .hm-cats-btn,
+  .hm-shein-grid-wrap:hover .hm-shein-grid-btn,
+  .hm-shein-deal-row-wrap:hover .hm-shein-row-btn,
+  .hm-shein-side-wrap:hover .hm-shein-side-btn { opacity: 0.85 !important; pointer-events: auto !important; }
+
+  .hm-cats-wrap .hm-cats-btn:hover,
+  .hm-section .hm-cats-btn:hover,
+  .hm-shein-grid-btn:hover,
+  .hm-shein-row-btn:hover,
+  .hm-shein-side-btn:hover { opacity: 1 !important; background: #fff !important; }
+
+  /* تصغير كرت الفئة قليلا */
+  .hm-cats-wrap .hm-cat-card-img { width: 87px; }
+}
+
+/* ========== العروض الكبيرة: مفرودة على عرض الصفحة (ديسكتوب فقط) ========== */
+@media (min-width: 1200px) {
+  .buda-mega-offers {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: stretch !important;
+    gap: 16px !important;
+    width: 100% !important;
+  }
+  .buda-mega-col {
+    flex: 1 1 0 !important;
+    min-width: 0 !important;
   }
 }

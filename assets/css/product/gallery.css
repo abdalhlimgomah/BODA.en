@@ -1,4 +1,4 @@
-﻿/* ============================================================
+/* ============================================================
    ProductGallery
    Mobile: full-width swipeable stage + dots + "n/N" counter.
    Desktop (>=1200px): main stage + vertical thumbnail rail to the
@@ -13,7 +13,7 @@
 .pdp-gallery-stage {
   position: relative;
   width: 100%;
-  aspect-ratio: 1 / 1;
+  aspect-ratio: 2 / 1;
   background: #f8fafc;
   border-radius: var(--pdp-radius);
   overflow: hidden;
@@ -176,9 +176,9 @@
 }
 
 @media (min-width: 1200px) {
-  .pdp-gallery { flex-direction: row-reverse; align-items: flex-start; position: sticky; top: 14px; }
+  .pdp-gallery { flex-direction: row-reverse; align-items: flex-start; }
   .pdp-gallery-stagewrap { flex: 1; min-width: 0; }
-  .pdp-gallery-stage { aspect-ratio: 1 / 1; cursor: zoom-in; }
+  .pdp-gallery-stage { aspect-ratio: 2 / 1; cursor: zoom-in; }
   .pdp-gallery-dots { display: none; }
   .pdp-gallery-thumbs {
     flex-direction: column;

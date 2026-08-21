@@ -1,29 +1,42 @@
 /* ============================================================
-   SpecificationsTable — 2-column label/value rows
+   SpecificationsTable — professional label/value spec sheet
+   (rounded frame, tinted label column, hover row highlight)
    ============================================================ */
 
 .pdp-spec-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-size: 0.84rem;
+  border: 1px solid var(--pdp-border);
+  border-radius: 12px;
+  overflow: hidden;
 }
-.pdp-spec-table tr { border-bottom: 1px solid var(--pdp-border); }
-.pdp-spec-table tr:nth-child(even) { background: #f8fafc; }
-.pdp-spec-table tr:last-child { border-bottom: 0; }
+.pdp-spec-table tr {
+  border-bottom: 1px solid #eef1f5;
+}
+.pdp-spec-table tr:last-child td {
+  border-bottom: 0;
+}
 .pdp-spec-table td {
-  padding: 11px 12px;
+  padding: 12px 14px;
   vertical-align: top;
 }
 .pdp-spec-table td:first-child {
-  width: 38%;
+  width: 32%;
   color: var(--pdp-muted);
   font-weight: 700;
+  background: #f8f9fb;
+  border-left: 1px solid #eef1f5;
 }
 .pdp-spec-table td:last-child {
   color: var(--pdp-ink);
-  font-weight: 700;
+  font-weight: 600;
+}
+.pdp-spec-table tbody tr:hover td:last-child {
+  background: #fafbfd;
 }
 
 @media (min-width: 768px) {
-  .pdp-spec-table td:first-child { width: 30%; }
+  .pdp-spec-table td:first-child { width: 26%; }
 }

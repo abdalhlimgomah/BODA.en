@@ -87,7 +87,7 @@ html[dir="ltr"] .pdp-sk-shimmer {
 }
 .pdp-skel-gallery-main {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 2 / 1;
     border-radius: var(--pdp-radius);
 }
 .pdp-skel-gallery-dots {

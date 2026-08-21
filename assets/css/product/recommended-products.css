@@ -72,3 +72,14 @@
 }
 
 .pdp-carousel-empty { color: var(--pdp-muted); font-size: 0.85rem; padding: 8px 0; }
+
+/* ---------- Variants badge (noon colorVariants) ---------- */
+.noon-variants-badge {
+  position: absolute; left: 10px; bottom: 52px; z-index: 3;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 8px; background: rgba(255,255,255,0.95);
+  border-radius: 999px; box-shadow: 0 1px 5px rgba(0,0,0,0.14);
+  pointer-events: none;
+}
+.noon-variants-badge img { width: 18px; height: 18px; display: block; }
+.noon-variants-badge .noon-variants-count { font-size: 0.72rem; font-weight: 800; color: var(--buda-text, #111); line-height: 1; }
