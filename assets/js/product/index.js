@@ -100,7 +100,74 @@
       var offersEl = document.getElementById("pdp-offers");
       if (offersEl) global.PDP.Info.renderOffers(offersEl, vm);
     }
+    placeSizeSection();
+    placeVariantsSection();
     syncWishlistOnLoad();
+  }
+
+  // ---------------------------------------------------------------
+  // NOTE: delivery + installment blocks intentionally stay in their
+  // original spot in the middle (info) column on ALL breakpoints.
+  // ---------------------------------------------------------------
+  var desktopMq = window.matchMedia("(min-width: 1200px)");
+
+  if (typeof desktopMq.addEventListener === "function") {
+    desktopMq.addEventListener("change", onDesktopChange);
+  } else if (typeof desktopMq.addListener === "function") {
+    desktopMq.addListener(onDesktopChange);
+  }
+
+  // ---------------------------------------------------------------
+  // Desktop placement: park the size selector under the product
+  // gallery (fills the empty space beneath the images) as a card.
+  // Below 1200px it returns to its original full-width spot.
+  // ---------------------------------------------------------------
+  var sizeHome = null;
+
+  function placeSizeSection() {
+    var section = document.getElementById("pdp-sizes-section");
+    if (!section) return;
+    if (!sizeHome) {
+      sizeHome = { parent: section.parentNode, next: section.nextSibling };
+    }
+    /* ملاحظة: .pdp-gallery-region موجودة نسختين (هيكل عظمي + حقيقية)
+       — [data-pdp-gallery] على الحقيقية فقط */
+    var galleryRegion = document.querySelector("[data-pdp-gallery]");
+    if (desktopMq.matches && galleryRegion) {
+      section.classList.add("pdp-size-desktop-card");
+      galleryRegion.appendChild(section);
+    } else if (sizeHome.parent) {
+      section.classList.remove("pdp-size-desktop-card");
+      sizeHome.parent.insertBefore(section, sizeHome.next);
+    }
+  }
+
+  function onDesktopChange() {
+    placeSizeSection();
+    placeVariantsSection();
+  }
+
+  // ---------------------------------------------------------------
+  // Desktop placement: the color/variants card joins the size card
+  // under the gallery (sizes first, then colors). Below 1200px it
+  // returns to its original full-width spot.
+  // ---------------------------------------------------------------
+  var variantsHome = null;
+
+  function placeVariantsSection() {
+    var section = document.getElementById("pdp-variants-section");
+    if (!section) return;
+    if (!variantsHome) {
+      variantsHome = { parent: section.parentNode, next: section.nextSibling };
+    }
+    var galleryRegion = document.querySelector("[data-pdp-gallery]");
+    if (desktopMq.matches && galleryRegion) {
+      section.classList.add("pdp-variants-desktop-card");
+      galleryRegion.appendChild(section);
+    } else if (variantsHome.parent) {
+      section.classList.remove("pdp-variants-desktop-card");
+      variantsHome.parent.insertBefore(section, variantsHome.next);
+    }
   }
 
   // ---------------------------------------------------------------

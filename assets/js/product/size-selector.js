@@ -23,7 +23,6 @@
       '<span class="material-icons-outlined">straighten</span> دليل المقاسات' +
       '</button></div>';
 
-    var scrollClass = sizes.length > 8 ? ' pdp-size-scroll' : '';
     if (!_selectedSize) {
       for (var si = 0; si < sizes.length; si++) {
         if (sizes[si].is_available !== false && sizes[si].stock !== 0) {
@@ -41,7 +40,7 @@
       return '<button type="button" class="' + cls + '" data-size-idx="' + i + '"' + disabled + '>' + U.escapeHtml(s.name) + '</button>';
     }).join('');
 
-    root.innerHTML = header + '<div class="pdp-size-options' + scrollClass + '">' + btns + '</div>';
+    root.innerHTML = header + '<div class="pdp-size-options">' + btns + '</div>';
 
     if (!root.dataset.sizeBound) {
       root.dataset.sizeBound = "1";

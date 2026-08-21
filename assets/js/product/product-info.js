@@ -48,6 +48,33 @@
       }
     }
 
+    var totalSalesEl = U.qs(".pdp-total-sales", root);
+    if (totalSalesEl) {
+      var toArDigits = function (n) {
+        return String(n).replace(/[0-9]/g, function (d) {
+          return "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669"[Number(d)];
+        });
+      };
+      var totalCount =
+        (vm.soldCount || 0) +
+        Math.max(
+          Number(vm.reviews && vm.reviews.total) || 0,
+          Number(vm.rating && vm.rating.count) || 0,
+        );
+      if (totalCount > 0) {
+        totalSalesEl.hidden = false;
+        totalSalesEl.innerHTML =
+          '<span class="pdp-total-sales-icon"><span class="material-icons-outlined">trending_up</span></span>' +
+          '<span class="pdp-total-sales-body">' +
+          '<span class="pdp-total-sales-label">آخر المبيعات</span>' +
+          '<strong class="pdp-total-sales-num">' + toArDigits(totalCount) + "</strong>" +
+          "</span>";
+      } else {
+        totalSalesEl.hidden = true;
+        totalSalesEl.innerHTML = "";
+      }
+    }
+
     var nudgesEl = U.qs(".pdp-nudges", root);
     if (nudgesEl) {
       var chips = [];
@@ -74,26 +101,61 @@
         stockEl.innerHTML =
           '<span class="material-icons-outlined">remove_shopping_cart</span>نفد المخزون';
       } else if (vm.stock.status === "low_stock") {
+        // Scarcity card (1-10 units left) — bar fill shrinks as stock runs out
         stockEl.classList.add("is-low");
+        var qty = vm.stock.quantity;
+        var pct = Math.max(8, Math.min(100, Math.round((qty / 10) * 100)));
         stockEl.innerHTML =
-          '<span class="material-icons-outlined">shopping_bag</span>متبقي ' +
-          vm.stock.quantity +
-          " فقط في المخزون";
+          '<div class="pdp-stock-low-head">' +
+          '<span class="pdp-stock-flame"><span class="material-icons-outlined">local_fire_department</span></span>' +
+          '<span class="pdp-stock-low-text">أسرع! باقي <strong>' + qty + "</strong> قطعة فقط</span>" +
+          "</div>" +
+          '<div class="pdp-stock-bar"><div class="pdp-stock-bar-fill" style="width:' + pct + '%"></div></div>';
       } else {
         stockEl.classList.add("is-ok");
         stockEl.innerHTML =
-          '<span class="material-icons-outlined">check_circle</span>متوفر';
+          '<span class="pdp-stock-badge"><span class="material-icons-outlined">check_circle</span>متوفر</span>';
       }
     }
 
     var exploreEl = U.qs(".pdp-explore-link", root);
     if (exploreEl && vm.category) {
       exploreEl.href = "sections.html";
-      exploreEl.querySelector("span:last-child") &&
-        (exploreEl.querySelector("span:last-child").textContent =
-          "استكشف الأفضل مبيعاً في " + vm.category);
+      exploreEl.innerHTML =
+        '<span class="pdp-explore-trophy"><span class="material-icons-outlined">emoji_events</span></span>' +
+        '<span class="pdp-explore-text">أفضل المنتجات في <strong>' + U.escapeHtml(vm.category) + "</strong></span>" +
+        '<span class="material-icons-outlined pdp-explore-caret">chevron_left</span>';
     } else if (exploreEl) {
       exploreEl.style.display = "none";
+    }
+
+    var exploreRatingEl = U.qs(".pdp-explore-rating", root);
+    if (exploreRatingEl) {
+      var avg =
+        Number(vm.reviews && vm.reviews.average) ||
+        Number(vm.rating && vm.rating.average) || 0;
+      var cnt = Math.max(
+        Number(vm.reviews && vm.reviews.total) || 0,
+        Number(vm.rating && vm.rating.count) || 0,
+      );
+      if (cnt > 0) {
+        var arDigits = function (n) {
+          return String(n).replace(/[0-9]/g, function (d) {
+            return "\u0660\u0661\u0662\u0663\u0664\u0665\u0666\u0667\u0668\u0669"[Number(d)];
+          });
+        };
+        exploreRatingEl.hidden = false;
+        exploreRatingEl.innerHTML =
+          (avg > 0
+            ? '<span class="pdp-explore-rating-num">' + arDigits(avg.toFixed(1)) + "</span>" +
+              '<span class="pdp-explore-rating-stars">' + U.starsMarkup(avg) + "</span>" +
+              '<span class="pdp-explore-rating-divider"></span>'
+            : "") +
+          '<span class="pdp-explore-rating-count">' + arDigits(cnt) + " تقييم</span>";
+      } else {
+        exploreRatingEl.hidden = true;
+        exploreRatingEl.innerHTML = "";
+      }
     }
   }
 

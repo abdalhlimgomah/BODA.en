@@ -12,9 +12,14 @@
     root.style.display = "";
     var inst = vm.installment;
     root.innerHTML =
-      '<div class="pdp-installment-logo">' + U.escapeHtml(inst.provider) + "</div>" +
-      '<div class="pdp-installment-text">ادفع ' + inst.months + ' أقساط شهرية بقيمة <strong>' + inst.perMonthText + "</strong></div>" +
-      '<div class="pdp-installment-more"><span class="material-icons-outlined">chevron_left</span></div>';
+      '<div class="pdp-installment-title">خصم على الدفع</div>' +
+      '<div class="pdp-installment-card">' +
+        '<div class="pdp-installment-logos">' +
+          '<span class="pdp-inst-logo pdp-inst-logo-visa">VISA</span>' +
+          '<span class="pdp-inst-logo pdp-inst-logo-mc"><i></i><i></i></span>' +
+        "</div>" +
+        '<p class="pdp-installment-text">ادفع <strong>' + inst.months + "</strong> أقساط شهرية بقيمة <strong>" + inst.perMonthText + "</strong></p>" +
+      "</div>";
     root.onclick = function () {
       U.notify("خيارات الدفع بالتقسيط: " + inst.providers.join("، "), { type: "info" });
     };

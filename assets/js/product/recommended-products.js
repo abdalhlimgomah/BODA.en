@@ -78,6 +78,8 @@
     if (dots) html += '<span class="noon-img-dots">' + dots + '</span>';
     html += '</div>';
     html += '<button class="noon-add-square" data-add-to-cart="' + escapeHtml(id) + '" aria-label="\u0625\u0636\u0627\u0641\u0629 \u0625\u0644\u0649 \u0627\u0644\u0633\u0644\u0629">+</button>';
+    var _vc = global.BudaStore && global.BudaStore.countProductVariants ? global.BudaStore.countProductVariants(product) : 0;
+    if (_vc > 1) html += '<span class="noon-variants-badge" title="متوفر بأكثر من لون"><img src="https://f.nooncdn.com/s/app/com/noon/images/colorVariants.svg" alt="" width="18" height="18" loading="lazy" /><span class="noon-variants-count">' + _vc + '</span></span>';
     html += '</div>';
     html += '<div class="noon-product-body">';
     html += '<h4 class="noon-title">' + escapeHtml(name) + '</h4>';

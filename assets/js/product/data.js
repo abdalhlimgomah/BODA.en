@@ -238,7 +238,7 @@
     var declaredStatus = String((product && (product.stockStatus || product.stock_status)) || "").toLowerCase();
     var status = "in_stock";
     if (declaredStatus === "out_of_stock" || qty === 0) status = "out_of_stock";
-    else if (qty > 0 && qty < 5) status = "low_stock";
+    else if (qty > 0 && qty <= 10) status = "low_stock";
     return { quantity: qty, status: status };
   }
 

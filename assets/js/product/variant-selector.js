@@ -34,7 +34,7 @@
         var isSwatch = group.type === "color";
         var classes = "pdp-variant-card " + (isSwatch ? "pdp-variant-card--swatch" : "pdp-variant-card--text") + (selected ? " is-selected" : "") + (opt.available ? "" : " is-disabled");
         var inner = isSwatch
-          ? '<span class="pdp-swatch-box" style="background:' + U.escapeHtml(opt.value) + ";color:" + readableTextColor(opt.value) + '">' + U.escapeHtml(opt.label) + "</span>"
+          ? '<span class="pdp-swatch-dot" style="background:' + U.escapeHtml(opt.value) + '"></span><span class="pdp-swatch-name">' + U.escapeHtml(opt.label) + "</span>"
           : U.escapeHtml(opt.label);
         return (
           '<button type="button" class="' + classes + '" data-group="' + U.escapeHtml(group.key) + '" data-index="' + i + '"' +

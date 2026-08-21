@@ -23,7 +23,9 @@
       discEl.style.display = price.hasDiscount ? "" : "none";
     }
     if (savingsEl) {
-      savingsEl.textContent = price.hasDiscount ? "وفرت " + U.money(price.savings) : "";
+      savingsEl.innerHTML = price.hasDiscount
+        ? '<span class="pdp-savings-badge"><span class="material-icons-outlined">savings</span>وفرت ' + U.money(price.savings) + "</span>"
+        : "";
       savingsEl.style.display = price.hasDiscount ? "" : "none";
     }
   }
