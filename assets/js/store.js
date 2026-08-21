@@ -1,4 +1,4 @@
-﻿// the inâ€‘memory database is initially hardâ€‘coded for offline/demo mode.
+// the inâ€‘memory database is initially hardâ€‘coded for offline/demo mode.
 // we declare it with `var` so it persists globally and survives script reloads.
 if (typeof window.productsDatabase === 'undefined') {
   window.productsDatabase = {};
@@ -1380,6 +1380,39 @@ function getLanguage() {
 
 function t(key) { return key; }
 
+const _variantCountCache = {};
+function countProductVariants(p) {
+  if (!p || !p.id) return 0;
+  if (_variantCountCache[p.id] !== undefined) return _variantCountCache[p.id];
+  var count = 0;
+  var direct = p.colors || p.color_options || p.variants || p.options || p.variant_options;
+  if (Array.isArray(direct) && direct.length) {
+    count = direct.length;
+  } else if (String(p.source) === "taager") {
+    try {
+      var pr = typeof p.raw_data === "string" ? JSON.parse(p.raw_data) : p.raw_data;
+      var pid = String((pr && (pr.productId || pr.product_id)) || "");
+      if (pid) {
+        var pool = Object.values(_getAllProducts() || {});
+        var name = String(p.name || "").trim().toLowerCase();
+        var sibs = 0;
+        for (var i = 0; i < pool.length; i++) {
+          var x = pool[i];
+          if (!x || x.id === p.id || x.source !== "taager") continue;
+          var xp = typeof x.raw_data === "string" ? JSON.parse(x.raw_data) : x.raw_data;
+          if (!xp) continue;
+          var xpid = String((xp && (xp.productId || xp.product_id)) || "");
+          var match = xpid ? xpid === pid : (name.length > 3 && x.name && String(x.name).trim().toLowerCase() === name);
+          if (match) sibs++;
+        }
+        count = sibs + 1;
+      }
+    } catch (e) { count = 0; }
+  }
+  _variantCountCache[p.id] = count;
+  return count;
+}
+
 window.BudaStore = {
   DEFAULT_PRODUCT_IMAGE,
   getImagePath,
@@ -1389,6 +1422,7 @@ window.BudaStore = {
   renderProductStars,
   normalizeProductRecord,
   getAllProducts: _getAllProducts,
+  countProductVariants,
   getProductById,
   getCart,
   saveCart,

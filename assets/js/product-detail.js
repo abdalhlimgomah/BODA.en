@@ -1074,6 +1074,9 @@ function renderSimilarProducts(currentProduct, allProducts) {
       const isWishlisted = window.BudaStore?.isInWishlist
         ? window.BudaStore.isInWishlist(productId)
         : false;
+      const variantCount = window.BudaStore?.countProductVariants
+        ? window.BudaStore.countProductVariants(product)
+        : 0;
 
       return `
         <article class="noon-product-card">
@@ -1087,6 +1090,7 @@ function renderSimilarProducts(currentProduct, allProducts) {
               <img src="${imagePath}" alt="${escapeHtml(product.name)}" onerror="this.onerror=null;this.src='${fallback}'" />
             </button>
             <button class="noon-add-square" type="button" data-similar-add="${productId}" aria-label="إضافة إلى السلة">+</button>
+            ${variantCount > 1 ? `<span class="noon-variants-badge" title="متوفر بأكثر من لون"><img src="https://f.nooncdn.com/s/app/com/noon/images/colorVariants.svg" alt="" width="18" height="18" loading="lazy" /><span class="noon-variants-count">${variantCount}</span></span>` : ""}
           </div>
           <div class="noon-product-body">
             ${

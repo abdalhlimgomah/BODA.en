@@ -711,7 +711,9 @@ async function fetchSupabaseProducts(filter) {
   var q = String(filter || "").trim().toLowerCase();
   var mapped = q ? ARABIC_CATEGORY_MAP[q] : null;
   var data = null;
-  if (!window.__productsProxyUnavailable) {
+  var isLocalDev =
+    location.hostname === "localhost" || location.hostname === "127.0.0.1";
+  if (!window.__productsProxyUnavailable && !isLocalDev) {
     try {
       var url = "/api/products";
       if (mapped) url += "?filter=" + encodeURIComponent(mapped);
@@ -883,6 +885,78 @@ function startNoonBadgeRotator() {
 }
 
 // ========== BUILD PRODUCT CARD ==========
+// ========== VARIANT SWATCHES (color dots on the card image) ==========
+// Taager products have no colors column — variants are sibling rows
+// sharing the same raw_data.productId (same logic as PDP buildVariants).
+var _variantCache = {};
+var VARIANT_HEX = {
+  "ابيض": "#ffffff", "white": "#ffffff", "شفاف": "#e2e8f0",
+  "اسود": "#111111", "black": "#111111",
+  "احمر": "#e11d48", "red": "#e11d48",
+  "ازرق": "#2563eb", "blue": "#2563eb", "كحلي": "#0f2a5c", "navy": "#0f2a5c", "سماوي": "#7dd3fc", "اجل": "#1e90ff",
+  "اخضر": "#16a34a", "green": "#16a34a", "زيتي": "#556b2f", "تركواز": "#14b8a6", "فيروزي": "#14b8a6",
+  "اصفر": "#facc15", "yellow": "#facc15", "ذهبي": "#d4af37", "gold": "#d4af37", "دهبي": "#d4af37",
+  "بني": "#7c4a21", "brown": "#7c4a21", "عنابي": "#7b1e3b", "نبيتي": "#7b1e3b", "خمري": "#7b1e3b",
+  "رمادي": "#9ca3af", "رمادى": "#9ca3af", "gray": "#9ca3af", "grey": "#9ca3af", "فضي": "#c0c0c0", "silver": "#c0c0c0", "فضى": "#c0c0c0",
+  "وردي": "#ec4899", "زهري": "#ec4899", "pink": "#ec4899", "فوشيا": "#d946ef",
+  "بيج": "#e8d8bf", "beige": "#e8d8bf", "كراميل": "#b5713a", "كاكاو": "#4e342e",
+  "بنفسجي": "#7c3aed", "purple": "#7c3aed", "موف": "#a78bfa", "لافندر": "#b4a7d6",
+  "برتقالي": "#f97316", "orange": "#f97316"
+};
+function _normColorKey(s) {
+  return String(s || "").toLowerCase()
+    .replace(/[أإآ]/g, "ا").replace(/ى/g, "ي").replace(/ة/g, "ه")
+    .replace(/\s+/g, " ").trim();
+}
+function colorNameToHex(v) {
+  var raw = String(v || "").trim();
+  if (/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(raw)) return raw;
+  var s = _normColorKey(raw);
+  if (VARIANT_HEX[s]) return VARIANT_HEX[s];
+  for (var k in VARIANT_HEX) { if (_normColorKey(k) === s) return VARIANT_HEX[k]; }
+  for (var k2 in VARIANT_HEX) { if (s && s.indexOf(_normColorKey(k2)) !== -1) return VARIANT_HEX[k2]; }
+  return "#cbd5e1";
+}
+function getProductVariants(p) {
+  if (!p || !p.id) return [];
+  if (_variantCache[p.id]) return _variantCache[p.id];
+  var vals = [];
+  var direct = p.colors || p.color_options || p.variants || p.options || p.variant_options;
+  if (Array.isArray(direct) && direct.length) {
+    vals = direct.map(function (o) { return typeof o === "string" ? o : (o && (o.label || o.name || o.value)) || ""; });
+  } else if (p.source === "taager") {
+    var selfVal = "";
+    try {
+      var pr = typeof p.raw_data === "string" ? JSON.parse(p.raw_data) : p.raw_data;
+      var pa = pr && pr.attributes && pr.attributes[0];
+      selfVal = (pa && pa.value) || "";
+      var pid = String((pr && (pr.productId || pr.product_id)) || "");
+      if (pid) {
+        var pool = window.BudaStore && window.BudaStore.getAllProducts ? Object.values(window.BudaStore.getAllProducts() || {}) : [];
+        var name = String(p.name || "").trim().toLowerCase();
+        for (var i = 0; i < pool.length; i++) {
+          var x = pool[i];
+          if (!x || x.id === p.id || x.source !== "taager") continue;
+          var match = false, xval = "";
+          try {
+            var xp = typeof x.raw_data === "string" ? JSON.parse(x.raw_data) : x.raw_data;
+            if (!xp) continue;
+            xpid = String((xp && (xp.productId || xp.product_id)) || "");
+            var xa = xp.attributes && xp.attributes[0];
+            xval = (xa && xa.value) || "";
+            match = xpid ? xpid === pid : (name.length > 3 && x.name && String(x.name).trim().toLowerCase() === name);
+          } catch (e2) { match = false; }
+          if (match && xval) vals.push(xval);
+        }
+      }
+    } catch (e) {}
+    if (selfVal) vals.unshift(selfVal);
+  }
+  vals = vals.filter(Boolean);
+  _variantCache[p.id] = vals;
+  return vals;
+}
+
 function buildProductCard(product) {
   var rp = resolvePrice(product);
   if (!rp.hasDiscount) {
@@ -934,6 +1008,7 @@ function buildProductCard(product) {
   var sellerName = product.seller || product.brand || "";
   var instMonths = Math.min(24, Math.max(3, Number(product.installment_months) || 3));
   var isOfficial = product.official_store || product.is_official || false;
+  var variantCount = getProductVariants(product).length;
   return (
     '<article class="noon-product-card">' +
     '<div class="noon-product-media-wrap">' +
@@ -969,7 +1044,11 @@ function buildProductCard(product) {
       : "") +
     '<button class="noon-add-square" data-add-to-cart="' +
     id +
-    '" aria-label="إضافة إلى السلة">+</button></div>' +
+    '" aria-label="إضافة إلى السلة">+</button>' +
+    (variantCount > 1
+      ? '<span class="noon-variants-badge" title="متوفر بأكثر من لون ونوع"><img src="https://f.nooncdn.com/s/app/com/noon/images/colorVariants.svg" alt="" width="18" height="18" loading="lazy" /><span class="noon-variants-count">' + variantCount + '</span></span>'
+      : "") +
+    '</div>' +
     '<div class="noon-product-body">' +
     '<h4 class="noon-title">' +
     escapeHtml(product.name || "منتج") +

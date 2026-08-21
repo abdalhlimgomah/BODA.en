@@ -5,6 +5,21 @@
 var PricingEngine = {
   tiers: [],
   tiersLoaded: false,
+  currentCountry: "EG",
+
+  // Get current country from localStorage (EG/SA)
+  getCountry: function () {
+    var cc = "EG";
+    try { cc = localStorage.getItem("userCountry") || "EG"; } catch (e) {}
+    cc = String(cc).toUpperCase();
+    return cc === "SA" ? "SA" : "EG";
+  },
+
+  // Normalize tier country (legacy rows without country_code = EG)
+  tierCountry: function (t) {
+    var tc = t.country_code ? String(t.country_code).toUpperCase() : "EG";
+    return tc === "SA" ? "SA" : "EG";
+  },
 
   // Load price tiers from Supabase
   loadTiers: async function () {
@@ -18,16 +33,36 @@ var PricingEngine = {
       console.warn("[PricingEngine] Supabase client not available");
       return;
     }
+    PricingEngine.currentCountry = PricingEngine.getCountry();
     try {
       var result = await client.from("price_tiers")
-        .select("id,min_price,max_price,markup,sort_order,is_active")
+        .select("id,min_price,max_price,markup,sort_order,is_active,country_code")
         .eq("is_active", true)
         .order("sort_order", { ascending: true });
+      if (result.error) {
+        // Fallback: country_code column not added yet (pre-migration DB)
+        result = await client.from("price_tiers")
+          .select("id,min_price,max_price,markup,sort_order,is_active")
+          .eq("is_active", true)
+          .order("sort_order", { ascending: true });
+      }
       if (result.error) throw result.error;
       if (result.data && result.data.length) {
-        PricingEngine.tiers = result.data;
+        var cc = PricingEngine.currentCountry;
+        // Keep only tiers belonging to the visitor's country
+        var filtered = result.data.filter(function (t) {
+          return PricingEngine.tierCountry(t) === cc;
+        });
+        // Safety net: if current country has no tiers yet, fall back to EG tiers
+        if (!filtered.length && cc !== "EG") {
+          filtered = result.data.filter(function (t) {
+            return PricingEngine.tierCountry(t) === "EG";
+          });
+          console.warn("[PricingEngine] No tiers for", cc, "- falling back to EG tiers");
+        }
+        PricingEngine.tiers = filtered;
         PricingEngine.tiersLoaded = true;
-        console.log("[PricingEngine] Loaded", result.data.length, "tiers:", JSON.stringify(PricingEngine.tiers));
+        console.log("[PricingEngine] Loaded", filtered.length, "tiers for", cc, ":", JSON.stringify(PricingEngine.tiers));
         document.dispatchEvent(new CustomEvent("boda:pricing-updated"));
       } else {
         console.warn("[PricingEngine] No active tiers found in Supabase");
@@ -106,3 +141,11 @@ if (document.readyState === "complete" || document.readyState === "interactive")
 } else {
   document.addEventListener("DOMContentLoaded", autoLoadTiers);
 }
+
+// Reload tiers when the visitor switches country (EG <-> SA)
+document.addEventListener("boda:country-changed", function () {
+  var cc = PricingEngine.getCountry();
+  if (cc !== PricingEngine.currentCountry || !PricingEngine.tiersLoaded) {
+    PricingEngine.refresh();
+  }
+});

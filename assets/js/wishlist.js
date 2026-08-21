@@ -200,6 +200,7 @@ function renderWishlist() {
                   ${dotsHtml ? `<span class="noon-img-dots">${dotsHtml}</span>` : ""}
                 </button>
                 <button class="noon-add-square" data-add="${id}" aria-label="إضافة إلى السلة">+</button>
+                ${(() => { const vc = window.BudaStore?.countProductVariants ? window.BudaStore.countProductVariants(item.raw || item) : 0; return vc > 1 ? `<span class="noon-variants-badge" title="متوفر بأكثر من لون"><img src="https://f.nooncdn.com/s/app/com/noon/images/colorVariants.svg" alt="" width="18" height="18" loading="lazy" /><span class="noon-variants-count">${vc}</span></span>` : ""; })()}
               </div>
               <div class="noon-product-body">
                 <h3 class="noon-title">${escapeHtml(item.name || "منتج")}</h3>
