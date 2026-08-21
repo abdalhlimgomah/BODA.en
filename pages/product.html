@@ -10,23 +10,23 @@
   <link href="../assets/css/noon-theme.css" rel="stylesheet" />
   <link href="../assets/css/noon-shell.css?v=20260817" rel="stylesheet" />
   <link href="../assets/css/noon-components.css" rel="stylesheet" />
-  <link href="../assets/css/desktop.css?v=20260808" rel="stylesheet" />
-  <link href="../assets/css/product/base.css" rel="stylesheet" />
-  <link href="../assets/css/product/skeleton.css" rel="stylesheet" />
-  <link href="../assets/css/product/gallery.css" rel="stylesheet" />
-  <link href="../assets/css/product/info.css?v=20260820" rel="stylesheet" />
-  <link href="../assets/css/product/price-card.css" rel="stylesheet" />
-  <link href="../assets/css/product/variant-selector.css?v=20260820" rel="stylesheet" />
-  <link href="../assets/css/product/size-selector.css" rel="stylesheet" />
-  <link href="../assets/css/product/delivery-card.css?v=20260820" rel="stylesheet" />
-  <link href="../assets/css/product/installment-card.css" rel="stylesheet" />
+  <link href="../assets/css/desktop.css?v=20260828b" rel="stylesheet" />
+  <link href="../assets/css/product/base.css?v=20260821" rel="stylesheet" />
+  <link href="../assets/css/product/skeleton.css?v=20260821b" rel="stylesheet" />
+  <link href="../assets/css/product/gallery.css?v=20260821d" rel="stylesheet" />
+    <link href="../assets/css/product/info.css?v=20260821f" rel="stylesheet" />
+  <link href="../assets/css/product/price-card.css?v=20260821" rel="stylesheet" />
+  <link href="../assets/css/product/variant-selector.css?v=20260821b" rel="stylesheet" />
+  <link href="../assets/css/product/size-selector.css?v=20260821b" rel="stylesheet" />
+  <link href="../assets/css/product/delivery-card.css?v=20260821" rel="stylesheet" />
+  <link href="../assets/css/product/installment-card.css?v=20260821c" rel="stylesheet" />
   <link href="../assets/css/product/seller-card.css" rel="stylesheet" />
   <link href="../assets/css/product/sticky-add-to-cart.css" rel="stylesheet" />
-  <link href="../assets/css/product/overview-tabs.css" rel="stylesheet" />
-  <link href="../assets/css/product/specifications-table.css" rel="stylesheet" />
+  <link href="../assets/css/product/overview-tabs.css?v=20260821" rel="stylesheet" />
+  <link href="../assets/css/product/specifications-table.css?v=20260821" rel="stylesheet" />
   <link href="../assets/css/product/review-section.css" rel="stylesheet" />
   <link href="../assets/css/product/bought-together.css" rel="stylesheet" />
-  <link href="../assets/css/product/recommended-products.css" rel="stylesheet" />
+  <link href="../assets/css/product/recommended-products.css?v=20260821" rel="stylesheet" />
 <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
 <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="../assets/icons/favicon-32x32.png">
@@ -35,10 +35,10 @@
 <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="../assets/icons/site.webmanifest">
 <meta name="theme-color" content="#FFD500">
-<link href="../assets/css/desktop.css?v=20260808" rel="stylesheet" />
+<link href="../assets/css/desktop.css?v=20260828b" rel="stylesheet" />
 <link href="../assets/css/desktop-animations.css?v=20260709" rel="stylesheet" />
   <link href="../assets/css/skeleton.css" rel="stylesheet" />
-  <link href="../assets/css/home.css?v=20260808" rel="stylesheet" />
+  <link href="../assets/css/home.css?v=20260826b" rel="stylesheet" />
 <link rel="canonical" href="https://budoq.vercel.app/pages/product.html" />
   <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
   <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
@@ -96,9 +96,11 @@
                     <a class="pdp-rating-link" href="#pdp-reviews"></a>
                     <span class="pdp-sold-count"></span>
                   </div>
+                  <div class="pdp-total-sales" hidden></div>
                   <div class="pdp-nudges"></div>
                   <div class="pdp-stock" role="status"></div>
                   <a class="pdp-explore-link" href="#"><span class="material-icons-outlined"></span><span></span></a>
+                  <a class="pdp-explore-rating" href="#pdp-reviews" hidden></a>
                   <details class="pdp-offers" id="pdp-offers"></details>
                 </div>
               </div>
@@ -110,7 +112,7 @@
                     <span class="pdp-price-discount"></span>
                   </div>
                   <div class="pdp-price-savings"></div>
-                  <div class="pdp-price-vat">السعر شامل ضريبة القيمة المضافة</div>
+                  <div class="pdp-price-vat"><span class="material-icons-outlined">verified</span>السعر شامل ضريبة القيمة المضافة</div>
                 </div>
               </div>
               <div data-pdp-delivery>
@@ -205,10 +207,11 @@
               <!-- Overview -->
               <div class="pdp-tab-panel is-active" id="pdp-panel-overview" role="tabpanel">
                 <div id="pdp-overview">
+                  <h3 class="pdp-section-title">أبرز المميزات</h3>
                   <div class="pdp-overview-grid"></div>
                   <button type="button" class="pdp-overview-more" style="display:none">عرض المزيد</button>
-                  <div style="margin-top:16px">
-                    <h3 style="font-size:0.9rem;font-weight:900;margin:0 0 8px">الوصف</h3>
+                  <div class="pdp-desc-block">
+                    <h3 class="pdp-section-title">الوصف</h3>
                     <p class="pdp-desc-text"></p>
                     <button type="button" class="pdp-desc-toggle" style="display:none">عرض المزيد</button>
                   </div>
@@ -217,6 +220,7 @@
               <!-- Specs -->
               <div class="pdp-tab-panel" id="pdp-panel-specs" role="tabpanel">
                 <div id="pdp-specs">
+                  <h3 class="pdp-section-title">المواصفات</h3>
                   <table class="pdp-spec-table"></table>
                   <div class="pdp-empty-note" style="display:none">لا توجد مواصفات متاحة</div>
                 </div>
@@ -320,32 +324,32 @@
   <script src="../assets/js/supabase-client.js?v=20260823"></script>
   <script src="../assets/js/auth.config.js?v=20260630"></script>
   <script src="../assets/js/taager-integration.js?v=20260814"></script>
-  <script src="../assets/js/store.js?v=20260820"></script>
-  <script src="../assets/js/pricing-engine.js"></script>
+  <script src="../assets/js/store.js?v=20260821"></script>
+  <script src="../assets/js/pricing-engine.js?v=20260820"></script>
   <script src="../assets/js/product/utils.js?v=20260815"></script>
   <script src="../assets/js/product/seller-generator.js?v=20260815"></script>
-  <script src="../assets/js/product/data.js?v=20260814-1"></script>
+  <script src="../assets/js/product/data.js?v=20260820"></script>
   <script src="../assets/js/product/product-skeleton.js?v=20260815"></script>
-  <script src="../assets/js/product/product-gallery.js?v=20260815"></script>
-  <script src="../assets/js/product/product-info.js?v=20260817"></script>
-  <script src="../assets/js/product/price-card.js?v=20260815"></script>
-  <script src="../assets/js/product/variant-selector.js?v=20260821"></script>
-  <script src="../assets/js/product/size-selector.js?v=20260814-1"></script>
+  <script src="../assets/js/product/product-gallery.js?v=20260821c"></script>
+    <script src="../assets/js/product/product-info.js?v=20260821j"></script>
+  <script src="../assets/js/product/price-card.js?v=20260821"></script>
+  <script src="../assets/js/product/variant-selector.js?v=20260821b"></script>
+  <script src="../assets/js/product/size-selector.js?v=20260821"></script>
   <script src="../assets/js/product/size-guide.js?v=20260815"></script>
   <script src="../assets/js/product/delivery-card.js?v=20260820"></script>
-  <script src="../assets/js/product/installment-card.js?v=20260815"></script>
+  <script src="../assets/js/product/installment-card.js?v=20260821d"></script>
   <script src="../assets/js/product/seller-card.js?v=20260815"></script>
   <script src="../assets/js/product/sticky-add-to-cart.js?v=20260814-1"></script>
   <script src="../assets/js/product/review-section.js?v=20260823"></script>
   <script src="../assets/js/product/bought-together.js?v=20260815"></script>
-  <script src="../assets/js/product/recommended-products.js?v=20260815"></script>
+  <script src="../assets/js/product/recommended-products.js?v=20260821b"></script>
   <script src="../assets/js/seo/seo-utils.js"></script>
   <script src="../assets/js/seo/meta-generator.js"></script>
   <script src="../assets/js/seo/schema-generator.js"></script>
   <script src="../assets/js/seo/seo-engine.js"></script>
   <script src="../assets/js/seo/product-seo-engine.js"></script>
   <script src="../assets/js/skeleton-loader.js"></script>
-  <script src="../assets/js/product/index.js?v=20260820"></script>
+  <script src="../assets/js/product/index.js?v=20260821g"></script>
   <script src="../assets/js/noon-shell.js?v=20260817"></script>
 </body>
 </html>
