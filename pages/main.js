@@ -6,7 +6,144 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   if (window.skeletonLoader) window.skeletonLoader.hideSkeleton(document.body);
 
-  productsGrid.innerHTML = [
+  // Two-step image fallback: resized -> original -> placeholder.
+  window.__spImgFallback = function (el) {
+    if (!el.getAttribute("data-fb-step")) {
+      el.setAttribute("data-fb-step", "1");
+      var full = el.getAttribute("data-full");
+      if (full && el.src !== full) { el.src = full; return; }
+    }
+    el.onerror = null;
+    var ph = el.getAttribute("data-ph");
+    if (ph) el.src = ph;
+  };
+
+  // ---- Shared render state -----------------------------------------------
+  // MUST be declared before the snapshot-paint block below: that block renders
+  // immediately, and a `var` assigned later in this closure reads as undefined
+  // there (pageSize=undefined made getPageItems return [] and wiped the just-
+  // painted grid with the "no products" empty state until the network render).
+  var allProducts = [];
+  var currentPage = 1;
+  var pageSize = 32;
+  var currentProducts = [];
+
+  // ---- Phase 2: instant paint from a local snapshot of the last render ----
+  var LIST_SNAPSHOTS_KEY = 'buda_listing_snapshots_v1';
+  var LIST_SNAPSHOT_TTL = 24 * 60 * 60 * 1000; // ignore snapshots older than 24h
+  var LIST_SNAPSHOT_MAX_KEYS = 10;             // LRU cap so localStorage stays small
+  var hydrationPromise = null;
+  var paintedFromSnapshot = false;
+  var lastPaintedSig = "";
+
+  function getViewBaseKey() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      return [
+        "v1",
+        localStorage.getItem("userCountry") || "EG",
+        params.get("category") || "",
+        params.get("branch") || ""
+      ].join("|");
+    } catch (_) {
+      return "v1|EG||";
+    }
+  }
+
+  function loadSnapMap() {
+    try {
+      var parsed = JSON.parse(localStorage.getItem(LIST_SNAPSHOTS_KEY) || "{}");
+      return parsed && typeof parsed === "object" ? parsed : {};
+    } catch (_) {
+      return {};
+    }
+  }
+
+  function trimProductForSnapshot(product) {
+    var out = {};
+    for (var key in product) {
+      if (!Object.prototype.hasOwnProperty.call(product, key)) continue;
+      var value = product[key];
+      if (value && typeof value === "object" && !Array.isArray(value)) continue;
+      if (typeof value === "string") {
+        // Keep image URLs intact, truncate long text (cards never show it).
+        if (value.length > 300 && !/^https?:\/\/|^data:image\//i.test(value)) value = value.slice(0, 300);
+      } else if (Array.isArray(value)) {
+        value = value.filter(function (entry) { return typeof entry === "string" && entry.length < 500; }).slice(0, 6);
+      }
+      out[key] = value;
+    }
+    return out;
+  }
+
+  function saveListingSnapshot(key, list) {
+    try {
+      if (!key || !list || !list.length) return;
+      var map = loadSnapMap();
+      map[key] = {
+        t: Date.now(),
+        total: list.length,
+        items: list.slice(0, pageSize).map(trimProductForSnapshot),
+        ids: list.map(function (p) { return String(p.id); })
+      };
+      var keys = Object.keys(map);
+      if (keys.length > LIST_SNAPSHOT_MAX_KEYS) {
+        keys.sort(function (a, b) { return (map[a].t || 0) - (map[b].t || 0); });
+        while (keys.length > LIST_SNAPSHOT_MAX_KEYS) delete map[keys.shift()];
+      }
+      localStorage.setItem(LIST_SNAPSHOTS_KEY, JSON.stringify(map));
+    } catch (_) {}
+  }
+
+  function listSignature(list) {
+    try {
+      var prices = [];
+      for (var i = 0; i < list.length && i < pageSize; i++) {
+        var p = list[i];
+        if (!p) return "bad" + Date.now();
+        prices.push(String(p.id) + ":" + Math.round((resolvePrice(p).finalPrice || 0) * 100));
+      }
+      var firstId = list.length ? String(list[0].id) : "";
+      var lastId = list.length ? String(list[list.length - 1].id) : "";
+      return list.length + "|" + firstId + ">" + lastId + "|" + prices.join(",");
+    } catch (_) {
+      return "err" + Date.now(); // force re-render on any signature failure
+    }
+  }
+
+  function ensureHydrated() {
+    return hydrationPromise || Promise.resolve();
+  }
+
+  // Paint instantly from the snapshot when we have one for this exact view;
+  // otherwise fall back to the skeleton placeholder as before.
+  (function paintFromSnapshot() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var cat = params.get("category") || "";
+      var branch = params.get("branch") || "";
+      var suffix = branch ? ("slug:" + cat + "|br:" + branch) : (cat ? "slug:" + cat : "");
+      var key = getViewBaseKey() + "|" + suffix;
+      var candidate = loadSnapMap()[key];
+      if (
+        candidate && Array.isArray(candidate.items) && candidate.items.length &&
+        Array.isArray(candidate.ids) && candidate.ids.length >= candidate.items.length &&
+        Date.now() - Number(candidate.t || 0) < LIST_SNAPSHOT_TTL
+      ) {
+        var stubs = candidate.ids.slice(candidate.items.length).map(function (id) {
+          return { id: id, __stub: true };
+        });
+        currentProducts = candidate.items.concat(stubs);
+        paintedFromSnapshot = true;
+        window.__spPerf = { paintStart: Math.round(performance.now()) };
+        renderProducts(currentProducts, { persist: false });
+        window.__spPerf.paintedAt = Math.round(performance.now());
+      }
+    } catch (_snapErr) {}
+  })();
+
+  if (!paintedFromSnapshot) {
+    productsGrid.innerHTML = [
     '<div class="noon-grid">',
     Array.from({ length: 6 }, function () {
       return (
@@ -25,12 +162,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     }).join(''),
     '</div>'
   ].join('');
+  }
 
   const CATEGORIES_CACHE_KEY = 'buda_categories_cache';
-  var allProducts = [];
-  var currentPage = 1;
-  var pageSize = 32;
-  var currentProducts = [];
 
   function getCurrencyConfig() {
     if (window.BudaStore && typeof window.BudaStore.resolveCurrencyConfig === 'function') {
@@ -50,6 +184,34 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   var priceFormatter = formatMoney;
 
+  var catPromiseMap = {};
+
+  async function loadCategoryFromDb(slug) {
+    if (!window.supabaseClient) return null;
+    try {
+      var { data } = await window.supabaseClient.from('categories').select('*').eq('slug', slug).eq('is_active', true).single();
+      if (data) {
+        var { data: branches } = await window.supabaseClient.from('category_branches').select('*').eq('category_id', data.id).eq('is_active', true).order('sort_order');
+        data.branches = branches || [];
+      }
+      // Write back so repeat visits skip both roundtrips entirely.
+      if (data) {
+        try {
+          var raw = localStorage.getItem(CATEGORIES_CACHE_KEY);
+          var obj = raw ? JSON.parse(raw) : null;
+          if (!obj || !Array.isArray(obj.data)) obj = { timestamp: Date.now(), data: [] };
+          obj.timestamp = Date.now();
+          obj.data = obj.data.filter(function (c) { return c && c.slug !== slug; });
+          obj.data.push(data);
+          localStorage.setItem(CATEGORIES_CACHE_KEY, JSON.stringify(obj));
+        } catch (_) {}
+      }
+      return data;
+    } catch (_) {
+      return null;
+    }
+  }
+
   async function getCategoryBySlug(slug) {
     try {
       var cached = localStorage.getItem(CATEGORIES_CACHE_KEY);
@@ -61,17 +223,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       }
     } catch (_) {}
-    if (!window.supabaseClient) return null;
-    try {
-      var { data } = await window.supabaseClient.from('categories').select('*').eq('slug', slug).eq('is_active', true).single();
-      if (data) {
-        var { data: branches } = await window.supabaseClient.from('category_branches').select('*').eq('category_id', data.id).eq('is_active', true).order('sort_order');
-        data.branches = branches || [];
-      }
-      return data;
-    } catch (_) {
-      return null;
-    }
+    if (!catPromiseMap[slug]) catPromiseMap[slug] = loadCategoryFromDb(slug);
+    return catPromiseMap[slug];
   }
 
   function matchProductByKeywords(product, keywords) {
@@ -200,22 +353,44 @@ document.addEventListener("DOMContentLoaded", async () => {
     paginationEl.innerHTML = html;
 
     paginationEl.querySelectorAll('.page-btn').forEach(function (btn) {
-      btn.addEventListener('click', function () {
+      btn.addEventListener('click', async function () {
         var page = parseInt(this.getAttribute('data-page'), 10);
-        if (page && page !== currentPage) {
-          currentPage = page;
-          renderProducts(currentProducts);
-          window.scrollTo({ top: productsGrid.offsetTop - 80, behavior: 'smooth' });
+        if (!page || page === currentPage) return;
+        // Stub zone (snapshot-painted pages beyond page 1): wait for fresh data.
+        var target = currentProducts[(page - 1) * pageSize];
+        if (target && target.__stub) {
+          this.disabled = true;
+          try { await ensureHydrated(); } catch (_e) {}
         }
+        if (!currentProducts.length) return;
+        currentPage = Math.min(Math.max(1, page), getPageCount(currentProducts.length));
+        renderProductsPage(getPageItems(currentProducts, currentPage), currentProducts);
+        window.scrollTo({ top: productsGrid.offsetTop - 80, behavior: 'smooth' });
       });
     });
   }
 
-  function renderProducts(products) {
+  function renderProducts(products, opts) {
+    opts = opts || {};
     if (window.skeletonLoader && typeof window.skeletonLoader.hideSkeleton === 'function') {
       window.skeletonLoader.hideSkeleton(document.body);
     }
     productsGrid.classList.remove('skeleton', 'skeleton-grid');
+
+    // Persist BEFORE the signature check so identical data still refreshes
+    // the snapshot timestamp (proves the data is fresh).
+    if (products.length && opts.persist !== false && opts.snapKey) {
+      saveListingSnapshot(opts.snapKey, products);
+    }
+
+    var sig = listSignature(products);
+    if (sig === lastPaintedSig && lastPaintedSig !== "") {
+      // Same content already on screen — swap state silently, no DOM churn.
+      currentProducts = products;
+      currentPage = 1;
+      return;
+    }
+    lastPaintedSig = sig;
 
     currentProducts = products;
     currentPage = 1;
@@ -231,6 +406,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function renderProductsPage(pageItems, allItems) {
+    // Invariant: this module's render state must be initialized before ANY
+    // render runs. If it isn't, fail loudly — a silent empty page here wipes
+    // already-painted cards and looks like "no products" to real users.
+    if (typeof pageSize !== "number" || !(pageSize > 0)) {
+      console.error("[Main] render invoked before state init (pageSize=" + pageSize + ") — refusing to wipe grid");
+      return;
+    }
     var totalPages = getPageCount(allItems.length);
 
     productsGrid.innerHTML = '';
@@ -252,6 +434,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         ? window.BudaStore.getImagePath(window.BudaStore.DEFAULT_PRODUCT_IMAGE || "assets/images/unnamed.png")
         : "../assets/images/unnamed.png";
       var imgSrc = getImage(product);
+      // Grid cards are ~250px wide: request a resized WebP instead of the
+      // full-size original (166KB -> ~10KB). Falls back to the original on
+      // error, then to the placeholder image.
+      var gridSrc = imgSrc;
+      if (window.BudaStore && typeof window.BudaStore.getResizedImageUrl === "function") {
+        gridSrc = window.BudaStore.getResizedImageUrl(imgSrc, 420) || imgSrc;
+      }
       var loadAttr = idx < 8 ? ' fetchpriority="high" loading="eager" decoding="async"' : ' loading="lazy" decoding="async"';
 
       var card = document.createElement('article');
@@ -264,7 +453,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         '<span class="material-icons-outlined" style="font-size:18px;">' + (isWishlisted ? 'favorite' : 'favorite_border') + '</span></button>' +
         '<button class="noon-product-media" data-view="' + id + '" aria-label="عرض المنتج">' +
         '<div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div>' +
-        '<img src="' + imgSrc + '" alt="' + escapeHtml(product.name || 'منتج') + '"' + loadAttr + ' onerror="this.onerror=null;this.src=\'' + fallbackImage + '\'" /></button>' +
+        '<img src="' + escapeHtml(gridSrc) + '" alt="' + escapeHtml(product.name || 'منتج') + '"' + loadAttr +
+        ' data-full="' + escapeHtml(imgSrc) + '" data-ph="' + escapeHtml(fallbackImage) + '" onerror="__spImgFallback(this)" /></button>' +
         '<button class="noon-add-square" data-add="' + id + '" aria-label="إضافة إلى السلة">+</button>' +
         '</div>' +
         '<div class="noon-product-body">' +
@@ -283,24 +473,38 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderPagination(allItems);
 
     productsGrid.querySelectorAll("[data-view]").forEach(function (button) {
-      button.addEventListener("click", function () {
+      button.addEventListener("click", async function () {
         var pid = this.getAttribute("data-view");
         if (!pid) return;
         var selected = allItems.find(function (item) { return String(item?.id) === String(pid); });
-        if (selected) {
-          try { sessionStorage.setItem("selectedProduct", encodeURIComponent(JSON.stringify(selected))); } catch {}
+        if ((!selected || selected.__stub || !selected.name) && hydrationPromise) {
+          try { await ensureHydrated(); } catch (_e) {}
+          selected =
+            (currentProducts || []).find(function (item) { return String(item?.id) === String(pid); }) ||
+            (allProducts || []).find(function (item) { return String(item?.id) === String(pid); }) ||
+            selected;
         }
+        if (!selected || selected.__stub || !selected.name) return;
+        try { sessionStorage.setItem("selectedProduct", encodeURIComponent(JSON.stringify(selected))); } catch {}
         window.location.href = 'product.html?id=' + encodeURIComponent(pid);
       });
     });
 
     productsGrid.querySelectorAll("[data-add]").forEach(function (button) {
-      button.addEventListener("click", function () {
+      button.addEventListener("click", async function () {
         var pid = this.getAttribute("data-add");
         if (!pid || !window.BudaStore) return;
         var fromList = allItems.find(function (item) { return String(item.id) === String(pid); });
         var product = fromList || window.BudaStore.getProductById(pid);
-        if (!product) return;
+        if (!product || product.__stub || !product.name) {
+          // Snapshot stub: wait for fresh data, then use the real product.
+          try { await ensureHydrated(); } catch (_e) {}
+          product =
+            (currentProducts || []).find(function (item) { return String(item.id) === String(pid); }) ||
+            (allProducts || []).find(function (item) { return String(item.id) === String(pid); }) ||
+            window.BudaStore.getProductById(pid);
+        }
+        if (!product || product.__stub || !product.name) return;
         window.BudaStore.addToCart(product, 1);
         window.BudaStore.updateCartCount();
         window.BudaUI?.refreshShell();
@@ -320,12 +524,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function applyCategoryFilter(selected) {
+    var suffix = selected === "الكل" ? "" : "label:" + selected;
+    var snapKey = getViewBaseKey() + "|" + suffix;
     if (selected === "الكل") {
-      renderProducts(allProducts);
+      renderProducts(allProducts, { snapKey: snapKey });
       return;
     }
     renderProducts(
-      allProducts.filter(function (product) { return normalizeCategoryLabel(product.category) === selected; })
+      allProducts.filter(function (product) { return normalizeCategoryLabel(product.category) === selected; }),
+      { snapKey: snapKey }
     );
   }
 
@@ -367,7 +574,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     var keywords = cat.keywords || [];
     if (!keywords.length) { renderProducts([]); return; }
     var filtered = allProducts.filter(function (p) { return matchProductByKeywords(p, keywords); });
-    renderProducts(filtered);
+    renderProducts(filtered, { snapKey: getViewBaseKey() + "|slug:" + slug });
   }
 
   async function handleBranchFilter(categorySlug, branchName) {
@@ -376,10 +583,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     var branch = cat.branches.find(function (b) { return b.branch_name === branchName; });
     if (!branch || !branch.branch_keywords || !branch.branch_keywords.length) { renderProducts([]); return; }
     var filtered = allProducts.filter(function (p) { return matchProductByKeywords(p, branch.branch_keywords); });
-    renderProducts(filtered);
+    renderProducts(filtered, { snapKey: getViewBaseKey() + "|slug:" + categorySlug + "|br:" + branchName });
   }
 
-  async function fetchProducts() {
+  async function runFetchProducts() {
     if (window.supabaseClient?.fetchAllProductsWithTaager) {
       try {
         var countryCode = localStorage.getItem('userCountry') || 'EG';
@@ -419,6 +626,31 @@ document.addEventListener("DOMContentLoaded", async () => {
     renderFilters();
   }
 
+  // Hydration: the single in-flight load that replaces/validates the snapshot.
+  function fetchProducts() {
+    hydrationPromise = runFetchProducts();
+    return hydrationPromise;
+  }
+
+  // Prewarm the category query in parallel with the products fetch —
+  // previously it only started AFTER all products finished downloading.
+  (function () {
+    try {
+      var slug = new URLSearchParams(window.location.search).get("category");
+      if (slug) getCategoryBySlug(slug)["catch"](function () {});
+    } catch (_) {}
+  })();
+
   fetchProducts();
+
+  // If pricing tiers arrive AFTER the snapshot was painted, repaint so every
+  // price shows its real markup (normally tiers are already cached & instant).
+  document.addEventListener("boda:pricing-updated", function () {
+    if (paintedFromSnapshot && currentProducts.length) {
+      lastPaintedSig = "";
+      renderProductsPage(getPageItems(currentProducts, currentPage), currentProducts);
+    }
+  });
+
   document.addEventListener("boda:wishlist-updated", function () { syncWishlistButtons(productsGrid); });
 });
