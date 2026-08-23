@@ -4,43 +4,6 @@
 
 var PL = {};
 
-// ========== DEMO DATA ==========
-var PL_DEMO = new URLSearchParams(window.location.search).get("demo") === "1";
-var PL_DEMO_PRODUCTS = [
-  { id: "pl-d1", name: "فستان صيفي أنيق بأكمام واسعة", price: 299, old_price: 599, image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300", rating: 4.5, reviews: 234, category: "أزياء", brand: "زارا", seller: "زارا", free_shipping: true, official_store: true },
-  { id: "pl-d2", name: "حقيبة جلدية فاخرة كتف", price: 459, old_price: 899, image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300", rating: 4.2, reviews: 189, category: "إكسسوارات", brand: "مايكل كورس", seller: "متجر فاخر", installment: true, official_store: true },
-  { id: "pl-d3", name: "نظارة شمسية عصرية راي بان", price: 199, old_price: 399, image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300", rating: 4.0, reviews: 567, category: "إكسسوارات", brand: "راي بان", seller: "راي بان", free_shipping: true },
-  { id: "pl-d4", name: "ساعة رياضية ذكية جارمن", price: 1299, image: "https://images.unsplash.com/photo-1546868871-af0de0ae72f1?w=300", rating: 4.7, reviews: 890, category: "إلكترونيات", brand: "جارمن", seller: "جارمن", free_shipping: true, installment: true },
-  { id: "pl-d5", name: "حذاء رياضي نايك اير ماكس", price: 549, old_price: 799, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300", rating: 4.4, reviews: 1234, category: "أحذية", brand: "نايك", seller: "نايك", installment: true, official_store: true },
-  { id: "pl-d6", name: "تيشيرت قطني أساسي", price: 89, old_price: 149, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300", rating: 3.9, reviews: 456, category: "أزياء", brand: "إتش آند إم", seller: "إتش آند إم", free_shipping: true },
-  { id: "pl-d7", name: "سماعة لاسلكية بلوتوث", price: 349, old_price: 599, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300", rating: 4.3, reviews: 789, category: "إلكترونيات", brand: "سامسونج", seller: "سامسونج", free_shipping: true, installment: true, official_store: true },
-  { id: "pl-d8", name: "كريم ترطيب للوجه 50مل", price: 129, old_price: 199, image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=300", rating: 4.1, reviews: 345, category: "العناية بالبشرة", brand: "نيفيا", seller: "نيفيا" },
-  { id: "pl-d9", name: "بنطلون جينز كلاسيك", price: 399, old_price: 599, image: "https://images.unsplash.com/photo-1542272604-787c3835535d?w=300", rating: 4.0, reviews: 678, category: "أزياء", brand: "ليفايز", seller: "ليفايز", free_shipping: true },
-  { id: "pl-d10", name: "قبعة بيسبول رياضية", price: 79, old_price: 149, image: "https://images.unsplash.com/photo-1521369909029-2afed882baee?w=300", rating: 4.2, reviews: 234, category: "إكسسوارات", brand: "نايك", seller: "نايك" },
-  { id: "pl-d11", name: "مكتب كمبيوتر خشبي", price: 899, image: "https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=300", rating: 4.5, reviews: 123, category: "أثاث", brand: "ايكيا", seller: "ايكيا", free_shipping: true, installment: true, official_store: true },
-  { id: "pl-d12", name: "خلاط كهربائي مطبخ", price: 249, old_price: 399, image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300", rating: 4.0, reviews: 456, category: "أجهزة منزلية", brand: "فيليبس", seller: "فيليبس", official_store: true },
-  { id: "pl-d13", name: "حذاء كاجوال جلدي", price: 379, old_price: 529, image: "https://images.unsplash.com/photo-1549298916-b41d501d3772?w=300", rating: 4.3, reviews: 567, category: "أحذية", brand: "كلاركس", seller: "كلاركس" },
-  { id: "pl-d14", name: "باور بانك 20000mAh", price: 199, image: "https://images.unsplash.com/photo-1609592424813-48db849d0e0d?w=300", rating: 4.4, reviews: 890, category: "إلكترونيات", brand: "انكر", seller: "انكر", free_shipping: true },
-  { id: "pl-d15", name: "عدسة كاميرا كانون", price: 2499, old_price: 3299, image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=300", rating: 4.8, reviews: 234, category: "إلكترونيات", brand: "كانون", seller: "كانون", official_store: true },
-  { id: "pl-d16", name: "طقم أطباق سيراميك 12قطعة", price: 449, image: "https://images.unsplash.com/photo-1513191513771-1d5a7a1b6b9a?w=300", rating: 4.1, reviews: 345, category: "أجهزة منزلية", brand: "ايكيا", seller: "ايكيا", free_shipping: true },
-  { id: "pl-d17", name: "جاكيت شتوي مبطن", price: 799, old_price: 1299, image: "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=300", rating: 4.6, reviews: 1234, category: "أزياء", brand: "زارا", seller: "زارا", free_shipping: true, installment: true, official_store: true },
-  { id: "pl-d18", name: "سيروم فيتامين C للوجه", price: 179, old_price: 299, image: "https://images.unsplash.com/photo-1620916566398-39f1143ab7be?w=300", rating: 4.3, reviews: 678, category: "العناية بالبشرة", brand: "ذا أورديناري", seller: "ذا أورديناري" },
-  { id: "pl-d19", name: "حذاء رياضي أديداس", price: 499, old_price: 699, image: "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?w=300", rating: 4.2, reviews: 901, category: "أحذية", brand: "أديداس", seller: "أديداس", official_store: true },
-  { id: "pl-d20", name: "لابتوب محمول خفيف", price: 4999, old_price: 6999, image: "https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=300", rating: 4.5, reviews: 567, category: "إلكترونيات", brand: "ديل", seller: "ديل", free_shipping: true, installment: true, official_store: true },
-  { id: "pl-d21", name: "محفظة جلدية رجالية", price: 199, old_price: 349, image: "https://images.unsplash.com/photo-1627123424574-724758594e93?w=300", rating: 4.0, reviews: 234, category: "إكسسوارات", brand: "مايكل كورس", seller: "مايكل كورس" },
-  { id: "pl-d22", name: "شنطة سفر كبير 80لتر", price: 699, old_price: 999, image: "https://images.unsplash.com/photo-1565026057447-bc90a3dceb87?w=300", rating: 4.4, reviews: 456, category: "إكسسوارات", brand: "سامسونايت", seller: "سامسونايت", free_shipping: true },
-  { id: "pl-d23", name: "ماكينة قهوة إسبريسو", price: 1299, image: "https://images.unsplash.com/photo-1517668808822-9ebb02f2a0e6?w=300", rating: 4.6, reviews: 789, category: "أجهزة منزلية", brand: "فيليبس", seller: "فيليبس", installment: true, official_store: true },
-  { id: "pl-d24", name: "طقم مفروشات سرير كينج", price: 899, old_price: 1499, image: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=300", rating: 4.2, reviews: 345, category: "أثاث", brand: "ايكيا", seller: "ايكيا", free_shipping: true },
-  { id: "pl-d25", name: "عطر فرنسي فاخر 100مل", price: 599, old_price: 899, image: "https://images.unsplash.com/photo-1541643600914-78b084683601?w=300", rating: 4.7, reviews: 1234, category: "العناية بالبشرة", brand: "شانيل", seller: "شانيل", official_store: true },
-  { id: "pl-d26", name: "جهاز تعقير بالأشعة فوق بنفسجية", price: 149, image: "https://images.unsplash.com/photo-1585771724684-38269d6639fd?w=300", rating: 3.8, reviews: 234, category: "إلكترونيات", brand: "شاومي", seller: "شاومي" },
-  { id: "pl-d27", name: "حذاء رسمي كلاسيك أسود", price: 499, old_price: 799, image: "https://images.unsplash.com/photo-1614252369475-531eba835eb1?w=300", rating: 4.1, reviews: 567, category: "أحذية", brand: "كلاركس", seller: "كلاركس" },
-  { id: "pl-d28", name: "ربطة عنق حريرية", price: 129, old_price: 199, image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300", rating: 3.9, reviews: 123, category: "إكسسوارات", brand: "زارا", seller: "زارا" },
-  { id: "pl-d29", name: "مقلاة غير لاصقة 28سم", price: 179, old_price: 299, image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300", rating: 4.0, reviews: 345, category: "أجهزة منزلية", brand: "تيفال", seller: "تيفال" },
-  { id: "pl-d30", name: "شاحن لاسلكي سريع 15W", price: 99, image: "https://images.unsplash.com/photo-1583394838336-acd977736f90?w=300", rating: 4.2, reviews: 678, category: "إلكترونيات", brand: "انكر", seller: "انكر", free_shipping: true },
-  { id: "pl-d31", name: "بلوزة نسائية صيفية", price: 179, old_price: 299, image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300", rating: 4.1, reviews: 456, category: "أزياء", brand: "إتش آند إم", seller: "إتش آند إم" },
-  { id: "pl-d32", name: "سجادة صلاة قطيفة", price: 89, image: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=300", rating: 4.5, reviews: 890, category: "أثاث", brand: "ايكيا", seller: "ايكيا" },
-];
-
 // ========== STATE ==========
 PL.state = {
   allProducts: [],
@@ -760,12 +723,7 @@ PL.fetchProducts = async function () {
     return pCountry === currentCountry.toUpperCase();
   });
 
-  // Demo fallback
-  if (!source || !source.length) {
-    source = PL_DEMO_PRODUCTS;
-  }
-
-  PL.state.allProducts = source;
+  PL.state.allProducts = source || [];
 };
 
 // ========== INIT ==========

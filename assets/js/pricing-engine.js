@@ -23,7 +23,31 @@ var PricingEngine = {
 
   // Load price tiers from Supabase
   loadTiers: async function () {
-    // Wait for supabaseClient to be ready (up to 5s)
+    PricingEngine.currentCountry = PricingEngine.getCountry();
+    // Fast path FIRST: cached tiers need no Supabase client, so pricing is
+    // correct from the very first synchronous paint (10 min TTL).
+    if (PricingEngine._skipCache) {
+      PricingEngine._skipCache = false;
+    } else {
+      try {
+        var cRaw = localStorage.getItem("buda_price_tiers_cache");
+        if (cRaw) {
+          var cEntry = JSON.parse(cRaw);
+          if (
+            cEntry && cEntry.cc === PricingEngine.currentCountry &&
+            Array.isArray(cEntry.tiers) && cEntry.tiers.length &&
+            Date.now() - Number(cEntry.t || 0) < 10 * 60 * 1000
+          ) {
+            PricingEngine.tiers = cEntry.tiers;
+            PricingEngine.tiersLoaded = true;
+            console.log("[PricingEngine] Loaded", cEntry.tiers.length, "tiers for", PricingEngine.currentCountry, "(cache)");
+            document.dispatchEvent(new CustomEvent("boda:pricing-updated"));
+            return;
+          }
+        }
+      } catch (_cacheErr) {}
+    }
+    // Cache miss/expired → wait for supabaseClient (up to 5s), then fetch.
     for (var retries = 0; retries < 25; retries++) {
       if (window.supabaseClient && typeof window.supabaseClient.from === "function") break;
       await new Promise(function (r) { setTimeout(r, 200); });
@@ -33,7 +57,6 @@ var PricingEngine = {
       console.warn("[PricingEngine] Supabase client not available");
       return;
     }
-    PricingEngine.currentCountry = PricingEngine.getCountry();
     try {
       var result = await client.from("price_tiers")
         .select("id,min_price,max_price,markup,sort_order,is_active,country_code")
@@ -63,6 +86,10 @@ var PricingEngine = {
         PricingEngine.tiers = filtered;
         PricingEngine.tiersLoaded = true;
         console.log("[PricingEngine] Loaded", filtered.length, "tiers for", cc, ":", JSON.stringify(PricingEngine.tiers));
+        // Persist for next page loads (10 min TTL)
+        try {
+          localStorage.setItem("buda_price_tiers_cache", JSON.stringify({ cc: cc, t: Date.now(), tiers: filtered }));
+        } catch (_wErr) {}
         document.dispatchEvent(new CustomEvent("boda:pricing-updated"));
       } else {
         console.warn("[PricingEngine] No active tiers found in Supabase");
@@ -120,9 +147,10 @@ var PricingEngine = {
     return tier ? Number(tier.markup) : 0;
   },
 
-  // Refresh tiers from Supabase
+  // Refresh tiers from Supabase (bypasses the local cache)
   refresh: async function () {
     this.tiersLoaded = false;
+    this._skipCache = true;
     await this.loadTiers();
   },
 };

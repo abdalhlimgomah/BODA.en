@@ -4,37 +4,6 @@
    brand_sections, promotional_banners
    ============================================ */
 
-// ========== DEMO DATA ==========
-var BL_DEMO = new URLSearchParams(window.location.search).get("demo") === "1";
-var BL_DEMO_BRAND = {
-  id: "demo-brand-1", name: "نايك", name_en: "Nike", slug: "nike",
-  description: "أفضل العلامات الرياضية العالمية",
-  logo_url: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg",
-  cover_url: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=800",
-  is_active: true, sort_order: 1
-};
-var BL_DEMO_BANNERS = [
-  { id: "demo-bban-1", brand_id: "demo-brand-1", image_url: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=1200", title: "تشكيلة نايك الرياضية", subtitle: "أداء لا يتوقف", cta_text: "تسوق الآن", cta_link: "#", sort_order: 1 },
-  { id: "demo-bban-2", brand_id: "demo-brand-1", image_url: "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200", title: "الجديد من نايك", subtitle: "ابتكار يغير قواعد اللعبة", cta_text: "اكتشف", cta_link: "#", sort_order: 2 },
-];
-var BL_DEMO_SECTIONS = [
-  { id: "demo-bsec-1", brand_id: "demo-brand-1", title: "الأكثر مبيعاً", subtitle: "المنتجات الأكثر طلباً", badge: "الأفضل", section_type: "products", sort_order: 1, is_active: true, display_count: 6, selection_mode: "auto", auto_rules: { discount_min: 10 } },
-  { id: "demo-bsec-2", brand_id: "demo-brand-1", title: "وصل حديثاً", subtitle: "أحدث إصدارات نايك", badge: "جديد", section_type: "products", sort_order: 2, is_active: true, display_count: 6, selection_mode: "auto", auto_rules: { sort_by: "rating" } },
-];
-var BL_DEMO_PROMO = {
-  id: "demo-bpromo-1", title: "خصم إضافي 20%", subtitle: "على أول طلب من نايك", image_url: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=600", link_url: "#", cta_text: "استفد الآن"
-};
-function blDemoProducts() {
-  return [
-    { id: "bl-dp1", name: "حذاء نايك اير فورس 1", price: 799, old_price: 1199, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300", rating: 4.6, reviews: 2345, category: "أحذية", brand: "نايك", seller: "نايك", free_shipping: true, installment: true, sizes: [] },
-    { id: "bl-dp2", name: "تيشيرت نايك الرياضي", price: 299, old_price: 449, image: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=300", rating: 4.3, reviews: 1234, category: "ملابس", brand: "نايك", seller: "نايك", sizes: [] },
-    { id: "bl-dp3", name: "بنطلون نايك تدريبي", price: 459, image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300", rating: 4.1, reviews: 876, category: "ملابس", brand: "نايك", seller: "نايك", free_shipping: true, sizes: [] },
-    { id: "bl-dp4", name: "قبعة نايك رياضية", price: 149, old_price: 249, image: "https://images.unsplash.com/photo-1521369909029-2afed882baee?w=300", rating: 4.0, reviews: 567, category: "إكسسوارات", brand: "نايك", seller: "نايك", sizes: [] },
-    { id: "bl-dp5", name: "جوارب نايك 3 أزواج", price: 89, old_price: 149, image: "https://images.unsplash.com/photo-1586350977771-b3b0abd50c82?w=300", rating: 4.4, reviews: 3456, category: "ملابس", brand: "نايك", seller: "نايك", installment: true, sizes: [] },
-    { id: "bl-dp6", name: "حقيبة نايك ظهر", price: 349, image: "https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=300", rating: 4.2, reviews: 789, category: "إكسسوارات", brand: "نايك", seller: "نايك", free_shipping: true, sizes: [] },
-  ];
-}
-
 // ========== STATE ==========
 var BL = {};
 BL.brand = null;
@@ -96,6 +65,15 @@ function hideBLSkeleton() {
   if (el) el.style.display = 'none';
   document.body.classList.remove('bl-loading');
   document.body.classList.add('bl-loaded');
+}
+function renderBLEmptyState(message) {
+  if (!BL.contentEl) return;
+  hideBLSkeleton();
+  BL.contentEl.innerHTML =
+    '<div class="noon-muted" style="padding:64px 16px;text-align:center">' +
+    String(message || 'هذه العلامة التجارية غير متاحة حالياً.')
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') +
+    '</div>';
 }
 
 // ========== FETCH BRAND ==========
@@ -585,7 +563,6 @@ BL.init = async function () {
   }
 
   try {
-    if (BL_DEMO) throw "demo";
     if (!slug) throw "no slug";
     BL.brand = await Promise.race([
       fetchBrand(slug),
@@ -593,7 +570,9 @@ BL.init = async function () {
     ]);
     if (!BL.brand) throw "not found";
   } catch (e) {
-    BL.brand = BL_DEMO_BRAND;
+    console.warn('[BL] brand load failed, reason:', e);
+    renderBLEmptyState();
+    return;
   }
   renderBreadcrumb(BL.brand);
   if (window.SEOEngine) SEOEngine.waitForBrand(BL.brand);
@@ -614,60 +593,42 @@ BL.init = async function () {
   }
 
   // 2. Fetch background data in parallel
-  var usingDemo = BL_DEMO || BL.brand === BL_DEMO_BRAND;
-  if (usingDemo) {
-    BL.banners = BL_DEMO_BANNERS;
-    var demoSecs = JSON.parse(JSON.stringify(BL_DEMO_SECTIONS));
-    var demoProds = blDemoProducts();
-    for (var dsi = 0; dsi < demoSecs.length; dsi++) {
-      demoSecs[dsi]._products = demoProds;
-    }
-    BL.sections = demoSecs;
-    BL.promoBanner = BL_DEMO_PROMO;
-    BL.brandProducts = demoProds;
-    BL.allProducts = demoProds;
-    // Register in store so clicking works
-    for (var bpi = 0; bpi < demoProds.length; bpi++) {
-      if (window.addProductToStore) window.addProductToStore(demoProds[bpi]);
-    }
-  } else {
-    var [banners, sections, promoBanner] = await Promise.all([
-      fetchBrandBanners(BL.brand.id),
-      fetchBrandSections(BL.brand.id),
-      fetchPromotionalBanner(BL.brand.id, BL.brand.slug || slug)
-    ]);
-    BL.banners = banners;
-    BL.sections = sections;
-    BL.promoBanner = promoBanner;
+  var [banners, sections, promoBanner] = await Promise.all([
+    fetchBrandBanners(BL.brand.id),
+    fetchBrandSections(BL.brand.id),
+    fetchPromotionalBanner(BL.brand.id, BL.brand.slug || slug)
+  ]);
+  BL.banners = banners;
+  BL.sections = sections;
+  BL.promoBanner = promoBanner;
 
-    // 3. Fetch all products & brand products
-    var allProducts = [];
-    if (window.BudaStore && window.BudaStore.getAllProducts) {
-      var store = window.BudaStore.getAllProducts();
-      for (var key in store) {
-        if (store.hasOwnProperty(key)) allProducts.push(store[key]);
-      }
+  // 3. Fetch all products & brand products
+  var allProducts = [];
+  if (window.BudaStore && window.BudaStore.getAllProducts) {
+    var store = window.BudaStore.getAllProducts();
+    for (var key in store) {
+      if (store.hasOwnProperty(key)) allProducts.push(store[key]);
     }
-    if (!allProducts.length) {
-      try {
-        var client = getSupabaseClient();
-        if (client) {
-          var { data } = await client.from('products').select('*').limit(200);
-          if (data) allProducts = data;
-        }
-      } catch (e) {}
-    }
-    if (!allProducts.length && window.TaagerIntegration && typeof window.TaagerIntegration.getCachedProducts === "function") {
-      allProducts = window.TaagerIntegration.getCachedProducts() || [];
-    }
-    BL.allProducts = allProducts;
-
-    var brandTerm = String(BL.brand.name || '').trim().toLowerCase();
-    BL.brandProducts = allProducts.filter(function (p) {
-      var haystack = ((p.brand || '') + ' ' + (p.name || '') + ' ' + (p.category || '')).toLowerCase();
-      return haystack.indexOf(brandTerm) > -1;
-    });
   }
+  if (!allProducts.length) {
+    try {
+      var client = getSupabaseClient();
+      if (client) {
+        var { data } = await client.from('products').select('*').limit(200);
+        if (data) allProducts = data;
+      }
+    } catch (e) {}
+  }
+  if (!allProducts.length && window.TaagerIntegration && typeof window.TaagerIntegration.getCachedProducts === "function") {
+    allProducts = window.TaagerIntegration.getCachedProducts() || [];
+  }
+  BL.allProducts = allProducts;
+
+  var brandTerm = String(BL.brand.name || '').trim().toLowerCase();
+  BL.brandProducts = allProducts.filter(function (p) {
+    var haystack = ((p.brand || '') + ' ' + (p.name || '') + ' ' + (p.category || '')).toLowerCase();
+    return haystack.indexOf(brandTerm) > -1;
+  });
 
   // 4. Clear skeleton, render hero
   BL.contentEl.innerHTML = '';
@@ -713,6 +674,12 @@ BL.init = async function () {
 
   // 7. Hide skeleton
   hideBLSkeleton();
+
+  if (!BL.contentEl.querySelector('#blHero') && !BL.contentEl.querySelector('.bl-section-wrap')) {
+    console.warn('[BL] Supabase returned no content for this brand');
+    renderBLEmptyState('لا يوجد محتوى لهذه العلامة التجارية بعد.');
+    return;
+  }
 
   // 8. Trigger visibility animations
   requestAnimationFrame(function () {

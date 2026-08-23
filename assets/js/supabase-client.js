@@ -32,9 +32,26 @@ function getSecUserEmail() {
   window.__bodaSecFetch = true;
   var originalFetch = window.fetch;
   if (typeof originalFetch !== "function") return;
-  window.fetch = function (input, init) {
+
+  function handleService402() {
+    if (window.__boda402Fired) return;
+    window.__boda402Fired = true;
+    try { document.dispatchEvent(new CustomEvent("boda:service-402")); } catch (_e) {}
     try {
-      var url = typeof input === "string" ? input : (input && input.url) || "";
+      var path = String(window.location.pathname || "");
+      if (path.indexOf("error-402") !== -1) return;
+      var last = Number(sessionStorage.getItem("boda_402_at") || 0);
+      if (Date.now() - last < 20000) return;
+      sessionStorage.setItem("boda_402_at", String(Date.now()));
+      var target = path.indexOf("/pages/") !== -1 ? "error-402.html" : "pages/error-402.html";
+      setTimeout(function () { window.location.replace(target); }, 500);
+    } catch (_e) {}
+  }
+
+  window.fetch = function (input, init) {
+    var url = "";
+    try {
+      url = typeof input === "string" ? input : (input && input.url) || "";
       if (url.indexOf("/rest/v1/") !== -1) {
         init = init || {};
         if (!(init.headers instanceof Headers)) {
@@ -46,7 +63,13 @@ function getSecUserEmail() {
         }
       }
     } catch (e) {}
-    return originalFetch.call(this, input, init);
+    var isRestCall = String(url).indexOf("/rest/v1/") !== -1;
+    return originalFetch.call(this, input, init).then(function (response) {
+      try {
+        if (isRestCall && response && response.status === 402) handleService402();
+      } catch (_e) {}
+      return response;
+    });
   };
 })();
 (function ensureSingleSupabaseClient() {

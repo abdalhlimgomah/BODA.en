@@ -651,6 +651,40 @@ function trySync() {
 
 trySync();
 
+const getResizedImageUrl = (source, width) => {
+  try {
+    let s = String(source || "");
+    if (!s || /^(data:|blob:|\/)/i.test(s)) return s;
+    if (/images\.weserv\.nl|\/api\/img\?/i.test(s)) return s;
+    // Unwrap legacy proxy URLs back to the origin image.
+    if (s.indexOf("action=proxy-image") >= 0) {
+      try {
+        const raw = s.split("url=")[1] || "";
+        if (raw) s = decodeURIComponent(raw);
+      } catch (_e) { /* keep original */ }
+    }
+    const isRemoteImage = /^https?:\/\/(media\.taager\.com|msgqzgzoslearaprgiqq\.supabase\.co)\//i.test(s);
+    if (!isRemoteImage) return s;
+    const parsedWidth = parseInt(width, 10);
+    const w = Math.min(Math.max(Number.isFinite(parsedWidth) ? parsedWidth : 400, 16), 1400);
+    const loc = (window.location && window.location) || {};
+    const host = String(loc.hostname || "");
+    if (loc.protocol === "file:") return s;
+    if (!/^127\.0\.0\.1$|^localhost$|^0\.0\.0\.0$/i.test(host)) {
+      return "/api/img?u=" + encodeURIComponent(s) + "&w=" + w;
+    }
+    // Local dev servers have no /api route: use a public resizer so dev
+    // behaves (and feels) like production instead of loading full-size files.
+    return (
+      "https://images.weserv.nl/?url=" +
+      encodeURIComponent(s.replace(/^https?:\/\//i, "")) +
+      "&w=" + w + "&q=78&output=webp"
+    );
+  } catch (_e) {
+    return source;
+  }
+};
+
 const getImagePath = (path) => {
   const isFile = window.location && window.location.protocol === "file:";
   const fallback = isFile
@@ -894,52 +928,80 @@ async function loadCartFromSupabase() {
 
 let _cartLoadedFromSupabase = false;
 let _wishlistLoadedFromSupabase = false;
+let _wishlistCache = [];
 
-async function syncWishlistToSupabase(wishlist, metadata = {}) {
+function buildWishlistRow(email, item) {
+  return {
+    user_email: email,
+    product_id: String(item.id || item.product_id || ""),
+    name: String(item.name || item.product_name || ""),
+    price: Number(item.price) || 0,
+    image: String(item.image || item.image_url || item.imageUrl || item.thumbnail || ""),
+    image_url: String(item.image_url || item.image || item.imageUrl || ""),
+    category: String(item.category || ""),
+    description: String(item.description || ""),
+    seller_id: String(item.seller_id || item.owner_id || ""),
+    seller_email: String(item.seller_email || item.owner_email || ""),
+    source: String(item.source || "internal"),
+    taager_product_id: String(item.taager_product_id || ""),
+  };
+}
+
+async function addWishlistItemOnServer(item) {
+  const client = getSupabaseForCart();
+  const email = getCartUserEmail();
+  if (!client || !email) return;
+  try {
+    const row = buildWishlistRow(email, item);
+    const { error } = await client
+      .from("wishlist_items")
+      .upsert([row], { onConflict: "user_email,product_id" });
+    if (error) throw error;
+  } catch (e) {
+    console.warn("addWishlistItemOnServer error:", e);
+    resyncWishlistFromServer();
+  }
+}
+
+async function removeWishlistItemOnServer(productId) {
+  const client = getSupabaseForCart();
+  const email = getCartUserEmail();
+  if (!client || !email) return;
+  try {
+    const { error } = await client
+      .from("wishlist_items")
+      .delete()
+      .match({ user_email: email, product_id: String(productId) });
+    if (error) throw error;
+  } catch (e) {
+    console.warn("removeWishlistItemOnServer error:", e);
+    resyncWishlistFromServer();
+  }
+}
+
+async function replaceWishlistOnServer(items) {
   const client = getSupabaseForCart();
   const email = getCartUserEmail();
   if (!client || !email) return;
 
-  const items = Array.isArray(wishlist) ? wishlist : [];
-  
-  // If a specific product was removed, delete it directly
-  if (metadata.productId && !metadata.isInWishlist) {
-    try {
-      await client.from("wishlist_items").delete().match({ user_email: email, product_id: String(metadata.productId) });
-    } catch (e) {
-      console.warn("syncWishlistToSupabase (delete) error:", e);
-    }
-  }
-  // Don't sync empty wishlist - would wipe Supabase
-  if (!items.length) {
-    console.log("syncWishlistToSupabase: skipping empty wishlist sync");
-    return;
-  }
-
+  const list = Array.isArray(items) ? items : [];
   try {
-    // Use upsert instead of delete+insert to avoid wiping data
-    const rows = items.map((item) => ({
-      user_email: email,
-      product_id: String(item.id || item.product_id || ""),
-      name: String(item.name || item.product_name || ""),
-      price: Number(item.price) || 0,
-      image: String(item.image || item.image_url || item.imageUrl || item.thumbnail || ""),
-      image_url: String(item.image_url || item.image || item.imageUrl || ""),
-      category: String(item.category || ""),
-      description: String(item.description || ""),
-      seller_id: String(item.seller_id || item.owner_id || ""),
-      seller_email: String(item.seller_email || item.owner_email || ""),
-      source: String(item.source || "internal"),
-      taager_product_id: String(item.taager_product_id || ""),
-    }));
-    
-    // Upsert instead of delete+insert
-    await client.from("wishlist_items").upsert(rows, { 
-      onConflict: "user_email,product_id" 
-    });
+    await client.from("wishlist_items").delete().eq("user_email", email);
+    if (list.length) {
+      const rows = list.map((item) => buildWishlistRow(email, item));
+      await client.from("wishlist_items").upsert(rows, { onConflict: "user_email,product_id" });
+    }
   } catch (e) {
-    console.warn("syncWishlistToSupabase error (non-fatal):", e);
+    console.warn("replaceWishlistOnServer error (non-fatal):", e);
+    resyncWishlistFromServer();
   }
+}
+
+async function resyncWishlistFromServer() {
+  const fresh = await loadWishlistFromSupabase();
+  if (fresh === null) return;
+  _wishlistCache = fresh;
+  document.dispatchEvent(new CustomEvent("boda:wishlist-loaded", { detail: { wishlist: getWishlist() } }));
 }
 
 async function loadWishlistFromSupabase() {
@@ -976,40 +1038,22 @@ async function loadWishlistFromSupabase() {
 }
 
 async function autoLoadWishlistFromSupabase() {
+  _wishlistCache = [];
+  try { localStorage.removeItem(getWishlistKey()); } catch (_e) {}
+
   const email = getCartUserEmail();
   if (!email) {
     _wishlistLoadedFromSupabase = true;
+    document.dispatchEvent(new CustomEvent("boda:wishlist-loaded", { detail: { wishlist: getWishlist() } }));
     return;
   }
 
   const supabaseWishlist = await loadWishlistFromSupabase();
-  const localWishlist = getWishlist();
-
-  if (supabaseWishlist === null) {
-    _wishlistLoadedFromSupabase = true;
-    return;
+  if (supabaseWishlist !== null) {
+    _wishlistCache = supabaseWishlist;
   }
-
-  // Only merge if Supabase has data - don't wipe local if Supabase is empty
-  if (supabaseWishlist.length > 0) {
-    if (localWishlist.length === 0) {
-      localStorage.setItem(getWishlistKey(), JSON.stringify(supabaseWishlist));
-    } else {
-      const merged = [...supabaseWishlist];
-      localWishlist.forEach((localItem) => {
-        const exists = merged.some((s) => String(s.id) === String(localItem.id));
-        if (!exists) merged.push(localItem);
-      });
-      localStorage.setItem(getWishlistKey(), JSON.stringify(merged));
-    }
-  }
-  // If supabaseWishlist.length === 0, KEEP local data - don't wipe it
 
   _wishlistLoadedFromSupabase = true;
-  const finalWishlist = getWishlist();
-  if (finalWishlist.length > 0) {
-    syncWishlistToSupabase(finalWishlist);
-  }
   document.dispatchEvent(new CustomEvent("boda:wishlist-loaded", { detail: { wishlist: getWishlist() } }));
 }
 
@@ -1026,15 +1070,7 @@ const saveCart = (cart) => {
   }
 };
 
-const getWishlist = () => {
-  try {
-    const wishlist = localStorage.getItem(getWishlistKey());
-    const parsed = wishlist ? JSON.parse(wishlist) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-};
+const getWishlist = () => _wishlistCache.slice();
 
 const saveWishlist = (wishlist, metadata = {}) => {
   const normalizedWishlist = Array.isArray(wishlist)
@@ -1042,24 +1078,20 @@ const saveWishlist = (wishlist, metadata = {}) => {
         .map((item) => normalizeProductRecord(item))
         .filter(Boolean)
     : [];
-  localStorage.setItem(getWishlistKey(), JSON.stringify(normalizedWishlist));
+  _wishlistCache = normalizedWishlist.slice();
 
-  // Sync to Supabase if user is logged in (has email)
-  const email = getCartUserEmail();
-  if (email) {
-    syncWishlistToSupabase(normalizedWishlist, metadata);
-  }
+  replaceWishlistOnServer(normalizedWishlist);
 
   document.dispatchEvent(
     new CustomEvent("boda:wishlist-updated", {
       detail: {
         ...metadata,
-        wishlist: normalizedWishlist,
+        wishlist: normalizedWishlist.slice(),
       },
     })
   );
 
-  return normalizedWishlist;
+  return normalizedWishlist.slice();
 };
 
 const isInWishlist = (productId) => {
@@ -1350,26 +1382,32 @@ const toggleWishlist = (productId) => {
   }
 
   const targetId = String(productId);
-  const wishlist = getWishlist();
-  const existingIndex = wishlist.findIndex((item) => String(item?.id) === targetId);
+  const existingIndex = _wishlistCache.findIndex((item) => String(item?.id) === targetId);
   let wishlistState = false;
 
   if (existingIndex !== -1) {
-    wishlist.splice(existingIndex, 1);
+    _wishlistCache.splice(existingIndex, 1);
+    removeWishlistItemOnServer(targetId);
   } else {
     const allProducts = _getAllProducts();
     const product = allProducts[targetId];
     if (!product) return false;
     const normalizedProduct = normalizeProductRecord(product);
     if (!normalizedProduct) return false;
-    wishlist.push(normalizedProduct);
+    _wishlistCache.push(normalizedProduct);
+    addWishlistItemOnServer(normalizedProduct);
     wishlistState = true;
   }
 
-  saveWishlist(wishlist, {
-    productId: targetId,
-    isInWishlist: wishlistState,
-  });
+  document.dispatchEvent(
+    new CustomEvent("boda:wishlist-updated", {
+      detail: {
+        productId: targetId,
+        isInWishlist: wishlistState,
+        wishlist: _wishlistCache.slice(),
+      },
+    })
+  );
 
   return wishlistState;
 };
@@ -1416,6 +1454,7 @@ function countProductVariants(p) {
 window.BudaStore = {
   DEFAULT_PRODUCT_IMAGE,
   getImagePath,
+  getResizedImageUrl,
   getProductImages: extractProductImages,
   resolveProductPrice,
   resolveProductRating,
@@ -1434,8 +1473,9 @@ window.BudaStore = {
   getCartCount,
   syncCartToSupabase,
   loadCartFromSupabase,
-  syncWishlistToSupabase,
   loadWishlistFromSupabase,
+  isWishlistLoaded: () => _wishlistLoadedFromSupabase,
+  refreshWishlist: resyncWishlistFromServer,
   getWishlist,
   saveWishlist,
   isInWishlist,

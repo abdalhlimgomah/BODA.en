@@ -1564,10 +1564,6 @@ HM.renderBanner = function (section) {
         "</a></div>";
     } else {
       html = '<div class="hm-banner-top-wrap hm-fade">' +
-        '<a class="hm-banner-top" href="' + escapeHtml(banner.link || '#') + '">' +
-        '<span class="hm-banner-top-icon"><span class="material-icons-outlined">local_shipping</span></span>' +
-        '<div class="hm-banner-top-text"><strong>توصيل مجاني للطلبات فوق ٩٩ ر.س</strong><span>عرض لفترة محدودة</span></div>' +
-        '<span class="hm-banner-top-arrow"><span class="material-icons-outlined">chevron_left</span></span>' +
         "</a></div>";
     }
     var temp = document.createElement("div");
@@ -1785,12 +1781,7 @@ HM.renderFeatures = function () {
 HM.renderSmartCategories = function (section) {
   var cards = HOME_CONFIG._smartCategories || [];
   if (!cards || !cards.length) {
-    cards = [
-      { title: 'العناية بالبشرة', subtitle: 'مستحضرات التجميل والعناية', link_url: 'category-landing.html?slug=skincare', gradient_from: '#4facfe', gradient_to: '#00f2fe', icon: 'spa' },
-      { title: 'أزياء الصيف', subtitle: 'تشكيلات الموسم', link_url: 'category-landing.html?slug=fashion', gradient_from: '#667eea', gradient_to: '#764ba2', icon: 'checkroom' },
-      { title: 'إلكترونيات', subtitle: 'أجهزة وسماعات', link_url: 'category-landing.html?slug=electronics', gradient_from: '#f093fb', gradient_to: '#f5576c', icon: 'devices' },
-      { title: 'أحذية رياضية', subtitle: 'لأداء أفضل', link_url: 'category-landing.html?slug=shoes', gradient_from: '#43e97b', gradient_to: '#38f9d7', icon: 'directions_run' }
-    ];
+    
   }
   var html =
     '<section class="hm-section hm-fade hm-smart-cats" id="sec-' + (section.id || 'hm-smart-cats') + '">' +

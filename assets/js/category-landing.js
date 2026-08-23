@@ -1,123 +1,11 @@
 /* ============================================
    Category Landing Page — Dynamic sections
+   Data source: Supabase (+ Taager cache for auto sections only)
    ============================================ */
 
 // ========== CONSTANTS ==========
 var CL_SLIDE_INTERVAL = 4000;
 var CL_PRODUCTS_PER_SECTION = 40;
-var CL_DEMO = new URLSearchParams(window.location.search).get("demo") === "1";
-
-// ========== DEMO DATA ==========
-function clDemoCategory(slug) {
-  var map = {
-    "smart-watches": { name: "الساعات الذكية", name_en: "Smart Watches", description: "أحدث الساعات الذكية والتقنيات القابلة للارتداء", icon: "watch", meta_title: "ساعات ذكية - BudoQ" },
-    "headphones": { name: "السماعات", name_en: "Headphones", description: "سماعات رأس وأذن بأعلى جودة صوت", icon: "headphones", meta_title: "سماعات - BudoQ" },
-    "shoes": { name: "الأحذية", name_en: "Shoes", description: "أحذية رياضية وعصرية لكل المناسبات", icon: "footprint", meta_title: "أحذية - BudoQ" },
-    "clothes": { name: "الملابس", name_en: "Fashion", description: "أحدث صيحات الموضة والأزياء", icon: "checkroom", meta_title: "أزياء وموضة - BudoQ" },
-  };
-  var m = map[slug] || map["clothes"];
-  return {
-    id: "demo-cat-" + (slug || "clothes"),
-    name: m.name, name_en: m.name_en, slug: slug || "clothes",
-    description: m.description, image_url: "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800",
-    icon: m.icon, sort_order: 1, is_active: true,
-    meta_title: m.meta_title, meta_description: m.description
-  };
-}
-
-function clDemoBanners(slug) {
-  var images = {
-    "smart-watches": ["https://images.unsplash.com/photo-1546868871-af0de0ae72f1?w=1200", "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1200"],
-    "headphones": ["https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=1200", "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=1200"],
-    "shoes": ["https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200", "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=1200"],
-    "clothes": ["https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200", "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1200"],
-  };
-  var imgs = images[slug] || images["clothes"];
-  return [
-    { id: "demo-ban-1", category_id: "demo-cat-1", image_url: imgs[0], title: "تخفيضات تصل إلى 70%", subtitle: "على مجموعة الصيف الجديدة", button_text: "تسوق الآن", link_url: "#", sort_order: 1, is_active: true },
-    { id: "demo-ban-2", category_id: "demo-cat-1", image_url: imgs[1], title: "تشكيلة الخريف", subtitle: "أحدث التصاميم العصرية", button_text: "استكشف", link_url: "#", sort_order: 2, is_active: true },
-  ];
-}
-
-function clDemoSections(slug) {
-  return [
-    { id: "demo-sec-1", category_id: "demo-cat-1", title: "الأكثر مبيعاً", subtitle: "منتجات نالت إعجاب الآلاف", badge: "حصري", section_type: "products", sort_order: 1, is_active: true, display_count: CL_PRODUCTS_PER_SECTION, selection_mode: "auto", auto_rules: { sort_by: "rating" }, view_all_link: "#" },
-    { id: "demo-sec-2", category_id: "demo-cat-1", title: "أسعار مميزة", subtitle: "أفضل الأسعار لتجربة تسوق رائعة", badge: "مميز", section_type: "products", sort_order: 2, is_active: true, display_count: CL_PRODUCTS_PER_SECTION, selection_mode: "auto", auto_rules: { sort_by: "price_asc" }, view_all_link: "#" },
-    { id: "demo-sec-3", category_id: "demo-cat-1", title: "", subtitle: "", badge: "", section_type: "products", sort_order: 3, is_active: true, display_count: CL_PRODUCTS_PER_SECTION, selection_mode: "auto", auto_rules: { sort_by: "random" }, view_all_link: "#" },
-  ];
-}
-
-var CL_DEMO_BRANDS = [
-  { id: "demo-br-1", name: "نايك", name_en: "Nike", slug: "nike", logo_url: "https://upload.wikimedia.org/wikipedia/commons/a/a6/Logo_NIKE.svg", cover_url: "" },
-  { id: "demo-br-2", name: "أديداس", name_en: "Adidas", slug: "adidas", logo_url: "https://upload.wikimedia.org/wikipedia/commons/2/20/Adidas_Logo.svg", cover_url: "" },
-  { id: "demo-br-3", name: "زارا", name_en: "Zara", slug: "zara", logo_url: "https://upload.wikimedia.org/wikipedia/commons/f/fd/Zara_Logo.svg", cover_url: "" },
-  { id: "demo-br-4", name: "إتش آند إم", name_en: "H&M", slug: "hm", logo_url: "https://upload.wikimedia.org/wikipedia/commons/5/53/H%26M-Logo.svg", cover_url: "" },
-];
-var CL_DEMO_PRODUCTS = [
-  { id: "demo-p1", name: "فستان صيفي أنيق", price: 299, old_price: 599, image: "https://images.unsplash.com/photo-1595777457583-95e059d581b8?w=300", rating: 4.5, reviews: 234, category: "ملابس", seller: "ماركة موضة", free_shipping: true, sizes: [] },
-  { id: "demo-p2", name: "حقيبة جلدية فاخرة", price: 459, old_price: 899, image: "https://images.unsplash.com/photo-1584917865442-de89df76afd3?w=300", rating: 4.2, reviews: 189, category: "ملابس", seller: "ماركة فاخرة", installment: true, sizes: [] },
-  { id: "demo-p3", name: "نظارة شمسية عصرية", price: 199, old_price: 399, image: "https://images.unsplash.com/photo-1572635196237-14b3f281503f?w=300", rating: 4.0, reviews: 567, category: "ملابس", seller: "ماركة موضة", sizes: [] },
-  { id: "demo-p4", name: "ساعة ذكية رياضية", price: 1299, image: "https://images.unsplash.com/photo-1546868871-af0de0ae72f1?w=300", rating: 4.7, reviews: 890, category: "إلكترونيات", seller: "تيك ووتش", free_shipping: true, sizes: [] },
-  { id: "demo-p5", name: "حذاء رياضي", price: 549, old_price: 799, image: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=300", rating: 4.4, reviews: 1234, category: "أحذية", seller: "نايك", installment: true, sizes: [] },
-  { id: "demo-p6", name: "سماعات لاسلكية", price: 349, old_price: 599, image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=300", rating: 4.3, reviews: 678, category: "إلكترونيات", seller: "تيك ووتش", free_shipping: true, sizes: [] },
-  { id: "demo-p7", name: "تيشيرت قطني", price: 89, old_price: 149, image: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=300", rating: 3.9, reviews: 456, category: "ملابس", seller: "إتش آند إم", free_shipping: true, sizes: [] },
-  { id: "demo-p8", name: "حذاء كاجوال", price: 399, old_price: 699, image: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=300", rating: 4.1, reviews: 567, category: "أحذية", seller: "ماركة أحذية", free_shipping: true, sizes: [] },
-  { id: "demo-p9", name: "سوار ذكي", price: 799, old_price: 1299, image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=300", rating: 4.6, reviews: 345, category: "إلكترونيات", seller: "تيك ووتش", installment: true, sizes: [] },
-  { id: "demo-p10", name: "سماعة بلوتوث", price: 249, old_price: 449, image: "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=300", rating: 4.0, reviews: 890, category: "إلكترونيات", seller: "تيك ووتش", free_shipping: true, sizes: [] },
-  { id: "demo-p11", name: "بنطلون جينز", price: 349, old_price: 549, image: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=300", rating: 4.3, reviews: 123, category: "ملابس", seller: "ماركة موضة", sizes: [] },
-  { id: "demo-p12", name: "حذاء رياضي أزرق", price: 649, old_price: 899, image: "https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=300", rating: 4.5, reviews: 234, category: "أحذية", seller: "نايك", free_shipping: true, sizes: [] },
-];
-
-function clDemoCollections(slug) {
-  var map = {
-    "smart-watches": [
-      { id: "demo-col-1", category_id: "demo-cat-1", name: "أحدث الساعات الذكية", slug: "smart-watch-collection", image_url: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=600", link_url: "#", sort_order: 1, is_active: true },
-      { id: "demo-col-2", category_id: "demo-cat-1", name: "إكسسوارات تقنية", slug: "tech-accessories", image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600", link_url: "#", sort_order: 2, is_active: true },
-    ],
-    "headphones": [
-      { id: "demo-col-3", category_id: "demo-cat-1", name: "سماعات لاسلكية", slug: "wireless-headphones", image_url: "https://images.unsplash.com/photo-1487215078519-e21cc028cb29?w=600", link_url: "#", sort_order: 1, is_active: true },
-      { id: "demo-col-4", category_id: "demo-cat-1", name: "سماعات رياضية", slug: "sports-headphones", image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600", link_url: "#", sort_order: 2, is_active: true },
-    ],
-    "shoes": [
-      { id: "demo-col-5", category_id: "demo-cat-1", name: "أحذية رياضية", slug: "sports-shoes", image_url: "https://images.unsplash.com/photo-1608231387042-66d1773070a5?w=600", link_url: "#", sort_order: 1, is_active: true },
-      { id: "demo-col-6", category_id: "demo-cat-1", name: "أحذية كاجوال", slug: "casual-shoes", image_url: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600", link_url: "#", sort_order: 2, is_active: true },
-    ],
-    "clothes": [
-      { id: "demo-col-7", category_id: "demo-cat-1", name: "تشكيلة الصيف", slug: "summer-collection", image_url: "https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=600", link_url: "#", sort_order: 1, is_active: true },
-      { id: "demo-col-8", category_id: "demo-cat-1", name: "العودة للمدارس", slug: "back-to-school", image_url: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600", link_url: "#", sort_order: 2, is_active: true },
-    ],
-  };
-  return map[slug] || [];
-}
-
-function clDemoProducts(slug) {
-  return clFilterBySlug(CL_DEMO_PRODUCTS, slug);
-}
-
-function clTryInjectDemo(slug) {
-  if (!CL_DEMO) return;
-  if (!CL.category) CL.category = clDemoCategory(slug);
-  if (!CL.banners.length) CL.banners = clDemoBanners(slug);
-  if (!CL.brands.length) CL.brands = CL_DEMO_BRANDS;
-  if (!CL.collections.length) CL.collections = clDemoCollections(slug);
-  if (CL.sections.length) return;
-  var secs = clDemoSections(slug);
-  var filtered = clFilterBySlug(clGetAllProducts(), slug);
-  if (filtered.length < 4) {
-    filtered = clFilterBySlug(CL_DEMO_PRODUCTS, slug);
-  }
-  for (var pi = 0; pi < filtered.length; pi++) {
-    if (window.addProductToStore) window.addProductToStore(filtered[pi]);
-  }
-  var savedAll = CL.allProducts;
-  CL.allProducts = filtered;
-  clDistributeProducts(filtered, secs);
-  for (var dsi = 0; dsi < secs.length; dsi++) {
-    secs[dsi].view_all_link = "product-listing.html?category=" + encodeURIComponent(slug);
-  }
-  CL.allProducts = savedAll;
-  CL.sections = secs;
-}
 
 // ========== STATE ==========
 var CL = {};
@@ -197,23 +85,6 @@ var CL_CAT_KEYWORDS = {
   "clothes": ["ملابس", "clothes", "clothing", "fashion", "apparel", "أزياء", "موضة", "لباس", "تيشيرت", "قميص", "بنطلون", "جينز"],
 };
 
-function clCleanProduct(p) {
-  var clean = {};
-  for (var k in p) {
-    if (/^image\d*$/i.test(k) && !p[k]) continue;
-    if (/^img\d*$/i.test(k) && !p[k]) continue;
-    clean[k] = p[k];
-  }
-  if (!clean.images || !Array.isArray(clean.images)) clean.images = [];
-  if (clean.image || clean.image1 || clean.imageUrl || clean.image_url) {
-    clean.images = [clean.image || clean.image1 || clean.imageUrl || clean.image_url].concat(
-      clean.images.filter(function (v) { return v && v !== clean.image && v !== clean.image1; })
-    );
-  }
-  clean.images = clean.images.filter(Boolean);
-  return clean;
-}
-
 function clGetKeywordsForSlug(slug) {
   if (CL_CAT_KEYWORDS[slug] || CL_NAME_KEYWORDS[slug]) return CL_CAT_KEYWORDS[slug] || CL_NAME_KEYWORDS[slug];
   if (!CL.category) return null;
@@ -224,20 +95,6 @@ function clGetKeywordsForSlug(slug) {
   var nw = cn.split(/\s+/);
   for (var _i = 0; _i < nw.length; _i++) { if (nw[_i].length > 2) kw.push(nw[_i].toLowerCase()); }
   return kw;
-}
-
-function clFilterBySlug(products, slug) {
-  if (!products || !products.length) return [];
-  var slugKw = clGetKeywordsForSlug(slug);
-  if (slugKw) {
-    var byKw = products.filter(function (p) {
-      var pc = (p.category || "").toLowerCase();
-      var pn = (p.name || "").toLowerCase();
-      return slugKw.some(function (kw) { return pc.indexOf(kw) > -1 || pn.indexOf(kw) > -1; });
-    });
-    if (byKw.length >= 4) return byKw.map(clCleanProduct);
-  }
-  return [];
 }
 
 function clGetImage(product) {
@@ -391,16 +248,6 @@ function clGetAutoSectionProducts(section) {
   var count = section.display_count || CL_PRODUCTS_PER_SECTION;
   var offset = (section._offset || 0) * count;
   return filtered.slice(offset, offset + count);
-}
-
-function clDistributeProducts(products, sections) {
-  if (!products.length || !sections.length) return;
-  var perSection = Math.min(100, Math.ceil(products.length / sections.length));
-  for (var dsi = 0; dsi < sections.length; dsi++) {
-    sections[dsi]._offset = dsi;
-    sections[dsi].display_count = (dsi === sections.length - 1) ? perSection * 2 : perSection;
-    sections[dsi]._products = clGetAutoSectionProducts(sections[dsi]);
-  }
 }
 
 // ========== UPDATE BREADCRUMB ==========
@@ -607,6 +454,17 @@ function clRemoveSkeleton() {
   skeletons.forEach(function (s) { s.remove(); });
 }
 
+function clRenderEmptyState(message) {
+  if (!CL.contentEl) return;
+  clRemoveSkeleton();
+  document.body.classList.remove("cl-loading");
+  document.body.classList.add("cl-loaded");
+  CL.contentEl.innerHTML =
+    '<div class="noon-muted" style="padding:64px 16px;text-align:center">' +
+    escapeHtml(message || "هذا القسم غير متاح حالياً.") +
+    "</div>";
+}
+
 // ========== INTERSECTION OBSERVER ==========
 function clInitAnimations() {
   var els = CL.contentEl.querySelectorAll(".cl-fade");
@@ -673,7 +531,6 @@ CL.init = async function () {
   var loadOk = false;
 
   try {
-    if (CL_DEMO) throw "demo";
     if (!slug) throw "no slug";
     CL.category = await Promise.race([
       clLoadCategory(),
@@ -683,8 +540,9 @@ CL.init = async function () {
     loadOk = true;
     console.log("[CL] category loaded from Supabase:", CL.category.name);
   } catch (e) {
-    console.log("[CL] using demo category, reason:", e);
-    CL.category = clDemoCategory(slug);
+    console.warn("[CL] category load failed, reason:", e);
+    clRenderEmptyState();
+    return;
   }
 
   console.log("[CL] category name:", CL.category.name);
@@ -692,70 +550,24 @@ CL.init = async function () {
   if (window.SEOEngine) SEOEngine.waitForCategory(CL.category);
 
   var catId = CL.category.id;
-  console.log("[CL] loadOk:", loadOk);
-  if (!loadOk) {
-    CL.banners = clDemoBanners(slug);
-    CL.brands = CL_DEMO_BRANDS;
-    CL.collections = clDemoCollections(slug);
-    var demoSections = clDemoSections(slug);
-    var filtered = clFilterBySlug(clGetAllProducts(), slug);
-    if (filtered.length < 4) {
-      filtered = clFilterBySlug(CL_DEMO_PRODUCTS, slug);
+  var [banners, sections, brands, collections] = await Promise.all([
+    clLoadBanners(catId), clLoadSections(catId), clLoadBrands(catId), clLoadCollections(catId),
+  ]);
+  CL.banners = banners;
+  CL.brands = brands;
+  CL.collections = collections;
+  for (var si = 0; si < sections.length; si++) {
+    var sec = sections[si];
+    sec._offset = si;
+    if (sec.selection_mode === "manual") {
+      sec._products = await clLoadSectionProducts(sec.id);
+    } else {
+      sec._products = clGetAutoSectionProducts(sec);
     }
-    for (var dpi = 0; dpi < filtered.length; dpi++) {
-      if (window.addProductToStore) window.addProductToStore(filtered[dpi]);
-    }
-    var savedAll = CL.allProducts;
-    CL.allProducts = filtered;
-    clDistributeProducts(filtered, demoSections);
-    for (var dsi = 0; dsi < demoSections.length; dsi++) {
-      demoSections[dsi].view_all_link = "product-listing.html?category=" + encodeURIComponent(slug);
-    }
-    CL.allProducts = savedAll;
-    CL.sections = demoSections;
-  } else {
-    var [banners, sections, brands, collections] = await Promise.all([
-      clLoadBanners(catId), clLoadSections(catId), clLoadBrands(catId), clLoadCollections(catId),
-    ]);
-    CL.banners = banners;
-    CL.brands = brands;
-    CL.collections = collections;
-    for (var si = 0; si < sections.length; si++) {
-      var sec = sections[si];
-      sec._offset = si;
-      if (sec.selection_mode === "manual") {
-        sec._products = await clLoadSectionProducts(sec.id);
-      } else {
-        sec._products = clGetAutoSectionProducts(sec);
-      }
-      sec.view_all_link = "product-listing.html?category=" + encodeURIComponent(slug || CL.category?.slug || "");
-      CL.sections.push(sec);
-    }
-    // Fall back to demo data if Supabase returned nothing
-    if (!CL.banners.length && !CL.sections.length) {
-      CL.banners = clDemoBanners(slug);
-      CL.brands = CL_DEMO_BRANDS;
-      CL.collections = clDemoCollections(slug);
-      var secs = clDemoSections(slug);
-      var filtered = clFilterBySlug(clGetAllProducts(), slug);
-      if (filtered.length < 4) {
-        filtered = clFilterBySlug(CL_DEMO_PRODUCTS, slug);
-      }
-      for (var dpi = 0; dpi < filtered.length; dpi++) {
-        if (window.addProductToStore) window.addProductToStore(filtered[dpi]);
-      }
-      var savedAll = CL.allProducts;
-      CL.allProducts = filtered;
-      clDistributeProducts(filtered, secs);
-      for (var dsi = 0; dsi < secs.length; dsi++) {
-        secs[dsi].view_all_link = "product-listing.html?category=" + encodeURIComponent(slug);
-      }
-      CL.allProducts = savedAll;
-      CL.sections = secs;
-    }
+    sec.view_all_link = "product-listing.html?category=" + encodeURIComponent(slug || CL.category?.slug || "");
+    CL.sections.push(sec);
   }
 
-  clTryInjectDemo(slug);
   console.log("[CL] sections count:", CL.sections.length, "banners:", CL.banners.length, "brands:", CL.brands.length);
 
   clRemoveSkeleton();
@@ -776,6 +588,13 @@ CL.init = async function () {
   try { clRenderCollections(CL.collections); } catch (e) { console.error("[CL] collections error:", e); }
   console.log("[CL] content children after render:", CL.contentEl.children.length, "sections:", CL.contentEl.querySelectorAll(".cl-section").length);
   console.log("[CL] last child ID:", CL.contentEl.lastElementChild?.id || "none");
+
+  if (!CL.contentEl.querySelector(".cl-hero") && !CL.contentEl.querySelector(".cl-section")) {
+    console.warn("[CL] Supabase returned no content for this category");
+    clRenderEmptyState("لا يوجد محتوى لهذا القسم بعد.");
+    return;
+  }
+
   clInitAnimations();
 
   document.addEventListener("boda:wishlist-updated", function () {

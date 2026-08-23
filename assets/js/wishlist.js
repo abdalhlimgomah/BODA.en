@@ -100,6 +100,13 @@ function wishlistItemMatchesCountry(item, countryCode) {
 function renderWishlist() {
   if (!window.BudaStore) return;
 
+  const loadingGrid = document.getElementById("wishlist-grid");
+  if (loadingGrid && window.BudaStore.isWishlistLoaded && !window.BudaStore.isWishlistLoaded()) {
+    loadingGrid.innerHTML =
+      '<div class="noon-muted" style="grid-column:1/-1;text-align:center;padding:48px 0;">جاري تحميل المفضلة...</div>';
+    return;
+  }
+
   const countryCode = getWishlistCountryCode();
   const allWishlist = window.BudaStore.getWishlist();
   const wishlist = allWishlist.filter(function (item) {
