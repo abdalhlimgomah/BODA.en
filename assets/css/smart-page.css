@@ -16,6 +16,12 @@
   display: flex; align-items: flex-end;
 }
 @media (min-width: 768px) { .sp-hero-slide { height: 340px; } }
+.sp-hero-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+.sp-hero-bg-m { display: none; }
+@media (max-width: 767px) {
+  .sp-hero-bg-m { display: block; }
+  .sp-hero-bg-d { display: none; }
+}
 .sp-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,.6), transparent 70%); }
 .sp-hero-content { position: relative; padding: 18px 16px 22px; color: #fff; width: 100%; }
 .sp-hero-content h2 { font-size: 1.15rem; margin: 0 0 5px; text-shadow: 0 1px 4px rgba(0,0,0,.45); }
@@ -108,13 +114,28 @@
 }
 .sp-showcase-products .sp-card img { height: 110px; }
 .sp-showcase-products .sp-card-name { min-height: 1.9em; font-size: .68rem; }
-.sp-smart-cats { display: flex; gap: 12px; overflow-x: auto; padding: 10px 14px 16px; scroll-snap-type: x mandatory; }
+.sp-smart-cats { display: flex; gap: 12px; overflow-x: auto; padding: 10px 14px 16px; scroll-snap-type: x mandatory; justify-content: center; }
 .sp-smart-cats::-webkit-scrollbar { display: none; }
 .sp-smart-cat-card {
   position: relative; flex-shrink: 0; scroll-snap-align: start;
-  width: 150px; min-height: 190px; border-radius: 16px; overflow: hidden;
+  width: 150px; min-height: var(--sp-cat-h, 190px); border-radius: var(--sp-cat-radius, 16px); overflow: hidden;
   text-decoration: none; color: #fff; display: flex; flex-direction: column;
 }
+.sp-cats-grid {
+  display: grid; overflow-x: visible; scroll-snap-type: none; justify-content: stretch;
+  grid-template-columns: repeat(var(--cols, 2), minmax(0, 1fr));
+  gap: var(--sp-cat-gap, 12px); padding: 10px 14px 16px;
+}
+@media (min-width: 1024px) { .sp-cats-grid { padding: 12px 24px 22px; } }
+.sp-cats-grid .sp-smart-cat-card { width: auto; }
+.sp-cat-shadow .sp-smart-cat-card { box-shadow: 0 10px 26px rgba(15, 23, 42, .16); }
+.sp-smart-cat-overlay { position: absolute; inset: 0; background: linear-gradient(180deg, rgba(15,23,42,.2), rgba(15,23,42,.65)); pointer-events: none; }
+.sp-pos-top .sp-smart-cat-content { margin-top: 0; margin-bottom: auto; }
+.sp-pos-center .sp-smart-cat-content { margin-top: auto; margin-bottom: auto; }
+.sp-cat-zoom .sp-smart-cat-media img { transition: transform .5s ease; }
+@media (hover: hover) { .sp-cat-zoom .sp-smart-cat-card:hover .sp-smart-cat-media img { transform: scale(1.08); } }
+.sp-cat-zoom .sp-smart-cat-card:active .sp-smart-cat-media img { transform: scale(1.06); }
+.sp-products-sub { font-size: .78rem; color: #64748b; margin: 4px 14px 0; }
 .sp-smart-cat-icon { position: absolute; top: 42px; left: 50%; transform: translateX(-50%); font-size: 42px; opacity: .9; }
 .sp-smart-cat-media { position: absolute; inset: 0; }
 .sp-smart-cat-media img { width: 100%; height: 100%; object-fit: cover; }
@@ -122,17 +143,117 @@
 .sp-smart-cat-content h3 { font-size: .85rem; margin: 0 0 3px; }
 .sp-smart-cat-content p { font-size: .68rem; margin: 0 0 8px; opacity: .85; }
 .sp-smart-cat-btn { font-size: .66rem; font-weight: 700; display: inline-flex; align-items: center; gap: 2px; background: rgba(255,255,255,.16); padding: 4px 8px; border-radius: 10px; }
-.sp-brands-row { display: flex; gap: 10px; overflow-x: auto; padding: 10px 14px 16px; scroll-snap-type: x mandatory; }
+.sp-brands-row { display: flex; gap: 14px; overflow-x: auto; padding: 10px 14px 16px; scroll-snap-type: x mandatory; justify-content: space-around; }
 .sp-brands-row::-webkit-scrollbar { display: none; }
-.sp-brand-chip {
+.sp-brand-card {
+  position: relative;
   flex-shrink: 0; scroll-snap-align: start;
-  padding: 9px 18px; border-radius: 24px;
-  background: var(--sp-primary, #6d28d9); color: #fff;
-  font-size: .8rem; font-weight: 700; text-decoration: none;
-  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
-  min-width: 110px;
+  width: 116px; height: 116px;
+  background: #fff; border: 1px solid rgba(15,23,42,.08); border-radius: 18px;
+  box-shadow: 0 2px 10px rgba(15,23,42,.07);
+  display: flex; align-items: center; justify-content: center;
+  padding: 16px; text-decoration: none;
+  transition: transform .15s ease, box-shadow .15s ease;
 }
-.sp-brand-logo {
-  width: 24px; height: 24px; border-radius: 50%; object-fit: cover;
-  background: #fff; flex-shrink: 0;
+.sp-brand-card:hover { transform: translateY(-3px); box-shadow: 0 8px 18px rgba(15,23,42,.13); }
+.sp-brand-card .sp-brand-fallback {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 2.4rem; font-weight: 800;
+  color: var(--sp-primary, #6d28d9); opacity: .3;
 }
+.sp-brand-card img {
+  position: relative; z-index: 1;
+  max-width: 100%; max-height: 100%;
+  width: auto; height: auto; object-fit: contain;
+}
+
+/* ---------- كروت المنتجات (بنفس شكل الهوم) ---------- */
+.sp-grid .noon-product-card { display: flex; flex-direction: column; }
+.sp-scroll-row .noon-product-card {
+  min-width: 175px; width: 175px; flex-shrink: 0; scroll-snap-align: start;
+}
+@media (min-width: 768px) {
+  .sp-scroll-row .noon-product-card { min-width: 215px; width: 215px; }
+}
+
+/* ---------- كروت الأقسام المصورة ---------- */
+.sp-cust-grid { display: grid; grid-template-columns: repeat(var(--mcols, 2), 1fr); gap: var(--cust-gap, 12px); padding: 12px 14px 16px; }
+@media (min-width: 768px) { .sp-cust-grid { grid-template-columns: repeat(var(--cols, 3), 1fr); gap: var(--cust-gap, 16px); } }
+@media (min-width: 1024px) {
+  .sp-cust-grid {
+    grid-template-columns: repeat(var(--cols, 3), minmax(0, 360px));
+    justify-content: center; gap: var(--cust-gap, 18px); padding: 18px;
+  }
+}
+.sp-cust-card {
+  display: block; text-decoration: none; color: inherit;
+  background: #fff; border: 1px solid rgba(15,23,42,.07);
+  box-shadow: 0 2px 10px rgba(15,23,42,.08); overflow: hidden;
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.sp-cust-card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(15,23,42,.16); }
+.sp-cust-media { position: relative; width: 100%; overflow: hidden; background-size: cover; }
+.sp-cust-media img {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; transition: transform .4s ease; display: block;
+}
+.sp-cust-card:hover .sp-cust-media img { transform: scale(1.07); }
+.sp-cust-grid.no-zoom .sp-cust-media img, .sp-cust-grid.no-zoom .sp-cust-card:hover .sp-cust-media img { transform: none !important; }
+.sp-cust-body { padding: 10px 12px 12px; text-align: center; }
+.sp-cust-body h4 { margin: 0 0 4px; font-size: var(--cust-name, .9rem); color: var(--sp-text, #1e293b); }
+.sp-cust-hint {
+  font-size: .68rem; color: var(--sp-primary, #6d28d9); font-weight: 700;
+  display: inline-flex; align-items: center; gap: 3px;
+}
+.sp-cust-hint .material-icons-outlined { font-size: 12px; }
+
+/* البنر العلوي — سلايدر رفيع بعرض الصفحة */
+.sp-cust-banner {
+  position: relative; overflow: hidden; border-radius: 14px;
+  background: var(--sp-surface, #f1f5f9); margin-bottom: 14px;
+}
+.sp-cust-banner.h-thin { height: 110px; }
+.sp-cust-banner.h-normal { height: 150px; }
+.sp-cust-banner.h-big { height: 200px; }
+@media (min-width: 768px) {
+  .sp-cust-banner.h-thin { height: 260px; }
+  .sp-cust-banner.h-normal { height: 340px; }
+  .sp-cust-banner.h-big { height: 430px; }
+}
+@media (max-width: 767px) {
+  .sp-cust-banner.h-thin { height: 72px; }
+  .sp-cust-banner.h-normal { height: 98px; }
+  .sp-cust-banner.h-big { height: 132px; }
+}
+.sp-cust-bn-track { display: flex; height: 100%; transition: transform .45s ease; }
+.sp-cust-bn-slide {
+  flex: 0 0 100%; min-width: 100%; height: 100%;
+  background-size: contain; background-position: center; background-repeat: no-repeat;
+}
+.sp-cust-bn-arrow {
+  position: absolute; top: 50%; transform: translateY(-50%); z-index: 3;
+  width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(255,255,255,.85); color: #1e293b;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25); opacity: 0;
+  transition: opacity .2s, background .2s;
+}
+.sp-cust-banner:hover .sp-cust-bn-arrow { opacity: 1; }
+.sp-cust-bn-arrow:hover { background: #fff; }
+.sp-cust-bn-arrow .material-icons-outlined { font-size: 18px; }
+.sp-cust-bn-arrow.prev { right: 8px; }
+.sp-cust-bn-arrow.next { left: 8px; }
+.sp-cust-bn-dots {
+  position: absolute; bottom: 7px; left: 0; right: 0;
+  display: flex; justify-content: center; gap: 5px; z-index: 3;
+}
+.sp-cust-bn-dot {
+  width: 7px; height: 7px; border-radius: 5px; background: rgba(255,255,255,.55);
+  cursor: pointer; transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,.35);
+}
+.sp-cust-bn-dot.active { background: #fff; width: 16px; }
+
+/* صندوق الكروت الملوّن */
+.sp-cust-box { overflow: hidden; box-shadow: 0 10px 26px rgba(15,23,42,.16); }
+.sp-cust-box .sp-cust-grid { padding: 14px; }
