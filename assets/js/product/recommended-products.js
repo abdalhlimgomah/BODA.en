@@ -44,7 +44,7 @@
 
   function buildCard(product) {
     var name = product.name || "منتج";
-    var images = U.getProductImages(product) || [];
+    var images = U.getProductImages(product, { width: 420 }) || [];
     var img = images[0] || U.fallbackImage();
     var rp = resolvePrice(product);
     var id = String(product.id);

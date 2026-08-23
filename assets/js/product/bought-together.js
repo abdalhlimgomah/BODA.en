@@ -35,7 +35,7 @@
       if (i > 0) html += '<div class="pdp-bt-plus">+</div>';
       var name = item.product.name || "منتج";
       var price = btResolvePrice(item.product);
-      var img = (U.getProductImages(item.product) || [])[0] || U.fallbackImage();
+      var img = (U.getProductImages(item.product, { width: 420 }) || [])[0] || U.fallbackImage();
       var pid = String(item.product.id || item.product.product_id || item.product.sku || "");
       html += '<div class="pdp-bt-item" data-bt-index="' + i + '" data-bt-product="' + pid + '">';
       html += '<div class="pdp-bt-item-imgwrap"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + img + '" alt="' + U.escapeHtml(name) + '" loading="lazy" decoding="async">';
@@ -55,7 +55,7 @@
     html += '</div>';
 
     // Product gallery images stacked vertically (up to 3)
-    var allImages = U.getProductImages(vm.raw) || [];
+    var allImages = U.getProductImages(vm.raw, { width: 420 }) || [];
     var galleryImages = allImages.slice(0, 3);
     if (galleryImages.length > 1) {
       html += '<div class="pdp-bt-gallery">';

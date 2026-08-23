@@ -43,6 +43,13 @@
        if (extraOpts.length) opts.otherOptions = extraOpts;
      }
      if (window.BudaStore) {
+       // Prefer the freshest store copy at the moment that matters (cart
+       // accuracy): the painted view-model may be a stale-while-revalidate
+       // snapshot refreshed in the background after first paint.
+       if (vm.id && typeof window.BudaStore.getProductById === "function") {
+         var fresh = window.BudaStore.getProductById(vm.id);
+         if (fresh && fresh.name) vm.raw = Object.assign({}, vm.raw, fresh);
+       }
        window.BudaStore.addToCart(vm.raw, qty, opts);
        window.BudaStore.updateCartCount();
        if (window.BudaUI) window.BudaUI.refreshShell();
@@ -296,12 +303,26 @@
   });
   window.addEventListener("unhandledrejection", function (e) {
     console.error("[PDP] Unhandled rejection:", e.reason);
+    if (e.reason && e.reason.stack) console.error("[PDP] Rejection stack:", e.reason.stack);
     S.revealAll();
   });
 
   async function init() {
     document.body.classList.remove("product-detail-loading");
     document.body.classList.add("pdp-shell-active");
+
+    var urlId = U.getQueryParam("id");
+
+    // Fire every id-independent query immediately. They used to run strictly
+    // AFTER resolveProduct() even though they only need the URL id.
+    var ratingsPromise = D.fetchRatings(urlId);
+    var poolPromise = D.getAllProducts()["catch"](function () { return []; });
+    var sellerGenPromise = null;
+    if (urlId && String(urlId).indexOf("taager_") === 0 && global.PDP.SellerGenerator) {
+      // Taager records never carry real seller stats, so the generator path
+      // is guaranteed — prestart it in parallel instead of after resolve.
+      sellerGenPromise = global.PDP.SellerGenerator.resolve(urlId)["catch"](function () { return null; });
+    }
 
     var product = await D.resolveProduct();
     if (!product) {
@@ -313,10 +334,10 @@
       }
       return;
     }
-    var reviews = await D.fetchRatings(product.id);
+    var reviews = await ratingsPromise;
     var seller = null;
     try {
-      seller = await D.resolveSeller(product);
+      seller = await D.resolveSeller(product, sellerGenPromise);
     } catch (e) {
       console.warn("[PDP] seller resolve failed", e);
       seller = null;
@@ -421,8 +442,9 @@
     S.reveal(document.querySelector("[data-pdp-scope=buybox]"));
     setTimeout(function () { S.reveal(document.querySelector("[data-pdp-scope=tabs]")); S.reveal(document.querySelector("[data-pdp-scope=reviews]")); }, 80);
 
-    // Load cross-sell pool in background — reveal skeletons when done
-    D.getAllProducts().then(function (list) {
+    // Cross-sell pool was prestarted in parallel at init — consume it here
+    // and reveal skeletons when done.
+    poolPromise.then(function (list) {
       allProducts = list;
       renderCarousels();
       renderBoughtTogether();

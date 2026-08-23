@@ -104,6 +104,28 @@
     return norm ? Object.assign({}, record, norm) : record;
   }
 
+  /**
+   * A stored copy is "complete" enough to paint the page without any
+   * network wait: name, a positive price, and at least one real image
+   * field. Checks RAW fields only — getProductImages() always returns
+   * the fallback placeholder, so its length is meaningless here.
+   */
+  function looksComplete(product) {
+    if (!product || !product.name) return false;
+    var price = Number(
+      product.price || product.currentPrice || product.finalPrice ||
+      product.price_after_discount || product.discountPrice
+    ) || 0;
+    if (!(price > 0)) return false;
+    if (Array.isArray(product.images) && product.images.length) return true;
+    return Boolean(product.image || product.image1 || product.image_url || product.img);
+  }
+
+  /** Refreshes the store cache for a painted product without blocking UI. */
+  function refreshProductInBackground(id) {
+    loadRemoteProduct(id)["catch"](function () { /* store keeps the painted copy */ });
+  }
+
   async function resolveProduct() {
     var id = utils().getQueryParam("id");
     var product = null;
@@ -111,11 +133,23 @@
     var stored = readStoredProduct(id);
     if (stored) product = product ? Object.assign({}, product, stored) : stored;
     if (id && String(id).indexOf("taager_") === 0) {
-      var remote = await loadRemoteProduct(id);
-      if (remote) product = remote;
-    } else if (id && (!product || utils().getProductImages(product).length <= 1 || (product && !product.raw_data))) {
-      var remote2 = await loadRemoteProduct(id);
-      if (remote2) product = product ? Object.assign({}, product, remote2) : remote2;
+      if (looksComplete(product)) {
+        // Stale-while-revalidate: paint instantly from the copy the visitor
+        // just clicked in the listing; refresh the store cache in background.
+        refreshProductInBackground(id);
+      } else {
+        var remote = await loadRemoteProduct(id);
+        if (remote) product = remote;
+      }
+    } else if (id) {
+      var imageCount = product ? utils().getProductImages(product).length : 0;
+      if (!product || !looksComplete(product) || imageCount <= 1) {
+        // Thin/missing record: block on the authoritative lookup as before.
+        var remote2 = await loadRemoteProduct(id);
+        if (remote2) product = product ? Object.assign({}, product, remote2) : remote2;
+      } else {
+        refreshProductInBackground(id);
+      }
     }
     if (!product && !id && global.BudaStore && global.BudaStore.getAllProducts) {
       var all = Object.values(global.BudaStore.getAllProducts() || {});
@@ -551,8 +585,12 @@
     };
   }
 
-  /** Async seller resolution — checks pool, assigns profile, returns seller object. */
-  async function resolveSeller(product) {
+  /**
+   * Async seller resolution — checks pool, assigns profile, returns seller object.
+   * `presolved`: optional promise started earlier in parallel (index.js) when the
+   * generator path was already known to be needed; awaited before a redundant call.
+   */
+  async function resolveSeller(product, presolved) {
     if (!product || !product.id) return buildSeller(product);
     var sellerField = product.seller || product.vendor;
     var hasSellerStats = (
@@ -562,7 +600,13 @@
     );
     if (hasSellerStats || (sellerField && !isGenericSeller(sellerField))) return buildSeller(product);
     var gen = global.PDP && global.PDP.SellerGenerator;
-    if (gen && gen.resolve) return await gen.resolve(product.id);
+    if (gen && gen.resolve) {
+      if (presolved && typeof presolved.then === "function") {
+        var pre = await presolved;
+        if (pre) return pre;
+      }
+      return await gen.resolve(product.id);
+    }
     return buildSeller(product);
   }
 
@@ -662,7 +706,7 @@
         if (taagerSizes.length > 1) { raw = taagerSizes; product._taagerMultiSizes = true; }
         else { product._needsTaagerSizes = true; }
       }
-      if (!Array.isArray(raw) || !raw.length && taagerRaw && taagerRaw.attributes && Array.isArray(taagerRaw.attributes)) {
+      if ((!Array.isArray(raw) || !raw.length) && taagerRaw && Array.isArray(taagerRaw.attributes)) {
         for (var bi = 0; bi < taagerRaw.attributes.length; bi++) {
           var b = taagerRaw.attributes[bi];
           var bName = String(b && (b.name || b.attr || b.key || "")).toLowerCase();

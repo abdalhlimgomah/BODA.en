@@ -59,10 +59,25 @@
     return getImagePath(s);
   }
 
-  function getProductImages(product) {
+  /**
+   * Extracts product image URLs. Optional opts.width routes REMOTE images
+   * through the shared resizer BEFORE getImagePath processing, so card-sized
+   * slots request small WebP files instead of full-size originals. The main
+   * gallery must keep calling this WITHOUT opts (production /api/img w=800).
+   */
+  function getProductImages(product, opts) {
+    var cardWidth = Number(opts && opts.width) || 0;
+    function processCandidate(raw) {
+      var s = String(raw == null ? "" : raw).trim();
+      if (!s) return "";
+      if (cardWidth && global.BudaStore && typeof global.BudaStore.getResizedImageUrl === "function") {
+        s = global.BudaStore.getResizedImageUrl(s, cardWidth) || s;
+      }
+      return safeImage(s);
+    }
     if (global.BudaStore && typeof global.BudaStore.getProductImages === "function") {
       var list = global.BudaStore.getProductImages(product) || [];
-      var out = list.map(safeImage).filter(Boolean);
+      var out = list.map(processCandidate).filter(Boolean);
       var seen = {};
       var uniq = [];
       out.forEach(function (u) { if (!seen[u]) { seen[u] = true; uniq.push(u); } });
@@ -77,9 +92,9 @@
     });
     if (Array.isArray(product.images)) candidates = candidates.concat(product.images.map(String));
     if (!candidates.length) return [fallbackImage()];
-    var seen = {}, uniq = [];
-    candidates.forEach(function (u) { var key = u.toUpperCase(); if (!seen[key]) { seen[key] = true; uniq.push(u); } });
-    return uniq.map(safeImage).filter(Boolean);
+    var seen2 = {}, uniq2 = [];
+    candidates.forEach(function (u) { var key = u.toUpperCase(); if (!seen2[key]) { seen2[key] = true; uniq2.push(u); } });
+    return uniq2.map(processCandidate).filter(Boolean);
   }
 
   function starsMarkup(rating, size) {
