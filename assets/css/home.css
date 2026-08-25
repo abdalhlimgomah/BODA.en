@@ -1276,6 +1276,8 @@ body.home-loading .buda-footer, body.home-hydrating .buda-footer { display: none
   .buda-footer__copyright { font-size: var(--text-caption); color: #a78bfa; }
   .buda-footer__payments { display: flex; align-items: center; gap: 12px; font-size: var(--text-caption); color: #a78bfa; }
   .buda-footer__payments svg { color: #a78bfa; }
+  #google-customer-reviews-badge { margin-left: 16px; }
+  #google-customer-reviews-badge .gri-widget { transform: scale(0.85); transform-origin: right center; }
 }
 
 /* Large desktop footer */
