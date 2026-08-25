@@ -40,9 +40,11 @@ Allow: /pages/landing.html
 Allow: /pages/seller.html
 Allow: /pages/offers.html
 Allow: /pages/offer.html
+Allow: /api/dynamic-sitemap/
 
 Sitemap: https://budoq.com/sitemap.xml
 Sitemap: https://budoq.com/sitemap-products.xml
+Sitemap: https://budoq.com/api/dynamic-sitemap/feed.xml
 
 # BudoQ - SEO Optimized
 # Last updated: 2026-08-26
