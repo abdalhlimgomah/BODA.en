@@ -29,7 +29,7 @@
 
   SEOUtils.getSiteUrl = function () {
     var url = window.location.origin;
-    if (url === "null" || !url) url = "https://budoq.vercel.app";
+    if (url === "null" || !url) url = "https://budoq.com";
     return url.replace(/\/+$/, "");
   };
 

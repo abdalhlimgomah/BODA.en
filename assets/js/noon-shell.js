@@ -37,10 +37,10 @@ function ensureSiteIdentity() {
     "@type": "WebSite",
     "name": "BudoQ",
     "alternateName": "BudoQ",
-    "url": "https://budoq.vercel.app/",
+    "url": "https://budoq.com/",
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://budoq.vercel.app/pages/search.html?q={search_term_string}",
+      "target": "https://budoq.com/pages/search.html?q={search_term_string}",
       "query-input": "required name=search_term_string"
     }
   });

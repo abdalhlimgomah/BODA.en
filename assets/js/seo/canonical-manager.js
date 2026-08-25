@@ -62,7 +62,7 @@
   };
 
   CanonicalManager.enforcePreferredDomain = function (preferred) {
-    preferred = preferred || "https://budoq.vercel.app";
+    preferred = preferred || "https://budoq.com";
     var host = window.location.hostname;
     var preferredHost = preferred.replace(/https?:\/\//, "");
     if (host === preferredHost || host === "localhost" || host === "127.0.0.1") return;
