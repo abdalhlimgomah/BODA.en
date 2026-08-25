@@ -4,6 +4,12 @@
       "source": "/",
       "destination": "/pages/home.html",
       "permanent": true
+    },
+    {
+      "source": "/:path((?!api/).*)",
+      "has": [{ "type": "host", "value": "budoq.vercel.app" }],
+      "destination": "https://budoq.com/:path",
+      "permanent": true
     }
   ],
   "rewrites": [

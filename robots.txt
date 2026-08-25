@@ -8,8 +8,24 @@ Disallow: /pages/empty-cart.html
 Disallow: /pages/logout-confirmation.html
 Disallow: /pages/delete-account.html
 Disallow: /pages/edit-account.html
+Disallow: /pages/addresses.html
+Disallow: /pages/my-orders.html
+Disallow: /pages/order-tracking.html
+Disallow: /pages/wishlist.html
+Disallow: /pages/invoice.html
+Disallow: /pages/referral-dashboard.html
+Disallow: /pages/admin-categories.html
+Disallow: /pages/ahsab.html
+Disallow: /pages/analytics.html
+Disallow: /pages/content-manager.html
+Disallow: /pages/seo-dashboard.html
+Disallow: /pages/merchant-center.html
+Disallow: /pages/mobile-diag.html
+Disallow: /pages/splash.html
+Disallow: /pages/error-402.html
 Disallow: /assets/
 Disallow: /tmp/
+Disallow: /api/
 
 Allow: /assets/js/
 Allow: /assets/css/
@@ -24,13 +40,9 @@ Allow: /pages/landing.html
 Allow: /pages/seller.html
 Allow: /pages/offers.html
 Allow: /pages/offer.html
-Allow: /api/merchant-feed/feed.xml
 
-Sitemap: https://budoq.vercel.app/api/merchant-feed/feed.xml
-
-Sitemap: https://budoq.vercel.app/sitemap.xml
-Sitemap: https://budoq.vercel.app/sitemap-products.xml
+Sitemap: https://budoq.com/sitemap.xml
+Sitemap: https://budoq.com/sitemap-products.xml
 
 # BudoQ - SEO Optimized
-# Last updated: 2026-07-19
-# Content SEO Phase - Blog, Knowledge Center, Guides, Comparisons, Landing Pages
+# Last updated: 2026-08-26

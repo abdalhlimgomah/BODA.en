@@ -1,6 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" />
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>تم الطلب - BudoQ</title>
@@ -18,8 +19,8 @@
 <link rel="apple-touch-icon" href="../assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="../assets/icons/site.webmanifest">
 <meta name="theme-color" content="#FFD500">
-  <meta property="og:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
-  <meta name="twitter:image" content="https://budoq.vercel.app/assets/images/og-image.png" />
+  <meta property="og:image" content="https://budoq.com/assets/images/og-image.png" />
+  <meta name="twitter:image" content="https://budoq.com/assets/images/og-image.png" />
 </head>
 <body class="app-shell app-shell--success">
   <main class="os-main">
@@ -74,7 +75,48 @@
   <script src="../assets/js/taager-integration.js?v=20260810"></script>
   <script src="../assets/js/noon-shell.js?v=20260817"></script>
   <script src="../assets/js/store.js?v=20260822b"></script>
-  <script src="../assets/js/order-success.js?v=20260821"></script>
+  <script src="../assets/js/order-success.js?v=20260828"></script>
   <script src="../assets/js/seo/analytics-manager.js"></script>
+
+  <script src="https://apis.google.com/js/platform.js?onload=renderOptIn" async defer></script>
+  <script>
+    window.renderOptIn = function() {
+      window.gapi.load('surveyoptin', function() {
+        var orderData = null;
+        try {
+          var raw = sessionStorage.getItem("orderSuccessData");
+          if (raw) orderData = JSON.parse(raw);
+        } catch (e) {}
+
+        if (!orderData || !orderData.fields) return;
+
+        var fields = orderData.fields || {};
+        var cart = orderData.cart || [];
+        var countryCode = orderData.country_code || "EG";
+
+        var d = new Date();
+        d.setDate(d.getDate() + 7);
+        var yyyy = d.getFullYear();
+        var mm = String(d.getMonth() + 1).padStart(2, "0");
+        var dd = String(d.getDate()).padStart(2, "0");
+
+        var products = cart.map(function(item) {
+          var gtin = item.gtin || item.ean || item.upc || "";
+          if (gtin) return { "gtin": String(gtin) };
+          return null;
+        }).filter(Boolean);
+
+        window.gapi.surveyoptin.render({
+          "merchant_id": 5844148094,
+          "order_id": fields.order_id || ("BUDQ-" + Date.now()),
+          "email": fields.email || "",
+          "delivery_country": countryCode,
+          "estimated_delivery_date": yyyy + "-" + mm + "-" + dd,
+          "products": products
+        });
+      });
+    }
+  </script>
 </body>
 </html>
+

@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
-const SITE_URL = Deno.env.get("SITE_URL") || "https://budoq.vercel.app";
+const SITE_URL = Deno.env.get("SITE_URL") || "https://budoq.com";
 const FEED_SECRET = Deno.env.get("MERCHANT_FEED_SECRET") || "";
 
 // Rate limiting
@@ -71,13 +71,18 @@ function getAllImages(p: Record<string, unknown>): string[] {
       if (typeof img === "string" && img.startsWith("http") && !result.includes(img)) result.push(img);
     }
   }
+  for (let i = 1; i <= 8; i++) {
+    const img = p[`image${i}`];
+    if (typeof img === "string" && (img as string).startsWith("http") && !result.includes(img)) result.push(img);
+  }
   return result;
 }
 
 function getAvailability(p: Record<string, unknown>): string {
-  const stock = Number(p.stock || p.quantity || p.inventory || 0);
+  if (p.stock_status === "out_of_stock") return "out_of_stock";
+  if (p.stock_status === "preorder") return "preorder";
+  const stock = Number(p.stock || 0);
   if (stock > 0) return "in_stock";
-  if (p.availability === "preorder") return "preorder";
   return "out_of_stock";
 }
 
@@ -94,24 +99,17 @@ function buildItem(p: Record<string, unknown>): string {
   if (!id) return "";
 
   const name = String(p.name || "منتج");
-  const title = String(p.seo_title || name);
-  const desc = String(p.meta_description || p.description || p.short_description || title);
+  const title = name;
+  const desc = String(p.description || p.quick_details || title);
   const link = `${SITE_URL}/pages/product.html?id=${encodeURIComponent(id)}`;
   const image = getFirstImage(p);
-  const price = Number(p.currentPrice || p.price || 0);
-  const salePrice = Number(p.sale_price || p.discount_price || 0);
+  const price = Number(p.price || 0);
+  const originalPrice = Number(p.original_price || 0);
   const currency = "EGP";
   const availability = getAvailability(p);
-  const brand = String(p.brand || p.seller_name || p.seller || "Buda");
-  const gtin = String(p.gtin || p.ean || p.upc || "");
-  const mpn = String(p.mpn || p.sku || id);
+  const brand = String(p.brand || p.seller || "BudoQ");
   const googleCategory = getGoogleCategory(p);
-  const productType = String(p.category || p.main_category || "");
-  const shippingWeight = p.weight ? `${p.weight} kg` : "";
-  const color = String(p.color || "");
-  const size = String(p.size || "");
-  const gender = String(p.gender || "");
-  const ageGroup = String(p.age_group || "");
+  const productType = String(p.category || "");
 
   let xml = `    <item>\n`;
   xml += `      <g:id>${escXml(id)}</g:id>\n`;
@@ -121,20 +119,14 @@ function buildItem(p: Record<string, unknown>): string {
   if (image) xml += `      <g:image_link>${escXml(image)}</g:image_link>\n`;
   xml += `      <g:availability>${availability}</g:availability>\n`;
   xml += `      <g:price>${price.toFixed(2)} ${currency}</g:price>\n`;
-  if (salePrice > 0 && salePrice < price) {
-    xml += `      <g:sale_price>${salePrice.toFixed(2)} ${currency}</g:sale_price>\n`;
+  if (originalPrice > 0 && originalPrice > price) {
+    xml += `      <g:sale_price>${price.toFixed(2)} ${currency}</g:sale_price>\n`;
   }
   xml += `      <g:condition>new</g:condition>\n`;
   xml += `      <g:brand>${escXml(brand)}</g:brand>\n`;
-  if (gtin) xml += `      <g:gtin>${escXml(gtin)}</g:gtin>\n`;
-  if (mpn) xml += `      <g:mpn>${escXml(mpn)}</g:mpn>\n`;
+  xml += `      <g:mpn>${escXml(id)}</g:mpn>\n`;
   if (googleCategory) xml += `      <g:google_product_category>${escXml(googleCategory)}</g:google_product_category>\n`;
   if (productType) xml += `      <g:product_type>${escXml(productType)}</g:product_type>\n`;
-  if (shippingWeight) xml += `      <g:shipping_weight>${escXml(shippingWeight)}</g:shipping_weight>\n`;
-  if (color) xml += `      <g:color>${escXml(color)}</g:color>\n`;
-  if (size) xml += `      <g:size>${escXml(size)}</g:size>\n`;
-  if (gender) xml += `      <g:gender>${escXml(gender)}</g:gender>\n`;
-  if (ageGroup) xml += `      <g:age_group>${escXml(ageGroup)}</g:age_group>\n`;
 
   const images = getAllImages(p);
   images.slice(1, 10).forEach((img) => {
@@ -144,36 +136,33 @@ function buildItem(p: Record<string, unknown>): string {
   xml += `      <g:shipping>\n`;
   xml += `        <g:country>EG</g:country>\n`;
   xml += `        <g:service>Standard</g:service>\n`;
-  xml += `        <g:price>0.00 EGP</g:price>\n`;
+  xml += `        <g:price>50.00 EGP</g:price>\n`;
   xml += `      </g:shipping>\n`;
 
-  const idExists = (gtin || mpn) ? "TRUE" : "FALSE";
-  xml += `      <g:identifier_exists>${idExists}</g:identifier_exists>\n`;
+  xml += `      <g:identifier_exists>FALSE</g:identifier_exists>\n`;
   xml += `    </item>\n`;
   return xml;
 }
 
 async function generateFeed(sb: ReturnType<typeof createClient>): Promise<string> {
+  const TAAGER_COLUMNS = "id,name,description,quick_details,price,original_price,image,images,image1,image2,image3,image4,image5,image6,image7,image8,stock,stock_status,brand,seller,category,is_active";
   const { data: products, error } = await sb
-    .from("products")
-    .select("*")
+    .from("taager_products")
+    .select(TAAGER_COLUMNS)
+    .eq("is_active", true)
+    .gt("price", 0)
     .limit(10000);
 
   if (error) throw error;
 
-  const activeProducts = (products || []).filter((p: Record<string, unknown>) => {
-    const price = Number(p.currentPrice || p.price || 0);
-    return p.is_active !== false && price > 0;
-  });
-
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
   xml += `<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">\n`;
   xml += `  <channel>\n`;
-  xml += `    <title>Buda - Product Feed</title>\n`;
+  xml += `    <title>BudoQ - Product Feed</title>\n`;
   xml += `    <link>${SITE_URL}/</link>\n`;
-  xml += `    <description>Google Shopping Product Feed for Buda</description>\n`;
+  xml += `    <description>Google Shopping Product Feed for BudoQ</description>\n`;
 
-  for (const p of activeProducts) {
+  for (const p of products || []) {
     xml += buildItem(p);
   }
 
@@ -208,9 +197,9 @@ serve(async (req) => {
   // Health / Stats
   if (base === "/stats" || base === "/" || base === "") {
     const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const { data: products } = await sb.from("products").select("id,currentPrice,price,is_active").limit(10000);
+    const { data: products } = await sb.from("taager_products").select("id,price,stock,is_active").limit(10000);
     const active = (products || []).filter((p: Record<string, unknown>) => {
-      const price = Number(p.currentPrice || p.price || 0);
+      const price = Number(p.price || 0);
       return p.is_active !== false && price > 0;
     });
     return new Response(JSON.stringify({

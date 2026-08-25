@@ -1,11 +1,13 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
+  <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>مقال - مدونة Buda</title>
+  <meta name="description" content="اقرأ مقالات ومدونة BudoQ - محتوى تعليمي ومفيد حول أفضل المنتجات ونصائح الشراء وأحدث العروض والخصومات." />
   <meta name="robots" content="index, follow">
-  <link rel="canonical" href="">
+  <link rel="canonical" href="https://budoq.com/pages/blog/post.html">
   <meta property="og:locale" content="ar_AR">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" type="image/png" href="../../assets/icons/favicon.png">
@@ -58,7 +60,8 @@
         var dateStr = post.published_at || post.created_at || '';
         var readTime = post.reading_time || Math.max(1, Math.ceil((post.content || '').length / 1000));
 
-        var html = '<header class="post-header">';
+        var html = '<header class="post-header">
+  <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" />';
         if (cat.name) html += '<span class="post-category" style="background:' + (cat.color || '#1a2530') + '20;color:' + (cat.color || '#1a2530') + '">' + cat.name + '</span>';
         html += '<h1>' + BlogEngine.escHtml(post.title) + '</h1>';
         html += '<div class="post-meta">';

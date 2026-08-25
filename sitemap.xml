@@ -1,168 +1,249 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://budoq.vercel.app/</loc>
+    <loc>https://budoq.com/</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>1.0</priority>
     <changefreq>daily</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/home.html</loc>
+    <loc>https://budoq.com/pages/home.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>1.0</priority>
     <changefreq>daily</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/products.html</loc>
+    <loc>https://budoq.com/pages/products.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.9</priority>
     <changefreq>daily</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/category-landing.html</loc>
+    <loc>https://budoq.com/pages/category-landing.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.9</priority>
     <changefreq>daily</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/brand-landing.html</loc>
+    <loc>https://budoq.com/pages/brand-landing.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/signin/login.html</loc>
+    <loc>https://budoq.com/pages/signin/login.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/signup/index.html</loc>
+    <loc>https://budoq.com/pages/signup/index.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.7</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/about.html</loc>
+    <loc>https://budoq.com/pages/about.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/contact.html</loc>
+    <loc>https://budoq.com/pages/contact.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/faq.html</loc>
+    <loc>https://budoq.com/pages/faq.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/shipping.html</loc>
+    <loc>https://budoq.com/pages/shipping.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/support.html</loc>
+    <loc>https://budoq.com/pages/support.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.6</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/returns.html</loc>
+    <loc>https://budoq.com/pages/returns.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.5</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/privacy.html</loc>
+    <loc>https://budoq.com/pages/privacy.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.5</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/complaints.html</loc>
+    <loc>https://budoq.com/pages/complaints.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.5</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/offers.html</loc>
+    <loc>https://budoq.com/pages/offers.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/seller.html</loc>
+    <loc>https://budoq.com/pages/seller.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.6</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/merchant-center.html</loc>
+    <loc>https://budoq.com/pages/merchant-center.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.5</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/wishlist.html</loc>
+    <loc>https://budoq.com/pages/wishlist.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.4</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/search.html</loc>
+    <loc>https://budoq.com/pages/search.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.6</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/checkout.html</loc>
+    <loc>https://budoq.com/pages/checkout.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.5</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/my-orders.html</loc>
+    <loc>https://budoq.com/pages/my-orders.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.5</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/ahsab.html</loc>
+    <loc>https://budoq.com/pages/ahsab.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.5</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/product-listing.html</loc>
+    <loc>https://budoq.com/pages/product-listing.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/contest.html</loc>
+    <loc>https://budoq.com/pages/contest.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.5</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/blog/</loc>
+    <loc>https://budoq.com/pages/blog/</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.9</priority>
     <changefreq>daily</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/knowledge-center.html</loc>
+    <loc>https://budoq.com/pages/knowledge-center.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.9</priority>
     <changefreq>daily</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/guide.html</loc>
+    <loc>https://budoq.com/pages/guide.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/comparison.html</loc>
+    <loc>https://budoq.com/pages/comparison.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.7</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/landing.html</loc>
+    <loc>https://budoq.com/pages/landing.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.8</priority>
     <changefreq>weekly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/order-tracking.html</loc>
+    <loc>https://budoq.com/pages/order-tracking.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.4</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/referral-dashboard.html</loc>
+    <loc>https://budoq.com/pages/referral-dashboard.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.3</priority>
     <changefreq>monthly</changefreq>
   </url>
   <url>
-    <loc>https://budoq.vercel.app/pages/content-manager.html</loc>
+    <loc>https://budoq.com/pages/content-manager.html</loc>
+    <lastmod>2026-08-26</lastmod>
     <priority>0.1</priority>
     <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.com/pages/blog/post.html</loc>
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.com/pages/section.html</loc>
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.com/pages/sections.html</loc>
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.com/pages/category.html</loc>
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.8</priority>
+    <changefreq>daily</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.com/pages/offer.html</loc>
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.7</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.com/pages/product.html</loc>
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.9</priority>
+    <changefreq>daily</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.com/pages/product-reviews.html</loc>
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.6</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+  <url>
+    <loc>https://budoq.com/pages/product-review-all.html</loc>
+    <lastmod>2026-08-26</lastmod>
+    <priority>0.6</priority>
+    <changefreq>weekly</changefreq>
   </url>
 </urlset>

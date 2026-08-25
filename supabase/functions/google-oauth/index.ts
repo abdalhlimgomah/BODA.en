@@ -69,7 +69,7 @@ serve(async (req: Request) => {
         code,
         client_id: clientId,
         client_secret: clientSecret,
-        redirect_uri: redirect_uri || "https://budoq.vercel.app/pages/signin/login.html",
+        redirect_uri: redirect_uri || "https://budoq.com/pages/signin/login.html",
         grant_type: "authorization_code",
       }),
     });
