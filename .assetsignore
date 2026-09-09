@@ -1,1 +1,3 @@
-node_modules .git .wrangler
+node_modules
+.git
+.wrangler
