@@ -1,0 +1,62 @@
+/**
+ * Error State Component
+ * Buda Design System v2.0
+ */
+
+.buda-error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-64) var(--space-24);
+  min-height: calc(var(--space-96) * 4);
+}
+
+.buda-error-state__illustration {
+  margin-bottom: var(--space-32);
+  width: calc(var(--space-96) * 2);
+  max-width: 100%;
+}
+
+.buda-error-state__code {
+  font-size: calc(var(--text-heading-xl) * 2);
+  font-weight: var(--weight-black);
+  color: var(--color-primary);
+  background: var(--color-primary-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: var(--space-16);
+  line-height: 1;
+}
+
+.buda-error-state__title {
+  font-size: var(--text-heading-lg);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-16);
+}
+
+.buda-error-state__subtitle {
+  font-size: var(--text-body-md);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-40);
+  max-width: calc(var(--space-96) * 5);
+}
+
+.buda-error-state__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Error Code Variants */
+.buda-error-state--403 {}
+.buda-error-state--404 {}
+.buda-error-state--410 {}
+.buda-error-state--500 {}
+.buda-error-state--offline {}
+.buda-error-state--maintenance {}
+.buda-error-state--server-error {}

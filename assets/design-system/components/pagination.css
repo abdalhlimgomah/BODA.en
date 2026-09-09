@@ -1,0 +1,97 @@
+/* 
+ * Buda Design System v2.0 - Pagination Component
+ * Path: assets/design-system/components/pagination.css
+ */
+
+.buda-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-primary, inherit);
+}
+
+.buda-pagination__list {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8, 8px);
+  list-style: none;
+  padding: var(--space-0, 0);
+  margin: var(--space-0, 0);
+}
+
+/* Item Wrapper */
+.buda-pagination__item {
+  display: flex;
+}
+
+/* Link / Button */
+.buda-pagination__link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  min-width: var(--space-40, 40px);
+  height: var(--space-40, 40px);
+  padding-inline: var(--space-8, 8px);
+  border-radius: var(--radius-md, 8px);
+  border: var(--border-width-sm, 1px) solid var(--color-border-subtle, #e5e7eb);
+  background-color: var(--color-surface-primary, #ffffff);
+  color: var(--color-text-primary, #111827);
+  font-size: var(--font-size-sm, 0.875rem);
+  font-weight: var(--font-weight-medium, 500);
+  text-decoration: none;
+  cursor: pointer;
+  outline: none;
+  transition: opacity var(--duration-fast, 150ms) ease, transform var(--duration-fast, 150ms) ease;
+}
+
+.buda-pagination__link:hover:not(:disabled) {
+  opacity: var(--opacity-hover, 0.8);
+}
+
+.buda-pagination__link:active:not(:disabled) {
+  transform: scale(var(--scale-active, 0.95));
+}
+
+.buda-pagination__link:focus-visible {
+  box-shadow: 0 0 0 var(--border-width-lg, 2px) var(--color-focus-ring, #007bff);
+}
+
+.buda-pagination__link:disabled,
+.buda-pagination__link[aria-disabled="true"] {
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+/* Active Page */
+.buda-pagination__link[aria-current="page"] {
+  background: var(--gradient-primary, linear-gradient(135deg, var(--color-primary), var(--color-info)));
+  color: var(--color-text-inverse, #ffffff);
+  border-color: transparent;
+}
+
+/* Ellipsis */
+.buda-pagination__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--space-40, 40px);
+  height: var(--space-40, 40px);
+  color: var(--color-text-muted, #6b7280);
+  font-size: var(--font-size-md, 1rem);
+  user-select: none;
+}
+
+/* Dark Theme Adjustments */
+[data-theme="dark"] .buda-pagination__link:not([aria-current="page"]) {
+  background-color: var(--color-surface-dark, #1f2937);
+  border-color: var(--color-border-dark, #374151);
+  color: var(--color-text-inverse, #f9fafb);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buda-pagination__link {
+    transition: none;
+  }
+}

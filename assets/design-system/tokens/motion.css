@@ -1,0 +1,61 @@
+/* ============================================
+   Buda Design System v2.0 — Motion Tokens
+   GPU-Accelerated Animation System
+   Only opacity & transform — No width/height/top/left
+   ============================================ */
+
+:root {
+  /* ─── Durations ─── */
+  --duration-instant: 100ms;
+  --duration-fast:    150ms;
+  --duration-default: 220ms;
+  --duration-slow:    320ms;
+  --duration-slower:  480ms;
+
+  /* ─── Component-specific Durations ─── */
+  --duration-fade:    200ms;
+  --duration-scale:   220ms;
+  --duration-slide:   240ms;
+  --duration-modal:   260ms;
+  --duration-drawer:  280ms;
+
+  /* ─── Easing Curves ─── */
+  --ease-out:       cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in:        cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out:    cubic-bezier(0.45, 0, 0.55, 1);
+  --ease-spring:    cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-bounce:    cubic-bezier(0.68, -0.55, 0.27, 1.55);
+  --ease-smooth:    cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* ─── Presets ─── */
+  --transition-fast:    var(--duration-fast)    var(--ease-out);
+  --transition-default: var(--duration-default) var(--ease-out);
+  --transition-slow:    var(--duration-slow)    var(--ease-out);
+  --transition-spring:  var(--duration-default) var(--ease-spring);
+  --transition-bounce:  var(--duration-slow)    var(--ease-bounce);
+
+  /* ─── Hover Presets ─── */
+  --hover-lift:   translateY(-4px);
+  --hover-scale:  scale(1.01);
+  --hover-grow:   scale(1.06);
+  --press-scale:  scale(0.97);
+
+  /* ─── Autoplay ─── */
+  --hero-autoplay: 5000ms;
+}
+
+/* ─── Reduced Motion Support ─── */
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --duration-instant: 0ms;
+    --duration-fast:    0ms;
+    --duration-default: 0ms;
+    --duration-slow:    0ms;
+    --duration-slower:  0ms;
+    --duration-fade:    0ms;
+    --duration-scale:   0ms;
+    --duration-slide:   0ms;
+    --duration-modal:   0ms;
+    --duration-drawer:  0ms;
+  }
+}

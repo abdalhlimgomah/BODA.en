@@ -1,0 +1,95 @@
+/* 
+ * Buda Design System v2.0 - Badge Component
+ * Path: assets/design-system/components/badge.css
+ */
+
+.buda-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  font-family: var(--font-primary, inherit);
+  font-size: var(--font-size-xs, 0.75rem);
+  font-weight: var(--font-weight-bold, 700);
+  line-height: var(--line-height-none, 1);
+  padding-block: var(--space-4, 4px);
+  padding-inline: var(--space-8, 8px);
+  border-radius: var(--radius-pill, 9999px);
+  color: var(--color-text-inverse, #ffffff);
+  background-color: var(--color-surface-neutral, #e5e7eb);
+  white-space: nowrap;
+  vertical-align: middle;
+  transition: opacity var(--duration-fast, 150ms) ease, transform var(--duration-fast, 150ms) ease;
+}
+
+/* RTL Support */
+:dir(rtl) .buda-badge {
+  /* Logical properties are mostly used, but any specific overrides go here */
+}
+
+/* Variants */
+.buda-badge--primary {
+  background-color: var(--color-primary, #007bff);
+}
+.buda-badge--success {
+  background-color: var(--color-success, #28a745);
+}
+.buda-badge--danger {
+  background-color: var(--color-danger, #dc3545);
+}
+.buda-badge--warning {
+  background-color: var(--color-warning, #ffc107);
+  color: var(--color-text-primary, #212529);
+}
+.buda-badge--info {
+  background-color: var(--color-info, #17a2b8);
+}
+
+/* Shapes & Types */
+.buda-badge--dot {
+  padding: var(--space-0, 0);
+  width: var(--space-8, 8px);
+  height: var(--space-8, 8px);
+  border-radius: var(--radius-circle, 50%);
+}
+
+.buda-badge--count {
+  min-width: var(--space-24, 24px);
+  padding-inline: var(--space-4, 4px);
+}
+
+.buda-badge--discount {
+  background: var(--gradient-discount, linear-gradient(45deg, var(--color-danger), var(--color-warning)));
+  color: var(--color-text-inverse, #fff);
+}
+
+.buda-badge--new {
+  background: var(--gradient-new, linear-gradient(45deg, var(--color-primary), var(--color-info)));
+}
+
+.buda-badge--official {
+  background-color: var(--color-primary-dark, #0056b3);
+}
+
+/* Keyframes */
+@keyframes badgeBounce {
+  0%, 100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+.buda-badge--bounce {
+  animation: badgeBounce var(--duration-normal, 300ms) ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buda-badge--bounce {
+    animation: none;
+  }
+  .buda-badge {
+    transition: none;
+  }
+}

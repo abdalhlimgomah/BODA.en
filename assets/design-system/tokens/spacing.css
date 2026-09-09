@@ -1,0 +1,45 @@
+/* ============================================
+   Buda Design System v2.0 — Spacing Tokens
+   Strict 8pt Grid System — No Random Values
+   ============================================ */
+
+:root {
+  /* ─── Base Unit ─── */
+  --space-unit: 8px;
+
+  /* ─── Scale (8pt Grid Only) ─── */
+  --space-0:   0;
+  --space-0-5: 4px;    /* 0.5 unit  */
+  --space-1:   8px;    /* 1 unit    */
+  --space-2:   16px;   /* 2 units   */
+  --space-3:   24px;   /* 3 units   */
+  --space-4:   32px;   /* 4 units   */
+  --space-5:   40px;   /* 5 units   */
+  --space-6:   48px;   /* 6 units   */
+  --space-7:   56px;   /* 7 units   */
+  --space-8:   64px;   /* 8 units   */
+  --space-9:   72px;   /* 9 units   */
+  --space-10:  80px;   /* 10 units  */
+  --space-12:  96px;   /* 12 units  */
+
+  /* ─── Semantic Aliases ─── */
+  --gap-text:      var(--space-1);    /* 8px  — Between text lines/elements  */
+  --gap-input:     var(--space-2);    /* 16px — Between form fields          */
+  --gap-card:      var(--space-3);    /* 24px — Between cards in grid        */
+  --gap-section:   var(--space-8);    /* 64px — Between major page sections  */
+  --gap-section-m: var(--space-4);    /* 32px — Section gap on mobile        */
+
+  /* ─── Component Padding ─── */
+  --pad-xs:   var(--space-0-5);  /* 4px  */
+  --pad-sm:   var(--space-1);    /* 8px  */
+  --pad-md:   var(--space-2);    /* 16px */
+  --pad-lg:   var(--space-3);    /* 24px */
+  --pad-xl:   var(--space-4);    /* 32px */
+  --pad-2xl:  var(--space-6);    /* 48px */
+
+  /* ─── Card Standard Padding ─── */
+  --pad-card: 20px;   /* Exception: 20px = 2.5 units, approved for card internals */
+
+  /* ─── Logo & Brand Spacing ─── */
+  --logo-gap: 12px;   /* Exception: 12px gap between logo and brand name */
+}

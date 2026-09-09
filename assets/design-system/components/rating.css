@@ -1,0 +1,90 @@
+/* 
+ * Buda Design System v2.0 - Rating Component
+ * Path: assets/design-system/components/rating.css
+ */
+
+.buda-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8, 8px);
+  font-family: var(--font-primary, inherit);
+}
+
+/* Star Group */
+.buda-rating__stars {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4, 4px);
+}
+
+/* Individual Star */
+.buda-rating__star {
+  background: transparent;
+  border: none;
+  padding: var(--space-0, 0);
+  margin: var(--space-0, 0);
+  color: var(--color-icon-muted, #d1d5db);
+  width: var(--space-24, 24px);
+  height: var(--space-24, 24px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  outline: none;
+  transition: transform var(--duration-fast, 150ms) ease;
+}
+
+.buda-rating__star:hover:not(:disabled) {
+  transform: scale(var(--scale-hover, 1.1));
+}
+
+.buda-rating__star:active:not(:disabled) {
+  transform: scale(var(--scale-active, 0.95));
+}
+
+.buda-rating__star:focus-visible {
+  border-radius: var(--radius-sm, 4px);
+  box-shadow: 0 0 0 var(--border-width-lg, 2px) var(--color-focus-ring, #007bff);
+}
+
+.buda-rating__star:disabled {
+  cursor: default;
+}
+
+/* Star States */
+.buda-rating__star[data-state="filled"] {
+  color: var(--color-warning, #ffc107);
+}
+
+.buda-rating__star[data-state="half"] {
+  /* Using an SVG icon inline or masking technique is standard, 
+     here we rely on the color context assuming the SVG paths handle half states 
+     or applying a mask via CSS */
+  color: var(--color-warning, #ffc107);
+  mask-image: linear-gradient(to right, currentColor 50%, transparent 50%);
+  -webkit-mask-image: linear-gradient(to right, currentColor 50%, transparent 50%);
+}
+
+/* RTL for half star */
+:dir(rtl) .buda-rating__star[data-state="half"] {
+  mask-image: linear-gradient(to left, currentColor 50%, transparent 50%);
+  -webkit-mask-image: linear-gradient(to left, currentColor 50%, transparent 50%);
+}
+
+/* Count Text */
+.buda-rating-count {
+  font-size: var(--font-size-sm, 0.875rem);
+  color: var(--color-text-muted, #6b7280);
+  line-height: var(--line-height-none, 1);
+}
+
+/* Dark Mode Adjustments */
+[data-theme="dark"] .buda-rating__star:not([data-state="filled"]):not([data-state="half"]) {
+  color: var(--color-icon-dark-muted, #4b5563);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buda-rating__star {
+    transition: none;
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "name": "BudoQ Design System",
+  "version": "2.0.0",
+  "codename": "Purple Premium",
+  "updatedAt": "2026-07-21",
+  "author": "BudoQ Team",
+  "fonts": ["Plus Jakarta Sans", "Manrope"],
+  "icons": "Lucide (stroke-width: 2)",
+  "grid": "8pt",
+  "prefix": "budoq-"
+}

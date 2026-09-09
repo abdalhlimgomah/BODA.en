@@ -1,0 +1,313 @@
+/* ==========================================================================
+   Buda Design System v2.0 - Inputs
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Base Input Group / Container
+   -------------------------------------------------------------------------- */
+.buda-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  position: relative;
+  inline-size: 100%;
+}
+
+/* --------------------------------------------------------------------------
+   Base Input Styles (.buda-input)
+   -------------------------------------------------------------------------- */
+.buda-input {
+  /* Box Model & Layout */
+  box-sizing: border-box;
+  inline-size: 100%;
+  block-size: var(--input-height, var(--space-48));
+  padding-inline: var(--space-16);
+  padding-block: 0;
+  
+  /* Typography */
+  font-family: var(--font-primary);
+  font-size: var(--text-body);
+  color: var(--color-input-text);
+  
+  /* Borders & Radius */
+  border: var(--border-width, 1px) solid var(--border-default);
+  border-radius: var(--radius-input, var(--space-18));
+  
+  /* Background */
+  background-color: var(--color-input-bg, transparent);
+  
+  /* Transitions */
+  transition: border-color var(--duration-fast, 0.2s) var(--ease-out),
+              box-shadow var(--duration-fast, 0.2s) var(--ease-out),
+              background-color var(--duration-fast, 0.2s) var(--ease-out);
+  
+  /* Reset */
+  appearance: none;
+  outline: none;
+}
+
+/* RTL Support */
+[dir="rtl"] .buda-input {
+  /* Logical properties handle most of RTL natively */
+}
+
+/* Placeholder */
+.buda-input::placeholder {
+  color: var(--color-input-placeholder);
+  opacity: 1; /* Firefox reset */
+}
+
+/* --------------------------------------------------------------------------
+   Input States
+   -------------------------------------------------------------------------- */
+
+/* Hover State */
+.buda-input:hover:not(:disabled) {
+  border-color: var(--border-hover);
+}
+
+/* Focus State */
+.buda-input:focus,
+.buda-input:focus-visible {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-focus);
+}
+
+/* Filled State */
+.buda-input.buda-input--filled {
+  background-color: var(--color-input-bg-filled);
+}
+
+/* Error State */
+.buda-input.buda-input--error {
+  border-color: var(--border-error);
+}
+.buda-input.buda-input--error:focus {
+  box-shadow: var(--shadow-focus-error);
+}
+
+/* Success State */
+.buda-input.buda-input--success {
+  border-color: var(--border-success);
+}
+.buda-input.buda-input--success:focus {
+  box-shadow: var(--shadow-focus-success);
+}
+
+/* Disabled State */
+.buda-input:disabled {
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+  background-color: var(--color-input-bg-disabled);
+  border-color: var(--border-disabled);
+}
+
+/* --------------------------------------------------------------------------
+   Input Types
+   -------------------------------------------------------------------------- */
+
+/* Email & Text use base .buda-input */
+.buda-input-email {}
+
+/* Password Input (w/ toggle icon space) */
+.buda-input-password {
+  padding-inline-end: var(--space-48);
+}
+.buda-input-password-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.buda-input-password-toggle {
+  position: absolute;
+  inset-inline-end: var(--space-16);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Phone Input (w/ country code) */
+.buda-input-phone-wrapper {
+  display: flex;
+  align-items: center;
+  border: var(--border-width, 1px) solid var(--border-default);
+  border-radius: var(--radius-input, var(--space-18));
+  overflow: hidden;
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+.buda-input-phone-wrapper:focus-within {
+  border-color: var(--border-focus);
+  box-shadow: var(--shadow-focus);
+}
+.buda-input-phone-wrapper:hover {
+  border-color: var(--border-hover);
+}
+.buda-input-phone-code {
+  padding-inline: var(--space-16);
+  background-color: var(--color-surface-muted);
+  color: var(--color-text-secondary);
+  border-inline-end: var(--border-width, 1px) solid var(--border-default);
+  display: flex;
+  align-items: center;
+  block-size: var(--input-height, var(--space-48));
+}
+.buda-input-phone {
+  border: none;
+  border-radius: 0;
+  flex: 1;
+}
+.buda-input-phone:focus {
+  box-shadow: none;
+}
+
+/* OTP Input */
+.buda-input-otp-group {
+  display: flex;
+  gap: var(--space-16);
+  justify-content: center;
+}
+.buda-input-otp {
+  inline-size: var(--input-height, var(--space-48));
+  text-align: center;
+  padding-inline: 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-weight-bold);
+}
+
+/* Search Input */
+.buda-input-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.buda-input-search-icon {
+  position: absolute;
+  inset-inline-start: var(--space-16);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+.buda-input-search {
+  padding-inline-start: var(--space-40);
+  padding-inline-end: var(--space-40);
+}
+.buda-input-search-clear {
+  position: absolute;
+  inset-inline-end: var(--space-16);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  opacity: 0;
+  transition: opacity var(--duration-fast);
+}
+.buda-input-search:not(:placeholder-shown) + .buda-input-search-clear {
+  opacity: 1;
+}
+
+/* Textarea (Auto-resize concept with CSS) */
+.buda-input-textarea {
+  block-size: auto;
+  min-block-size: var(--space-96);
+  padding-block: var(--space-16);
+  resize: vertical;
+  line-height: var(--line-height-normal);
+}
+
+/* Select Input */
+.buda-input-select-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.buda-input-select {
+  padding-inline-end: var(--space-40);
+  appearance: none;
+  cursor: pointer;
+}
+.buda-input-select-arrow {
+  position: absolute;
+  inset-inline-end: var(--space-16);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+
+/* --------------------------------------------------------------------------
+   Auxiliary Elements
+   -------------------------------------------------------------------------- */
+
+/* Label */
+.buda-input-label {
+  font-family: var(--font-primary);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+  margin-block-end: var(--space-4);
+  display: block;
+}
+
+/* Helper Text */
+.buda-input-helper {
+  font-family: var(--font-primary);
+  font-size: var(--text-xs);
+  color: var(--color-text-muted);
+  margin-block-start: var(--space-4);
+}
+
+/* Error Text */
+.buda-input-error-text {
+  font-family: var(--font-primary);
+  font-size: var(--text-xs);
+  color: var(--color-error);
+  margin-block-start: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+/* --------------------------------------------------------------------------
+   Floating Label Animation
+   -------------------------------------------------------------------------- */
+.buda-floating-group {
+  position: relative;
+}
+.buda-floating-input {
+  padding-block-start: var(--space-16); /* Make room for floating label */
+}
+.buda-floating-label {
+  position: absolute;
+  inset-inline-start: var(--space-16);
+  inset-block-start: 50%;
+  transform: translateY(-50%);
+  color: var(--color-input-placeholder);
+  transition: transform var(--duration-fast, 0.2s) var(--ease-out),
+              color var(--duration-fast, 0.2s) var(--ease-out),
+              font-size var(--duration-fast, 0.2s) var(--ease-out);
+  pointer-events: none;
+  transform-origin: left top;
+}
+[dir="rtl"] .buda-floating-label {
+  transform-origin: right top;
+}
+
+/* Active floating label */
+.buda-floating-input:focus ~ .buda-floating-label,
+.buda-floating-input:not(:placeholder-shown) ~ .buda-floating-label {
+  transform: translateY(calc(-50% - var(--space-16))) scale(var(--scale-label, 0.85));
+  color: var(--color-primary);
+}
+.buda-floating-input:not(:focus):not(:placeholder-shown) ~ .buda-floating-label {
+  color: var(--color-text-secondary);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .buda-input,
+  .buda-floating-label {
+    transition-duration: 0.01ms !important;
+  }
+}

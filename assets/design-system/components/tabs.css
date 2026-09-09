@@ -1,0 +1,103 @@
+/* 
+ * Buda Design System v2.0 - Tabs Component
+ * Path: assets/design-system/components/tabs.css
+ */
+
+.buda-tabs {
+  display: flex;
+  flex-direction: column;
+  width: var(--size-full, 100%);
+}
+
+/* Tab List */
+.buda-tabs__list {
+  display: flex;
+  position: relative;
+  overflow-x: auto;
+  scrollbar-width: none;
+  border-block-end: var(--border-width-sm, 1px) solid var(--color-border-subtle, #e5e7eb);
+  gap: var(--space-16, 16px);
+  padding-inline: var(--space-16, 16px);
+}
+
+.buda-tabs__list::-webkit-scrollbar {
+  display: none;
+}
+
+/* Tab Item */
+.buda-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  background: transparent;
+  border: none;
+  padding-block: var(--space-16, 16px);
+  padding-inline: var(--space-8, 8px);
+  font-family: var(--font-primary, inherit);
+  font-size: var(--font-size-md, 1rem);
+  font-weight: var(--font-weight-medium, 500);
+  color: var(--color-text-muted, #6b7280);
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  transition: opacity var(--duration-fast, 150ms) ease;
+  outline: none;
+}
+
+.buda-tab:hover:not(:disabled) {
+  opacity: var(--opacity-hover, 0.8);
+}
+
+.buda-tab:focus-visible {
+  border-radius: var(--radius-sm, 4px);
+  box-shadow: 0 0 0 var(--border-width-lg, 2px) var(--color-focus-ring, #007bff);
+}
+
+.buda-tab:disabled {
+  opacity: var(--opacity-disabled, 0.5);
+  cursor: not-allowed;
+}
+
+/* Active State */
+.buda-tab[aria-selected="true"] {
+  color: var(--color-primary, #007bff);
+  font-weight: var(--font-weight-semibold, 600);
+}
+
+/* Active Indicator */
+.buda-tab[aria-selected="true"]::after {
+  content: "";
+  position: absolute;
+  inset-block-end: calc(var(--border-width-sm, 1px) * -1);
+  inset-inline-start: var(--space-0, 0);
+  width: var(--size-full, 100%);
+  height: var(--space-4, 4px);
+  background: var(--gradient-primary, linear-gradient(90deg, var(--color-primary), var(--color-info)));
+  border-start-start-radius: var(--radius-sm, 4px);
+  border-start-end-radius: var(--radius-sm, 4px);
+}
+
+/* Tab Panel */
+.buda-tab-panel {
+  padding-block: var(--space-24, 24px);
+  padding-inline: var(--space-16, 16px);
+  display: none;
+}
+
+.buda-tab-panel[aria-hidden="false"] {
+  display: block;
+  animation: fadeIn var(--duration-normal, 300ms) ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buda-tab, .buda-tab-panel[aria-hidden="false"] {
+    transition: none;
+    animation: none;
+  }
+}

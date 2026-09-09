@@ -1,0 +1,81 @@
+/**
+ * Buda Design System v2.0 - Bottom Sheet Component
+ * 
+ * Slide up from bottom, handle bar, radius-2xl top, max-height 85vh.
+ */
+
+.buda-bottom-sheet-backdrop {
+  position: fixed;
+  inset: var(--space-0);
+  background-color: var(--color-overlay);
+  z-index: var(--z-bottom-sheet-backdrop);
+  opacity: var(--opacity-0);
+  transition: opacity var(--duration-normal) var(--ease-out);
+  display: flex;
+  align-items: flex-end;
+}
+
+.buda-bottom-sheet-backdrop.is-open {
+  opacity: var(--opacity-100);
+}
+
+.buda-bottom-sheet {
+  background-color: var(--color-bg-primary);
+  width: var(--size-w-full);
+  max-block-size: var(--size-85vh);
+  border-start-start-radius: var(--radius-2xl);
+  border-start-end-radius: var(--radius-2xl);
+  box-shadow: var(--shadow-xl);
+  z-index: var(--z-bottom-sheet);
+  display: flex;
+  flex-direction: column;
+  transform: translateY(var(--transform-100pct));
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
+.buda-bottom-sheet-backdrop.is-open .buda-bottom-sheet {
+  transform: translateY(var(--space-0));
+}
+
+.buda-bottom-sheet-handle {
+  width: var(--size-w-48);
+  height: var(--space-4);
+  background-color: var(--color-border-strong);
+  border-radius: var(--radius-full);
+  margin: var(--space-16) auto var(--space-8) auto;
+}
+
+.buda-bottom-sheet-header {
+  padding: var(--space-16) var(--space-24) var(--space-16) var(--space-24);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.buda-bottom-sheet-title {
+  color: var(--color-text-primary);
+  font-size: var(--font-size-lg);
+  font-weight: var(--font-weight-bold);
+  margin: var(--space-0);
+}
+
+.buda-bottom-sheet-body {
+  padding: var(--space-24);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  color: var(--color-text-primary);
+}
+
+.buda-bottom-sheet-close-btn:focus-visible {
+  outline: var(--border-width-md) solid var(--color-focus);
+  outline-offset: var(--space-4);
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .buda-bottom-sheet-backdrop,
+  .buda-bottom-sheet {
+    transition: none;
+    transform: none;
+  }
+}

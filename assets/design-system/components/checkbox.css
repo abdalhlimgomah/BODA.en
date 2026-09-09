@@ -1,0 +1,82 @@
+/**
+ * Checkbox Component
+ * Buda Design System v2.0
+ */
+
+.buda-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  cursor: pointer;
+  position: relative;
+}
+
+.buda-checkbox__input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.buda-checkbox__box {
+  width: var(--space-24); /* nearest to 20px on 8pt grid */
+  height: var(--space-24);
+  background-color: var(--color-surface);
+  border: var(--border-width-1) solid var(--color-border);
+  border-radius: var(--radius-sm); /* closest to 4px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color var(--duration-fast) ease-in-out, border-color var(--duration-fast) ease-in-out;
+}
+
+.buda-checkbox__icon {
+  width: var(--space-16);
+  height: var(--space-16);
+  fill: none;
+  stroke: var(--color-background);
+  stroke-width: var(--border-width-2);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity var(--duration-fast) ease-in-out, transform var(--duration-fast) var(--ease-spring);
+  will-change: transform, opacity;
+}
+
+.buda-checkbox__input:checked + .buda-checkbox__box,
+.buda-checkbox__input:indeterminate + .buda-checkbox__box {
+  background: var(--color-primary-gradient);
+  border-color: transparent;
+}
+
+.buda-checkbox__input:checked + .buda-checkbox__box .buda-checkbox__icon,
+.buda-checkbox__input:indeterminate + .buda-checkbox__box .buda-checkbox__icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.buda-checkbox__input:focus-visible + .buda-checkbox__box {
+  box-shadow: 0 0 0 var(--space-2) var(--color-background), 0 0 0 var(--space-4) var(--color-primary);
+}
+
+.buda-checkbox__input:disabled + .buda-checkbox__box {
+  opacity: var(--opacity-disabled);
+  cursor: not-allowed;
+  background-color: var(--color-surface-hover);
+}
+
+.buda-checkbox:has(.buda-checkbox__input:disabled) {
+  cursor: not-allowed;
+}
+
+[data-theme="dark"] .buda-checkbox__box {
+  background-color: var(--color-surface-dark);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .buda-checkbox__box,
+  .buda-checkbox__icon {
+    transition: none;
+  }
+}

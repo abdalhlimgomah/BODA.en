@@ -1,0 +1,166 @@
+/* ============================================
+   Buda Design System v2.0 — Layout: Grids
+   Responsive Product Grids & Section Layouts
+   ============================================ */
+
+/* ─── Product Grid ─── */
+.buda-product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--product-card-desktop), 1fr));
+  gap: var(--gap-card);
+  width: 100%;
+}
+
+/* ─── Fixed Column Grids ─── */
+.buda-grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--gap-card); }
+.buda-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--gap-card); }
+.buda-grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--gap-card); }
+.buda-grid-5 { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap-card); }
+
+/* ─── Category Grid ─── */
+.buda-category-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 1fr);
+  gap: var(--space-2);
+}
+
+/* ─── Brand Grid ─── */
+.buda-brand-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--gap-card);
+}
+
+/* ─── Feature Grid ─── */
+.buda-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--gap-card);
+}
+
+/* ─── Page Layout: Main + Sidebar (70/30) ─── */
+.buda-page-layout {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: var(--space-4);
+  max-width: var(--content-default);
+  margin: 0 auto;
+  padding: var(--space-4) var(--container-pad);
+}
+.buda-page-layout__main { min-width: 0; }
+.buda-page-layout__side {
+  position: sticky;
+  top: calc(var(--header-h-desktop) + var(--space-3));
+  align-self: start;
+}
+
+/* ─── Section Container ─── */
+.buda-section {
+  padding: var(--gap-section) 0;
+}
+.buda-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-3);
+}
+.buda-section__title {
+  font-size: var(--text-heading-md);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+}
+.buda-section__link {
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-primary);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: var(--space-0-5);
+  transition: color var(--transition-fast);
+}
+.buda-section__link:hover {
+  color: var(--color-primary-700);
+}
+
+/* ─── Horizontal Scroll Section (Mobile Carousel) ─── */
+.buda-scroll-section {
+  display: flex;
+  gap: var(--gap-card);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  padding-bottom: var(--space-1);
+}
+.buda-scroll-section::-webkit-scrollbar { display: none; }
+.buda-scroll-section > * {
+  flex-shrink: 0;
+  scroll-snap-align: start;
+}
+
+/* ─── PDP Layout: Gallery + Info ─── */
+.buda-pdp-layout {
+  display: grid;
+  grid-template-columns: 560px 1fr;
+  gap: var(--space-4);
+  max-width: var(--content-default);
+  margin: 0 auto;
+  padding: var(--space-4) var(--container-pad);
+}
+
+/* ─── Filter Layout: Sidebar + Grid ─── */
+.buda-filter-layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: var(--space-4);
+  max-width: var(--content-default);
+  margin: 0 auto;
+  padding: var(--space-4) var(--container-pad);
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1279px) {
+  .buda-product-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+  .buda-grid-5 { grid-template-columns: repeat(4, 1fr); }
+  .buda-brand-grid { grid-template-columns: repeat(3, 1fr); }
+  .buda-pdp-layout { grid-template-columns: 480px 1fr; }
+  .buda-filter-layout { grid-template-columns: 240px 1fr; }
+}
+
+@media (max-width: 767px) {
+  .buda-product-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-2);
+  }
+  .buda-grid-3,
+  .buda-grid-4,
+  .buda-grid-5 { grid-template-columns: repeat(2, 1fr); }
+  .buda-category-grid { grid-template-columns: repeat(3, 1fr); }
+  .buda-brand-grid { grid-template-columns: repeat(2, 1fr); }
+  .buda-feature-grid { grid-template-columns: repeat(2, 1fr); }
+  .buda-page-layout {
+    grid-template-columns: 1fr;
+    padding: var(--space-2);
+  }
+  .buda-page-layout__side {
+    position: static;
+  }
+  .buda-pdp-layout {
+    grid-template-columns: 1fr;
+    padding: var(--space-2);
+  }
+  .buda-filter-layout {
+    grid-template-columns: 1fr;
+    padding: var(--space-2);
+  }
+  .buda-section {
+    padding: var(--gap-section-m) 0;
+  }
+}
+
+@media (max-width: 389px) {
+  .buda-category-grid { grid-template-columns: repeat(3, 1fr); }
+}

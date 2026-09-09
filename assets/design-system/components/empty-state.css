@@ -1,0 +1,51 @@
+/**
+ * Empty State Component
+ * Buda Design System v2.0
+ */
+
+.buda-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-48) var(--space-24);
+}
+
+.buda-empty-state__illustration {
+  width: calc(var(--space-64) * 2); /* Approximating 120px to 128px */
+  height: calc(var(--space-64) * 2);
+  margin-bottom: var(--space-24);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.buda-empty-state__title {
+  font-size: var(--text-heading-md);
+  font-weight: var(--weight-bold);
+  color: var(--color-text);
+  margin-bottom: var(--space-8);
+}
+
+.buda-empty-state__subtitle {
+  font-size: var(--text-body-sm);
+  color: var(--color-text-muted);
+  margin-bottom: var(--space-32);
+  max-width: calc(var(--space-96) * 4);
+}
+
+.buda-empty-state__cta {
+  /* Utility wrapper for CTA if needed */
+}
+
+/* Contextual Variants */
+.buda-empty-state--cart {}
+.buda-empty-state--wishlist {}
+.buda-empty-state--orders {}
+.buda-empty-state--search {}
+.buda-empty-state--notifications {}
+.buda-empty-state--coupons {}
+.buda-empty-state--addresses {}
+.buda-empty-state--recently-viewed {}
+.buda-empty-state--products {}
