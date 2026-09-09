@@ -95,7 +95,7 @@ a:hover {
 }
 
 img, video {
-  max-width: 100%;
+  max-width: 23%;
   height: auto;
   display: block;
 }
