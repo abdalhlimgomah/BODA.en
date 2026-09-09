@@ -1785,8 +1785,6 @@ HM.renderSmartCategories = function (section) {
   }
   var html =
     '<section class="hm-section hm-fade hm-smart-cats" id="sec-' + (section.id || 'hm-smart-cats') + '">' +
-    '<div class="hm-section-head"><h2>' + escapeHtml(section.title || 'تسوق حسب الفئة') + '</h2>' +
-    '<a href="category-landing.html?slug=clothes">استكشف الكل</a></div>' +
     '<div class="hm-section-body"><div class="hm-cats-scroll-wrap"><button class="hm-cats-btn prev" type="button" aria-label="السابق">❮</button><div class="hm-smart-cats-grid">';
   cards.forEach(function (card, i) {
     html +=

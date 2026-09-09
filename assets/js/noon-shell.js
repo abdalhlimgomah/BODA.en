@@ -100,7 +100,7 @@ function getNoonHeaderHTML() {
   return [
     '<div class="buda-header__inner">',
     '  <a href="home.html" class="buda-header__brand" id="budaHeaderBrand">',
-    '    <img class="buda-header__logo-img" src="../assets/images/logo.png" alt="Buda" />',
+    '    <img class="buda-header__logo-img" src="../assets/images/logo.png" alt="BudoQ" />',
     '    <span class="buda-header__brand-name">BudoQ</span>',
     '  </a>',
     '  <div class="buda-header__search-inline" id="budaHeaderSearch">',
@@ -176,7 +176,7 @@ function ensureSidebar() {
     var isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
     var userName = localStorage.getItem('userFullName') || localStorage.getItem('userEmail') || '';
     sidebar.innerHTML =
-      '<div class="sidebar-head"><strong>Buda</strong><button id="sidebar-close" class="menu-btn" type="button" aria-label="إغلاق"><span class="menu-icon"></span></button></div>' +
+      '<div class="sidebar-head"><strong>BudoQ</strong><button id="sidebar-close" class="menu-btn" type="button" aria-label="إغلاق"><span class="menu-icon"></span></button></div>' +
       '<nav class="sidebar-nav">' +
       (isLoggedIn && userName ? '<a href="ahsab.html" class="sidebar-link"><span class="material-icons-outlined">person</span> ' + escapeHtml(userName) + '</a>' : '<a href="ahsab.html" class="sidebar-link"><span class="material-icons-outlined">login</span> تسجيل الدخول</a>') +
       '<a href="home.html" class="sidebar-link"><span class="material-icons-outlined">home</span> الرئيسية</a>' +
@@ -213,7 +213,7 @@ function ensureModals() {
       '<div class="support-backdrop" id="support-backdrop"></div>' +
       '<div class="support-drawer-inner">' +
       '<div class="support-drawer-header"><h3>الدعم</h3><button class="support-close" id="support-close" type="button"><span class="material-icons-outlined">close</span></button></div>' +
-      '<p style="color:#666;font-size:0.85rem;text-align:center;padding:20px 0;">للتواصل معنا عبر البريد الإلكتروني: support@buda.com</p>' +
+      '<p style="color:#666;font-size:0.85rem;text-align:center;padding:20px 0;">للتواصل معنا عبر البريد الإلكتروني: support@budoq.com</p>' +
       '</div>';
     document.body.appendChild(drawer);
   }
