@@ -21,3 +21,5 @@ BACKUP_SEO/
 
 # Logs
 *.log
+ #
+node_modules/
