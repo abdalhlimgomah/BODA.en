@@ -278,7 +278,7 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
 
 /* ===== HERO CAROUSEL ===== */
 .hm-hero-wrap { padding: 0 16px; margin: 8px 0 4px; }
-.hm-hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--color-skeleton); aspect-ratio: 16/9; touch-action: pan-y; user-select: none; }
+.hm-hero { position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--color-skeleton); aspect-ratio: 20/9; touch-action: pan-y; user-select: none; }
 .hm-hero-track { display: flex; direction: ltr; height: 100%; will-change: transform; backface-visibility: hidden; }
 .hm-hero-slide { flex: 0 0 100%; height: 100%; position: relative; cursor: pointer; overflow: hidden; border-radius: var(--radius-sm); }
 .hm-hero-slide a { display: block; width: 100%; height: 100%; }
