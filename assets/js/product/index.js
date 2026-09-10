@@ -374,13 +374,24 @@
     // sync with what addToCart stores: the selected size's price).
     function applyPriceForSize(size) {
       if (!vm || !vm.raw) return;
-      var perSize = size ? Number(size.price) || 0 : 0;
+      var perSize = 0;
+      if (size) {
+        var sp = Number(size.price);
+        if (!isNaN(sp) && sp > 0) perSize = sp;
+      }
       var base = D.buildPrice(vm.raw);
       var fallback = base && base.current > 0 ? base.current : (Number((vm.price || {}).current) || 0);
       var current = perSize > 0 ? perSize : fallback;
-      var previous = vm.price || {};
-      var original = Number(previous.original) || 0;
-      if (original <= current) original = current;
+      if (!(current > 0)) current = fallback;
+      // The "old price" must come from REAL discount sources (fake-original table or
+      // original_price column) — never from the tier markup, otherwise the very first
+      // price shown gets repainted as a fake discount the moment a size is clicked.
+      var r0 = null;
+      if (global.BudaStore && typeof global.BudaStore.resolveProductPrice === "function") {
+        r0 = global.BudaStore.resolveProductPrice(vm.raw);
+      }
+      var realOriginal = r0 && r0.originalPrice > 0 ? Number(r0.originalPrice) : 0;
+      var original = realOriginal > current ? realOriginal : current;
       vm.price = {
         current: current,
         original: original,
@@ -428,8 +439,100 @@
     // Never feed a selling price back into PricingEngine.calculate(): that compounds the markup
     // on every click (the price grows each time a size is clicked). Size prices are final; when a
     // size has no price, fall back to the clean base price of the product — never to a transient.
+
+    // ---------------------------------------------------------------
+    // Live per-size/color quantity
+    // ---------------------------------------------------------------
+    // The stored stock for a Taager vendor product lives per size/color, but the stock badge and
+    // the qty stepper are rendered once with the product-level total. Recompute them as the user
+    // picks a size (and, where a real color grid exists, a color) so the quantity shown matches
+    // the chosen variant exactly.
+
+    function selColorName() {
+      if (!global.PDP.Variants || typeof global.PDP.Variants.getSelectedOptions !== "function") return "";
+      var vRoot = document.querySelector("[data-pdp-variants]");
+      if (!vRoot) return "";
+      var opts = global.PDP.Variants.getSelectedOptions(vRoot) || {};
+      var labels = Object.keys(opts).map(function (k) {
+        var o = opts[k];
+        return o ? String(o.label || o.value || "") : "";
+      });
+      var matrix = vm.colorsMatrix || [];
+      for (var i = 0; i < matrix.length; i++) {
+        var cn = String(matrix[i].name);
+        for (var j = 0; j < labels.length; j++) {
+          if (labels[j] === cn) return cn;
+        }
+      }
+      return "";
+    }
+
+    function resolveQuantity() {
+      var qty = Number((vm.stock || {}).quantity) || 0;
+      var selSize = null;
+      if (global.PDP.SizeSelector && typeof global.PDP.SizeSelector.getSelectedSize === "function") {
+        selSize = global.PDP.SizeSelector.getSelectedSize();
+      }
+      if (!selSize) return qty;
+      var s = null;
+      for (var i = 0; i < (vm.sizes || []).length; i++) {
+        if (String(vm.sizes[i].name) === String(selSize.name)) { s = vm.sizes[i]; break; }
+      }
+      qty = Math.max(0, Number((s || selSize).stock) || 0);
+      var colorName = selColorName();
+      if (colorName) {
+        var sizeName = String(selSize.name);
+        var matrix = vm.colorsMatrix || [];
+        for (var ci = 0; ci < matrix.length; ci++) {
+          if (String(matrix[ci].name) === colorName && Array.isArray(matrix[ci].sizes)) {
+            for (var si = 0; si < matrix[ci].sizes.length; si++) {
+              if (String(matrix[ci].sizes[si].size) === sizeName) {
+                qty = Math.max(0, Number(matrix[ci].sizes[si].stock) || 0);
+                break;
+              }
+            }
+            break;
+          }
+        }
+      }
+      return qty;
+    }
+
+    // Mirrors the stock-badge markup from PDP.Info so the badge stays consistent after updates.
+    function updateQuantityUI() {
+      var qty = resolveQuantity();
+      var status = qty <= 0 ? "out" : qty <= 10 ? "low" : "ok";
+      var stockEl = qs(".pdp-stock");
+      if (stockEl) {
+        stockEl.classList.remove("is-ok", "is-low", "is-out");
+        stockEl.classList.add("is-" + status);
+        if (status === "ok") {
+          stockEl.innerHTML =
+            '<span class="pdp-stock-badge"><span class="material-icons-outlined">check_circle</span>متوفر</span>';
+        } else if (status === "low") {
+          var pct = Math.max(8, Math.min(100, Math.round((qty / 10) * 100)));
+          stockEl.innerHTML =
+            '<div class="pdp-stock-low-head">' +
+            '<span class="pdp-stock-flame"><span class="material-icons-outlined">local_fire_department</span></span>' +
+            '<span class="pdp-stock-low-text">أسرع! باقي <strong>' + qty + "</strong> قطعة فقط</span>" +
+            "</div>" +
+            '<div class="pdp-stock-bar"><div class="pdp-stock-bar-fill" style="width:' + pct + '%"></div></div>';
+        } else {
+          stockEl.innerHTML =
+            '<span class="material-icons-outlined">remove_shopping_cart</span>نفد المخزون';
+        }
+      }
+      qsa('[data-qty-action="inc"]').forEach(function (btn) {
+        btn.setAttribute("data-max", status === "low" ? String(qty) : "99");
+      });
+    }
+
     document.addEventListener("pdp:size-change", function (e) {
       applyPriceForSize(e.detail && e.detail.size);
+      updateQuantityUI();
+    });
+    document.addEventListener("pdp:variant-change", function () {
+      updateQuantityUI();
     });
 
     // Size guide button

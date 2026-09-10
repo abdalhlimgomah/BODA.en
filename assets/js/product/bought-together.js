@@ -10,11 +10,14 @@
 
   function btResolvePrice(product) {
     var p = Number(product && product.price) || 0;
+    var isFinalPrice = String(product && product.source || "").toLowerCase() === "vendor" ||
+      String(product && product.source || "").toLowerCase() === "taager" ||
+      String(product && (product.id || "")) .indexOf("vendor_") === 0 || String(product && (product.id || "")).indexOf("taager_") === 0;
     if (global.BudaStore && global.BudaStore.resolveProductPrice) {
       var r = global.BudaStore.resolveProductPrice(product);
       var base = r.currentPrice > 0 ? r.currentPrice : p;
       p = base;
-      if (global.PricingEngine && global.PricingEngine.tiersLoaded) {
+      if (global.PricingEngine && global.PricingEngine.tiersLoaded && !isFinalPrice) {
         p = global.PricingEngine.calculate(base);
       }
     }

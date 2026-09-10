@@ -242,13 +242,24 @@
   // View-model builders (pure functions over a raw product record)
   // ---------------------------------------------------------------
 
+  /** True when the stored price is already the FINAL selling price (Vendoor/Taager rows hold the
+   *  seller's price — applying the tier markup on top would double-inflate it). */
+  function isFinalPriceProduct(product) {
+    if (!product) return false;
+    var src = String(product.source || "").toLowerCase();
+    var pid = String(product.id || product.product_id || "");
+    return src === "vendor" || src === "taager" || pid.indexOf("vendor_") === 0 || pid.indexOf("taager_") === 0;
+  }
+
   function buildPrice(product) {
     var u = utils();
     var current = 0, original = 0;
     if (global.BudaStore && global.BudaStore.resolveProductPrice) {
       var r = global.BudaStore.resolveProductPrice(product);
       current = r.currentPrice > 0 ? r.currentPrice : 0;
-      if (global.PricingEngine && global.PricingEngine.tiersLoaded) current = global.PricingEngine.calculate(current);
+      if (global.PricingEngine && global.PricingEngine.tiersLoaded && !isFinalPriceProduct(product)) {
+        current = global.PricingEngine.calculate(current);
+      }
       original = r.originalPrice > current ? r.originalPrice : current;
     } else {
       current = Number(product && product.price) || 0;
@@ -277,6 +288,19 @@
 
   function buildStock(product) {
     var qty = Math.max(0, Math.round(Number(product && (product.stock || product.quantity)) || 0));
+    // Vendoor/Taager rows store `stock` = minimum variant stock, which reads as a fake
+    // "1 left" scare while there may be plenty in hand. Use the real total for the
+    // product-level badge; the per-size number is surfaced when a size is selected.
+    var pidSrc = String(product && product.source || "").toLowerCase();
+    var pid = String(product && (product.id || product.product_id) || "");
+    var isFinal = pidSrc === "vendor" || pidSrc === "taager" || pid.indexOf("vendor_") === 0 || pid.indexOf("taager_") === 0;
+    if (isFinal && Array.isArray(product.sizes) && product.sizes.length) {
+      var total = 0;
+      for (var vi = 0; vi < product.sizes.length; vi++) {
+        total += Math.max(0, Number(product.sizes[vi] && product.sizes[vi].stock) || 0);
+      }
+      if (total > 0) qty = total;
+    }
     var declaredStatus = String((product && (product.stockStatus || product.stock_status)) || "").toLowerCase();
     var status = "in_stock";
     if (declaredStatus === "out_of_stock" || qty === 0) status = "out_of_stock";
@@ -737,6 +761,21 @@
     }).filter(function (s) { return s.name; });
   }
 
+  /** Builds a per-color → per-size stock matrix from the stored `colors` column. */
+  function buildColorsMatrix(product) {
+    var cols = product && Array.isArray(product.colors) ? product.colors : [];
+    return cols.map(function (c) {
+      return {
+        name: String((c && (c.name || c.label || c.value)) || "").trim(),
+        sizes: (Array.isArray(c && c.sizes) ? c.sizes : [])
+          .map(function (x) {
+            return { size: String((x && (x.size || x.name)) || "").trim(), stock: Math.max(0, Number(x && x.stock) || 0) };
+          })
+          .filter(function (x) { return x.size; }),
+      };
+    }).filter(function (c) { return c.name; });
+  }
+
   /** Builds the full, stable view-model every component consumes. */
   function buildViewModel(product, extras) {
     extras = extras || {};
@@ -761,6 +800,7 @@
       offers: buildOffers(product),
       variants: buildVariants(product),
       sizes: buildSizes(product),
+      colorsMatrix: buildColorsMatrix(product),
       seller: extras.seller || buildSeller(product),
       highlights: buildHighlights(product),
       specs: buildSpecs(product),
