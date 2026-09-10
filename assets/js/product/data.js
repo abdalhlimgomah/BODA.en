@@ -95,6 +95,14 @@
             record = allResp.data.find(function (p) { return String(p.id || p.product_id) === String(id); }) || null;
           }
         }
+        if (!record && typeof client.from === "function") {
+          var vendResp = await client.from("taager_products").select("*").eq("id", String(id)).limit(1);
+          if (!vendResp.error && vendResp.data && vendResp.data.length) record = vendResp.data[0];
+          if (!record && /^\d+$/.test(String(id))) {
+            vendResp = await client.from("taager_products").select("*").eq("taager_product_id", String(id)).limit(1);
+            if (!vendResp.error && vendResp.data && vendResp.data.length) record = vendResp.data[0];
+          }
+        }
       }
     } catch (e) { console.warn("[PDP] supabase lookup failed", e); }
     if (!record) return null;
