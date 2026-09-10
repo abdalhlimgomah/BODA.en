@@ -14,6 +14,10 @@
   ],
   "rewrites": [
     {
+      "source": "/assets/vendor/supabase/supabase-js@2.js",
+      "destination": "/assets/vendor/supabase/supabase-js.js"
+    },
+    {
       "source": "/api/merchant-feed/(.*)",
       "destination": "https://msgqzgzoslearaprgiqq.supabase.co/functions/v1/merchant-feed/$1"
     },
