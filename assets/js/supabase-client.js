@@ -327,7 +327,7 @@ function filterTaagerProductsByCountry(products = [], countryCode = "") {
 }
 
 const TAAGER_LIST_COLUMNS =
-  "id,taager_product_id,name,created_at,description,quick_details,content_ideas,how_to_use,videos,category,price,original_price,image,images,image1,image2,image3,image4,image5,image6,image7,image8,available_countries,stock,stock_status,brand,seller,sizes,colors,raw_data,source,is_active,updated_at,last_synced_at";
+  "id,taager_product_id,name,category,price,original_price,image,images,available_countries,stock,stock_status,brand,seller,is_active,created_at,updated_at";
 
 const _taagerListMemoryCache = {};
 const TAAGER_LIST_CACHE_TTL = 10 * 60 * 1000;
