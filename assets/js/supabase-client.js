@@ -263,6 +263,8 @@ function normalizeTaagerDbProduct(item) {
     image4: sanitizeText(item.image4 || item.image_4),
     image5: sanitizeText(item.image5 || item.image_5),
     raw_data: item.raw_data,
+    sizes: item.sizes,
+    colors: item.colors,
     image_url: sanitizeText(item.image_url || item.imageUrl || image),
     imageUrl: sanitizeText(item.imageUrl || item.image_url || image),
     gallery: item.gallery || item.extra_images || item.additional_images || "",
@@ -325,7 +327,7 @@ function filterTaagerProductsByCountry(products = [], countryCode = "") {
 }
 
 const TAAGER_LIST_COLUMNS =
-  "id,taager_product_id,name,created_at,description,quick_details,content_ideas,how_to_use,videos,category,price,original_price,image,images,image1,image2,image3,image4,image5,image6,image7,image8,available_countries,stock,stock_status,brand,seller,source,is_active,updated_at,last_synced_at";
+  "id,taager_product_id,name,created_at,description,quick_details,content_ideas,how_to_use,videos,category,price,original_price,image,images,image1,image2,image3,image4,image5,image6,image7,image8,available_countries,stock,stock_status,brand,seller,sizes,colors,raw_data,source,is_active,updated_at,last_synced_at";
 
 const _taagerListMemoryCache = {};
 const TAAGER_LIST_CACHE_TTL = 10 * 60 * 1000;

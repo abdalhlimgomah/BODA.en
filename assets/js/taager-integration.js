@@ -474,6 +474,8 @@
       id: id,
       source: "taager",
       raw_data: item.raw_data,
+      sizes: item.sizes,
+      colors: item.colors,
       taager_product_id: taagerProductId || (id.indexOf("taager_") === 0 ? id.slice(7) : id),
       product_id: taagerProductId || (id.indexOf("taager_") === 0 ? id.slice(7) : id),
       name: sanitizeText(item.name || item.title || item.product_name || "منتج من تاجِر"),
