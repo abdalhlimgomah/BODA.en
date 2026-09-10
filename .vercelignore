@@ -8,12 +8,12 @@ __pycache__/
 *.log
 
 # Supabase-deployed code (deploy via Supabase, not Vercel)
-supabase/
+# NOTE: anchored to root so we keep assets/vendor/supabase/ in the deploy
+/supabase/
 
 # DB migrations (live already applied via Supabase SQL editor)
-sql/
+/sql/
 
 # OS/IDE
 .DS_Store
 Thumbs.db
-
