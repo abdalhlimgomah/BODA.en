@@ -412,7 +412,7 @@ async function annotateProductsWithSupabaseRatings(products) {
     async function fetchRatingsFor(chunk) {
       var res;
       try {
-        res = await client.from("ratings_summary").select("item_id,star1,star2,star3,star4,star5,total").in("item_id", chunk);
+        res = await client.rpc("get_ratings_summary", { product_ids: chunk });
         if (res.error) throw res.error;
       } catch (e) {
         res = await client.from("ratings").select("item_id,rating").in("item_id", chunk);

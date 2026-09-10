@@ -615,7 +615,7 @@
       var chunks = [];
       for (var i = 0; i < ids.length; i += 100) chunks.push(ids.slice(i, i + 100));
       var results = await Promise.all(chunks.map(async function (c) {
-        var res = await client.from("ratings_summary").select("item_id,star1,star2,star3,star4,star5,total").in("item_id", c);
+        var res = await client.rpc("get_ratings_summary", { product_ids: c });
         if (res.error) return [];
         return res.data || [];
       }));
