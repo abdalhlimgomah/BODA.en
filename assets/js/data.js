@@ -95,6 +95,14 @@
             record = allResp.data.find(function (p) { return String(p.id || p.product_id) === String(id); }) || null;
           }
         }
+        if (!record && typeof client.from === "function") {
+          var vendResp = await client.from("taager_products").select("*").eq("id", String(id)).limit(1);
+          if (!vendResp.error && vendResp.data && vendResp.data.length) record = vendResp.data[0];
+          if (!record && /^\d+$/.test(String(id))) {
+            vendResp = await client.from("taager_products").select("*").eq("taager_product_id", String(id)).limit(1);
+            if (!vendResp.error && vendResp.data && vendResp.data.length) record = vendResp.data[0];
+          }
+        }
       }
     } catch (e) { console.warn("[PDP] supabase lookup failed", e); }
     if (!record) return null;
@@ -104,6 +112,28 @@
     return norm ? Object.assign({}, record, norm) : record;
   }
 
+  /**
+   * A stored copy is "complete" enough to paint the page without any
+   * network wait: name, a positive price, and at least one real image
+   * field. Checks RAW fields only — getProductImages() always returns
+   * the fallback placeholder, so its length is meaningless here.
+   */
+  function looksComplete(product) {
+    if (!product || !product.name) return false;
+    var price = Number(
+      product.price || product.currentPrice || product.finalPrice ||
+      product.price_after_discount || product.discountPrice
+    ) || 0;
+    if (!(price > 0)) return false;
+    if (Array.isArray(product.images) && product.images.length) return true;
+    return Boolean(product.image || product.image1 || product.image_url || product.img);
+  }
+
+  /** Refreshes the store cache for a painted product without blocking UI. */
+  function refreshProductInBackground(id) {
+    loadRemoteProduct(id)["catch"](function () { /* store keeps the painted copy */ });
+  }
+
   async function resolveProduct() {
     var id = utils().getQueryParam("id");
     var product = null;
@@ -111,11 +141,23 @@
     var stored = readStoredProduct(id);
     if (stored) product = product ? Object.assign({}, product, stored) : stored;
     if (id && String(id).indexOf("taager_") === 0) {
-      var remote = await loadRemoteProduct(id);
-      if (remote) product = remote;
-    } else if (id && (!product || utils().getProductImages(product).length <= 1 || (product && !product.raw_data))) {
-      var remote2 = await loadRemoteProduct(id);
-      if (remote2) product = product ? Object.assign({}, product, remote2) : remote2;
+      if (looksComplete(product)) {
+        // Stale-while-revalidate: paint instantly from the copy the visitor
+        // just clicked in the listing; refresh the store cache in background.
+        refreshProductInBackground(id);
+      } else {
+        var remote = await loadRemoteProduct(id);
+        if (remote) product = remote;
+      }
+    } else if (id) {
+      var imageCount = product ? utils().getProductImages(product).length : 0;
+      if (!product || !looksComplete(product) || imageCount <= 1) {
+        // Thin/missing record: block on the authoritative lookup as before.
+        var remote2 = await loadRemoteProduct(id);
+        if (remote2) product = product ? Object.assign({}, product, remote2) : remote2;
+      } else {
+        refreshProductInBackground(id);
+      }
     }
     if (!product && !id && global.BudaStore && global.BudaStore.getAllProducts) {
       var all = Object.values(global.BudaStore.getAllProducts() || {});
@@ -238,7 +280,7 @@
     var declaredStatus = String((product && (product.stockStatus || product.stock_status)) || "").toLowerCase();
     var status = "in_stock";
     if (declaredStatus === "out_of_stock" || qty === 0) status = "out_of_stock";
-    else if (qty > 0 && qty < 5) status = "low_stock";
+    else if (qty > 0 && qty <= 10) status = "low_stock";
     return { quantity: qty, status: status };
   }
 
@@ -267,12 +309,15 @@
   function buildDelivery(product, badges) {
     var cutoff = nextCutoff();
     var shippingDays = badges.express ? 1 : 3;
-    var eta = new Date(cutoff);
-    eta.setDate(eta.getDate() + shippingDays);
+    var etaStart = new Date(cutoff);
+    etaStart.setDate(etaStart.getDate() + shippingDays);
+    var etaEnd = new Date(etaStart);
+    etaEnd.setDate(etaEnd.getDate() + 3);
     var fee = Number(product && (product.shipping_fee || product.shippingFee));
     return {
       express: badges.express,
-      etaDate: formatArabicDate(eta),
+      etaDate: formatArabicDate(etaStart),
+      etaEndDate: formatArabicDate(etaEnd),
       cutoffTs: cutoff.getTime(),
       feeText: fee > 0 ? utils().money(fee) : (badges.freeShipping ? "مجاني" : "يُحسب عند الدفع"),
     };
@@ -548,8 +593,12 @@
     };
   }
 
-  /** Async seller resolution — checks pool, assigns profile, returns seller object. */
-  async function resolveSeller(product) {
+  /**
+   * Async seller resolution — checks pool, assigns profile, returns seller object.
+   * `presolved`: optional promise started earlier in parallel (index.js) when the
+   * generator path was already known to be needed; awaited before a redundant call.
+   */
+  async function resolveSeller(product, presolved) {
     if (!product || !product.id) return buildSeller(product);
     var sellerField = product.seller || product.vendor;
     var hasSellerStats = (
@@ -559,7 +608,13 @@
     );
     if (hasSellerStats || (sellerField && !isGenericSeller(sellerField))) return buildSeller(product);
     var gen = global.PDP && global.PDP.SellerGenerator;
-    if (gen && gen.resolve) return await gen.resolve(product.id);
+    if (gen && gen.resolve) {
+      if (presolved && typeof presolved.then === "function") {
+        var pre = await presolved;
+        if (pre) return pre;
+      }
+      return await gen.resolve(product.id);
+    }
     return buildSeller(product);
   }
 
@@ -589,10 +644,13 @@
     var u = utils();
     var fb = u.fallbackImage();
     var eta = new Date(Date.now() + 3 * 86400000);
-    var etaStr;
+    var etaEnd = new Date(eta);
+    etaEnd.setDate(etaEnd.getDate() + 3);
+    var etaStr, etaEndStr;
       try {
         etaStr = formatArabicDate(eta);
-      } catch (e) { etaStr = eta.toDateString(); }
+        etaEndStr = formatArabicDate(etaEnd);
+      } catch (e) { etaStr = eta.toDateString(); etaEndStr = etaEnd.toDateString(); }
     return {
       id: "demo",
       raw: null,
@@ -605,7 +663,7 @@
       rating: { average: 4.2, count: 15 },
       stock: { quantity: 10, status: "in_stock" },
       badges: { express: true, freeShipping: true, bestSeller: true },
-      delivery: { express: true, etaDate: etaStr, cutoffTs: Date.now() + 3600000, feeText: "مجاني" },
+      delivery: { express: true, etaDate: etaStr, etaEndDate: etaEndStr, cutoffTs: Date.now() + 3600000, feeText: "مجاني" },
       installment: { provider: "ValU", months: 6, perMonthText: u.money(33.33), providers: ["ValU", "Premium", "Visa", "Mastercard"] },
       offers: { coupons: [], bankOffers: [], hasAny: false },
       variants: [],
@@ -656,7 +714,7 @@
         if (taagerSizes.length > 1) { raw = taagerSizes; product._taagerMultiSizes = true; }
         else { product._needsTaagerSizes = true; }
       }
-      if (!Array.isArray(raw) || !raw.length && taagerRaw && taagerRaw.attributes && Array.isArray(taagerRaw.attributes)) {
+      if ((!Array.isArray(raw) || !raw.length) && taagerRaw && Array.isArray(taagerRaw.attributes)) {
         for (var bi = 0; bi < taagerRaw.attributes.length; bi++) {
           var b = taagerRaw.attributes[bi];
           var bName = String(b && (b.name || b.attr || b.key || "")).toLowerCase();
@@ -669,13 +727,29 @@
       if (!Array.isArray(raw) || !raw.length) return [];
     }
     return raw.map(function (s) {
-      if (typeof s === "string") return { name: s, stock: 0, is_available: true };
+      if (typeof s === "string") return { name: s, stock: 999, is_available: true };
       return {
         name: s.name || s.size || s.label || String(s),
         stock: Math.max(0, Number(s.stock) || 0),
         is_available: s.is_available !== false && s.stock !== 0,
+        price: (typeof s.price === "number" && s.price > 0) ? s.price : (typeof s.price === "string" && Number(s.price) > 0 ? Number(s.price) : undefined),
       };
     }).filter(function (s) { return s.name; });
+  }
+
+  /** Builds a per-color → per-size stock matrix from the stored `colors` column. */
+  function buildColorsMatrix(product) {
+    var cols = product && Array.isArray(product.colors) ? product.colors : [];
+    return cols.map(function (c) {
+      return {
+        name: String((c && (c.name || c.label || c.value)) || "").trim(),
+        sizes: (Array.isArray(c && c.sizes) ? c.sizes : [])
+          .map(function (x) {
+            return { size: String((x && (x.size || x.name)) || "").trim(), stock: Math.max(0, Number(x && x.stock) || 0) };
+          })
+          .filter(function (x) { return x.size; }),
+      };
+    }).filter(function (c) { return c.name; });
   }
 
   /** Builds the full, stable view-model every component consumes. */
@@ -702,6 +776,7 @@
       offers: buildOffers(product),
       variants: buildVariants(product),
       sizes: buildSizes(product),
+      colorsMatrix: buildColorsMatrix(product),
       seller: extras.seller || buildSeller(product),
       highlights: buildHighlights(product),
       specs: buildSpecs(product),
@@ -811,6 +886,7 @@
     buildViewModel: buildViewModel,
     buildVariants: buildVariants,
     buildSizes: buildSizes,
+    buildPrice: buildPrice,
     buildFallbackViewModel: buildFallbackViewModel,
     pickBoughtTogether: pickBoughtTogether,
     pickRecommended: pickRecommended,
