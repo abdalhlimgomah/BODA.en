@@ -1,0 +1,18 @@
+# Secrets — never upload these to Vercel
+gen-lang-client-*.json
+
+# Local tooling / env
+.venv/
+node_modules/
+__pycache__/
+*.log
+
+# Supabase-deployed code (deploy via Supabase, not Vercel)
+supabase/
+
+# DB migrations (live already applied via Supabase SQL editor)
+sql/
+
+# OS/IDE
+.DS_Store
+Thumbs.db
