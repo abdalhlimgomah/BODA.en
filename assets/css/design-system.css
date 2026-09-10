@@ -1,5 +1,5 @@
 /* Design System — New tokens (ch-*, cart-*, pl-*, pd-*, etc.) */
-@import url('../design-system/index.css');
+@import url('../design-system/index.css?v=20260909d');
 
 /* Design System */
 @import url('design-system.css');

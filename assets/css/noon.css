@@ -1,4 +1,4 @@
-@import '../design-system/index.css';
+@import url('../design-system/index.css?v=20260909d');
 
 * {
   -webkit-tap-highlight-color: transparent;
