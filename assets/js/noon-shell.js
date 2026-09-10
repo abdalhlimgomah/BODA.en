@@ -100,7 +100,7 @@ function getNoonHeaderHTML() {
   return [
     '<div class="buda-header__inner">',
     '  <a href="home.html" class="buda-header__brand" id="budaHeaderBrand">',
-    '    <img class="buda-header__logo-img" src="../assets/images/logo.png" alt="BudoQ" />',
+    '    <picture><source srcset="../assets/images/logo-140.webp" type="image/webp" /><img class="buda-header__logo-img" src="../assets/images/logo-140.png" alt="BudoQ" /></picture>',
     '    <span class="buda-header__brand-name">BudoQ</span>',
     '  </a>',
     '  <div class="buda-header__search-inline" id="budaHeaderSearch">',
