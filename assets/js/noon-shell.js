@@ -78,7 +78,7 @@ function ensureHeaderCSS() {
 
   var nightCssId = "boda-night-css";
   if (!document.getElementById(nightCssId)) {
-    var nightUrl = resolveAssetUrl("../css/noon.css?v=20260826");
+    var nightUrl = resolveAssetUrl("../css/noon.css?v=20260909d");
     var nightLink = document.createElement("link");
     nightLink.id = nightCssId;
     nightLink.rel = "stylesheet";
