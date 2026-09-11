@@ -97,7 +97,7 @@
     <a href="empty-cart.html" data-nav="cart"><span class="material-icons-outlined"></span><small>العربة</small><span id="nav-cart-count" class="nav-cart-count nav-cart-0">0</span></a>
   </nav>
 
-  <script src="../assets/vendor/supabase/supabase-js@2.js?v=20260810"></script>
+  <script src="../assets/vendor/supabase/supabase-js.js?v=20260810"></script>
   <script src="../assets/js/supabase-client.js?v=20260822c"></script>
   <script src="../assets/js/auth.config.js"></script>
   <script src="../assets/js/taager-integration.js?v=20260814"></script>
@@ -133,7 +133,7 @@
         renderPage();
       }
 
-      function getPrice(p) { var r = window.BudaStore ? window.BudaStore.resolveProductPrice(p) : { currentPrice: Number(p.price)||0, originalPrice: Number(p.originalPrice)||0, hasDiscount: false, discountPercent: 0 }; return { finalPrice: r.currentPrice || r.finalPrice || Number(p.price)||0, originalPrice: r.originalPrice || 0, hasDiscount: r.hasDiscount || false, discountPercent: r.discountPercent || 0 }; }
+      function getPrice(p) { var r = window.BudaStore ? window.BudaStore.resolveProductPrice(p) : { currentPrice: Number(p.price)||0, originalPrice: Number(p.originalPrice)||0, hasDiscount: false, discountPercent: 0 }; var f = r.currentPrice || r.finalPrice || Number(p.price)||0; if (window.BudaStore && window.BudaStore.applyPricing) { f = window.BudaStore.applyPricing(p, f); } var o = r.originalPrice > f ? r.originalPrice : f; return { finalPrice: f, originalPrice: o, hasDiscount: o > f, discountPercent: o > f ? Math.round(((o - f) / o) * 100) : 0 }; }
       function getRating(p) { return window.BudaStore ? window.BudaStore.resolveProductRating(p) : { rating: 0, reviews: 0 }; }
       function getImage(p) { return window.BudaStore ? window.BudaStore.getImagePath((window.BudaStore.getProductImages(p)||["assets/images/unnamed.png"])[0]) : (p.image || "assets/images/unnamed.png"); }
       function formatMoney(v) { return window.BudaStore ? window.BudaStore.formatMoney(v) : (Number(v)||0).toFixed(2); }
@@ -251,9 +251,16 @@
         });
       }
 
-      if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", loadProducts);
-      else loadProducts();
-    })();
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", loadProducts);
+        else loadProducts();
+
+        document.addEventListener("boda:pricing-updated", function () {
+          if (allProducts.length) {
+            allFiltered = getFilteredProducts();
+            renderPage();
+          }
+        });
+      })();
   </script>
   <script src="../assets/js/noon-shell.js?v=20260909d"></script>
 </body>

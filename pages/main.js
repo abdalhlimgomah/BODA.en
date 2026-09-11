@@ -285,7 +285,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (window.BudaStore?.resolveProductPrice) {
       const { currentPrice, originalPrice, hasDiscount, discountPercent } =
         window.BudaStore.resolveProductPrice(product);
-      return { finalPrice: currentPrice, originalPrice, hasDiscount, discountPercent };
+      const finalPrice =
+        window.BudaStore.applyPricing
+          ? window.BudaStore.applyPricing(product, currentPrice)
+          : currentPrice;
+      const orig = originalPrice > finalPrice ? originalPrice : finalPrice;
+      return {
+        finalPrice,
+        originalPrice: orig,
+        hasDiscount: hasDiscount || orig > finalPrice,
+        discountPercent: orig > finalPrice ? Math.round(((orig - finalPrice) / orig) * 100) : 0,
+      };
     }
     const value = Number(product?.price) || 0;
     return { finalPrice: value, originalPrice: value, hasDiscount: false, discountPercent: 0 };

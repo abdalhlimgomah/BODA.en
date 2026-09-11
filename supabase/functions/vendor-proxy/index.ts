@@ -14,9 +14,15 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 
 const VENDOR_MAX_PAGES = 60;
+const VENDOR_MAX_PAGES_AUTO = 2000;
 const VENDOR_DETAILS_LIMIT = 200;
+const VENDOR_DETAILS_LIMIT_MAX = 2000;
 const VENDOR_DETAILS_CONCURRENCY = 4;
+const VENDOR_IMAGE_CHECK_CONCURRENCY = 6;
+const VENDOR_BATCH = 100;
 const VENDOR_CHUNK = 200;
+const VENDOR_ZERO_NEW_STOP = 12;
+const VENDOR_CRAWL_STATE_KEY = "vendor_crawl_state";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Origin": "*",
@@ -93,8 +99,9 @@ function splitBlocks(buffer: string, openTag: string): string[] {
 
 function parseCard(card: string): JsonRecord | null {
   const idMatch = card.match(/<i[^>]*data-id="(\d+)"[^>]*class="[^"]*makeFav/);
-  if (!idMatch) return null;
-  const id = idMatch[1];
+  const urlIdMatch = card.match(/\/product\/(\d+)/);
+  const id = idMatch ? idMatch[1] : (urlIdMatch ? urlIdMatch[1] : "");
+  if (!id) return null;
 
   const zipMatch = card.match(/<a[^>]*href="([^"]*\.zip)"[^>]*download/i);
   const productMatch = card.match(/href="(https:\/\/aff\.ven-door\.com\/(?:product|products)\/\d+[^"]*)"/);
@@ -286,13 +293,59 @@ function isCardHtml(html: string): boolean {
     /<i[^>]*data-id="\d+"[^>]*class="[^"]*makeFav/.test(html);
 }
 
-async function crawlCatalog(token: string, maxPages: number): Promise<{ products: JsonRecord[]; ids: string[]; pagesScanned: number }> {
-  const products: JsonRecord[] = [];
+async function fetchAllVendorIds(): Promise<Set<string>> {
+  const supabase = getSupabaseAdmin();
+  const out = new Set<string>();
+  if (!supabase) return out;
+  let from = 0;
+  for (;;) {
+    const { data, error } = await supabase
+      .from("taager_products")
+      .select("id")
+      .eq("source", "vendor")
+      .range(from, from + 999);
+    if (error) break;
+    if (!data || !(data as unknown[]).length) break;
+    for (const r of (data as JsonRecord[])) out.add(String(r.id).replace(/^vendor_/, ""));
+    from += 1000;
+    if ((data as unknown[]).length < 1000) break;
+  }
+  return out;
+}
+
+async function crawlCatalog(
+  token: string,
+  maxPages: number,
+  resume: { dataId: string; dataIds: string } | null,
+  onProgress: (dataId: string, dataIds: string) => Promise<void>,
+  onBatch: (batch: JsonRecord[]) => Promise<void>,
+  skipIds: Set<string> | null = null,
+): Promise<{ totalCrawled: number; ids: string[]; pagesScanned: number; reachedEnd: boolean; anonymous: boolean; loopStopped: boolean; lastState: { dataId: string; dataIds: string } }> {
   const seen = new Set<string>();
-  let dataId = "";
-  let dataIds = "";
+  let dataId = resume?.dataId || "";
+  let dataIds = resume?.dataIds || "";
+  if (dataIds) {
+    for (const id of dataIds.split(",")) {
+      const t = id.trim();
+      if (t) seen.add(t);
+    }
+  }
   let pagesScanned = 0;
   let emptyHits = 0;
+  let zeroNewStreak = 0;
+  let reachedEnd = false;
+  let anonymous = false;
+  let loopStopped = false;
+  let totalCrawled = 0;
+  const batch: JsonRecord[] = [];
+
+  const flushBatch = async () => {
+    if (!batch.length) return;
+    const snapshot = batch.slice();
+    batch.length = 0;
+    totalCrawled += snapshot.length;
+    await onBatch(snapshot);
+  };
 
   for (let round = 0; round < maxPages; round++) {
     let html = await fetchLoadData(token, dataId, dataIds);
@@ -313,29 +366,79 @@ async function crawlCatalog(token: string, maxPages: number): Promise<{ products
     emptyHits = 0;
 
     const parsed = parseCardPage(html);
+    const hasAnyButton = /class=\s*"[^"]*\bload-more\b[^"]*"/.test(html);
+    const hasRealButton = parsed.page !== null;
+    if (hasAnyButton && !hasRealButton) {
+      anonymous = true;
+      break;
+    }
+
     let added = 0;
     for (const p of parsed.products) {
       const pid = String(p.id);
+      if (skipIds && skipIds.has(pid)) continue;
       if (!seen.has(pid)) {
         seen.add(pid);
         p.storeId = dataId || "";
-        products.push(p);
+        batch.push(p);
         added++;
       }
     }
     pagesScanned++;
 
+    const finishedPage = !parsed.page;
+    const lastRound = round === maxPages - 1;
+    if (finishedPage) reachedEnd = true;
+
+    if (batch.length >= VENDOR_BATCH || finishedPage || lastRound) {
+      await flushBatch();
+    }
+    if (finishedPage) break;
+
     if (!parsed.page) break;
-    dataId = String(parsed.page.dataId);
+    const nextDataId = String(parsed.page.dataId);
     dataIds = String(parsed.page.dataIds || "");
-    if (!dataId) break;
+    if (!nextDataId) {
+      reachedEnd = true;
+      await flushBatch();
+      break;
+    }
+
+    if (added === 0) zeroNewStreak++;
+    else zeroNewStreak = 0;
+    if (zeroNewStreak >= VENDOR_ZERO_NEW_STOP) {
+      loopStopped = true;
+      await flushBatch();
+      break;
+    }
+
+    if (nextDataId === dataId) {
+      dataId = "";
+      continue;
+    }
+    dataId = nextDataId;
+
     if (parsed.products.length === 0 && added === 0) {
       emptyHits++;
       if (emptyHits >= 2) break;
     }
+
+    if (pagesScanned % 3 === 0) {
+      try { await onProgress(dataId, dataIds); } catch { /* non-critical */ }
+    }
   }
 
-  return { products, ids: Array.from(seen), pagesScanned };
+  if (batch.length && !anonymous) await flushBatch();
+
+  return {
+    totalCrawled,
+    ids: Array.from(seen),
+    pagesScanned,
+    reachedEnd,
+    anonymous,
+    loopStopped,
+    lastState: { dataId, dataIds },
+  };
 }
 
 async function mapLimit<T, R>(items: T[], limit: number, fn: (item: T, index: number) => Promise<R>): Promise<R[]> {
@@ -401,7 +504,7 @@ async function resolveImageUrl(url: string): Promise<string> {
 }
 
 async function filterLiveImages(urls: string[]): Promise<string[]> {
-  const results = await mapLimit(urls, 3, (u) => resolveImageUrl(u));
+  const results = await mapLimit(urls, VENDOR_IMAGE_CHECK_CONCURRENCY, (u) => resolveImageUrl(u));
   const seen = new Set<string>();
   const out: string[] = [];
   for (const u of results) {
@@ -593,19 +696,23 @@ function buildSizesColors(variants: JsonRecord[], priceMax: number): { sizes: Js
   return { sizes, colors };
 }
 
-async function fetchExistingByIds(ids: string[]): Promise<Record<string, JsonRecord>> {
+async function fetchExistingByIds(ids: string[], full = false): Promise<Record<string, JsonRecord>> {
   const supabase = getSupabaseAdmin();
   if (!supabase) return {};
   const map: Record<string, JsonRecord> = {};
+  const cols = full
+    ? "*"
+    : "id,name,category,price,original_price,stock,stock_status,seller,brand,quick_details,content_ideas,how_to_use,videos,images,sizes,colors,raw_data";
   const chunkSize = 200;
   for (let i = 0; i < ids.length; i += chunkSize) {
     const chunkIds = ids.slice(i, i + chunkSize).map((id) => `vendor_${id}`);
-    const { data, error } = await supabase
+    const builder = supabase
       .from("taager_products")
-      .select("id,name,category,price,original_price,stock,stock_status,seller,brand,quick_details,content_ideas,how_to_use,videos,images,sizes,colors,raw_data")
-      .in("id", chunkIds);
+      .select(cols as never)
+      .in("id", chunkIds) as unknown as Promise<{ data: JsonRecord[] | null; error: any }>;
+    const { data, error } = await builder;
     if (error) throw error;
-    for (const r of (data || [])) map[String(r.id)] = r as JsonRecord;
+    for (const r of (data || [])) map[String(r.id)] = r;
   }
   return map;
 }
@@ -634,6 +741,65 @@ async function persistVendorRows(rows: JsonRecord[], allIds: string[], replaceSt
   }
 }
 
+async function getCrawlState(): Promise<JsonRecord | null> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return null;
+  const { data } = await sb.from("app_settings").select("value").eq("key", VENDOR_CRAWL_STATE_KEY).maybeSingle();
+  if (!data || !data.value) return null;
+  try {
+    const parsed = JSON.parse(String(data.value));
+    return parsed && typeof parsed === "object" ? parsed as JsonRecord : null;
+  } catch { return null; }
+}
+
+async function saveCrawlState(state: JsonRecord): Promise<void> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return;
+  await sb.from("app_settings").upsert({ key: VENDOR_CRAWL_STATE_KEY, value: JSON.stringify(state) }, { onConflict: "key" });
+}
+
+async function clearCrawlState(): Promise<void> {
+  const sb = getSupabaseAdmin();
+  if (!sb) return;
+  await sb.from("app_settings").delete().eq("key", VENDOR_CRAWL_STATE_KEY);
+}
+
+function partialPatch(row: JsonRecord, existing: JsonRecord, fields: Set<string>): JsonRecord {
+  const now = String(row.updated_at || "");
+  const priorRaw = (existing.raw_data && typeof existing.raw_data === "object") ? existing.raw_data as JsonRecord : {};
+  const newRaw = (row.raw_data && typeof row.raw_data === "object") ? row.raw_data as JsonRecord : {};
+  const rawPatch: JsonRecord = { ...priorRaw };
+  const patch: JsonRecord = { updated_at: now, last_synced_at: now };
+
+  if (fields.has("price")) {
+    patch.price = row.price;
+    rawPatch.price = newRaw.price != null ? newRaw.price : rawPatch.price;
+    rawPatch.price_min = newRaw.price_min != null ? newRaw.price_min : rawPatch.price_min;
+    rawPatch.price_max = newRaw.price_max != null ? newRaw.price_max : rawPatch.price_max;
+    if (newRaw.commission != null) rawPatch.commission = newRaw.commission;
+    if (newRaw.commission_value != null) rawPatch.commission_value = newRaw.commission_value;
+    if (newRaw.qty != null) rawPatch.qty = newRaw.qty;
+  }
+
+  if (fields.has("stock")) {
+    patch.stock = row.stock;
+    patch.stock_status = row.stock_status;
+    if (newRaw.qty != null) rawPatch.qty = newRaw.qty;
+  }
+
+  if (fields.has("sizes")) {
+    patch.sizes = row.sizes;
+    patch.colors = row.colors;
+    patch.stock = row.stock;
+    patch.stock_status = row.stock_status;
+    if (newRaw.variants != null) rawPatch.variants = newRaw.variants;
+    if (newRaw.qty != null) rawPatch.qty = newRaw.qty;
+  }
+
+  patch.raw_data = rawPatch;
+  return patch;
+}
+
 function isSyncAuthorized(req: Request, url: URL): boolean {
   if (!VENDOR_SYNC_SECRET) return true;
   const headerSecret = req.headers.get("x-sync-secret") || "";
@@ -643,12 +809,25 @@ function isSyncAuthorized(req: Request, url: URL): boolean {
 
 async function probeSession(): Promise<JsonRecord> {
   const token = await refreshToken();
-  const ok = Boolean(token);
+  if (!token) {
+    return { ok: false, token_prefix: "", session_valid: false, hint: "تعذر الحصول على CSRF — تأكد من بيانات الجلسة" };
+  }
+  let anonymous = false;
+  try {
+    const html = await fetchLoadData(token, "", "");
+    const hasAnyButton = /class=\s*"[^"]*\bload-more\b[^"]*"/.test(html);
+    const hasRealButton = html.includes('id="load_more_button"');
+    anonymous = hasAnyButton && !hasRealButton;
+  } catch {
+    anonymous = false;
+  }
   return {
-    ok,
-    token_prefix: token ? token.substring(0, 10) + "..." : "",
-    session_valid: ok,
-    hint: ok ? "" : "الجلسة غير صالحة — حدّث VENDOR_COOKIE_SESSION و VENDOR_COOKIE_XSRF من المتصفح",
+    ok: !anonymous,
+    token_prefix: token.substring(0, 10) + "...",
+    session_valid: !anonymous,
+    hint: anonymous
+      ? "الجلسة غير صالحة: الكتالوج معروض بالوضع العام (منتجات تجريبية فقط). حدّث VENDOR_COOKIE_SESSION و VENDOR_COOKIE_XSRF من المتصفح"
+      : "",
   };
 }
 
@@ -688,9 +867,14 @@ serve(async (req: Request) => {
         return respond(JSON.stringify({ error: "VENDOR_COOKIE_SESSION و VENDOR_COOKIE_XSRF غير مضبوطين بعد" }), 400);
       }
 
-      const maxPages = Math.min(Math.max(Number(url.searchParams.get("max_pages") || VENDOR_MAX_PAGES) || 0, 1), 200);
-      const detailsLimit = Math.min(Math.max(Number(url.searchParams.get("details_limit") || VENDOR_DETAILS_LIMIT) || 0, 0), 1000);
+      const requestedPages = Number(url.searchParams.get("max_pages") || VENDOR_MAX_PAGES) || 0;
+      const maxPages = Math.min(Math.max(requestedPages > 0 ? requestedPages : VENDOR_MAX_PAGES_AUTO, 1), VENDOR_MAX_PAGES_AUTO);
+      const detailsLimit = Math.min(Math.max(Number(url.searchParams.get("details_limit") || VENDOR_DETAILS_LIMIT) || 0, 0), VENDOR_DETAILS_LIMIT_MAX);
       const fetchDetails = url.searchParams.get("fetch_details") !== "0";
+      const newOnly = url.searchParams.get("new_only") === "1";
+      const fieldsParam = (url.searchParams.get("fields") || "full").toLowerCase();
+      const fieldSet = new Set(fieldsParam.split(",").map((f) => f.trim()).filter(Boolean));
+      const fieldsMode = !fieldSet.has("full") && fieldSet.size > 0;
 
       const probe = await probeSession();
       if (!probe.ok) {
@@ -698,48 +882,154 @@ serve(async (req: Request) => {
       }
       const fullToken = await refreshToken();
 
-      const crawled = await crawlCatalog(fullToken, maxPages);
-      if (!crawled.products.length) {
-        return respond(JSON.stringify({ ok: false, error: "لا توجد منتجات أو الجلسة منتهية", pages_scanned: crawled.pagesScanned }));
+      let resume: { dataId: string; dataIds: string } | null = null;
+      let resumed = false;
+      let runningTotal = { pages: 0, products: 0 };
+      const savedState = await getCrawlState();
+      if (savedState && String(savedState.dataId || "") && String(savedState.dataIds || "")) {
+        resumed = true;
+        resume = { dataId: String(savedState.dataId), dataIds: String(savedState.dataIds) };
+        runningTotal.pages = Number(savedState.pages || 0) || 0;
+        runningTotal.products = Number(savedState.products || 0) || 0;
       }
 
-      let enriched = 0;
-      if (fetchDetails && detailsLimit > 0) {
-        const todo = crawled.products.slice(0, detailsLimit);
-        const details = await mapLimit(todo, VENDOR_DETAILS_CONCURRENCY, async (card) => {
-          try {
-            const html = await fetchHtml(`${VENDOR_SITE}/product/${String(card.id)}`, {
-              headers: { "Referer": `${VENDOR_SITE}/` },
-            });
-            return { card, detail: parseDetail(html) };
-          } catch {
-            return { card, detail: null };
+      let processedCount = 0;
+      let addedTotal = 0;
+      let updatedTotal = 0;
+      let detailsFetchedTotal = 0;
+      let detailsSkippedTotal = 0;
+      let detailsTotal = 0;
+
+      const processBatch = async (batch: JsonRecord[]) => {
+        if (!batch.length) return;
+        processedCount += batch.length;
+        const now = new Date().toISOString();
+        const ids = batch.map((c) => String(c.id));
+        const existingMap = await fetchExistingByIds(ids, fieldsMode);
+
+        let enriched = 0;
+        let skippedDetailed = 0;
+        if (fetchDetails && detailsLimit > 0) {
+          const todo = batch
+            .filter((p) => !rowHasDetails(existingMap[`vendor_${p.id}`]))
+            .slice(0, detailsLimit);
+          skippedDetailed = batch.length - todo.length;
+          const details = await mapLimit(todo, VENDOR_DETAILS_CONCURRENCY, async (card) => {
+            try {
+              const html = await fetchHtml(`${VENDOR_SITE}/product/${String(card.id)}`, {
+                headers: { "Referer": `${VENDOR_SITE}/` },
+              });
+              return { card, detail: parseDetail(html) };
+            } catch {
+              return { card, detail: null };
+            }
+          });
+          for (const d of details) {
+            if (d.detail) enriched++;
+            const card = batch.find((p) => String(p.id) === String(d.card.id));
+            if (card) card._detail = d.detail;
           }
-        });
-        for (const d of details) {
-          if (d.detail) enriched++;
-          const card = crawled.products.find((p) => String(p.id) === String(d.card.id));
-          if (card) card._detail = d.detail;
         }
+
+        const rows = await mapLimit(batch, 4, (card) =>
+          toDbRow(card, (card._detail as JsonRecord | null) || null, now, existingMap[`vendor_${card.id}`] || null)
+        );
+
+        let persistRows = rows;
+        if (newOnly) {
+          persistRows = rows.filter((r) => !existingMap[String(r.id)]);
+          addedTotal += persistRows.length;
+        } else if (fieldsMode) {
+          const merged: JsonRecord[] = [];
+          for (const row of rows) {
+            const existing = existingMap[String(row.id)];
+            if (!existing) {
+              merged.push(row);
+              addedTotal++;
+              continue;
+            }
+            merged.push({ ...existing, ...partialPatch(row, existing, fieldSet) });
+            updatedTotal++;
+          }
+          persistRows = merged;
+        } else {
+          addedTotal += rows.filter((r) => !existingMap[String(r.id)]).length;
+        }
+
+        if (persistRows.length) {
+          await persistVendorRows(persistRows, [], false);
+        }
+
+        detailsTotal += fetchedDetailCount(rows);
+        detailsFetchedTotal += enriched;
+        detailsSkippedTotal += skippedDetailed;
+      };
+
+      const crawled = await crawlCatalog(
+        fullToken,
+        maxPages,
+        resume,
+        async (dataId, dataIds) => {
+          await saveCrawlState({ dataId, dataIds, pages: runningTotal.pages, products: runningTotal.products });
+        },
+        async (batch) => {
+          await processBatch(batch);
+        },
+        newOnly ? await fetchAllVendorIds() : null,
+      );
+      if (crawled.anonymous) {
+        return respond(JSON.stringify({
+          ok: false,
+          error: "جلسة Vendoor غير صالحة — الكتالوج معروض بالوضع العام (منتجات تجريبية فقط). حدّث الكوكيز ثم أعد الجلب",
+          hint: "حدّث VENDOR_COOKIE_SESSION و VENDOR_COOKIE_XSRF من المتصفح",
+        }), 401);
+      }
+      runningTotal.pages += crawled.pagesScanned;
+      runningTotal.products += crawled.totalCrawled;
+
+      if (crawled.totalCrawled === 0) {
+        if (crawled.reachedEnd && resume) {
+          await clearCrawlState();
+        }
+        return respond(JSON.stringify({
+          ok: false,
+          error: "لا توجد منتجات أو الجلسة منتهية",
+          pages_scanned: crawled.pagesScanned,
+          resumed,
+          catalog_complete: crawled.reachedEnd,
+          loop_stopped: crawled.loopStopped,
+          hint: crawled.loopStopped ? "لم يظهر منتج جديد — كل منتجات فيندور موجودة بالفعل في قاعدة البيانات" : "",
+        }));
       }
 
-      const now = new Date().toISOString();
-      const existingMap = await fetchExistingByIds(crawled.ids);
-      const rows: JsonRecord[] = [];
-      for (const card of crawled.products) {
-        rows.push(await toDbRow(card, (card._detail as JsonRecord | null) || null, now, existingMap[`vendor_${card.id}`] || null));
+      if (crawled.reachedEnd && !fieldsMode && !newOnly) {
+        await persistVendorRows([], crawled.ids, true);
       }
 
-      await persistVendorRows(rows, crawled.ids, true);
+      if (crawled.reachedEnd || crawled.loopStopped) {
+        await clearCrawlState();
+      } else {
+        await saveCrawlState({ ...crawled.lastState, pages: runningTotal.pages, products: runningTotal.products });
+      }
 
       return respond(JSON.stringify({
         ok: true,
-        synced_count: rows.length,
+        mode: fieldsMode ? "fields" : (newOnly ? "new" : "full"),
+        fields: fieldsMode ? fieldsParam : undefined,
+        synced_count: processedCount,
+        added_count: addedTotal,
+        updated_count: updatedTotal,
         ids_count: crawled.ids.length,
         pages_scanned: crawled.pagesScanned,
-        details_fetched: enriched,
-        details_total: fetchedDetailCount(rows),
-        details_pending: Math.max(0, crawled.ids.length - fetchedDetailCount(rows)),
+        total_pages: runningTotal.pages,
+        total_products: runningTotal.products,
+        resumed,
+        catalog_complete: crawled.reachedEnd,
+        resume_active: !crawled.reachedEnd && !crawled.loopStopped,
+        loop_stopped: crawled.loopStopped,
+        details_fetched: detailsFetchedTotal,
+        details_skipped: detailsSkippedTotal,
+        details_pending: Math.max(0, processedCount - detailsTotal),
       }));
     }
 
@@ -816,6 +1106,30 @@ serve(async (req: Request) => {
       return respond(JSON.stringify(data || []));
     }
 
+    if (action === "page") {
+      const token = await refreshToken();
+      const html = await fetchLoadData(token, "", "");
+      const mk = (html.match(/<i[^>]*class="[^"]*makeFav/g) || []).length;
+      const col3 = (html.match(/<div class="col-md-3">/g) || []).length;
+      const lb = html.includes('id="load_more_button"');
+      const lbb = html.includes('load_more_best_button');
+      const anyLoadMore = /load_more/i.test(html);
+      return respond(JSON.stringify({
+        ok: true,
+        len: html.length,
+        token_found: Boolean(token),
+        markers: {
+          col_md_3: col3,
+          makeFav: mk,
+          has_load_more_button: lb,
+          has_load_more_best_button: lbb,
+          any_load_more: anyLoadMore,
+        },
+        head: html.slice(0, 1500),
+        tail: html.slice(-2000),
+      }));
+    }
+
     return respond(JSON.stringify({ error: "Unknown action" }), 400);
   } catch (e) {
     return respond(JSON.stringify({ error: (e as Error).message || String(e) }), 500);
@@ -829,4 +1143,10 @@ function fetchedDetailCount(rows: JsonRecord[]): number {
     if (raw.description || (Array.isArray(raw.variants) && (raw.variants as unknown[]).length)) n++;
   }
   return n;
+}
+
+function rowHasDetails(existing: JsonRecord | null | undefined): boolean {
+  if (!existing) return false;
+  const raw = existing.raw_data && typeof existing.raw_data === "object" ? existing.raw_data as JsonRecord : {};
+  return Boolean(raw.description) || (Array.isArray(raw.variants) && (raw.variants as unknown[]).length > 0);
 }
