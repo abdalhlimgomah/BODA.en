@@ -10,14 +10,14 @@ const FEED_SECRET = Deno.env.get("MERCHANT_FEED_SECRET") || "";
 const RL_WINDOW_MS = 60_000;
 const RL_MAX = 30;
 
-async function checkRateLimit(sb: ReturnType<typeof createClient>, ip: string, fn: string): Promise<boolean> {
+async function checkRateLimit(sb: any, ip: string, fn: string): Promise<boolean> {
   const ws = new Date(Date.now() - RL_WINDOW_MS).toISOString();
   try {
     const { count } = await sb.from("api_rate_limits")
       .select("*", { count: "exact", head: true })
       .eq("ip", ip).eq("function_name", fn).gt("created_at", ws);
     if (count && count >= RL_MAX) return false;
-    sb.from("api_rate_limits").insert({ ip, function_name: fn }).catch(() => {});
+    sb.from("api_rate_limits").insert({ ip, function_name: fn }).then(() => {}, () => {});
     return true;
   } catch { return true; }
 }
@@ -38,6 +38,44 @@ const GOOGLE_CATEGORIES: Record<string, string> = {
   bags: "Luggage & Bags",
   shoes: "Apparel & Accessories > Shoes",
 };
+
+/** Price tiers cache — loaded once per invocation from the price_tiers table
+ *  (same tiers the storefront PricingEngine uses for the on-site markup). */
+let _tiersCache: { min_price: number; max_price: number | null; markup: number }[] | null = null;
+
+async function loadTiers(sb: any): Promise<typeof _tiersCache> {
+  if (_tiersCache) return _tiersCache;
+  const { data, error } = await sb
+    .from("price_tiers")
+    .select("min_price,max_price,markup,sort_order,is_active,country_code")
+    .eq("is_active", true)
+    .order("sort_order", { ascending: true });
+  if (error) throw error;
+  const cc = "EG"; // Feed is generated for the EG storefront
+  const filtered = (data || []).filter((t: Record<string, unknown>) => {
+    const tc = String(t.country_code || "EG").toUpperCase();
+    return tc === cc || (!t.country_code && cc === "EG");
+  });
+  _tiersCache = (filtered.length ? filtered : data || []);
+  return _tiersCache;
+}
+
+/** Same logic as PricingEngine.calculate: find matching tier, add its markup. */
+function applyMarkup(price: number): number {
+  if (!(price > 0)) return price;
+  const tiers = _tiersCache || [];
+  for (const t of tiers) {
+    if (price >= t.min_price && (t.max_price === null || price <= t.max_price)) {
+      const selling = price + Number(t.markup || 0);
+      return selling < price ? price : selling;
+    }
+  }
+  return price;
+}
+
+function round2(n: number): number {
+  return Math.round((Number(n) || 0) * 100) / 100;
+}
 
 function escXml(s: string): string {
   if (!s) return "";
@@ -111,6 +149,14 @@ function buildItem(p: Record<string, unknown>): string {
   const googleCategory = getGoogleCategory(p);
   const productType = String(p.category || "");
 
+  // Final selling price = supplier price + tier markup (same as storefront)
+  const sellingPrice = round2(applyMarkup(price));
+  // Real discount anchor only: show sale_price when original_price is truely
+  // above the selling price. Otherwise g:price IS the selling price.
+  const realOriginal = originalPrice > 0 ? originalPrice : 0;
+  const useSale = realOriginal > sellingPrice && sellingPrice > 0;
+  const displayPrice = useSale ? realOriginal : sellingPrice; // <g:price>
+
   let xml = `    <item>\n`;
   xml += `      <g:id>${escXml(id)}</g:id>\n`;
   xml += `      <g:title>${escXml(truncate(title, 150))}</g:title>\n`;
@@ -118,9 +164,9 @@ function buildItem(p: Record<string, unknown>): string {
   xml += `      <g:link>${escXml(link)}</g:link>\n`;
   if (image) xml += `      <g:image_link>${escXml(image)}</g:image_link>\n`;
   xml += `      <g:availability>${availability}</g:availability>\n`;
-  xml += `      <g:price>${price.toFixed(2)} ${currency}</g:price>\n`;
-  if (originalPrice > 0 && originalPrice > price) {
-    xml += `      <g:sale_price>${price.toFixed(2)} ${currency}</g:sale_price>\n`;
+  xml += `      <g:price>${displayPrice.toFixed(2)} ${currency}</g:price>\n`;
+  if (useSale) {
+    xml += `      <g:sale_price>${sellingPrice.toFixed(2)} ${currency}</g:sale_price>\n`;
   }
   xml += `      <g:condition>new</g:condition>\n`;
   xml += `      <g:brand>${escXml(brand)}</g:brand>\n`;
@@ -144,16 +190,24 @@ function buildItem(p: Record<string, unknown>): string {
   return xml;
 }
 
-async function generateFeed(sb: ReturnType<typeof createClient>): Promise<string> {
+async function generateFeed(sb: any): Promise<string> {
+  await loadTiers(sb);
   const TAAGER_COLUMNS = "id,name,description,quick_details,price,original_price,image,images,image1,image2,image3,image4,image5,image6,image7,image8,stock,stock_status,brand,seller,category,is_active";
-  const { data: products, error } = await sb
-    .from("taager_products")
-    .select(TAAGER_COLUMNS)
-    .eq("is_active", true)
-    .gt("price", 0)
-    .limit(10000);
 
-  if (error) throw error;
+  const all: Record<string, unknown>[] = [];
+  const PAGE_SIZE = 1000;
+  for (let offset = 0; offset < 200000; offset += PAGE_SIZE) {
+    const { data, error } = await sb
+      .from("taager_products")
+      .select(TAAGER_COLUMNS)
+      .eq("is_active", true)
+      .gt("price", 0)
+      .range(offset, offset + PAGE_SIZE - 1);
+    if (error) throw error;
+    if (!data || data.length === 0) break;
+    for (const p of data) all.push(p);
+    if (data.length < PAGE_SIZE) break;
+  }
 
   let xml = `<?xml version="1.0" encoding="UTF-8"?>\n`;
   xml += `<rss xmlns:g="http://base.google.com/ns/1.0" version="2.0">\n`;
@@ -162,7 +216,7 @@ async function generateFeed(sb: ReturnType<typeof createClient>): Promise<string
   xml += `    <link>${SITE_URL}/</link>\n`;
   xml += `    <description>Google Shopping Product Feed for BudoQ</description>\n`;
 
-  for (const p of products || []) {
+  for (const p of all) {
     xml += buildItem(p);
   }
 
@@ -197,16 +251,27 @@ serve(async (req) => {
   // Health / Stats
   if (base === "/stats" || base === "/" || base === "") {
     const sb = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const { data: products } = await sb.from("taager_products").select("id,price,stock,is_active").limit(10000);
-    const active = (products || []).filter((p: Record<string, unknown>) => {
-      const price = Number(p.price || 0);
-      return p.is_active !== false && price > 0;
-    });
+    try { await loadTiers(sb); } catch (_e) {}
+    const PAGE_SIZE = 1000;
+    let total = 0, active = 0;
+    for (let offset = 0; offset < 200000; offset += PAGE_SIZE) {
+      const { data: products, error } = await sb.from("taager_products")
+        .select("id,price,stock,is_active").range(offset, offset + PAGE_SIZE - 1);
+      if (error) break;
+      if (!products || products.length === 0) break;
+      for (const p of products) {
+        total++;
+        const pr = Number(p.price || 0);
+        if (p.is_active !== false && pr > 0) active++;
+      }
+      if (products.length < PAGE_SIZE) break;
+    }
     return new Response(JSON.stringify({
       status: "ok",
-      total: products?.length || 0,
-      active: active.length,
-      feed_url: `${SITE_URL}/api/merchant-feed/feed.xml`,
+      total,
+      active,
+      tiers: _tiersCache?.length || 0,
+      feed_url: `${SUPABASE_URL}/functions/v1/merchant-feed/feed.xml`,
       last_updated: new Date().toISOString(),
     }), {
       headers: { "Content-Type": "application/json" },
