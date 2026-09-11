@@ -4,6 +4,10 @@
    Prefix: bl-
    ============================================ */
 
+:root {
+  --noon-shell-width: 100%;
+}
+
 /* ========== SHIMMER ANIMATION ========== */
 @keyframes bl-shimmer {
   0% { background-position: -468px 0; }
