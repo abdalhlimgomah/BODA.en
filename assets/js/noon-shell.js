@@ -733,6 +733,7 @@ function hideBottomNavOnDesktop() {
           try {
             var pi = window.BudaStore.resolveProductPrice ? window.BudaStore.resolveProductPrice(p) : null;
             var curPrice = pi ? Number(pi.currentPrice || pi.price) : 0;
+            if (pi && curPrice > 0 && window.BudaStore.applyPricing) curPrice = window.BudaStore.applyPricing(p, curPrice);
             if (curPrice > 0) {
               var fmt = function (v) {
                 return window.BudaStore.formatMoney ? window.BudaStore.formatMoney(v, { plain: true }) : String(v);

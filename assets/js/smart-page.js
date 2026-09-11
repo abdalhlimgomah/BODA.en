@@ -222,6 +222,7 @@
           var r2 = window.BudaStore.resolveProductPrice(p);
           var c2 = Number(r2.currentPrice);
           if (c2 > 0) {
+            if (window.BudaStore.applyPricing) c2 = window.BudaStore.applyPricing(p, c2);
             cur = c2;
             orig = Number(r2.originalPrice) > c2 ? Number(r2.originalPrice) : 0;
           }
@@ -517,6 +518,31 @@
         '<div class="sp-brands-row">' + html + '</div></div>');
     }
   };
+
+  document.addEventListener("boda:pricing-updated", function () {
+    document.querySelectorAll(".noon-product-card[data-view-product]").forEach(function (el) {
+      var pid = el.getAttribute("data-view-product");
+      if (!pid) return;
+      try {
+        var p = window.BudaStore && window.BudaStore.getProductById ? window.BudaStore.getProductById(pid) : null;
+        if (!p) return;
+        var priceEl = el.querySelector(".noon-price");
+        if (!priceEl) return;
+        var price = Number(p.price) || 0;
+        var orig = Number(p.original_price) || 0;
+        var cur = price, origDisp = orig > price ? orig : 0;
+        if (window.BudaStore.resolveProductPrice) {
+          var r = window.BudaStore.resolveProductPrice(p);
+          if (r.currentPrice > 0) cur = r.currentPrice;
+        }
+        if (window.BudaStore.applyPricing) cur = window.BudaStore.applyPricing(p, cur);
+        priceEl.innerHTML = window.BudaStore.formatMoney ? window.BudaStore.formatMoney(cur) : String(cur);
+        var badge = el.querySelector(".buda-badge");
+        var off = origDisp > cur && cur > 0 ? Math.round(((origDisp - cur) / origDisp) * 100) : 0;
+        if (badge) badge.textContent = "-" + off + "%";
+      } catch (e) {}
+    });
+  });
 
   window.SmartPage = SmartPage;
 })();

@@ -339,6 +339,19 @@ function resolveProductPrice(product = {}) {
   return { currentPrice, originalPrice, hasDiscount, discountPercent };
 }
 
+/** Apply the tier markup on top of a resolved (supplier) price. Returns `price`
+ *  unchanged when tiers aren't loaded yet. */
+function applyPricing(product, price) {
+  const value = Number(price) || 0;
+  if (!(value > 0)) return value;
+  try {
+    if (window.PricingEngine && window.PricingEngine.tiersLoaded) {
+      return window.PricingEngine.calculate(value);
+    }
+  } catch (_e) {}
+  return value;
+}
+
 function resolveRatingsSource(product = {}) {
   const source = String(
     product.ratingSource ||
@@ -1457,6 +1470,7 @@ window.BudaStore = {
   getResizedImageUrl,
   getProductImages: extractProductImages,
   resolveProductPrice,
+  applyPricing,
   resolveProductRating,
   renderProductStars,
   normalizeProductRecord,

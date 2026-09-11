@@ -78,7 +78,10 @@ function normalizeImages(product) {
 
 function normalizePrice(product) {
   if (window.BudaStore?.resolveProductPrice) {
-    return window.BudaStore.resolveProductPrice(product);
+    const r = window.BudaStore.resolveProductPrice(product);
+    let currentPrice = r.currentPrice || 0;
+    if (window.BudaStore.applyPricing) currentPrice = window.BudaStore.applyPricing(product, currentPrice);
+    return { currentPrice, originalPrice: r.originalPrice };
   }
   const value = Number(product?.price) || 0;
   return { currentPrice: value, originalPrice: value };
@@ -909,4 +912,19 @@ async function renderProductReviewsPage() {
 document.addEventListener("DOMContentLoaded", () => {
   bindImageUploadSection();
   renderProductReviewsPage();
+});
+
+document.addEventListener("boda:pricing-updated", () => {
+  try {
+    const pid = new URLSearchParams(window.location.search).get("id");
+    if (!pid) return;
+    let product = null;
+    try { product = JSON.parse(sessionStorage.getItem("selectedProduct")); } catch {}
+    if (!product || String(product.id) !== String(pid)) {
+      product = window.BudaStore?.getProductById ? window.BudaStore.getProductById(pid) : null;
+    }
+    if (!product) return;
+    const order = reviewPageState?.order || null;
+    renderProductCard(product, order, reviewPageState?.primaryItem || null, null);
+  } catch (_e) {}
 });
