@@ -1798,7 +1798,6 @@ HM.renderSmartCategories = function (section) {
       '<div class="hm-smart-cat-content">' +
       '<h3 class="hm-smart-cat-title">' + escapeHtml(card.title) + '</h3>' +
       (card.subtitle ? '<p class="hm-smart-cat-subtitle">' + escapeHtml(card.subtitle) + '</p>' : '') +
-      '<span class="hm-smart-cat-btn">استكشف الآن <span class="material-icons-outlined">arrow_back</span></span>' +
       '</div></a>';
   });
   html += '</div><button class="hm-cats-btn next" type="button" aria-label="التالي">❯</button></div></div></section>';
