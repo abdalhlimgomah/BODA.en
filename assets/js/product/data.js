@@ -257,7 +257,7 @@
     if (global.BudaStore && global.BudaStore.resolveProductPrice) {
       var r = global.BudaStore.resolveProductPrice(product);
       current = r.currentPrice > 0 ? r.currentPrice : 0;
-      if (global.PricingEngine && global.PricingEngine.tiersLoaded && !isFinalPriceProduct(product)) {
+      if (global.PricingEngine && global.PricingEngine.tiersLoaded) {
         current = global.PricingEngine.calculate(current);
       }
       original = r.originalPrice > current ? r.originalPrice : current;

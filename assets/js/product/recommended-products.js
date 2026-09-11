@@ -10,17 +10,14 @@
   var U = global.PDP.Utils;
 
   function resolvePrice(product) {
-    var isFinalPrice = String(product.source || "").toLowerCase() === "vendor" ||
-      String(product.source || "").toLowerCase() === "taager" ||
-      String(product.id || "").indexOf("vendor_") === 0 || String(product.id || "").indexOf("taager_") === 0;
     if (global.BudaStore && global.BudaStore.resolveProductPrice) {
       var r = global.BudaStore.resolveProductPrice(product);
       var basePrice = r.currentPrice > 0 ? r.currentPrice : (Number(product.price) || 0);
       var finalPrice = basePrice;
-      if (global.PricingEngine && global.PricingEngine.tiersLoaded && !isFinalPrice) {
+      if (global.PricingEngine && global.PricingEngine.tiersLoaded) {
         finalPrice = global.PricingEngine.calculate(basePrice);
       }
-      var origPrice = r.originalPrice > finalPrice ? r.originalPrice : (isFinalPrice ? finalPrice : (r.hasDiscount ? finalPrice * 1.25 : finalPrice));
+      var origPrice = r.originalPrice > finalPrice ? r.originalPrice : (r.hasDiscount ? finalPrice * 1.25 : finalPrice);
       return {
         currentPrice: finalPrice,
         originalPrice: origPrice,
