@@ -159,15 +159,49 @@
   }
 
   function loadReferrals(client) {
-    client.from('referrals').select('*').eq('campaign_id', campaign.id).eq('referrer_user_id', participant.user_id).order('created_at', { ascending: false })
-      .then(function(result) {
-        if (!result.error && result.data) {
-          referrals = result.data;
-        }
-        renderStats();
-        renderProgress();
+    /* Count referrals from BOTH sources so a referral always shows even if
+       the referrals-row insert failed at registration time:
+       1. referrals rows where I am the referrer
+       2. participants whose referred_by = my referral code          */
+    var myCode = participant && participant.referral_code;
+    var myUserId = participant ? String(participant.user_id || '') : '';
+
+    function finalize(rows) {
+      /* Merge and dedupe by referred_user_id */
+      var map = {};
+      (rows || []).forEach(function(r) {
+        if (!r || r.referred_user_id == null) return;
+        if (String(r.referred_user_id) === myUserId) return;
+        map[r.referred_user_id] = r;
+      });
+      referrals = Object.keys(map).map(function(k) { return map[k]; });
+      renderStats();
+      renderProgress();
+    }
+
+    var refPromise = client.from('referrals').select('*').eq('campaign_id', campaign.id).eq('referrer_user_id', myUserId).order('created_at', { ascending: false });
+    var partPromise = myCode
+      ? client.from('contest_participants').select('user_id, joined_at').eq('campaign_id', campaign.id).eq('referred_by', myCode)
+      : Promise.resolve({ data: [], error: null });
+
+    Promise.all([refPromise, partPromise])
+      .then(function(results) {
+        var rows = (results[0] && results[0].data) ? results[0].data.slice() : [];
+        var parts = (results[1] && results[1].data) ? results[1].data : [];
+        parts.forEach(function(p) {
+          if (!p || !p.user_id) return;
+          rows.push({
+            campaign_id: campaign.id,
+            referrer_user_id: myUserId,
+            referred_user_id: p.user_id,
+            referral_code: myCode,
+            status: 'qualified',
+            created_at: p.joined_at
+          });
+        });
+        finalize(rows);
       })
-      .catch(function() {});
+      .catch(function() { finalize([]); });
   }
 
   function loadRewardsData(client) {

@@ -43,25 +43,39 @@ window.ContestReferral = (function() {
     return match ? decodeURIComponent(match[1]) : null;
   }
 
-  /* Store ref temporarily in sessionStorage */
+  /* Store ref code in BOTH sessionStorage and localStorage.
+     localStorage makes the code survive tab closes and full navigation
+     through login/signup/Google OAuth so the referral never gets lost. */
   function storeRefCode(code) {
-    try {
-      sessionStorage.setItem('contest_ref_code', code);
-    } catch (e) {}
+    try { sessionStorage.setItem('contest_ref_code', code); } catch (e) {}
+    try { localStorage.setItem('contest_ref_code', code); } catch (e) {}
   }
 
-  /* Read stored ref code */
+  /* Read stored ref code, preferring sessionStorage then localStorage */
   function getStoredRefCode() {
     try {
-      return sessionStorage.getItem('contest_ref_code');
+      var code = sessionStorage.getItem('contest_ref_code');
+      if (code) return code;
+    } catch (e) {}
+    try {
+      return localStorage.getItem('contest_ref_code');
     } catch (e) { return null; }
   }
 
-  /* Clear stored ref */
+  /* Clear stored ref from both storages */
   function clearStoredRef() {
-    try {
-      sessionStorage.removeItem('contest_ref_code');
-    } catch (e) {}
+    try { sessionStorage.removeItem('contest_ref_code'); } catch (e) {}
+    try { localStorage.removeItem('contest_ref_code'); } catch (e) {}
+  }
+
+  /* Resolve a pending referral code from URL, sessionStorage or localStorage */
+  function resolvePendingRef() {
+    var fromUrl = getRefFromUrl();
+    if (fromUrl) {
+      storeRefCode(fromUrl);
+      return fromUrl;
+    }
+    return getStoredRefCode();
   }
 
   /* Copy text to clipboard with fallback */
@@ -143,6 +157,7 @@ window.ContestReferral = (function() {
     storeRefCode: storeRefCode,
     getStoredRefCode: getStoredRefCode,
     clearStoredRef: clearStoredRef,
+    resolvePendingRef: resolvePendingRef,
     copyToClipboard: copyToClipboard,
     shareLink: shareLink,
     initReferralUI: initReferralUI

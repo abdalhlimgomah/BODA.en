@@ -7,14 +7,10 @@ window.ContestUI = (function() {
   var countdownInterval = null;
 
   function init() {
-    /* Check for referral code in URL */
-    var refCode = window.ContestReferral.getRefFromUrl();
-    if (refCode) {
-      window.ContestReferral.storeRefCode(refCode);
-      /* Clean URL without page reload */
-      if (history.replaceState) {
-        history.replaceState({}, document.title, window.location.pathname);
-      }
+    /* Capture referral code from URL (persists in sessionStorage + localStorage).
+       Keep ?ref= in the URL as a backup so the code survives any navigation. */
+    if (window.ContestReferral.getRefFromUrl()) {
+      window.ContestReferral.storeRefCode(window.ContestReferral.getRefFromUrl());
     }
 
     /* Check auth */
@@ -201,7 +197,22 @@ window.ContestUI = (function() {
       window.ContestData.checkReferralCode(refCode)
         .then(function(r) {
           if (r.data && String(r.data.user_id) !== String(refUserId)) {
-            window.ContestData.claimReferral(p.id, refCode).catch(function() {});
+            window.ContestData.claimReferral(p.id, refCode)
+              .then(function() {
+                /* Also create the referral row (idempotent) so the referrer sees it */
+                if (campaign && refUserId) {
+                  return window.ContestData.createReferral({
+                    campaign_id: campaign.id,
+                    referrer_user_id: r.data.user_id,
+                    referred_user_id: refUserId,
+                    referral_code: refCode,
+                    status: 'qualified'
+                  });
+                }
+              })
+              .catch(function(err) {
+                console.error('[Contest] claimReferral error:', err);
+              });
           }
         })
         .catch(function() {});
