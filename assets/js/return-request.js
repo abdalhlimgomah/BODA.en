@@ -78,17 +78,21 @@
       state.addresses
         .map(function (addr, i) {
           var isSel = state.selectedAddress && String(addr.id) === String(state.selectedAddress.id);
-          var parts = [addr.fullAddress || addr.street, addr.area, addr.building, addr.floor ? "دور " + addr.floor : ""].filter(Boolean);
+          var detail = addr.fullAddress || [addr.street, addr.area, addr.building, addr.floor ? "دور " + addr.floor : ""].filter(Boolean).join(" - ");
           return (
             '<div class="rs-address-option' + (isSel ? " is-selected" : "") + '" data-rs-address="' + i + '">' +
             '<div class="rao-name">' + esc(addr.name || addr.type || "عنوان " + (i + 1)) + "</div>" +
-            '<div class="rao-detail">' + esc(parts.join(" - ")) + (addr.phone ? " · " + esc(addr.phone) : "") + "</div>" +
+            '<div class="rao-detail">' + esc(detail || "—") + (addr.phone ? " · " + esc(addr.phone) : "") + "</div>" +
             "</div>"
           );
         })
         .join("") +
       "</div>"
     );
+  }
+
+  function guideImgHtml(src) {
+    return '<figure><img src="' + src + '" alt="صور توضيحية لطلب الإرجاع" loading="lazy" /></figure>';
   }
 
   function renderForm() {
@@ -122,11 +126,11 @@
         '<div class="rs-form-card">' +
         '<h3 class="rs-form-title"><span class="material-icons-outlined">badge</span>بيانات التواصل والعنوان</h3>' +
         '<div class="rs-field-grid">' +
-        '<div class="rs-field"><label for="rs-name">الاسم *</label><input class="rs-input" id="rs-name" type="text" autocomplete="name" /></div>' +
-        '<div class="rs-field"><label for="rs-phone">رقم الهاتف *</label><input class="rs-input" id="rs-phone" type="tel" inputmode="tel" autocomplete="tel" /></div>' +
+        '<div class="rs-field"><label for="rs-name">الاسم *</label><input class="rs-input" id="rs-name" type="text" maxlength="120" autocomplete="name" /></div>' +
+        '<div class="rs-field"><label for="rs-phone">رقم الهاتف *</label><input class="rs-input" id="rs-phone" type="tel" inputmode="tel" maxlength="20" autocomplete="tel" /></div>' +
         "</div>" +
         '<div class="rs-field"><label>عنوان استلام المرتجع *</label>' + buildAddressListHtml() + "</div>" +
-        '<div class="rs-field"><label for="rs-address-manual">عنوان إضافي (اختياري — املأه لو لم تجد عنوانك المحفوظ)</label><textarea class="rs-textarea" id="rs-address-manual" placeholder="المدينة، المنطقة، الشارع، رقم الشقة..."></textarea></div>' +
+        '<div class="rs-field"><label for="rs-address-manual">عنوان إضافي (اختياري — املأه لو لم تجد عنوانك المحفوظ)</label><textarea class="rs-textarea" id="rs-address-manual" maxlength="400" placeholder="المدينة، المنطقة، الشارع، رقم الشقة..."></textarea></div>' +
         "</div>" +
         '<div class="rs-form-card">' +
         '<h3 class="rs-form-title"><span class="material-icons-outlined">assignment_turned_in</span>سبب الإرجاع</h3>' +
@@ -139,16 +143,18 @@
         '<option value="توصيل خاطئ / منتج مختلف">توصيل خاطئ / منتج مختلف</option>' +
         '<option value="سبب آخر">سبب آخر</option>' +
         "</select></div>" +
-        '<div class="rs-field"><label for="rs-details">تفاصيل إضافية (اختياري)</label><textarea class="rs-textarea" id="rs-details" placeholder="اشرح المشكلة أو سبب الإرجاع بالتفصيل..."></textarea></div>' +
+        '<div class="rs-field"><label for="rs-details">تفاصيل إضافية (اختياري)</label><textarea class="rs-textarea" id="rs-details" maxlength="800" placeholder="اشرح المشكلة أو سبب الإرجاع بالتفصيل..."></textarea></div>' +
         "</div>" +
         '<div class="rs-form-card">' +
-        '<h3 class="rs-form-title"><span class="material-icons-outlined">photo_camera</span>صور المنتج (حتى 3 صور)</h3>' +
+        '<h3 class="rs-form-title"><span class="material-icons-outlined">photo_camera</span>صور المنتج (حتى 5 صور)</h3>' +
         '<div class="rs-upload-grid" id="rs-upload-grid">' +
         '<div class="rs-upload-slot" data-rs-slot="0"><span class="material-icons-outlined">add_a_photo</span>أضف صورة</div>' +
         '<div class="rs-upload-slot" data-rs-slot="1"><span class="material-icons-outlined">add_a_photo</span>أضف صورة</div>' +
         '<div class="rs-upload-slot" data-rs-slot="2"><span class="material-icons-outlined">add_a_photo</span>أضف صورة</div>' +
+        '<div class="rs-upload-slot" data-rs-slot="3"><span class="material-icons-outlined">add_a_photo</span>أضف صورة</div>' +
+        '<div class="rs-upload-slot" data-rs-slot="4"><span class="material-icons-outlined">add_a_photo</span>أضف صورة</div>' +
         "</div>" +
-        "<small style='color:#94a3b8;'>صور توضح حالة المنتج تساعدنا على مراجعة طلبك بشكل أسرع.</small>" +
+        "<small style='color:#94a3b8;'>صوّر المنتج كما في الصور التوضيحية بالأعلى — صور واضحة من زوايا متعددة تساعدنا على مراجعة طلبك بشكل أسرع.</small>" +
         "</div>" +
         '<div class="rs-submit-bar">' +
         '<button type="submit" class="rs-btn-return" id="rs-submit"><span class="material-icons-outlined" style="font-size:18px;">send</span>إرسال طلب الإرجاع</button>' +
@@ -167,6 +173,14 @@
       '<p class="rs-pm-sub">الكمية: ' + (Number(state.item.quantity) || 1) + " · " + window.BudaOrders.formatMoney(Number(state.item.price ?? state.order.total_price) || 0, state.order) + "</p>" +
       "</div></div>" +
       "</div>" +
+      '<div class="rs-form-card">' +
+      '<h3 class="rs-form-title"><span class="material-icons-outlined">photo_library</span>صور توضيحية لطلب الإرجاع</h3>' +
+      '<div class="rs-guide-imgs">' +
+      guideImgHtml("https://www.jawdaonline.com/public/egy-request/1.png") +
+      guideImgHtml("https://www.jawdaonline.com/public/egy-request/2.png") +
+      guideImgHtml("https://www.jawdaonline.com/public/egy-request/3.png") +
+      guideImgHtml("https://www.jawdaonline.com/public/egy-request/4.png") +
+      "</div></div>" +
       bannerHtml +
       formHtml;
 
@@ -185,29 +199,61 @@
     return "buda_selected_address_" + state.email.toLowerCase() + "_" + state.country;
   }
 
+  function normalizeAddress(a) {
+    if (!a) return null;
+    if (typeof a === "string") return { id: "", name: "", fullAddress: a, phone: "", country: state.country };
+    return {
+      id: a.id,
+      name: a.name || a.type || "",
+      fullAddress: a.fullAddress || a.full_address || "",
+      street: a.street || "",
+      building: a.building || "",
+      area: a.area || "",
+      floor: a.floor || "",
+      phone: a.phone || "",
+      type: a.type || "",
+      isDefault: !!a.isDefault,
+      country: a.country || state.country,
+    };
+  }
+
   async function loadAddresses() {
     state.addresses = [];
+
+    /* جمع كل القوائم المحفوظة محليًا وتنظيفها */
     var keys = readAddressesKeys();
+    var pools = [];
     for (var i = 0; i < keys.length; i++) {
       try {
         var raw = localStorage.getItem(keys[i]);
         if (raw) {
           var parsed = JSON.parse(raw);
-          if (Array.isArray(parsed) && parsed.length) {
-            state.addresses = parsed;
-            break;
-          }
+          if (Array.isArray(parsed) && parsed.length) pools.push(parsed);
         }
       } catch (e) { /* ignore malformed */ }
     }
 
-    if (!state.addresses.length && window.supabaseClient && typeof window.supabaseClient.from === "function") {
+    var structured = [];
+    var strings = [];
+    for (var p = 0; p < pools.length; p++) {
+      for (var k = 0; k < pools[p].length; k++) {
+        var entry = pools[p][k];
+        if (entry && typeof entry === "object") structured.push(entry);
+        else if (typeof entry === "string" && entry.trim()) strings.push(entry.trim());
+      }
+    }
+
+    /* العناوين المسجلة في دفتر العناوين (كائنات منظمة) تسبق أي نصوص مبعثرة
+       من عمليات شراء قديمة؛ ونختار القاعدة (user_addresses) قبل النصوص كاحتياط */
+    if (structured.length) {
+      state.addresses = structured.map(normalizeAddress);
+    } else if (strings.length || (window.supabaseClient && typeof window.supabaseClient.from === "function")) {
       for (var emailVariant of [state.email, state.email.toLowerCase()]) {
         try {
           var resp = await window.supabaseClient.from("user_addresses").select("*").eq("email", emailVariant).order("created_at", { ascending: true });
           if (resp && !resp.error && Array.isArray(resp.data) && resp.data.length) {
             state.addresses = resp.data.map(function (row) {
-              return {
+              return normalizeAddress({
                 id: row.id,
                 name: row.name || row.type || "",
                 fullAddress: row.full_address || "",
@@ -217,14 +263,29 @@
                 floor: row.floor || "",
                 phone: row.phone || "",
                 type: row.type || "",
+                isDefault: row.is_default,
                 country: row.country || "EG",
-              };
+              });
             });
             break;
           }
         } catch (e) { /* offline */ }
       }
+      if (!state.addresses.length) {
+        state.addresses = strings.map(function (s, id) { return normalizeAddress(s); });
+      }
     }
+
+    /* إزالة التكرار (نفس المعرّف أو نفس النص) */
+    var seen = {};
+    state.addresses = state.addresses.filter(function (a) {
+      if (!a) return false;
+      var key = String(a.id || "") + "|" + String(a.fullAddress || "");
+      if (!key || key === "|") return true;
+      if (seen[key]) return false;
+      seen[key] = true;
+      return true;
+    });
 
     var selectedId = null;
     try {
@@ -243,11 +304,21 @@
   function prefilledFromAddresses() {
     var nameInput = document.getElementById("rs-name");
     var phoneInput = document.getElementById("rs-phone");
-    if (nameInput && !nameInput.value.trim() && state.selectedAddress) {
-      nameInput.value = state.addresses.find(function (a) { return String(a.id) === String(state.selectedAddress.id); })?.name || state.selectedAddress.name || "";
+    var nameNow = nameInput && nameInput.value.trim();
+    var phoneNow = phoneInput && phoneInput.value.trim();
+
+    /* بيانات الحساب المسجلة (الاسم والرقم) أولًا */
+    if (nameInput && !nameNow) {
+      nameInput.value =
+        localStorage.getItem("userFullName") ||
+        (state.addresses.find(function (a) { return a.name; }) || {}).name ||
+        "";
     }
-    if (phoneInput && !phoneInput.value.trim() && state.selectedAddress) {
-      phoneInput.value = state.selectedAddress.phone || "";
+    if (phoneInput && !phoneNow) {
+      phoneInput.value =
+        localStorage.getItem("userPhone") ||
+        (state.addresses.find(function (a) { return a.phone; }) || {}).phone ||
+        "";
     }
   }
 
@@ -268,12 +339,12 @@
     });
   }
 
-  /* ---- صور حتى 3 ---- */
+  /* ---- صور حتى 5 ---- */
   function renderUploadSlots() {
     var grid = document.getElementById("rs-upload-grid");
     if (!grid) return;
     grid.innerHTML = "";
-    for (var i = 0; i < 3; i++) {
+    for (var i = 0; i < 5; i++) {
       var img = state.images[i];
       var slotHtml = "";
       if (img) {
@@ -291,6 +362,62 @@
     }
   }
 
+  var MAX_IMAGE_SIZE = 2 * 1024 * 1024;
+
+  /* ضغط الصورة في المتصفح قبل الرفع: تصغير الأبعاد + جودة JPEG أقل
+     لتقليل حجم الملف المرسل للخادم قدر الإمكان */
+  var COMPRESS_MAX_DIM = 1024;
+  var COMPRESS_QUALITY = 0.65;
+
+  function loadImageElement(dataUrl) {
+    return new Promise(function (resolve, reject) {
+      var img = new Image();
+      img.onload = function () { resolve(img); };
+      img.onerror = function () { reject(new Error("bad image")); };
+      img.src = dataUrl;
+    });
+  }
+
+  function canvasToBlob(canvas, type, quality) {
+    return new Promise(function (resolve) {
+      try {
+        canvas.toBlob(function (blob) { resolve(blob); }, type, quality);
+      } catch (e) {
+        resolve(null);
+      }
+    });
+  }
+
+  function compressImageFile(file, dataUrl) {
+    return loadImageElement(dataUrl).then(function (img) {
+      var w = img.naturalWidth || img.width;
+      var h = img.naturalHeight || img.height;
+      if (!w || !h) throw new Error("no size");
+
+      var scale = Math.min(1, COMPRESS_MAX_DIM / Math.max(w, h));
+      var cw = Math.max(1, Math.round(w * scale));
+      var ch = Math.max(1, Math.round(h * scale));
+
+      var canvas = document.createElement("canvas");
+      canvas.width = cw;
+      canvas.height = ch;
+      var ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, cw, ch);
+      ctx.drawImage(img, 0, 0, cw, ch);
+
+      var outType = "image/jpeg";
+      return canvasToBlob(canvas, outType, COMPRESS_QUALITY).then(function (blob) {
+        if (!blob) throw new Error("no blob");
+        return {
+          blob: blob,
+          dataUrl: canvas.toDataURL(outType, COMPRESS_QUALITY),
+          ext: "jpg",
+        };
+      });
+    });
+  }
+
   function bindUploader() {
     var grid = document.getElementById("rs-upload-grid");
     var fileInput = document.getElementById("rs-file");
@@ -304,8 +431,8 @@
         renderUploadSlots();
         return;
       }
-      if (state.images.length >= 3) {
-        notify("يمكنك إرفاق حتى 3 صور فقط.", "info");
+      if (state.images.length >= 5) {
+        notify("يمكنك إرفاق حتى 5 صور فقط.", "info");
         return;
       }
       if (event.target.closest("[data-rs-slot]")) fileInput.click();
@@ -314,12 +441,28 @@
     fileInput.addEventListener("change", function () {
       var files = Array.from(fileInput.files || []);
       files.forEach(function (file) {
-        if (state.images.length >= 3) return;
-        if (!file.type || file.type.indexOf("image/") !== 0) return;
+        if (state.images.length >= 5) return;
+        if (!file.type || file.type.indexOf("image/") !== 0) {
+          notify("يُسمح بملفات الصور فقط.", "error");
+          return;
+        }
+        if (file.size > MAX_IMAGE_SIZE) {
+          notify("كل صورة يجب ألا تتجاوز 2 ميجابايت.", "error");
+          return;
+        }
         var reader = new FileReader();
         reader.onload = function () {
-          state.images.push({ file: file, dataUrl: reader.result, status: "" });
-          renderUploadSlots();
+          var original = { file: file, dataUrl: reader.result, status: "" };
+          compressImageFile(file, reader.result)
+            .then(function (result) {
+              state.images.push({ file: result.blob, dataUrl: result.dataUrl, status: "", ext: result.ext });
+              renderUploadSlots();
+            })
+            .catch(function () {
+              /* تعذر الضغط => استخدام الصورة الأصلية */
+              state.images.push(original);
+              renderUploadSlots();
+            });
         };
         reader.readAsDataURL(file);
       });
@@ -361,7 +504,7 @@
       img.status = "uploading";
       renderUploadSlots();
       var extMatch = String(img.file.name || "").split(".").pop();
-      var ext = extMatch && extMatch.length <= 5 ? extMatch.toLowerCase() : "jpg";
+      var ext = img.ext || (extMatch && extMatch.length <= 5 ? extMatch.toLowerCase() : "jpg");
       var path = "returns/" + requestCode + "/" + Date.now() + "-" + i + "." + ext;
       try {
         var upload = await rawClient.storage.from("return-images").upload(path, img.file, {
@@ -497,6 +640,11 @@
 
   async function blockWithExisting(request) {
     var meta = window.BudaReturns.RETURN_STATUS_META[request.status] || window.BudaReturns.RETURN_STATUS_META.reviewing;
+    var rejected = request.status === "cancelled";
+    var title = rejected ? "تم إلغاء طلبك مسبقًا" : "تم تقديم طلب إرجاع مسبقًا";
+    var body = rejected
+      ? "تم إلغاء طلب الإرجاع الخاص بهذا المنتج، ولا يمكنك إعادة التقديم مرة أخرى لنفس المنتج في نفس الطلب."
+      : "لمنع التكرار، يمكنك إرسال طلب إرجاع واحد فقط لنفس المنتج في نفس الطلب.";
     page.root.innerHTML =
       '<div class="rs-form-card">' +
       '<h3 class="rs-form-title"><span class="material-icons-outlined">assignment_return</span>تفاصيل المنتج</h3>' +
@@ -505,11 +653,11 @@
       '<div><p class="rs-pm-name">' + esc(state.item.name) + "</p>" +
       (buildVariantChip(state.item) ? '<p class="rs-pm-sub">' + buildVariantChip(state.item) + "</p>" : "") +
       "</div></div></div>" +
-      '<div class="rs-window-banner is-blocked"><span class="material-icons-outlined">info</span><div><strong>تم تقديم طلب إرجاع لهذا المنتج مسبقًا</strong><br>طلبك الحالي: <strong>' + esc(request.request_code) + "</strong> - حالة: <strong>" + meta.label + "</strong></div></div>" +
+      '<div class="rs-window-banner is-blocked"><span class="material-icons-outlined">info</span><div><strong>' + title + '</strong><br>طلبك: <strong>' + esc(request.request_code) + "</strong> - الحالة: <strong>" + meta.label + "</strong></div></div>" +
       '<div class="rs-empty">' +
       '<div class="rs-empty-icon"><span class="material-icons-outlined" style="font-size:38px;">assignment_return</span></div>' +
       "<h3>لا يمكن تكرار الطلب</h3>" +
-      "<p>لمنع التكرار، لا يمكنك إرسال أكثر من طلب إرجاع واحد لنفس المنتج في نفس الطلب.</p>" +
+      "<p>" + body + "</p>" +
       '<a class="rs-btn-return" href="returns.html">العودة إلى المرتجعات</a>' +
       "</div>";
   }
@@ -546,6 +694,12 @@
       blockMessage("لم يتم العثور على المنتج", "تعذر العثور على المنتج داخل الطلب.", "error");
       return;
     }
+    /* إن وقع الاختيار على منتج افتراضي، نعيد استخدام معرّف المنتج الفعلي منه
+       حتى تتطابق كل التحققات (الصلاحية + منع التكرار) مع صفحة المرتجعات */
+    var resolvedPid = window.BudaReturns.resolveProductId(order, item);
+    if (resolvedPid && String(resolvedPid).trim().toLowerCase() !== String(state.productId).trim().toLowerCase()) {
+      state.productId = resolvedPid;
+    }
 
     state.order = order;
     state.item = item;
@@ -560,7 +714,7 @@
     state.returnAllowed = window.BudaReturns.productReturnAllowed(state.flags, state.productId, item);
     state.windowInfo = window.BudaReturns.getReturnWindowInfo(order);
 
-    // منع التكرار: طلب نشط لنفس (الطلب + المنتج)
+    // منع التكرار نهائيًا: أي طلب سابق (حتى المرفوض) يمنع إعادة التقديم لنفس (الطلب + المنتج)
     if (window.supabaseClient && typeof window.supabaseClient.from === "function") {
       try {
         var resp = await window.supabaseClient
@@ -569,7 +723,6 @@
           .eq("user_email", state.email.toLowerCase())
           .eq("order_id", state.orderId)
           .eq("product_id", state.productId)
-          .in("status", ["reviewing", "accepted"])
           .limit(1);
         if (resp && !resp.error && Array.isArray(resp.data) && resp.data.length) {
           blockWithExisting(resp.data[0]);

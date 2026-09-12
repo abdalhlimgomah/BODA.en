@@ -8,12 +8,12 @@
     flags: {},
     email: "",
     isAdmin: false,
+    countryCode: "EG",
   };
 
   var page = {
     listEl: null,
     statusEl: null,
-    statsEl: null,
   };
 
   function notify(message, type) {
@@ -76,22 +76,25 @@
     var windowInfo = window.BudaReturns.getReturnWindowInfo(order);
     var returnAllowed = window.BudaReturns.productReturnAllowed(state.flags, productId, item);
     var isDelivered = orderMeta.key === "delivered";
-    var isFinished = orderMeta.isFinished || orderMeta.key === "returned";
     var matches = findExistingRequests(order, orderMeta.orderId, productId);
+    var exists = matches.length > 0;
     var activeExists = hasActiveRequest(matches);
     var latest = latestRequest(matches);
 
-    var eligible = isDelivered && returnAllowed && windowInfo.eligible && !activeExists;
+    /* قاعدة "مرة واحدة فقط": أي طلب سابق (حتى المرفوض) يمنع إعادة التقديم */
+    var eligible = isDelivered && returnAllowed && windowInfo.eligible && !exists;
     var stateLabel = "";
     var chipClass = "";
     var chipIcon = "";
 
-    if (activeExists) {
+    if (exists && latest) {
       var meta = window.BudaReturns.RETURN_STATUS_META[latest.status] || window.BudaReturns.RETURN_STATUS_META.reviewing;
       chipClass = meta.chip;
       chipIcon = meta.icon;
       stateLabel = meta.label;
-    } else if (isFinished || orderMeta.key === "cancelled" || orderMeta.key === "returned") {
+    } else if (orderMeta.key === "cancelled" || orderMeta.key === "returned") {
+      /* الطلب مُلغى أو مُرجَع فعليًا => غير قابل للإرجاع نهائيًا.
+         ملاحظة: التوصيل (delivered) يأتي هنا بحالة isFinished لكنه يبقى مؤهلًا */
       chipClass = "rs-chip-notallowed";
       chipIcon = "cancel";
       stateLabel = "لا يمكن إرجاع هذا الطلب";
@@ -122,6 +125,7 @@
       isDelivered: isDelivered,
       windowInfo: windowInfo,
       eligible: eligible,
+      exists: exists,
       matches: matches,
       latest: latest,
       activeExists: activeExists,
@@ -146,42 +150,17 @@
     return '<p class="rs-item-variant">' + window.BudaReturns.escapeHtml(parts.join(" / ")) + "</p>";
   }
 
-  function renderRequestImages(request) {
-    var images = [];
-    try {
-      images = JSON.parse(Array.isArray(request.images) ? JSON.stringify(request.images) : request.images || "[]");
-    } catch (e) {
-      images = Array.isArray(request.images) ? request.images : [];
-    }
-    if (!Array.isArray(images) || !images.length) return "";
+  function renderKebab(view) {
+    if (!view.eligible) return "";
     return (
-      '<div class="rs-request-imgs">' +
-      images
-        .map(function (url) {
-          return (
-            '<img src="' + window.BudaReturns.escapeHtml(url) + '" alt="صورة الإرجاع" loading="lazy" data-rs-action="lightbox" data-rs-src="' + window.BudaReturns.escapeHtml(url) + '" />'
-          );
-        })
-        .join("") +
-      "</div>"
-    );
-  }
-
-  function renderRequestPanel(view) {
-    var request = view.latest;
-    if (!request) return "";
-    var meta = window.BudaReturns.RETURN_STATUS_META[request.status] || window.BudaReturns.RETURN_STATUS_META.reviewing;
-    var note = request.admin_note ? '<p class="rs-request-note"><strong>ملاحظة الإدارة:</strong> ' + window.BudaReturns.escapeHtml(request.admin_note) + "</p>" : "";
-    var decidedAt = request.decided_at ? "<small>· " + window.BudaReturns.formatShortDate(request.decided_at) + "</small>" : "";
-    return (
-      '<div class="rs-request">' +
-      '<div class="rs-request-head">' +
-      '<span class="rs-request-code">' + window.BudaReturns.escapeHtml(request.request_code || "طلب إرجاع") + "</span>" +
-      '<span class="rs-chip ' + meta.chip + '"><span class="material-icons-outlined">' + meta.icon + "</span>" + meta.label + decidedAt + "</span>" +
-      "</div>" +
-      "<small style='color:#94a3b8;'>تم التقديم: " + window.BudaReturns.formatShortDate(request.created_at) + "</small>" +
-      note +
-      renderRequestImages(request) +
+      '<div class="rs-kebab">' +
+      '<button type="button" class="rs-kebab-btn" data-rs-action="toggle-kebab" data-order-id="' +
+      window.BudaReturns.escapeHtml(view.orderMeta.orderId) +
+      '" data-product-id="' +
+      window.BudaReturns.escapeHtml(view.productId) +
+      '" aria-label="خيارات الإرجاع" aria-expanded="false">' +
+      '<span class="material-icons-outlined">more_vert</span>' +
+      "</button>" +
       "</div>"
     );
   }
@@ -193,33 +172,22 @@
     var image = item.image || window.BudaOrders.fallbackItemImage();
     var imgTag = window.BudaOrders.buildOrderImageTag(image, item.name);
 
-    var actionHtml = "";
-    if (view.eligible) {
-      actionHtml =
-        '<button type="button" class="rs-btn-return" data-rs-action="create" data-order-id="' + window.BudaReturns.escapeHtml(view.orderMeta.orderId) + '" data-product-id="' + window.BudaReturns.escapeHtml(view.productId) + '">' +
-        '<span class="material-icons-outlined" style="font-size:18px;">assignment_return</span> طلب استرجاع' +
-        "</button>";
-    } else if (view.latest) {
-      actionHtml = "";
-    }
-
     return (
       '<div class="rs-item">' +
-      imgTag +
       '<div class="rs-item-copy">' +
       '<h4 class="rs-item-name">' + window.BudaReturns.escapeHtml(item.name) + "</h4>" +
       buildVariantChip(item) +
       '<div class="rs-item-meta">' +
-      "<span>الكمية: " + qty + "</span>" +
+      '<span class="rs-qty">الكمية: ' + qty + "</span>" +
       '<span class="rs-item-price">' + window.BudaOrders.formatMoney(price, view.order) + "</span>" +
       "</div>" +
       "</div>" +
-      '<div class="rs-item-side">' +
+      '<span class="rs-item-imgwrap">' + imgTag + "</span>" +
+      "</div>" +
+      '<footer class="rs-item-return">' +
       '<span class="rs-chip ' + view.chipClass + '"><span class="material-icons-outlined">' + view.chipIcon + "</span>" + window.BudaReturns.escapeHtml(view.chipLabel) + "</span>" +
-      actionHtml +
-      "</div>" +
-      "</div>" +
-      (view.latest ? renderRequestPanel(view) : "")
+      renderKebab(view) +
+      "</footer>"
     );
   }
 
@@ -243,18 +211,23 @@
     var rows = items
       .map(function (item) {
         var productId = window.BudaReturns.resolveProductId(order, item);
-        return renderItemRow(buildItemView(order, { key: status.key, isFinished: status.isFinished, orderId: orderId }, item, productId));
+        return renderItemRow(buildItemView(order, { key: status.key, orderId: orderId }, item, productId));
       })
       .join("");
 
     var statusDate = window.BudaOrders.formatOrderDate(window.BudaOrders.getOrderTime(order));
+    var statusClass = "is-" + (status.key || "processing");
+    if (!/^(is-delivered|is-cancelled|is-processing|is-shipped|is-returned)$/.test(statusClass)) {
+      statusClass = "is-processing";
+    }
 
     return (
       '<article class="rs-order-card" data-order-id="' + window.BudaReturns.escapeHtml(orderId) + '">' +
-      '<div class="rs-order-head">' +
-      '<span class="rs-order-state-line">' + window.BudaReturns.escapeHtml(status.linePrefix || status.label) + " · " + window.BudaReturns.escapeHtml(statusDate) + "</span>" +
+      '<header class="rs-order-head">' +
+      '<span class="rs-order-status ' + statusClass + '">' + window.BudaReturns.escapeHtml(status.linePrefix || status.label || status) + "</span>" +
+      '<span class="rs-order-date">' + window.BudaReturns.escapeHtml(statusDate) + "</span>" +
       '<span class="rs-order-ref" title="' + window.BudaReturns.escapeHtml(orderRef) + '">' + window.BudaReturns.escapeHtml(orderRef.substring(0, 12)) + "</span>" +
-      "</div>" +
+      "</header>" +
       rows +
       "</article>"
     );
@@ -279,34 +252,11 @@
     page.listEl.innerHTML = renderEmpty("error_outline", "تعذر تحميل البيانات", "حدث خطأ أثناء تحميل مرتجعاتك. حاول مرة أخرى لاحقًا.", "");
   }
 
-  function renderStats() {
-    if (!page.statsEl) return;
-    var eligibleCount = 0;
-    var activeCount = 0;
-    var expiredCount = 0;
-
-    for (var i = 0; i < state.orders.length; i++) {
-      var order = state.orders[i];
-      var meta = window.BudaOrders.statusMeta(order.status || order.order_status);
-      var items = window.BudaOrders.getOrderItems(order);
-      for (var j = 0; j < (items || []).length; j++) {
-        var item = items[j];
-        var productId = window.BudaReturns.resolveProductId(order, item);
-        var view = buildItemView(order, { key: meta.key, isFinished: meta.isFinished, orderId: window.BudaOrders.getOrderId(order) }, item, productId);
-        if (view.eligible) eligibleCount += 1;
-        else if (view.activeExists) activeCount += 1;
-        else if (view.windowInfo.expired && view.isDelivered && view.returnAllowed) expiredCount += 1;
-      }
-    }
-
-    page.statsEl.innerHTML =
-      '<div class="rs-stat"><div class="rs-stat-value">' + eligibleCount + '</div><div class="rs-stat-label">متاح للإرجاع</div></div>' +
-      '<div class="rs-stat"><div class="rs-stat-value">' + activeCount + '</div><div class="rs-stat-label">طلبات إرجاع نشطة</div></div>' +
-      '<div class="rs-stat"><div class="rs-stat-value">' + expiredCount + '</div><div class="rs-stat-label">انتهت المهلة</div></div>';
-  }
-
   function renderList() {
-    renderStats();
+    var groupEl = document.getElementById("rs-group-title");
+    if (groupEl) {
+      groupEl.innerHTML = "طلباتي <span class=\"rs-group-count\">" + state.orders.length + "</span>";
+    }
 
     if (!state.orders.length) {
       page.listEl.innerHTML = renderEmpty("assignment_return", "لا توجد طلبات للإرجاع", "عند إتمام أي طلب سيكون بإمكانك طلب استرجاع المنتجات المؤهلة من هنا خلال 14 يوم من التوصيل.", "");
@@ -320,36 +270,69 @@
     }
   }
 
-  function openLightbox(src) {
-    var old = document.querySelector(".rs-lightbox");
-    if (old) old.remove();
-    var overlay = document.createElement("div");
-    overlay.className = "rs-lightbox";
-    overlay.style.cssText =
-      "position:fixed;inset:0;background:rgba(10,16,28,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;";
-    overlay.innerHTML = '<img src="' + window.BudaReturns.escapeHtml(src) + '" alt="صورة" style="max-width:100%;max-height:90vh;border-radius:12px;display:block;" />';
-    overlay.addEventListener("click", function () { overlay.remove(); });
-    document.body.appendChild(overlay);
+  var activeKebabBtn = null;
+
+  function closeKebabMenus() {
+    var open = document.querySelector(".rs-kebab-float");
+    if (open) open.remove();
+    if (activeKebabBtn) {
+      activeKebabBtn.setAttribute("aria-expanded", "false");
+      activeKebabBtn = null;
+    }
+  }
+
+  function openKebabMenu(btn, orderId, productId) {
+    if (activeKebabBtn === btn) {
+      closeKebabMenus();
+      return;
+    }
+    closeKebabMenus();
+    activeKebabBtn = btn;
+
+    var menu = document.createElement("div");
+    menu.className = "rs-kebab-menu rs-kebab-float";
+    menu.setAttribute("role", "menu");
+    menu.innerHTML =
+      '<button type="button" class="rs-kebab-item" data-rs-action="create" data-order-id="' +
+      window.BudaReturns.escapeHtml(orderId) +
+      '" data-product-id="' +
+      window.BudaReturns.escapeHtml(productId) +
+      '"><span class="material-icons-outlined">assignment_return</span>طلب إرجاع</button>';
+    document.body.appendChild(menu);
+
+    var rect = btn.getBoundingClientRect();
+    var vw = window.innerWidth || document.documentElement.clientWidth;
+    var menuWidth = menu.offsetWidth || 210;
+    var left = Math.max(8, Math.min(rect.left, vw - menuWidth - 8));
+    menu.style.position = "fixed";
+    menu.style.top = Math.round(rect.bottom + 8) + "px";
+    menu.style.left = Math.round(left) + "px";
+    menu.classList.add("is-open");
+    btn.setAttribute("aria-expanded", "true");
+  }
+
+  function goCreate(orderId, productId) {
+    if (!orderId || !productId) {
+      notify("تعذر فتح طلب الإرجاع.", "error");
+      return;
+    }
+    window.location.href = "return-request.html?id=" + encodeURIComponent(orderId) + "&pid=" + encodeURIComponent(productId);
   }
 
   function handleClick(event) {
-    var createBtn = event.target.closest("[data-rs-action='create']");
-    if (createBtn) {
+    var toggle = event.target.closest("[data-rs-action='toggle-kebab']");
+    if (toggle) {
       event.preventDefault();
-      var orderId = createBtn.getAttribute("data-order-id");
-      var productId = createBtn.getAttribute("data-product-id");
-      if (!orderId || !productId) {
-        notify("تعذر فتح طلب الإرجاع.", "error");
-        return;
-      }
-      window.location.href = "return-request.html?id=" + encodeURIComponent(orderId) + "&pid=" + encodeURIComponent(productId);
+      var orderId = toggle.getAttribute("data-order-id");
+      var productId = toggle.getAttribute("data-product-id");
+      openKebabMenu(toggle, orderId, productId);
       return;
     }
 
-    var lb = event.target.closest("[data-rs-action='lightbox']");
-    if (lb) {
-      var src = lb.getAttribute("data-rs-src");
-      if (src) openLightbox(src);
+    var createBtn = event.target.closest("[data-rs-action='create']");
+    if (createBtn) {
+      event.preventDefault();
+      goCreate(createBtn.getAttribute("data-order-id"), createBtn.getAttribute("data-product-id"));
     }
   }
 
@@ -379,14 +362,24 @@
     }
   }
 
+  /* هل الطلب تابع لدولة الحساب؟ (country_code / country يدعم "EG" و"مصر" و"SA" و"السعودية") */
+  function orderInCountry(order, code) {
+    if (!code) return true;
+    var field = String(order.country_code || order.country || order.orderCountry || "").toUpperCase().trim();
+    if (!field) return true; /* لا معلومة دولة => نفترض نفس دولة الحساب حتى لا نخفي الطلبات */
+    if (code === "SA") return /(SA|السعودية)/.test(field) && !/EG/.test(field);
+    if (code === "EG") return /(EG|مصر)/.test(field);
+    return field.indexOf(code) === 0;
+  }
+
   async function renderOrders() {
     page.listEl = document.getElementById("returns-list");
     page.statusEl = document.getElementById("returns-status");
-    page.statsEl = document.getElementById("returns-stats");
     if (!page.listEl) return;
 
     state.email = window.BudaReturns.getActiveEmail();
     state.isAdmin = /@example\.com$/.test(state.email);
+    state.countryCode = (window.BudaReturns.getUserCountryCode() || "EG").toUpperCase();
 
     if (!state.email) {
       renderNotLoggedIn();
@@ -402,7 +395,12 @@
     try {
       var rawOrders = await window.supabaseClient.getOrders(state.isAdmin ? {} : { user_email: state.email.toLowerCase() });
       var hydrated = await window.BudaOrders.hydrateOrdersWithOrderItems(rawOrders || []);
-      state.orders = Array.isArray(hydrated) ? hydrated : [];
+      var allOrders = Array.isArray(hydrated) ? hydrated : [];
+
+      /* عرض طلبات دولة الحساب فقط (مصر للسعوديين والعكس) */
+      state.orders = allOrders.filter(function (order) {
+        return orderInCountry(order, state.countryCode);
+      });
 
       await loadRequests(window.supabaseClient);
 
@@ -429,6 +427,25 @@
 
     var list = document.getElementById("returns-list");
     if (list) list.addEventListener("click", handleClick);
+
+    document.addEventListener("click", function (event) {
+      var createBtn = event.target.closest("[data-rs-action='create']");
+      if (createBtn) {
+        event.preventDefault();
+        goCreate(createBtn.getAttribute("data-order-id"), createBtn.getAttribute("data-product-id"));
+        closeKebabMenus();
+        return;
+      }
+      if (!event.target.closest(".rs-kebab-float") && !event.target.closest(".rs-kebab")) {
+        closeKebabMenus();
+      }
+    });
+    document.addEventListener("keydown", function (event) {
+      if (event.key === "Escape") closeKebabMenus();
+    });
+    ["scroll", "resize"].forEach(function (ev) {
+      window.addEventListener(ev, closeKebabMenus, { passive: true });
+    });
 
     var params = new URLSearchParams(window.location.search);
     if (params.get("created") === "1") {

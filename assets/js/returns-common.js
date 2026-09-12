@@ -69,8 +69,9 @@
     return "";
   }
 
-  /* تاريخ تسليم الطلب: delivered_at / delivered_date / completed_at ...
-     وإلا تاريخ إنشاء الطلب كبديل */
+/* تاريخ تسليم الطلب: delivered_at (يهّبه النظام تلقائيًا عند التوصيل)
+   ثم delivered_date / completed ... وأخيرًا updated_at كتقريب للطلبات القديمة
+   بدلًا من وقت إنشاء الطلب */
   function getDeliveryStamp(order, fallbackTimestamp) {
     if (!order) return fallbackTimestamp || 0;
     var keys = [
@@ -78,9 +79,10 @@
       "delivered_date",
       "deliveredTimestamp",
       "delivered_timestamp",
-      "shipped_at",
       "completed_at",
       "completion_date",
+      "updated_at",
+      "updatedAt",
     ];
     for (var i = 0; i < keys.length; i++) {
       var v = order[keys[i]];
@@ -148,7 +150,7 @@
 
   /* هل المنتج قابل للإرجاع؟ (افتراضي: مقبول ما لم يُحدَّد العكس) */
   function productReturnAllowed(flagsMap, productId, item) {
-    var flag = flagsMap ? flagsMap[String(productId || "").trim()] : undefined;
+    var flag = flagsMap ? flagsMap[String(productId || "").trim().toLowerCase()] : undefined;
     if (flag !== undefined && flag !== null && flag !== "") {
       return flag === true || flag === "true" || flag === 1 || flag === "1";
     }
@@ -182,8 +184,8 @@
           .in("id", ids);
         if (resp && !resp.error && Array.isArray(resp.data)) {
           resp.data.forEach(function (row) {
-            if (row && row.id != null && !(String(row.id) in flags)) {
-              flags[String(row.id)] = row.return_allowed;
+            if (row && row.id != null && !(String(row.id).trim().toLowerCase() in flags)) {
+              flags[String(row.id).trim().toLowerCase()] = row.return_allowed;
             }
           });
         }
