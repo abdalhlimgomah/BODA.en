@@ -37,16 +37,7 @@
       var available = s.is_available !== false && s.stock !== 0;
       var cls = 'pdp-size-btn' + (available ? '' : ' is-unavailable') + (i === selectedIdx ? ' is-selected' : '');
       var disabled = available ? '' : ' disabled';
-      var stockHtml = '';
-      if (!available) {
-        stockHtml = '<span class="pdp-size-stock is-out">نفد المخزون</span>';
-      } else if (s.stock > 0 && s.stock < 50) {
-        stockHtml = '<span class="pdp-size-stock is-low">متبقي ' + s.stock + '</span>';
-      } else {
-        stockHtml = '<span class="pdp-size-stock">متوفر</span>';
-      }
-      return '<button type="button" class="' + cls + '" data-size-idx="' + i + '"' + disabled + '>' +
-        '<span class="pdp-size-name">' + U.escapeHtml(s.name) + '</span>' + stockHtml + '</button>';
+      return '<button type="button" class="' + cls + '" data-size-idx="' + i + '"' + disabled + '>' + U.escapeHtml(s.name) + '</button>';
     }).join('');
 
     root.innerHTML = header + '<div class="pdp-size-options">' + btns + '</div>';
