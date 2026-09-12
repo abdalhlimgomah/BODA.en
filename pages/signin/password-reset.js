@@ -6,9 +6,9 @@
   const RESEND_COOLDOWN_MS = 60 * 1000;
   const MAX_RESEND_ATTEMPTS = 3;
 
-  const EMAILJS_PUBLIC_KEY = "xdVqEELgzBCftq4cf";
-  const EMAILJS_SERVICE_ID = "service_xsps2sb";
-  const EMAILJS_TEMPLATE_ID = "template_o7zn76j";
+  const EMAILJS_PUBLIC_KEY = "sEH3pCrlZBU0hpS73";
+  const EMAILJS_SERVICE_ID = "budoq_smtp";
+  const EMAILJS_TEMPLATE_ID = "template_pd2c0av";
 
   const STORAGE = {
     email: "reset_email",

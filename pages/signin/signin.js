@@ -187,7 +187,7 @@ function ensureEmailJSReady() {
   if (window.__Buda_EMAILJS_READY__) return;
 
   try {
-    window.emailjs.init({ publicKey: "xdVqEELgzBCftq4cf" });
+    window.emailjs.init({ publicKey: "sEH3pCrlZBU0hpS73" });
     window.__Buda_EMAILJS_READY__ = true;
   } catch (error) {
     console.warn("EmailJS init skipped", error);
@@ -201,7 +201,7 @@ async function sendOTPEmail(email, otp) {
   const timeString = expirationTime.toLocaleTimeString("ar-EG");
 
   try {
-    const result = await emailjs.send("service_xsps2sb", "template_o7zn76j", {
+    const result = await emailjs.send("budoq_smtp", "template_pd2c0av", {
       to_email: email,
       email: email,
       passcode: otp,
