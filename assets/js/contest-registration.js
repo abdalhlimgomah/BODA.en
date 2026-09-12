@@ -65,6 +65,14 @@ window.ContestRegistration = (function() {
       emailField.value = email;
     }
 
+    /* Pre-fill invite code from the pending referral (so the user sees their
+       invitation link was not lost) */
+    var inviteField = FIELDS.inviteCode && FIELDS.inviteCode.el;
+    if (inviteField && !inviteField.value.trim()) {
+      var pendingRef = window.ContestReferral.getStoredRefCode();
+      if (pendingRef) inviteField.value = pendingRef;
+    }
+
     /* Real-time validation on blur */
     for (var k in FIELDS) {
       (function(fieldKey) {
