@@ -480,6 +480,13 @@ function startGoogleOAuth() {
   var scope = "openid email profile";
   var state = Math.random().toString(36).slice(2, 15);
 
+  /* Carry the pending referral code inside the OAuth state so it survives
+     the Google round-trip even if all storage is wiped (in-app browsers). */
+  try {
+    var pendingRef = sessionStorage.getItem("contest_ref_code") || localStorage.getItem("contest_ref_code");
+    if (pendingRef) state = state + "." + encodeURIComponent(pendingRef);
+  } catch (_e) {}
+
   var authUrl = "https://accounts.google.com/o/oauth2/v2/auth?" +
     "client_id=" + encodeURIComponent(clientId) +
     "&redirect_uri=" + encodeURIComponent(redirectUri) +
@@ -500,6 +507,21 @@ async function handleGoogleCallback() {
   var params = new URLSearchParams(window.location.search);
   var code = params.get("code");
   if (!code) return;
+
+  /* Restore the referral code carried through the OAuth state (survives a full storage wipe) */
+  var stateValue = params.get("state");
+  if (stateValue) {
+    var dotIdx = stateValue.indexOf(".");
+    if (dotIdx > 0) {
+      try {
+        var stateRef = decodeURIComponent(stateValue.slice(dotIdx + 1));
+        if (stateRef) {
+          sessionStorage.setItem("contest_ref_code", stateRef);
+          localStorage.setItem("contest_ref_code", stateRef);
+        }
+      } catch (_e) {}
+    }
+  }
 
   var edgeUrl = window.TAAGER_EDGE_FUNCTION_URL
     ? window.TAAGER_EDGE_FUNCTION_URL.replace("taager-proxy", "google-oauth")
