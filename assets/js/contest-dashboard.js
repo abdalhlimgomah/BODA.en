@@ -524,7 +524,7 @@
     var backBtn = document.getElementById('rdBackBtn');
     if (backBtn) {
       backBtn.addEventListener('click', function() {
-        window.location.href = 'edit-account.html';
+        window.location.href = 'ahsab.html';
       });
     }
 
