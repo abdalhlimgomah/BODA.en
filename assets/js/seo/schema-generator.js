@@ -41,7 +41,7 @@
       description: opts.description || "منصة تجارة إلكترونية متعددة البائعين",
       url: U.getSiteUrl(),
       telephone: opts.phone || undefined,
-      email: opts.email || "budoq.com@gmail.com",
+      email: opts.email || "support@budoq.com",
       image: U.getFullUrl("assets/icons/apple-touch-icon.png"),
       address: opts.address
         ? {
