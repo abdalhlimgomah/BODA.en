@@ -22,7 +22,7 @@ function getPostLoginPath() {
     if (refCode) {
       const path = (window.location.pathname || "").toLowerCase();
       if (path.includes("/pages/signin/") || path.includes("/pages/signup/")) {
-        return "../pages/contest.html";
+        return "../contest.html";
       }
       return "pages/contest.html";
     }
