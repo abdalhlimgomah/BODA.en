@@ -377,7 +377,12 @@
       var perSize = 0;
       if (size) {
         var sp = Number(size.price);
-        if (!isNaN(sp) && sp > 0) perSize = sp;
+        if (!isNaN(sp) && sp > 0) {
+          perSize = sp;
+          if (global.PricingEngine && global.PricingEngine.tiersLoaded) {
+            perSize = global.PricingEngine.calculate(perSize);
+          }
+        }
       }
       var base = D.buildPrice(vm.raw);
       var fallback = base && base.current > 0 ? base.current : (Number((vm.price || {}).current) || 0);
@@ -435,10 +440,11 @@
       applyPriceForSize(sz);
     });
 
-    // Size selection — per-size price (from the admin matrix editor) REPLACES the buybox price.
-    // Never feed a selling price back into PricingEngine.calculate(): that compounds the markup
-    // on every click (the price grows each time a size is clicked). Size prices are final; when a
-    // size has no price, fall back to the clean base price of the product — never to a transient.
+    // Size selection — the per-size price (from the admin matrix editor) is the SUPPLIER price and
+    // REPLACES the buybox price, so the tier markup is applied to it exactly like the base price.
+    // Always recompute from the raw stored size price (never from a transient), so the markup can
+    // never compound on repeated size clicks. When a size has no price, fall back to the clean
+    // base price of the product.
 
     // ---------------------------------------------------------------
     // Live per-size/color quantity

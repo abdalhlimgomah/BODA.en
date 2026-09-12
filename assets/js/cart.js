@@ -330,7 +330,12 @@ function resolveCartItemView(item = {}) {
       var soName = rawProduct.sizes[si] ? String(rawProduct.sizes[si].name || rawProduct.sizes[si]) : "";
       if (soName === String(item.selected_size)) {
         var perSizeNum = Number(rawProduct.sizes[si].price) || 0;
-        if (perSizeNum > 0) perSizeFromLive = perSizeNum;
+        if (perSizeNum > 0) {
+          perSizeFromLive = perSizeNum;
+          if (window.PricingEngine?.tiersLoaded) {
+            perSizeFromLive = window.PricingEngine.calculate(perSizeFromLive);
+          }
+        }
         break;
       }
     }

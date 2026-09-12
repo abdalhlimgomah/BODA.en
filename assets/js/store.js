@@ -1285,14 +1285,14 @@ const addToCart = (product, quantity = 1, options = {}) => {
       ? Number(selectedSize.price) || 0
       : 0;
   var finalPrice = perSizePrice > 0 ? perSizePrice : priceInfo.currentPrice;
-  if (perSizePrice <= 0 && window.PricingEngine?.tiersLoaded) {
+  if (finalPrice > 0 && window.PricingEngine?.tiersLoaded) {
     finalPrice = window.PricingEngine.calculate(finalPrice);
   }
   const existingItem = cart.find(function (item) { return String(item.id) === targetId; });
   if (existingItem) {
     existingItem.quantity += quantity;
     if (perSizePrice > 0) {
-      existingItem.price = perSizePrice;
+      existingItem.price = finalPrice;
       existingItem.selected_size_price = perSizePrice;
     }
   } else {
