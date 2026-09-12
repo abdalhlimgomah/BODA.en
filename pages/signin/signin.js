@@ -46,6 +46,41 @@ function captureRefParam() {
   } catch (_e) {}
 }
 
+/* Cookie backup for the referral code so it survives the Google OAuth
+   round-trip even if sessionStorage is lost (new tab, private mode, etc.) */
+function setReferralCookie(value) {
+  try {
+    document.cookie =
+      "buda_contest_ref=" + encodeURIComponent(value) + "; path=/; max-age=1800; SameSite=Lax";
+  } catch (_e) {}
+}
+
+function getReferralCookie() {
+  try {
+    const m = document.cookie.match(/(?:^|; )buda_contest_ref=([^;]+)/);
+    return m ? decodeURIComponent(m[1]) : null;
+  } catch (_e) { return null; }
+}
+
+function clearReferralCookie() {
+  try {
+    document.cookie = "buda_contest_ref=; path=/; max-age=0; SameSite=Lax";
+  } catch (_e) {}
+}
+
+function restoreReferralFromCookie() {
+  try {
+    const ref = getReferralCookie();
+    if (ref) {
+      if (!sessionStorage.getItem("contest_ref_code") && !localStorage.getItem("contest_ref_code")) {
+        sessionStorage.setItem("contest_ref_code", ref);
+        localStorage.setItem("contest_ref_code", ref);
+      }
+      clearReferralCookie();
+    }
+  } catch (_e) {}
+}
+
 const LOGIN_FAIL_COUNT_KEY = "auth_login_fail_count";
 const LOGIN_LOCK_UNTIL_KEY = "auth_login_lock_until";
 const MAX_LOGIN_ATTEMPTS = 5;
@@ -452,6 +487,12 @@ function startGoogleOAuth() {
     "&scope=" + encodeURIComponent(scope) +
     "&state=" + encodeURIComponent(state);
 
+  /* Back the referral code up in a cookie so it survives the Google round-trip */
+  try {
+    const pendingRef = sessionStorage.getItem("contest_ref_code") || localStorage.getItem("contest_ref_code");
+    if (pendingRef) setReferralCookie(pendingRef);
+  } catch (_e) {}
+
   window.location.href = authUrl;
 }
 
@@ -603,6 +644,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   attachPasswordToggle();
+  restoreReferralFromCookie();
   captureRefParam();
   prefillEmailFromQuery();
   showResetSuccessIfAny();
