@@ -182,7 +182,7 @@ window.ContestRegistration = (function() {
     var storedRef = window.ContestReferral.getStoredRefCode() || null;
 
     /* Generate referral code & register */
-    function proceed(referredBy) {
+    function proceed(referredBy, referrerUserId) {
       window.ContestReferral.ensureUniqueCode(function(referralCode) {
 
         /* Prevent self-referral via own generated code */
@@ -191,7 +191,7 @@ window.ContestRegistration = (function() {
           window.ContestUI.showToast('لا يمكن استخدام كود الدعوة الخاص بك');
           return;
         }
-        doRegister(referralCode, referredBy);
+        doRegister(referralCode, referredBy, referrerUserId);
       });
     }
 
@@ -213,50 +213,71 @@ window.ContestRegistration = (function() {
             window.ContestUI.showToast('لا يمكن استخدام كود الدعوة الخاص بك');
             return;
           }
-          proceed(manualRef);
+          proceed(manualRef, result.data.user_id);
         })
         .catch(function() {
           setLoading(false);
           window.ContestUI.showToast('حدث خطأ أثناء التحقق من كود الدعوة. حاول مرة أخرى.');
         });
     } else if (storedRef) {
-      /* Soft validation for URL ref: use it only if valid and not self */
+      /* Soft validation for URL ref: use it only if valid and not self.
+         On a transient error, still proceed with the code so the referral
+         is attempted (registration itself always succeeds). */
       window.ContestData.checkReferralCode(storedRef)
         .then(function(result) {
-          if (result.data && String(result.data.user_id) !== String(userId)) {
-            proceed(storedRef);
+          if (result.error || !result.data) {
+            /* Transient error or unknown code: still attempt the referral;
+               registration itself must not be blocked. */
+            proceed(storedRef, null);
+          } else if (String(result.data.user_id) === String(userId)) {
+            proceed(null, null);
           } else {
-            proceed(null);
+            proceed(storedRef, result.data.user_id);
           }
         })
         .catch(function() {
-          proceed(null);
+          proceed(storedRef, null);
         });
     } else {
-      proceed(null);
+      proceed(null, null);
     }
 
-    function createReferralIfNeeded(referredBy, referralCode) {
+    function createReferralIfNeeded(referredBy, referralCode, referrerUserId) {
       if (!referredBy || referredBy === referralCode) return Promise.resolve();
-      return window.ContestData.checkReferralCode(referredBy)
-        .then(function(refResult) {
-          if (!refResult.data || String(refResult.data.user_id) === String(userId)) return;
-          window.ContestReferral.clearStoredRef();
-          return window.ContestData.createReferral({
-            campaign_id: campaignId,
-            referrer_user_id: refResult.data.user_id,
-            referred_user_id: userId,
-            referral_code: referredBy,
-            status: 'qualified'
-          });
-        })
-        .catch(function(err) {
+
+      function makeRow(referrerId) {
+        if (!referrerId || String(referrerId) === String(userId)) return Promise.resolve();
+        /* Note: supabase builders have .then but no .catch — always chain
+           via .then so rejections are handled by a real Promise. */
+        return window.ContestData.createReferral({
+          campaign_id: campaignId,
+          referrer_user_id: referrerId,
+          referred_user_id: userId,
+          referral_code: referredBy,
+          status: 'qualified'
+        }).then(function(res) {
+          if (res && res.error) {
+            console.error('[Contest] Referral creation error:', res.error);
+          }
+        }, function(err) {
           console.error('[Contest] Referral creation error:', err);
           window.ContestUI.showToast('تم تسجيلك، لكن لم يتم ربط الدعوة — سيتم ربطها تلقائياً لاحقاً');
         });
+      }
+
+      /* Use the referrer id already resolved during code validation */
+      if (referrerUserId) return makeRow(referrerUserId);
+
+      /* Fallback: resolve the referrer now */
+      return window.ContestData.checkReferralCode(referredBy)
+        .then(function(refResult) {
+          if (refResult.error || !refResult.data) return;
+          return makeRow(refResult.data.user_id);
+        })
+        .catch(function() {});
     }
 
-    function doRegister(referralCode, referredBy) {
+    function doRegister(referralCode, referredBy, referrerUserId) {
       var participantData = {
         user_id: userId,
         campaign_id: campaignId,
@@ -285,7 +306,7 @@ window.ContestRegistration = (function() {
             }
             throw new Error('registration_failed');
           }
-          return createReferralIfNeeded(referredBy, referralCode);
+          return createReferralIfNeeded(referredBy, referralCode, referrerUserId);
         })
         .then(function() {
           window.ContestReferral.clearStoredRef();
