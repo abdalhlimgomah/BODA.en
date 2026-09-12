@@ -60,13 +60,11 @@
 .pdp-size-btn {
   position: relative;
   display: inline-flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
   min-width: 52px;
-  height: auto;
-  min-height: 48px;
-  padding: 7px 14px;
+  height: 42px;
+  padding: 0 14px;
   border: 1px solid #c9ccd4;
   border-radius: 4px;
   background: #fff;
@@ -78,24 +76,6 @@
   transition: border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
   user-select: none;
   flex: none;
-}
-.pdp-size-btn .pdp-size-name {
-  display: block;
-  line-height: 1.2;
-}
-.pdp-size-stock {
-  display: block;
-  margin-top: 3px;
-  font-size: 0.66rem;
-  font-weight: 600;
-  line-height: 1.15;
-  color: #16a34a;
-}
-.pdp-size-stock.is-low {
-  color: #d97706;
-}
-.pdp-size-stock.is-out {
-  color: #b6bac3;
 }
 .pdp-size-btn:hover {
   border-color: #7c818c;
@@ -282,8 +262,8 @@
 @media (max-width: 767px) {
   .pdp-size-btn {
     min-width: 46px;
-    min-height: 42px;
-    padding: 5px 12px;
+    height: 38px;
+    padding: 0 12px;
     font-size: 0.8rem;
   }
   .pdp-size-guide-modal {
@@ -295,8 +275,8 @@
 @media (min-width: 1200px) {
   .pdp-size-btn {
     min-width: 56px;
-    min-height: 52px;
-    padding: 8px 18px;
+    height: 44px;
+    padding: 0 18px;
     font-size: 0.88rem;
   }
 }
