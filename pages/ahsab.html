@@ -1264,6 +1264,55 @@
     });
   </script>
   <script>
+    /* Rewards entry: check contest registration before navigating.
+       Registered -> referral-dashboard.html, otherwise -> contest.html */
+    document.addEventListener("DOMContentLoaded", function() {
+      var link = document.querySelector(".buda-rewards-img-link");
+      if (!link) return;
+
+      link.addEventListener("click", function(e) {
+        var isLoggedIn = localStorage.getItem("isLoggedIn") === "true";
+        if (!isLoggedIn) return;
+
+        e.preventDefault();
+        e.stopPropagation();
+
+        var goto = function(registered) {
+          window.location.href = registered ? "referral-dashboard.html" : "contest.html";
+        };
+        var fallback = function(err) {
+          if (err) console.error("[Account] Rewards entry error:", err);
+          window.location.href = "contest.html";
+        };
+
+        var client = window.getSupabaseClient ? window.getSupabaseClient() : null;
+        if (!client) { fallback(); return; }
+
+        var user = null;
+        try { user = JSON.parse(localStorage.getItem("currentUser")); } catch(er) {}
+        var userId = user && user.id ? String(user.id) : null;
+        var email = localStorage.getItem("userEmail");
+        if (!userId && !email) { fallback(); return; }
+
+        client.from("contest_campaigns").select("id").eq("status", "active").order("created_at", { ascending: false }).limit(1).maybeSingle()
+          .then(function(campResult) {
+            if (campResult.error || !campResult.data) { fallback(); return; }
+            var campaignId = campResult.data.id;
+            var q = client.from("contest_participants").select("id").eq("campaign_id", campaignId);
+            if (userId) q = q.eq("user_id", userId);
+            else q = q.eq("email", email);
+            return q.maybeSingle();
+          })
+          .then(function(pResult) {
+            goto(pResult && !pResult.error && !!pResult.data);
+          })
+          .catch(function(err) {
+            fallback(err);
+          });
+      });
+    });
+  </script>
+  <script>
     // ===== Support Chat Drawer =====
     document.addEventListener("DOMContentLoaded", function () {
 
