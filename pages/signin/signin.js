@@ -14,10 +14,12 @@ function getHomePath() {
   return "home.html";
 }
 
-/* After login: return to contest page if a referral code is pending */
+/* After login: return to contest page if a referral code is pending
+   (survives tab switches by also checking localStorage) */
 function getPostLoginPath() {
   try {
-    if (sessionStorage.getItem("contest_ref_code")) {
+    const refCode = sessionStorage.getItem("contest_ref_code") || localStorage.getItem("contest_ref_code");
+    if (refCode) {
       const path = (window.location.pathname || "").toLowerCase();
       if (path.includes("/pages/signin/") || path.includes("/pages/signup/")) {
         return "../pages/contest.html";
@@ -26,6 +28,22 @@ function getPostLoginPath() {
     }
   } catch (_e) {}
   return getHomePath();
+}
+
+/* Capture ?ref= from the login/signup URL so the referral survives the auth flow */
+function captureRefParam() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) {
+      sessionStorage.setItem("contest_ref_code", ref);
+      localStorage.setItem("contest_ref_code", ref);
+      params.delete("ref");
+      const query = params.toString();
+      const cleanUrl = `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash || ""}`;
+      window.history.replaceState({}, "", cleanUrl);
+    }
+  } catch (_e) {}
 }
 
 const LOGIN_FAIL_COUNT_KEY = "auth_login_fail_count";
@@ -585,6 +603,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   attachPasswordToggle();
+  captureRefParam();
   prefillEmailFromQuery();
   showResetSuccessIfAny();
   handleGoogleCallback();

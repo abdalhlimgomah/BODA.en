@@ -353,8 +353,10 @@
         errorMessage.className = "success-message";
         errorMessage.style.display = "block";
 
-        setTimeout(() => {
-          window.location.href = "../home.html";
+setTimeout(() => {
+          /* Redirect to the contest page if a referral code is pending,
+             otherwise back to home (getPostLoginPath handles both). */
+          window.location.href = typeof getPostLoginPath === "function" ? getPostLoginPath() : "../home.html";
         }, 1200);
       } catch (error) {
         console.error("verify error", error);
