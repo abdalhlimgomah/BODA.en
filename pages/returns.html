@@ -11,7 +11,7 @@
   <link href="../assets/css/noon-shell.css?v=20260817" rel="stylesheet" />
   <link href="../assets/css/noon-components.css" rel="stylesheet" />
   <link href="../assets/css/my-orders.css?v=20260821" rel="stylesheet" />
-  <link href="../assets/css/returns.css?v=20260911" rel="stylesheet" />
+  <link href="../assets/css/returns.css?v=20260911f" rel="stylesheet" />
   <link href="../assets/css/desktop.css?v=20260828b" rel="stylesheet" media="only screen and (min-width: 768px)" />
   <link rel="icon" type="image/x-icon" href="../assets/icons/favicon.ico">
   <link rel="icon" type="image/png" sizes="16x16" href="../assets/icons/favicon-16x16.png">
@@ -50,42 +50,72 @@
       </a>
       <div class="rs-title">
         <h1>المرتجعات</h1>
+        <p class="rs-title-sub">اشترِ بثقة — اطلب استرجاع المنتجات المؤهلة خلال 14 يومًا من التوصيل، وتابع مصير طلبك من هنا.</p>
       </div>
       <span style="width:40px;"></span>
     </section>
 
-    <section id="returns-stats" class="rs-stats-row" aria-label="ملخص حالة الإرجاع"></section>
+    <div class="rs-layout">
+      <div class="rs-layout-main">
 
-    <section class="rs-policy-card" id="rs-policy">
-      <button type="button" class="rs-policy-head" id="rs-policy-head">
-        <span class="material-icons-outlined">published_with_changes</span>
-        سياسة الإرجاع
-        <span class="material-icons-outlined rs-toggle-icon">expand_more</span>
-      </button>
-      <div class="rs-policy-body">
-        <p>في BudoQ نسعى دائمًا لضمان رضاك عن مشترياتك. إذا لم تكن راضيًا عن منتج، يمكنك إرجاعه وفقًا للشروط التالية:</p>
-        <h4>مدة الإرجاع</h4>
-        <p>يمكنك تقديم طلب إرجاع خلال <strong>14 يومًا</strong> من تاريخ استلام الطلب، مع مراعاة أن يكون المنتج صالحًا للإرجاع (كما هو موضح في صفحة المنتج).</p>
-        <h4>شروط الإرجاع</h4>
-        <ul>
-          <li>أن يكون المنتج في حالته الأصلية ولم يتم استخدامه</li>
-          <li>أن تكون العبوة الأصلية سليمة</li>
-          <li>إرفاق صور توضح حالة المنتج عند التقديم</li>
-          <li>بعض المنتجات لا يمكن إرجاعها، ويُحدَّد ذلك في صفحة المنتج وفي تفاصيل طلبك هنا</li>
-        </ul>
-        <h4>خطوات الإرجاع</h4>
-        <ol>
-          <li>سجل الدخول إلى حسابك وافتح صفحة المرتجعات</li>
-          <li>اختر المنتج الظاهر بجانبه "متاح للإرجاع" ثم اضغط "طلب استرجاع"</li>
-          <li>املأ بياناتك وسبب الإرجاع وأرفق حتى 3 صور للمنتج</li>
-          <li>يتم تتبع حالة طلبك هنا (قيد المراجعة / تم طلب الإرجاع / تم إلغاء طلبك)</li>
-        </ol>
+        <section class="rs-policy-card" id="rs-policy">
+          <button type="button" class="rs-policy-head" id="rs-policy-head">
+            <span class="material-icons-outlined">published_with_changes</span>
+            سياسة الإرجاع
+            <span class="material-icons-outlined rs-toggle-icon">expand_more</span>
+          </button>
+          <div class="rs-policy-body">
+            <p>في BudoQ نسعى دائمًا لضمان رضاك عن مشترياتك. إذا لم تكن راضيًا عن منتج، يمكنك إرجاعه وفقًا للشروط التالية:</p>
+            <h4>مدة الإرجاع</h4>
+            <p>يمكنك تقديم طلب إرجاع خلال <strong>14 يومًا</strong> من تاريخ استلام الطلب، مع مراعاة أن يكون المنتج صالحًا للإرجاع (كما هو موضح في صفحة المنتج).</p>
+            <h4>شروط الإرجاع</h4>
+            <ul>
+              <li>أن يكون المنتج في حالته الأصلية ولم يتم استخدامه</li>
+              <li>أن تكون العبوة الأصلية سليمة</li>
+              <li>إرفاق صور توضح حالة المنتج عند التقديم</li>
+              <li>لا يمكن إرجاع منتجات العناية الشخصية (مثل مستحضرات التجميل المفتوحة ومنتجات النظافة الشخصية) بعد فتحها أو استخدامها لأسباب صحية</li>
+              <li>بعض المنتجات لا يمكن إرجاعها، ويُحدَّد ذلك في صفحة المنتج وفي تفاصيل طلبك هنا</li>
+            </ul>
+            <h4>خطوات الإرجاع</h4>
+            <ol>
+              <li>سجل الدخول إلى حسابك وافتح صفحة المرتجعات</li>
+              <li>اختر المنتج الظاهر بجانبه "متاح للإرجاع"، اضغط على <strong>⋯</strong> بجوار المنتج ثم اختر "طلب إرجاع"</li>
+              <li>املأ بياناتك وسبب الإرجاع وأرفق حتى 3 صور للمنتج</li>
+              <li>يتم تتبع حالة طلبك هنا (قيد المراجعة / تم طلب الإرجاع / تم إلغاء طلبك)</li>
+            </ol>
+            <h4 class="rs-guide-imgs-title">صور توضيحية لطلب الإرجاع</h4>
+            <div class="rs-guide-imgs">
+              <figure><img src="https://www.jawdaonline.com/public/egy-request/1.png" alt="صور توضيحية لطلب الإرجاع - خطوة 1" loading="lazy" /></figure>
+              <figure><img src="https://www.jawdaonline.com/public/egy-request/2.png" alt="صور توضيحية لطلب الإرجاع - خطوة 2" loading="lazy" /></figure>
+              <figure><img src="https://www.jawdaonline.com/public/egy-request/3.png" alt="صور توضيحية لطلب الإرجاع - خطوة 3" loading="lazy" /></figure>
+              <figure><img src="https://www.jawdaonline.com/public/egy-request/4.png" alt="صور توضيحية لطلب الإرجاع - خطوة 4" loading="lazy" /></figure>
+            </div>
+          </div>
+        </section>
+
+        <h2 class="rs-group-title" id="rs-group-title">طلباتي</h2>
+
+        <section id="returns-list" class="rs-list" aria-live="polite"></section>
+
       </div>
-    </section>
 
-    <h2 class="rs-group-title">طلباتي</h2>
-
-    <section id="returns-list" class="rs-list" aria-live="polite"></section>
+      <aside class="rs-layout-aside">
+        <div class="rs-guide-card">
+          <h3><span class="material-icons-outlined">menu_book</span>كيفية الإرجاع</h3>
+          <ol class="rs-guide-steps">
+            <li><span>افتح صفحة المرتجعات وستجد طلباتك الحالية.</span></li>
+            <li><span>اضغط على ⋮ بجوار المنتج المؤهل ثم اختر "طلب إرجاع".</span></li>
+            <li><span>أدخل بياناتك وسؤالك وسبب الإرجاع وأرفق صور المنتج.</span></li>
+            <li><span>تابع حالة الطلب هنا حتى موافقة فريقنا.</span></li>
+          </ol>
+        </div>
+        <div class="rs-contact-card">
+          <h3><span class="material-icons-outlined">support_agent</span>تحتاج مساعدة؟</h3>
+          <p>في حال وجود أي استفسار بشأن مرتجعاتك، تواصل مع خدمة العملاء وسنرد عليك في أسرع وقت.</p>
+          <a href="contact.html">تواصل معنا</a>
+        </div>
+      </aside>
+    </div>
   </main>
 
   <header class="app-header buda-header"></header>
@@ -97,7 +127,7 @@
   <script src="../assets/js/taager-integration.js?v=20260810"></script>
   <script src="../assets/js/noon-shell.js?v=20260909d"></script>
   <script src="../assets/js/orders-common.js?v=20260826"></script>
-  <script src="../assets/js/returns-common.js?v=20260911"></script>
-  <script src="../assets/js/returns.js?v=20260911"></script>
+  <script src="../assets/js/returns-common.js?v=20260911c"></script>
+  <script src="../assets/js/returns.js?v=20260911f"></script>
 </body>
 </html>
