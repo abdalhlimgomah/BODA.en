@@ -14,11 +14,13 @@ function getHomePath() {
   return "home.html";
 }
 
-/* After login: return to contest page if a referral code is pending
-   (survives tab switches by also checking localStorage) */
+/* After login: return to contest page ONLY when the referral code was
+   captured during the CURRENT tab session (the user actually clicked an
+   invite link). A stale code sitting in localStorage for days must never
+   hijack the redirect — normal logins/signups always land on home. */
 function getPostLoginPath() {
   try {
-    const refCode = sessionStorage.getItem("contest_ref_code") || localStorage.getItem("contest_ref_code");
+    const refCode = sessionStorage.getItem("contest_ref_code");
     if (refCode) {
       const path = (window.location.pathname || "").toLowerCase();
       if (path.includes("/pages/signin/") || path.includes("/pages/signup/")) {
@@ -480,10 +482,10 @@ function startGoogleOAuth() {
   var scope = "openid email profile";
   var state = Math.random().toString(36).slice(2, 15);
 
-  /* Carry the pending referral code inside the OAuth state so it survives
-     the Google round-trip even if all storage is wiped (in-app browsers). */
+  /* Carry a FRESH referral code (from this tab session) inside the OAuth state
+     so the Google round-trip survives even if sessionStorage is wiped in-app. */
   try {
-    var pendingRef = sessionStorage.getItem("contest_ref_code") || localStorage.getItem("contest_ref_code");
+    var pendingRef = sessionStorage.getItem("contest_ref_code");
     if (pendingRef) state = state + "." + encodeURIComponent(pendingRef);
   } catch (_e) {}
 
@@ -494,9 +496,10 @@ function startGoogleOAuth() {
     "&scope=" + encodeURIComponent(scope) +
     "&state=" + encodeURIComponent(state);
 
-  /* Back the referral code up in a cookie so it survives the Google round-trip */
+  /* Back the FRESH referral code up in a cookie so it survives a Google
+     round-trip that wipes sessionStorage (in-app browsers). */
   try {
-    const pendingRef = sessionStorage.getItem("contest_ref_code") || localStorage.getItem("contest_ref_code");
+    const pendingRef = sessionStorage.getItem("contest_ref_code");
     if (pendingRef) setReferralCookie(pendingRef);
   } catch (_e) {}
 
