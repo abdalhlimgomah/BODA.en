@@ -14,6 +14,9 @@
 
   var vm = null;
   var allProducts = [];
+  var _syncDepth = 0;
+  var _syncingColor = false;
+  var _syncingSize = false;
 
 // ---------------------------------------------------------------
    // Actions shared between components
@@ -362,6 +365,7 @@
     }
 
     renderBuybox();
+    syncAvailability();
     renderOverview();
     renderSpecs();
     renderReviews();
@@ -533,11 +537,137 @@
       });
     }
 
+    // ---------------------------------------------------------------
+    // Cross availability — drives the diagonal strike-through so the
+    // buyer never picks a (color × size) combination that has no stock.
+    // The ONLY source of truth is the real colors×sizes matrix; a group
+    // member is struck when the SELECTED member of the OTHER group has
+    // zero stock for it. With nothing selected the base availability
+    // rules each group. Auto-fallback re-selects the first open option
+    // when the chosen one becomes invalid, so the qty badge + price stay
+    // consistent with a purchasable variant.
+    // ---------------------------------------------------------------
+    function normName(x) {
+      var s = String(x || "").trim().replace(/\s+/g, " ");
+      var t = s.replace(/^مقاس\s*/i, "").trim();
+      t = t.replace(/[٠-٩]/g, function (d) { return "٠١٢٣٤٥٦٧٨٩".indexOf(d); });
+      t = t.replace(/[۰-۹]/g, function (d) { return "۰۱۲۳۴۵۶۷۸۹".indexOf(d); });
+      return t;
+    }
+
+    function matrixColorEntry(colorName) {
+      var matrix = vm.colorsMatrix || [];
+      for (var i = 0; i < matrix.length; i++) {
+        if (normName(matrix[i].name) === normName(colorName)) return matrix[i];
+      }
+      return null;
+    }
+
+    // -1 → the color has NO matrix row (no constraint data); 0 → color
+    // row exists but has no stock for that size.
+    function matrixStockFor(colorName, sizeName) {
+      var entry = matrixColorEntry(colorName);
+      if (!entry || !Array.isArray(entry.sizes)) return -1;
+      for (var i = 0; i < entry.sizes.length; i++) {
+        if (normName(entry.sizes[i].size) === normName(sizeName)) {
+          return Math.max(0, Number(entry.sizes[i].stock) || 0);
+        }
+      }
+      return 0;
+    }
+
+    function syncAvailability() {
+      if (!vm) return;
+      if (_syncDepth > 4) return;
+      _syncDepth++;
+      try {
+        var vRoot = document.querySelector("[data-pdp-variants]");
+        var sizeName = null;
+        if (global.PDP.SizeSelector && typeof global.PDP.SizeSelector.getSelectedSize === "function") {
+          var selSz = global.PDP.SizeSelector.getSelectedSize();
+          if (selSz) sizeName = selSz.name;
+        }
+        var colorOpt = null;
+        if (global.PDP.Variants && vRoot && typeof global.PDP.Variants.getSelectedOptions === "function") {
+          colorOpt = global.PDP.Variants.getSelectedOptions(vRoot).color || null;
+        }
+        var colorName = colorOpt ? (colorOpt.label || colorOpt.value) : null;
+
+        // ---- sizes constrained by the selected color ----
+        var firstOpenSizeBtn = null;
+        qsa(".pdp-size-btn").forEach(function (btn) {
+          var idx = Number(btn.getAttribute("data-size-idx"));
+          var s = (vm.sizes || [])[idx];
+          if (!s) return;
+          var st = colorName ? matrixStockFor(colorName, s.name) : -1;
+          var ok = st === -1 ? (s.is_available !== false && s.stock !== 0) : st > 0;
+          if (ok) {
+            btn.classList.remove("is-unavailable");
+            btn.disabled = false;
+            if (!firstOpenSizeBtn && !btn.classList.contains("is-selected")) firstOpenSizeBtn = btn;
+          } else {
+            btn.classList.add("is-unavailable");
+            btn.disabled = true;
+          }
+        });
+
+        // ---- colors constrained by the selected size ----
+        if (vRoot) {
+          var colorGroup = null;
+          for (var gi = 0; gi < (vm.variants || []).length; gi++) {
+            if (vm.variants[gi].type === "color") { colorGroup = vm.variants[gi]; break; }
+          }
+          if (colorGroup) {
+            var firstOpenColorCard = null;
+            qsa("[data-pdp-variants] .pdp-variant-card[data-group='color']").forEach(function (card) {
+              var idx = Number(card.getAttribute("data-index"));
+              var opt = colorGroup.options[idx];
+              if (!opt) return;
+              var st = sizeName ? matrixStockFor(opt.label || opt.value, sizeName) : -1;
+              var ok = st === -1 ? (opt.available !== false && opt.inStock !== false) : st > 0;
+              if (ok) {
+                card.classList.remove("is-disabled");
+                card.disabled = false;
+                if (!firstOpenColorCard && !card.classList.contains("is-selected")) firstOpenColorCard = card;
+              } else {
+                card.classList.add("is-disabled");
+                card.disabled = true;
+              }
+            });
+
+            // If the chosen color no longer fits the size, re-select first open one.
+            if (sizeName && colorName && matrixStockFor(colorName, sizeName) !== -1 && matrixStockFor(colorName, sizeName) <= 0) {
+              if (firstOpenColorCard && !_syncingColor) {
+                _syncingColor = true;
+                firstOpenColorCard.click();
+                _syncingColor = false;
+              }
+            }
+          }
+        }
+
+        // If the chosen size no longer fits the color, re-select first open one.
+        if (sizeName && colorName && matrixStockFor(colorName, sizeName) !== -1 && matrixStockFor(colorName, sizeName) <= 0) {
+          if (firstOpenSizeBtn && !_syncingSize) {
+            _syncingSize = true;
+            var szIdx = Number(firstOpenSizeBtn.getAttribute("data-size-idx"));
+            var szObj = (vm.sizes || [])[szIdx] || null;
+            if (szObj && !szObj._siblingId) firstOpenSizeBtn.click();
+            _syncingSize = false;
+          }
+        }
+      } finally {
+        _syncDepth--;
+      }
+    }
+
     document.addEventListener("pdp:size-change", function (e) {
       applyPriceForSize(e.detail && e.detail.size);
+      syncAvailability();
       updateQuantityUI();
     });
     document.addEventListener("pdp:variant-change", function () {
+      syncAvailability();
       updateQuantityUI();
     });
 
@@ -568,6 +698,7 @@
             if (global.PDP.Variants && variantsRoot) {
               global.PDP.Variants.render(variantsRoot, vm);
             }
+            syncAvailability();
           }
         }
         if (vm.raw._needsTaagerSizes) {
@@ -575,7 +706,7 @@
           if (retrySizes && retrySizes.length) {
             vm.sizes = retrySizes;
             var sRoot = document.querySelector("[data-pdp-sizes]");
-            if (global.PDP.SizeSelector && sRoot) global.PDP.SizeSelector.render(sRoot, vm);
+            if (global.PDP.SizeSelector && sRoot) { global.PDP.SizeSelector.render(sRoot, vm); syncAvailability(); }
           }
           if (vm.raw._needsTaagerSizes && D.fetchSizesFromVariantGroups) {
             D.fetchSizesFromVariantGroups(vm.raw).then(function (fbSizes) {
@@ -583,7 +714,7 @@
                 vm.sizes = fbSizes;
                 vm.raw._needsTaagerSizes = false;
                 var sRoot2 = document.querySelector("[data-pdp-sizes]");
-                if (global.PDP.SizeSelector && sRoot2) global.PDP.SizeSelector.render(sRoot2, vm);
+                if (global.PDP.SizeSelector && sRoot2) { global.PDP.SizeSelector.render(sRoot2, vm); syncAvailability(); }
               }
             });
           }

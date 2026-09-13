@@ -29,8 +29,14 @@
     root.__pdpVariants = vm.variants;
 
     root.innerHTML = vm.variants.map(function (group) {
+      var firstAvailableIdx = -1;
+      for (var _fi = 0; _fi < group.options.length; _fi++) {
+        if (group.options[_fi].available) { firstAvailableIdx = _fi; break; }
+      }
+      if (firstAvailableIdx === -1) firstAvailableIdx = 0;
+
       var optionsHtml = group.options.map(function (opt, i) {
-        var selected = group._taagerMulti ? (opt.value === currentId) : (i === 0);
+        var selected = group._taagerMulti ? (opt.value === currentId) : (i === firstAvailableIdx);
         var isSwatch = group.type === "color";
         var classes = "pdp-variant-card " + (isSwatch ? "pdp-variant-card--swatch" : "pdp-variant-card--text") + (selected ? " is-selected" : "") + (opt.available ? "" : " is-disabled");
         var inner = isSwatch
@@ -47,7 +53,7 @@
 
       var selectedLabel = group._taagerMulti
         ? (function () { for (var oi = 0; oi < group.options.length; oi++) { if (group.options[oi].value === currentId) return group.options[oi].label; } return group.options[0].label; })()
-        : group.options[0].label;
+        : (function () { for (var oi = 0; oi < group.options.length; oi++) { if (group.options[oi].available) return group.options[oi].label; } return group.options[0].label; })();
       return (
         '<div class="pdp-variant-group" data-group-key="' + U.escapeHtml(group.key) + '">' +
         '<div class="pdp-variant-label">' + U.escapeHtml(group.label) + ": " +

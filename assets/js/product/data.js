@@ -386,6 +386,30 @@
     pushGroup("capacity", "السعة", product && (product.capacities || product.capacity_options), "text");
     pushGroup("edition", "النسخة", product && (product.editions || product.edition_options), "text");
 
+    // A color whose colors×sizes matrix holds zero stock for EVERY size is
+    // itself out of stock — strike it and block selection (never bottom-up).
+    if (product && Array.isArray(product.colors) && product.colors.length) {
+      var colorGroupLbl = null;
+      for (var _gi = 0; _gi < groups.length; _gi++) {
+        if (groups[_gi].type === "color") { colorGroupLbl = groups[_gi]; break; }
+      }
+      if (colorGroupLbl) {
+        var cm = buildColorsMatrix(product);
+        colorGroupLbl.options.forEach(function (opt) {
+          for (var _ci = 0; _ci < cm.length; _ci++) {
+            if (String(cm[_ci].name).toLowerCase() === String(opt.label).toLowerCase()) {
+              var hasAny = 0;
+              for (var _sj = 0; _sj < (cm[_ci].sizes || []).length; _sj++) {
+                if ((Number(cm[_ci].sizes[_sj].stock) || 0) > 0) { hasAny = 1; break; }
+              }
+              opt.available = hasAny === 1;
+              break;
+            }
+          }
+        });
+      }
+    }
+
     if (!groups.length) {
       var generic = (product && (product.variants || product.options || product.variant_options)) || [];
       pushGroup("variant", (product && product.variant_label) || "اختر النوع", generic, "text");
