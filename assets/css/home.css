@@ -1888,3 +1888,24 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
   transition: color 0.2s;
 }
 .nsq-footer__legal a:hover { color: #6D28D9; }
+
+
+/* ====== الفئات على الهاتف فقط: كل زوج = صورتين تحت بعض (صف فوق + صف تحته) ====== */
+@media (max-width: 767px) {
+  .hm-cats-scroll {
+    scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+  .hm-cats-pair {
+    flex-direction: column;
+    width: fit-content;
+    scroll-snap-align: start;
+  }
+  .hm-cats-pair .hm-cat-card {
+    width: fit-content;
+  }
+.hm-cats-pair .hm-cat-card-img {
+    width: 60px;
+  }
+}
