@@ -1218,15 +1218,25 @@ const notifyCartAdded = (product, quantity = 1, priceInfo) => {
   var priceRow = document.createElement('div');
   priceRow.className = '_bodaCartToast-price';
 
+  var moneyFmt = function (v) {
+    try {
+      if (window.BudaStore && typeof window.BudaStore.formatMoney === "function") {
+        return window.BudaStore.formatMoney(v, { plain: true });
+      }
+    } catch (_e) {}
+    return (Number(v) || 0).toLocaleString("ar-EG") + " " +
+      (window.BudaStore && typeof window.BudaStore.getCurrencyLabel === "function" ? window.BudaStore.getCurrencyLabel() : "جنيه");
+  };
+
   var curPriceEl = document.createElement('span');
   curPriceEl.className = '_bodaCartToast-current';
-  curPriceEl.textContent = curPrice.toLocaleString('ar-EG') + ' \u062C\u0646\u064A\u0647';
+  curPriceEl.textContent = moneyFmt(curPrice);
   priceRow.appendChild(curPriceEl);
 
   if (oldPrice > curPrice) {
     var oldPriceEl = document.createElement('span');
     oldPriceEl.className = '_bodaCartToast-old';
-    oldPriceEl.textContent = oldPrice.toLocaleString('ar-EG') + ' \u062C\u0646\u064A\u0647';
+    oldPriceEl.textContent = moneyFmt(oldPrice);
     priceRow.appendChild(oldPriceEl);
 
     var discEl = document.createElement('span');
