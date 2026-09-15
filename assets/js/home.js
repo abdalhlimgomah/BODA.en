@@ -1681,7 +1681,7 @@ HM.renderCategories = function () {
   var html =
     '<div class="hm-cats-wrap hm-fade">' +
     '<div class="hm-cats-section">' +
-    '<div class="hm-cats-head"></div>' +
+    '<div class="hm-cats-head"><h2>أشترى حسب الفئه</h2></div>' +
     '<div class="hm-cats-body">' +
     '<div class="hm-cats-scroll-wrap">' +
     '<button class="hm-cats-btn prev" type="button" aria-label="السابق">❮</button>' +
@@ -2471,6 +2471,12 @@ HM.renderInitialProgressively = function () {
     return Promise.resolve();
   }
 
+  // Keep only the skeleton variant matching the current viewport so
+  // hydration replaces the right placeholders (mobile vs desktop).
+  var isDesktop = window.matchMedia("(min-width: 1200px)").matches;
+  var removeSelector = isDesktop ? ".sk-mob" : ".sk-desk";
+  Array.from(skeletonEl.querySelectorAll(removeSelector)).forEach(function (el) { el.remove(); });
+
   document.body.classList.add("home-hydrating");
   document.body.classList.remove("home-loading");
 
@@ -2896,7 +2902,7 @@ function renderSummerSection() {
   }
   var container = HM.renderOffers({
     id: "hm-summer",
-    title: "عروض الصيف",
+    title: "مقترح لك",
     excludeIds: forYouIds,
     rotate: true,
   });
@@ -2967,8 +2973,7 @@ HM.renderMegaOffers = function (section) {
   html +=
     '    </div></div>' +
     '  <div class="buda-mega-col buda-mega-col-2">' +
-    '    <div class="buda-mega-flash-head"><h3 class="buda-mega-col-title"><span class="material-icons-outlined">bolt</span> عروض خاطفة</h3>' +
-    '    <span class="buda-mega-flash-timer" id="buda-flash-timer">--:--:--</span></div>' +
+    '    <h3 class="buda-mega-col-title"><span class="material-icons-outlined">bolt</span> عروض خاطفة</h3>' +
     '    <div class="buda-mega-grid" id="buda-mega-grid-2">';
   col2Items.forEach(function (p) {
     var rp = resolvePrice(p);
@@ -3011,30 +3016,6 @@ HM.renderMegaOffers = function (section) {
   if (!HM.contentEl) return null;
   HM.contentEl.appendChild(el);
   attachProductCardEvents(el);
-  // Flash deals countdown — 6h cycle, persisted so refresh keeps the same timer
-  var endTs = 0;
-  try { endTs = parseInt(localStorage.getItem('buda_flash_end') || '0', 10); } catch (_e) { endTs = 0; }
-  if (!endTs || endTs <= Date.now()) endTs = Date.now() + 6 * 3600 * 1000;
-  try { localStorage.setItem('buda_flash_end', String(endTs)); } catch (_e) {}
-  var timerEl = el.querySelector('#buda-flash-timer');
-  if (timerEl) {
-    if (window._budaFlashTimer) clearInterval(window._budaFlashTimer);
-    function pad2(n) { return (n < 10 ? '0' : '') + n; }
-    function tickFlash() {
-      var diff = endTs - Date.now();
-      if (diff <= 0) {
-        endTs = Date.now() + 6 * 3600 * 1000;
-        try { localStorage.setItem('buda_flash_end', String(endTs)); } catch (_e) {}
-        diff = endTs - Date.now();
-      }
-      timerEl.textContent =
-        pad2(Math.floor(diff / 3600000)) +
-        ':' + pad2(Math.floor((diff % 3600000) / 60000)) +
-        ':' + pad2(Math.floor((diff % 60000) / 1000));
-    }
-    tickFlash();
-    window._budaFlashTimer = setInterval(tickFlash, 1000);
-  }
   return el;
 };
 
