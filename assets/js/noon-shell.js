@@ -1,4 +1,4 @@
-﻿(function () {
+(function () {
   "use strict";
 
 
@@ -78,7 +78,7 @@ function ensureHeaderCSS() {
 
   var nightCssId = "boda-night-css";
   if (!document.getElementById(nightCssId)) {
-    var nightUrl = resolveAssetUrl("../css/noon.css?v=20260909d");
+    var nightUrl = resolveAssetUrl("../css/noon.css?v=20260914a");
     var nightLink = document.createElement("link");
     nightLink.id = nightCssId;
     nightLink.rel = "stylesheet";
@@ -112,7 +112,10 @@ function getNoonHeaderHTML() {
     '    </div>',
     '  </div>',
     '  <div class="buda-header__nav-group">',
-    '    <button class="buda-header__notif" type="button" aria-label="الإشعارات">',
+    '    <a href="wishlist.html" class="buda-header__wishlist" data-nav="wishlist" aria-label="المفضلة" title="المفضلة">',
+    '      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>',
+    '    </a>',
+    '    <button class="buda-header__notif buda-header__support" type="button" aria-label="الدعم" title="الدعم">',
     '      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
     '      <span class="buda-header__badge" id="budaCartBadge">0</span>',
     '    </button>',
@@ -248,7 +251,8 @@ function injectFloatingSearch() {
         '  </button>'
       : '') +
     '</div>';
-  header.appendChild(wrap);
+  var inner = header.querySelector('.buda-header__inner');
+    (inner || header).appendChild(wrap);
   if (isHome) {
     var cameraBtn = wrap.querySelector('.buda-search-camera');
     if (cameraBtn) {
@@ -303,13 +307,14 @@ function initNoonHeaderUI() {
   var locTrigger = document.getElementById('budaLocationTrigger');
   var locModal = document.getElementById('budaLocationModal');
   var locClose = document.getElementById('budaLocationClose');
-  if (locTrigger && locModal) {
-    locTrigger.addEventListener('click', function () {
+  if (locModal) {
+    function openLocationModal() {
       locModal.classList.add('open');
       document.body.style.overflow = 'hidden';
       if (typeof renderSavedAddresses === 'function') renderSavedAddresses();
-    });
+    }
     function closeLocationModal() { locModal.classList.remove('open'); document.body.style.overflow = ''; }
+    if (locTrigger) locTrigger.addEventListener('click', openLocationModal);
     if (locClose) locClose.addEventListener('click', closeLocationModal);
     locModal.addEventListener('click', function (e) { if (e.target === locModal) closeLocationModal(); });
     document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && locModal.classList.contains('open')) closeLocationModal(); });
@@ -1141,45 +1146,107 @@ function hideBottomNavOnDesktop() {
     return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
   }
 
+  function getShellCountryCode() {
+    var cc = '';
+    if (window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry) {
+      try {
+        var sel = window.TaagerIntegration.getSelectedCountry();
+        if (sel && sel.code) cc = String(sel.code);
+      } catch (e) {}
+    }
+    if (!cc) cc = String(localStorage.getItem('userCountry') || 'EG');
+    return cc;
+  }
+
+  function shellAddrKey(email, country) {
+    return email ? 'buda_saved_addresses_' + email + '_' + country : 'buda_saved_addresses_' + country;
+  }
+
+  function shellSelKey(email, country) {
+    return email ? 'buda_selected_address_' + email + '_' + country : 'buda_selected_address_' + country;
+  }
+
+  function readShellAddresses(email, country) {
+    var addrKey = shellAddrKey(email, country);
+    var savedJson = localStorage.getItem(addrKey);
+    if (!savedJson && email) {
+      var oldKey = 'buda_saved_addresses_' + email;
+      var oldData = localStorage.getItem(oldKey);
+      if (oldData) {
+        try { localStorage.setItem(addrKey, oldData); } catch (e) {}
+        savedJson = oldData;
+      }
+    }
+    try { return savedJson ? JSON.parse(savedJson) : []; } catch (e) { return []; }
+  }
+
+  function syncHeaderAddressesFromServer(email, country, cb) {
+    var client = (typeof window.getSupabaseClient === 'function') ? window.getSupabaseClient() : null;
+    if (!client || !email) { if (cb) cb(null); return; }
+    client
+      .from('user_addresses')
+      .select('*')
+      .eq('email', email)
+      .order('created_at', { ascending: true })
+      .then(function (res) {
+        if (!res || res.error) { if (cb) cb(null); return; }
+        var rows = (res.data || []).map(function (r) {
+          return {
+            id: r.id, email: r.email, type: r.type, name: r.name,
+            fullAddress: r.full_address, phone: r.phone, lat: r.lat, lng: r.lng,
+            street: r.street, building: r.building, area: r.area, floor: r.floor,
+            isDefault: r.is_default, country: r.country || 'EG', createdAt: r.created_at
+          };
+        });
+        try { localStorage.setItem(shellAddrKey(email, country), JSON.stringify(rows)); } catch (e) {}
+        if (cb) cb(rows);
+      })
+      .catch(function () { if (cb) cb(null); });
+  }
+
   function renderSavedAddresses() {
     var list = document.getElementById('budaAddressList');
     if (!list) return;
     var userEmail = String(localStorage.getItem('userEmail') || sessionStorage.getItem('user_email') || '').trim();
-    if (!userEmail) {
-      list.innerHTML =
-        '<div class="buda-address-empty">' +
-        '<span class="material-icons-outlined">location_off</span>' +
-        '<p>سجل الدخول أولاً</p>' +
-        '<span>قم بتسجيل الدخول لعرض عناوينك</span>' +
-        '</div>';
+    var userCountry = getShellCountryCode();
+    var addresses = readShellAddresses(userEmail, userCountry);
+
+    if (!addresses.length && userEmail && typeof window.getSupabaseClient === 'function') {
+      syncHeaderAddressesFromServer(userEmail, userCountry, function (serverRows) {
+        if (serverRows && serverRows.length) {
+          renderAddressList(list, serverRows, userEmail, userCountry);
+        } else {
+          renderEmptyAddressList(list, userEmail);
+        }
+      });
       return;
     }
-    // Use country-specific key so addresses show per country
-    var userCountry = String(localStorage.getItem('userCountry') || 'EG');
-    var addrKey = 'buda_saved_addresses_' + userEmail + '_' + userCountry;
-    // Migration: if new key empty, try old key
-    var savedJson = localStorage.getItem(addrKey);
-    if (!savedJson) {
-      var oldKey = 'buda_saved_addresses_' + userEmail;
-      var oldData = localStorage.getItem(oldKey);
-      if (oldData) {
-        // Migrate old data to new country-specific key
-        localStorage.setItem(addrKey, oldData);
-        savedJson = oldData;
-      }
+    if (addresses.length) {
+      renderAddressList(list, addresses, userEmail, userCountry);
+    } else {
+      renderEmptyAddressList(list, userEmail);
     }
-    var addresses = [];
-    try { addresses = savedJson ? JSON.parse(savedJson) : []; } catch { addresses = []; }
-    if (addresses.length === 0) {
-      list.innerHTML =
-        '<div class="buda-address-empty">' +
-        '<span class="material-icons-outlined">location_off</span>' +
-        '<p>لا توجد عناوين محفوظة</p>' +
-        '<span>أضف عنوانك الأول لبدء التسوق</span>' +
-        '</div>';
-      return;
-    }
-    var selectedId = localStorage.getItem('buda_selected_address_' + userEmail + '_' + userCountry) || '';
+  }
+
+  function renderEmptyAddressList(list, userEmail) {
+    var loginCta = userEmail ? '' :
+      '<button class="buda-add-address-btn" id="budaLoginCta" type="button"><span class="material-icons-outlined">login</span> تسجيل الدخول</button>';
+    list.innerHTML =
+      '<div class="buda-address-empty">' +
+      '<span class="material-icons-outlined">location_off</span>' +
+      '<p>' + (userEmail ? 'لا توجد عناوين محفوظة' : 'سجل الدخول أولاً') + '</p>' +
+      '<span>' + (userEmail ? 'أضف عنوانك الأول لبدء التسوق' : 'قم بتسجيل الدخول لعرض عناوينك أو أضف عنوانًا') + '</span>' +
+      loginCta +
+      '<button class="buda-add-address-btn" id="budaAddAddressBtn2" type="button"><span class="material-icons-outlined">add</span> إضافة عنوان جديد</button>' +
+      '</div>';
+    var loginBtn = document.getElementById('budaLoginCta');
+    if (loginBtn) loginBtn.addEventListener('click', function () { window.location.href = 'signin/login.html'; });
+    var addBtn2 = document.getElementById('budaAddAddressBtn2');
+    if (addBtn2) addBtn2.addEventListener('click', function () { window.location.href = 'addresses.html'; });
+  }
+
+  function renderAddressList(list, addresses, userEmail, userCountry) {
+    var selectedId = localStorage.getItem(shellSelKey(userEmail, userCountry)) || '';
     try { selectedId = JSON.parse(selectedId); } catch {}
     list.innerHTML = addresses.map(function (addr, i) {
       var isActive = String(addr.id) === String(selectedId) || (i === 0 && !selectedId);
@@ -1203,8 +1270,8 @@ function hideBottomNavOnDesktop() {
         var idx = parseInt(card.getAttribute('data-addr-index'), 10);
         if (isNaN(idx)) return;
         var addr = addresses[idx];
-        if (addr && userEmail) {
-          localStorage.setItem('buda_selected_address_' + userEmail + '_' + userCountry, JSON.stringify(addr.id));
+        if (addr) {
+          localStorage.setItem(shellSelKey(userEmail, userCountry), JSON.stringify(addr.id));
           var dt = document.getElementById('deliver-to-text');
           if (dt) dt.textContent = (addr.label || addr.name || addr.area || 'عنوان ' + (idx + 1));
         }
@@ -1218,7 +1285,7 @@ function hideBottomNavOnDesktop() {
         var idx = parseInt(btn.getAttribute('data-addr-delete'), 10);
         if (isNaN(idx)) return;
         addresses.splice(idx, 1);
-        try { localStorage.setItem(addrKey, JSON.stringify(addresses)); } catch {}
+        try { localStorage.setItem(shellAddrKey(userEmail, userCountry), JSON.stringify(addresses)); } catch {}
         renderSavedAddresses();
       });
     });
@@ -1338,6 +1405,8 @@ function hideBottomNavOnDesktop() {
 
   // Subscribe to support messages globally so the bell badge works on every page
   function initSupportBadge() {
+    var supportBtn = document.querySelector('.buda-header__support');
+    if (!supportBtn || getComputedStyle(supportBtn).display === 'none') return;
     // Retry finding badge if header not injected yet
     var badge = document.getElementById('budaCartBadge');
     if (!badge) { setTimeout(initSupportBadge, 200); return; }

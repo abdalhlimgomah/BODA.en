@@ -1757,17 +1757,6 @@ HM.renderBrands = function () {
 HM.renderFeatures = function () {
   if (!HM.contentEl) return;
   var html =
-    /* Mobile: single card with 4 horizontal items */
-    '<div class="hm-features-mobile">' +
-    '<div class="hm-f-card">' +
-    '<div class="hm-f-item"><div class="hm-f-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14h-1a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h1"/><path d="M20 6h1a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2h-1"/><path d="M6 14h2v6H6z"/><path d="M16 14h2v6h-2z"/><path d="M6 14v-2a6 6 0 0 1 12 0v2"/></svg></div><div class="hm-f-info"><span class="hm-f-title">دعم 24/7</span><span class="hm-f-desc">خدمة عملاء</span></div></div>' +
-    '<div class="hm-f-divider"></div>' +
-    '<div class="hm-f-item"><div class="hm-f-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="hm-f-info"><span class="hm-f-title">دفع آمن</span><span class="hm-f-desc">حماية بياناتك</span></div></div>' +
-    '<div class="hm-f-divider"></div>' +
-    '<div class="hm-f-item"><div class="hm-f-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><div class="hm-f-info"><span class="hm-f-title">جودة مضمونة</span><span class="hm-f-desc">منتجات أصلية 100%</span></div></div>' +
-    '<div class="hm-f-divider"></div>' +
-    '<div class="hm-f-item"><div class="hm-f-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6C2BFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-1"/><polygon points="12 15 17 21 7 21 12 15"/><path d="M12 15V9"/></svg></div><div class="hm-f-info"><span class="hm-f-title">توصيل سريع</span><span class="hm-f-desc">إلى جميع المناطق</span></div></div>' +
-    '</div></div>' +
 /* Desktop: stacked vertical cards */
     '<div class="hm-features-desktop">' +
 
@@ -1776,6 +1765,7 @@ HM.renderFeatures = function () {
   temp.innerHTML = html;
   HM.contentEl.appendChild(temp.firstElementChild);
 };
+
 
 // ========== SMART CATEGORY SHOWCASE (4 premium cards) ==========
 HM.renderSmartCategories = function (section) {
