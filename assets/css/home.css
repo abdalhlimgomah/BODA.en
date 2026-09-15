@@ -1379,8 +1379,8 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
     box-shadow: 0 2px 8px rgba(217,54,62,0.4);
 }
 
-/* ========== MOBILE: hide header top-row on scroll down (search stays) ========== */
-@media (max-width: 767px) {
+/* ========== TABLET: hide header top-row on scroll down (search stays); phones keep the noon-style header ========== */
+@media (min-width: 768px) and (max-width: 1199px) {
   .buda-header__inner {
     max-height: 64px;
     overflow: hidden;

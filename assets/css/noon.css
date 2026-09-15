@@ -376,3 +376,153 @@ html, body {
 .buda-search-panel__all a:hover {
   background: var(--color-primary-50, #f5f3ff);
 }
+
+/* ============================================
+   NOON-STYLE MOBILE HEADER (≤767px)
+   Top row: menu | logo | search | wishlist
+   Second row: delivery-to address bar
+   ============================================ */
+@media (min-width: 768px) {
+  .buda-header__wishlist { display: none; }
+}
+
+@media (max-width: 767px) {
+  .buda-header .buda-header__inner {
+    max-width: none;
+    height: auto;
+    min-height: 54px;
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    position: static;
+    overflow: visible;
+  }
+  .buda-header .buda-header__brand {
+    position: static;
+    transform: none;
+    left: auto;
+    top: auto;
+    z-index: auto;
+    gap: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+  }
+  .buda-header .buda-header__logo-img { display: none !important; }
+  .buda-header .buda-header__brand-name { font-size: 19px; font-weight: 800; line-height: 1; }
+  .buda-header .buda-header__menu-btn {
+    position: static;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+  }
+  .buda-header__wishlist {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex: 0 0 38px;
+    border-radius: 14px;
+    color: #111111;
+    text-decoration: none;
+    transition: background 220ms ease;
+  }
+  .buda-header__wishlist:active { transform: scale(0.95); }
+  .buda-header__wishlist svg { width: 24px; height: 24px; stroke: #111111; stroke-width: 2; }
+  .buda-header__support { display: none !important; }
+  .buda-header .buda-header__nav-group {
+    position: static;
+    inset: auto;
+    display: contents;
+    padding: 0;
+  }
+  .buda-header__nav-group .buda-header__menu-btn { order: 0; }
+  .buda-header .buda-header__brand { order: 1; }
+  .buda-header__wishlist { order: 3; }
+
+  #buda-search-float {
+    order: 2;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: auto;
+    max-width: none;
+  }
+  #buda-search-float .buda-search-box {
+    height: 38px;
+    width: 100%;
+    padding: 0 14px;
+    box-shadow: 0 2px 10px rgba(109,40,217,0.06);
+    border-top: none;
+  }
+  #buda-search-float .buda-search-box .buda-search-icon {
+    width: 24px;
+    height: 24px;
+  }
+  #buda-search-float .buda-search-box .buda-search-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  #buda-search-float .buda-search-box .buda-search-box__input {
+    font-size: 13.5px;
+    flex: 1 1 0% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+    height: 42px !important;
+    min-height: 0 !important;
+    padding: 10px 12px !important;
+    box-sizing: border-box !important;
+  }
+  #buda-search-float .buda-search-rotator {
+    left: 18px !important;
+    right: 56px !important;
+  }
+  #buda-search-float .buda-search-box .buda-search-box__btn,
+  #buda-search-float .buda-search-box .buda-search-camera {
+    height: 38px !important;
+    min-height: 0 !important;
+    width: 34px !important;
+    flex: 0 0 auto !important;
+    padding: 0 4px !important;
+    margin: 0 !important;
+    border-radius: 12px !important;
+    border: none !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #buda-search-float .buda-search-box .buda-search-box__btn svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+  #menu-toggle.buda-header__menu-btn,
+  .buda-header__inner .buda-header__menu-btn {
+    height: 38px !important;
+    min-height: 0 !important;
+    width: 38px !important;
+    flex: 0 0 38px !important;
+  }
+
+  /* ---- Addresses sheet: slide up from bottom on phones ---- */
+  .buda-modal-overlay { align-items: flex-end; }
+  .buda-modal {
+    width: 100%;
+    max-width: none;
+    max-height: 72vh;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 16px max(20px, env(safe-area-inset-bottom));
+    animation: budaSheetUp 260ms cubic-bezier(0.25, 0.8, 0.35, 1);
+  }
+  @keyframes budaSheetUp {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+  }
+}
