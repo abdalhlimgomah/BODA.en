@@ -6,6 +6,22 @@ function getGoogleClientId() {
   return window.__Buda_GOOGLE_CLIENT_ID || window.Buda_GOOGLE_CLIENT_ID || "";
 }
 
+/* True when the JS runs inside the BudoQ Android app's WebView. On that
+   platform the Google sign-in is opened in the REAL external browser so the
+   user's saved Google accounts are available, then the app picks the session
+   back up through a deep link. On the normal website this stays in-browser. */
+function isBudoqNativeApp() {
+  try {
+    return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+  } catch (_e) {
+    return false;
+  }
+}
+
+function getAuthReturnKind() {
+  return isBudoqNativeApp() ? "app" : "web";
+}
+
 function getHomePath() {
   const path = (window.location.pathname || "").toLowerCase();
   if (path.includes("/pages/signin/") || path.includes("/pages/signup/")) {
@@ -482,12 +498,14 @@ function startGoogleOAuth() {
   var scope = "openid email profile";
   var state = Math.random().toString(36).slice(2, 15);
 
-  /* Carry a FRESH referral code (from this tab session) inside the OAuth state
-     so the Google round-trip survives even if sessionStorage is wiped in-app. */
+  /* State format: <csrf>.<kind>[.<encoded_ref>]  where kind is "app" (the
+     Android app wants the flow back via a deep link) or "web" (normal). */
+  var pendRef = "";
   try {
-    var pendingRef = sessionStorage.getItem("contest_ref_code");
-    if (pendingRef) state = state + "." + encodeURIComponent(pendingRef);
+    pendRef = sessionStorage.getItem("contest_ref_code") || "";
   } catch (_e) {}
+  if (pendRef) state = state + "." + encodeURIComponent(pendRef);
+  state = state + "." + getAuthReturnKind();
 
   var authUrl = "https://accounts.google.com/o/oauth2/v2/auth?" +
     "client_id=" + encodeURIComponent(clientId) +
@@ -503,6 +521,15 @@ function startGoogleOAuth() {
     if (pendingRef) setReferralCookie(pendingRef);
   } catch (_e) {}
 
+  if (isBudoqNativeApp()) {
+    /* Inside the Android app: hand the real browser the OAuth URL. The native
+       layer intercepts the "budoqoauth://start#<url>" navigation and opens it
+       in the external browser (Chrome) where the user's saved Google accounts
+       live. The app later receives the callback via a deep link. */
+    window.location.href = "budoqoauth://start#" + encodeURIComponent(authUrl);
+    return;
+  }
+
   window.location.href = authUrl;
 }
 
@@ -511,19 +538,34 @@ async function handleGoogleCallback() {
   var code = params.get("code");
   if (!code) return;
 
+  /* state = <csrf>[.<encoded_ref>].<kind> ; kind = "app" | "web" */
+  var stateValue = params.get("state") || "";
+  var stateParts = stateValue.split(".");
+  var authKind = stateParts.length > 1 ? stateParts[stateParts.length - 1] : "";
+  var stateRef = stateParts.length > 2 ? decodeURIComponent(stateParts.slice(1, stateParts.length - 1).join(".")) : "";
+
   /* Restore the referral code carried through the OAuth state (survives a full storage wipe) */
-  var stateValue = params.get("state");
-  if (stateValue) {
-    var dotIdx = stateValue.indexOf(".");
-    if (dotIdx > 0) {
-      try {
-        var stateRef = decodeURIComponent(stateValue.slice(dotIdx + 1));
-        if (stateRef) {
-          sessionStorage.setItem("contest_ref_code", stateRef);
-          localStorage.setItem("contest_ref_code", stateRef);
-        }
-      } catch (_e) {}
-    }
+  if (stateRef) {
+    try {
+      sessionStorage.setItem("contest_ref_code", stateRef);
+      localStorage.setItem("contest_ref_code", stateRef);
+    } catch (_e) {}
+  }
+
+  /* The OAuth started inside the Android app, so it completed in the EXTERNAL
+     browser. Don't consume the code here: hand it to the app via a deep link
+     and let the app's own WebView run the exchange so the session lands in the
+     app's storage (Chrome's storage is invisible to the app). */
+  if (authKind === "app" && !isBudoqNativeApp()) {
+    var returnUrl =
+      window.location.origin +
+      "/pages/signin/app-return.html?" +
+      new URLSearchParams({
+        code: code,
+        state: stateValue,
+      }).toString();
+    window.location.replace(returnUrl);
+    return;
   }
 
   var edgeUrl = window.TAAGER_EDGE_FUNCTION_URL

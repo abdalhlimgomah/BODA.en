@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>تسجيل الدخول ناجح</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body {
+        font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+        background: linear-gradient(180deg, #f6f2fb 0%, #f1eafb 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+      }
+      .card {
+        max-width: 430px;
+        width: 100%;
+        background: #fff;
+        border-radius: 22px;
+        padding: 38px 28px;
+        box-shadow: 0 18px 50px rgba(124, 58, 237, 0.18);
+        text-align: center;
+      }
+      .badge {
+        width: 76px;
+        height: 76px;
+        border-radius: 50%;
+        margin: 0 auto 18px;
+        background: #7c3aed;
+        display: grid;
+        place-items: center;
+        color: #fff;
+      }
+      .badge svg {
+        width: 42px;
+        height: 42px;
+      }
+      h1 {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1f1240;
+        margin-bottom: 10px;
+      }
+      p {
+        font-size: 15px;
+        line-height: 1.7;
+        color: #5f5480;
+        margin-bottom: 26px;
+      }
+      button {
+        width: 100%;
+        border: none;
+        cursor: pointer;
+        outline: none;
+        font: inherit;
+      }
+      .primary {
+        background: #7c3aed;
+        color: #fff;
+        border-radius: 14px;
+        padding: 16px;
+        font-size: 17px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        transition: transform 0.12s ease, background 0.2s ease;
+      }
+      .primary:active { transform: scale(0.97); background: #6d28d9; }
+      .hint {
+        margin-top: 18px;
+        font-size: 13px;
+        color: #8a80a8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+      }
+      .spinner {
+        width: 15px;
+        height: 15px;
+        border: 2px solid rgba(255, 255, 255, 0.4);
+        border-top-color: #fff;
+        border-radius: 50%;
+        display: inline-block;
+        animation: spin 0.9s linear infinite;
+      }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      .hidden { display: none !important; }
+    </style>
+  </head>
+  <body>
+    <div class="card">
+      <div class="badge">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+          <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </div>
+      <h1>تم تسجيل الدخول بنجاح</h1>
+      <p>حساب Google الخاص بك جاهز. ارجع للتطبيق لإكمال تسجيل الدخول داخل بودوكيو في ثانية واحدة.</p>
+      <button id="open-app" class="primary">
+        <span id="btn-text">فتح تطبيق بودوكيو</span>
+      </button>
+      <div class="hint">
+        <span id="spinner" class="spinner"></span>
+        جارٍ التوجه للتطبيق…
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var params = new URLSearchParams(window.location.search);
+        var code = params.get("code") || "";
+        var state = params.get("state") || "";
+
+        if (!code) {
+          document.getElementById("btn-text").textContent = "المتابعة على الموقع";
+        }
+
+        function buildIntent() {
+          var q = new URLSearchParams();
+          if (code) q.set("code", code);
+          if (state) q.set("state", state);
+          var url =
+            "intent://budoq.com/pages/signin/app-return.html" +
+            (q.toString() ? "?" + q.toString() : "") +
+            "#Intent;scheme=https;package=com.budoq.app;S.browser_fallback_url=" +
+            encodeURIComponent("https://budoq.com/pages/signin/login.html") +
+            ";end";
+          return url;
+        }
+
+        function attemptOpen() {
+          if (!code) {
+            window.location.href = "https://budoq.com/pages/home.html";
+            return;
+          }
+          try {
+            window.location.href = buildIntent();
+          } catch (e) {
+            document.getElementById("open-app").classList.remove("hidden");
+          }
+        }
+
+        var opened = false;
+        document.getElementById("open-app").addEventListener("click", function () {
+          opened = true;
+          attemptOpen();
+        });
+
+        /* Auto-launch shortly after load; a first tap anywhere also counts as a
+           user gesture so Chrome accepts the intent without extra prompts. */
+        setTimeout(function () {
+          if (!opened) attemptOpen();
+        }, 500);
+        document.addEventListener(
+          "click",
+          function () {
+            if (!opened && !document.getElementById("open-app").matches(":active")) {
+              /* only first plain tap auto-triggers once */
+            }
+          },
+          { once: true }
+        );
+      })();
+    </script>
+  </body>
+</html>
