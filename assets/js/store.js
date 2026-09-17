@@ -676,7 +676,7 @@ const getResizedImageUrl = (source, width) => {
         if (raw) s = decodeURIComponent(raw);
       } catch (_e) { /* keep original */ }
     }
-    const isRemoteImage = /^https?:\/\/(media\.taager\.com|msgqzgzoslearaprgiqq\.supabase\.co)\//i.test(s);
+    const isRemoteImage = /^https?:\/\/(media\.taager\.com|msgqzgzoslearaprgiqq\.supabase\.co|wwlwwgqfjhmchrijaojr\.supabase\.co)\//i.test(s);
     if (!isRemoteImage) return s;
     const parsedWidth = parseInt(width, 10);
     const w = Math.min(Math.max(Number.isFinite(parsedWidth) ? parsedWidth : 400, 16), 1400);
@@ -719,7 +719,7 @@ const getImagePath = (path) => {
     }
     // Resize remote images through our own Vercel optimizer (CDN-cached),
     // except when serving from a local dev server (no /api there).
-    const isRemoteImage = /^https?:\/\/(media\.taager\.com|msgqzgzoslearaprgiqq\.supabase\.co)\//i.test(source);
+    const isRemoteImage = /^https?:\/\/(media\.taager\.com|msgqzgzoslearaprgiqq\.supabase\.co|wwlwwgqfjhmchrijaojr\.supabase\.co)\//i.test(source);
     if (isRemoteImage) {
       const host = String(window.location && window.location.hostname || "");
       if (!/^127\.0\.0\.1$|^localhost$/i.test(host)) {

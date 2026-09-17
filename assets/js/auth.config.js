@@ -9,7 +9,10 @@ window.__Buda_GOOGLE_CLIENT_ID =
 window.TAAGER_MERCHANT_API = "https://merchant.api.taager.com/api";
 window.TAAGER_TAAGER_ID = "";
 window.TAAGER_SESSION_KEY = "";
-window.TAAGER_EDGE_FUNCTION_URL = "https://msgqzgzoslearaprgiqq.supabase.co/functions/v1/taager-proxy";
+// Supabase failover updates SUPABASE_URL before this file runs, so Edge
+// Function calls follow the same active project as database calls.
+window.TAAGER_EDGE_FUNCTION_URL =
+  String(window.SUPABASE_URL || "https://msgqzgzoslearaprgiqq.supabase.co") + "/functions/v1/taager-proxy";
 window.TAAGER_API_KEY = "";
 
 // Load cached credentials from localStorage (set by supabase-client.js loadTaagerCredentials)
@@ -21,6 +24,8 @@ try {
     if (_tcp.taager_taager_id) window.TAAGER_TAAGER_ID = _tcp.taager_taager_id;
     if (_tcp.taager_session_key) window.TAAGER_SESSION_KEY = _tcp.taager_session_key;
     if (_tcp.taager_merchant_api) window.TAAGER_MERCHANT_API = _tcp.taager_merchant_api;
-    if (_tcp.taager_edge_function_url) window.TAAGER_EDGE_FUNCTION_URL = _tcp.taager_edge_function_url;
+    // The function belongs to the currently active Supabase project.
+    window.TAAGER_EDGE_FUNCTION_URL =
+      String(window.SUPABASE_URL || "https://msgqzgzoslearaprgiqq.supabase.co") + "/functions/v1/taager-proxy";
   }
 } catch (_e) {}

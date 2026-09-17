@@ -1,10 +1,121 @@
 ﻿// Central Supabase helper. Load once per page after supabase-js library.
 
-if (typeof window.SUPABASE_URL === 'undefined') {
-  window.SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
-  window.SUPABASE_ANON_KEY =
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
+// The backup project is deliberately configured with its *publishable* key.
+// Secret/service-role keys must never be placed in browser code.
+var BODA_SUPABASE_BACKENDS = {
+  primary: {
+    name: "primary",
+    url: "https://msgqzgzoslearaprgiqq.supabase.co",
+    key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE",
+  },
+  backup: {
+    name: "backup",
+    url: "https://wwlwwgqfjhmchrijaojr.supabase.co",
+    key: "sb_publishable_wIxpA7t3a2hII8asqYZ1Bg__NoMLLUU",
+  },
+};
+
+var BODA_SUPABASE_BACKEND_STORAGE_KEY = "boda_supabase_active_backend";
+var BODA_SUPABASE_BACKEND_TTL_MS = 15 * 60 * 1000;
+var _bodaFailoverPromise = null;
+
+function getBodaSupabaseBackend(name) {
+  return BODA_SUPABASE_BACKENDS[name] || null;
 }
+
+function getStoredBodaSupabaseBackend() {
+  try {
+    var saved = JSON.parse(sessionStorage.getItem(BODA_SUPABASE_BACKEND_STORAGE_KEY) || "null");
+    if (saved && saved.name === "backup" && Number(saved.until) > Date.now()) {
+      return getBodaSupabaseBackend("backup");
+    }
+    sessionStorage.removeItem(BODA_SUPABASE_BACKEND_STORAGE_KEY);
+  } catch (_e) {}
+  return null;
+}
+
+function getActiveBodaSupabaseBackend() {
+  return getBodaSupabaseBackend(window.__bodaSupabaseBackendName || "primary") || BODA_SUPABASE_BACKENDS.primary;
+}
+
+function applyBodaSupabaseBackend(backend) {
+  if (!backend) return;
+  window.__bodaSupabaseBackendName = backend.name;
+  window.SUPABASE_URL = backend.url;
+  window.SUPABASE_ANON_KEY = backend.key;
+  window.TAAGER_EDGE_FUNCTION_URL = backend.url + "/functions/v1/taager-proxy";
+}
+
+function persistBodaSupabaseBackup(reason) {
+  try {
+    sessionStorage.setItem(
+      BODA_SUPABASE_BACKEND_STORAGE_KEY,
+      JSON.stringify({ name: "backup", reason: String(reason || "failover"), until: Date.now() + BODA_SUPABASE_BACKEND_TTL_MS })
+    );
+  } catch (_e) {}
+}
+
+function activateBodaSupabaseBackend(name, reason) {
+  var next = getBodaSupabaseBackend(name);
+  if (!next) return null;
+  var previous = getActiveBodaSupabaseBackend();
+  if (previous.name === next.name) return next;
+
+  try {
+    if (window._clientInstance && window._clientInstance.auth && typeof window._clientInstance.auth.stopAutoRefresh === "function") {
+      window._clientInstance.auth.stopAutoRefresh();
+    }
+  } catch (_e) {}
+
+  window._clientInstance = null;
+  window.__rawSupabase = null;
+  applyBodaSupabaseBackend(next);
+  if (next.name === "backup") persistBodaSupabaseBackup(reason);
+  else {
+    try { sessionStorage.removeItem(BODA_SUPABASE_BACKEND_STORAGE_KEY); } catch (_e) {}
+  }
+
+  // Rebuild the shared SDK client when the library is available. Any old
+  // client retained by a page is still routed to the active project by fetch.
+  try {
+    var createClient = window.__bodaRealCreateClient || (window.supabase && window.supabase.createClient);
+    if (typeof createClient === "function") {
+      var fresh = createClient.call(window.supabase, next.url, next.key);
+      if (fresh && typeof fresh.from === "function") window._clientInstance = fresh;
+    }
+  } catch (e) {
+    console.warn("[Supabase] failed to rebuild client after failover:", e);
+  }
+
+  try {
+    document.dispatchEvent(
+      new CustomEvent("boda:supabase-failover", {
+        detail: { from: previous.name, to: next.name, reason: String(reason || "manual") },
+      })
+    );
+  } catch (_e) {}
+  return next;
+}
+
+function failOverToBodaSupabaseBackup(reason) {
+  if (getActiveBodaSupabaseBackend().name === "backup") return Promise.resolve(BODA_SUPABASE_BACKENDS.backup);
+  if (_bodaFailoverPromise) return _bodaFailoverPromise;
+  _bodaFailoverPromise = Promise.resolve().then(function () {
+    return activateBodaSupabaseBackend("backup", reason);
+  });
+  _bodaFailoverPromise.then(
+    function () { _bodaFailoverPromise = null; },
+    function () { _bodaFailoverPromise = null; }
+  );
+  return _bodaFailoverPromise;
+}
+
+// A prior outage keeps this browser tab on the working backup for 15 minutes;
+// a new visit starts with primary again.
+applyBodaSupabaseBackend(getStoredBodaSupabaseBackend() || BODA_SUPABASE_BACKENDS.primary);
+window.getActiveBodaSupabaseBackend = getActiveBodaSupabaseBackend;
+window.activateBodaSupabaseBackend = activateBodaSupabaseBackend;
+window.failOverToBodaSupabaseBackup = failOverToBodaSupabaseBackup;
 
 if (typeof window._clientInstance === 'undefined') {
   window._clientInstance = null;
@@ -33,7 +144,7 @@ function getSecUserEmail() {
   var originalFetch = window.fetch;
   if (typeof originalFetch !== "function") return;
 
-  function handleService402() {
+  function handleAllBackendsUnavailable() {
     if (window.__boda402Fired) return;
     window.__boda402Fired = true;
     try { document.dispatchEvent(new CustomEvent("boda:service-402")); } catch (_e) {}
@@ -48,27 +159,113 @@ function getSecUserEmail() {
     } catch (_e) {}
   }
 
+  function getFetchUrl(input) {
+    if (typeof input === "string") return input;
+    if (input && typeof input.url === "string") return input.url;
+    if (input && typeof input.href === "string") return input.href;
+    return "";
+  }
+
+  function getBackendNameForUrl(url) {
+    var value = String(url || "");
+    if (value.indexOf(BODA_SUPABASE_BACKENDS.primary.url) === 0) return "primary";
+    if (value.indexOf(BODA_SUPABASE_BACKENDS.backup.url) === 0) return "backup";
+    return "";
+  }
+
+  function replaceSupabaseOrigin(url, targetBackend) {
+    var value = String(url || "");
+    if (!targetBackend || !getBackendNameForUrl(value)) return value;
+    return value
+      .replace(BODA_SUPABASE_BACKENDS.primary.url, targetBackend.url)
+      .replace(BODA_SUPABASE_BACKENDS.backup.url, targetBackend.url);
+  }
+
+  function routeFetchInput(input, targetBackend) {
+    var sourceUrl = getFetchUrl(input);
+    var routedUrl = replaceSupabaseOrigin(sourceUrl, targetBackend);
+    if (!routedUrl || routedUrl === sourceUrl) return input;
+    try {
+      if (typeof input === "string") return routedUrl;
+      if (typeof Request !== "undefined" && input instanceof Request) return new Request(routedUrl, input);
+      if (typeof URL !== "undefined" && input instanceof URL) return new URL(routedUrl);
+    } catch (_e) {}
+    return input;
+  }
+
+  function cloneFetchInput(input) {
+    try {
+      if (typeof Request !== "undefined" && input instanceof Request) return input.clone();
+    } catch (_e) {}
+    return input;
+  }
+
+  function getFetchMethod(input, init) {
+    return String((init && init.method) || (input && input.method) || "GET").toUpperCase();
+  }
+
+  function isReadMethod(method) {
+    return method === "GET" || method === "HEAD" || method === "OPTIONS";
+  }
+
+  function isRecoverableStatus(status) {
+    return status === 402 || status === 500 || status === 502 || status === 503 || status === 504;
+  }
+
+  function retryWithBackup(fetchThis, retryInput, init, retryAfter402) {
+    var backupInput = routeFetchInput(retryInput, BODA_SUPABASE_BACKENDS.backup);
+    return originalFetch.call(fetchThis, backupInput, init).then(function (response) {
+      if (retryAfter402 && response && response.status === 402) handleAllBackendsUnavailable();
+      return response;
+    });
+  }
+
   window.fetch = function (input, init) {
+    var fetchThis = this;
+    var retryInput = cloneFetchInput(input);
     var url = "";
     try {
-      url = typeof input === "string" ? input : (input && input.url) || "";
+      url = getFetchUrl(input);
       if (url.indexOf("/rest/v1/") !== -1) {
         init = init || {};
         if (!(init.headers instanceof Headers)) {
           init.headers = new Headers(init.headers || {});
         }
         var email = getSecUserEmail();
-        if (email) {
-          init.headers.set("x-user-email", email);
-        }
+        if (email) init.headers.set("x-user-email", email);
       }
     } catch (e) {}
-    var isRestCall = String(url).indexOf("/rest/v1/") !== -1;
-    return originalFetch.call(this, input, init).then(function (response) {
-      try {
-        if (isRestCall && response && response.status === 402) handleService402();
-      } catch (_e) {}
-      return response;
+
+    var requestBackend = getBackendNameForUrl(url);
+    var method = getFetchMethod(input, init);
+    var activeBackend = getActiveBodaSupabaseBackend();
+    // This covers pages that retain an old primary SDK client after the shared
+    // client has already switched to backup.
+    var routedInput = routeFetchInput(input, activeBackend);
+
+    return originalFetch.call(fetchThis, routedInput, init).then(function (response) {
+      var primaryRequestFailed =
+        requestBackend === "primary" && activeBackend.name === "primary" && response && isRecoverableStatus(response.status);
+      if (!primaryRequestFailed) return response;
+
+      return failOverToBodaSupabaseBackup("http-" + response.status).then(function () {
+        // A 402 is returned before Supabase processes the request, so retrying
+        // it is safe. For 5xx, retry only reads: a write may have reached the DB.
+        if (response.status === 402 || isReadMethod(method)) {
+          return retryWithBackup(fetchThis, retryInput, init, response.status === 402);
+        }
+        return response;
+      });
+    }).catch(function (error) {
+      var primaryNetworkFailure = requestBackend === "primary" && activeBackend.name === "primary";
+      if (!primaryNetworkFailure) throw error;
+
+      return failOverToBodaSupabaseBackup("network").then(function () {
+        // Never replay a write after an unknown network failure; it could have
+        // been committed by primary and replaying could duplicate an order.
+        if (isReadMethod(method)) return retryWithBackup(fetchThis, retryInput, init, false);
+        throw error;
+      });
     });
   };
 })();
@@ -76,11 +273,20 @@ function getSecUserEmail() {
   if (!window.supabase || typeof window.supabase.createClient !== "function") return;
   if (window.supabase.createClient.__bodaSingle) return;
   var realCreateClient = window.supabase.createClient;
+  window.__bodaRealCreateClient = realCreateClient;
   window.supabase.createClient = function () {
     if (window._clientInstance && isRealSupabaseClient(window._clientInstance)) {
       return window._clientInstance;
     }
-    var fresh = realCreateClient.apply(window.supabase, arguments);
+    var active = getActiveBodaSupabaseBackend();
+    var args = Array.prototype.slice.call(arguments);
+    // A few legacy pages still pass the original project URL directly. Force
+    // those calls through whichever backend is active.
+    if (!args.length || getBackendNameForSupabaseClientArg(args[0])) {
+      args[0] = active.url;
+      args[1] = active.key;
+    }
+    var fresh = realCreateClient.apply(window.supabase, args);
     if (fresh && typeof fresh.from === "function") {
       window._clientInstance = fresh;
     }
@@ -88,6 +294,13 @@ function getSecUserEmail() {
   };
   window.supabase.createClient.__bodaSingle = true;
 })();
+
+function getBackendNameForSupabaseClientArg(value) {
+  var url = String(value || "");
+  if (url.indexOf(BODA_SUPABASE_BACKENDS.primary.url) === 0) return "primary";
+  if (url.indexOf(BODA_SUPABASE_BACKENDS.backup.url) === 0) return "backup";
+  return "";
+}
 
 if (typeof window._ordersColumnsCache === 'undefined') {
   window._ordersColumnsCache = null;
@@ -1899,7 +2112,9 @@ async function loadTaagerCredentials() {
     if (map.taager_taager_id) window.TAAGER_TAAGER_ID = map.taager_taager_id;
     if (map.taager_session_key) window.TAAGER_SESSION_KEY = map.taager_session_key;
     if (map.taager_merchant_api) window.TAAGER_MERCHANT_API = map.taager_merchant_api;
-    if (map.taager_edge_function_url) window.TAAGER_EDGE_FUNCTION_URL = map.taager_edge_function_url;
+    // Never let a cached setting send a backup session back to primary.
+    window.TAAGER_EDGE_FUNCTION_URL =
+      getActiveBodaSupabaseBackend().url + "/functions/v1/taager-proxy";
     try { localStorage.setItem("_taagerCredentials", JSON.stringify(map)); } catch (_e) {}
   } catch (e) {
     if (!(typeof isNetworkResolutionError === "function" && isNetworkResolutionError(e))) console.warn("[Supabase] loadTaagerCredentials error:", e);

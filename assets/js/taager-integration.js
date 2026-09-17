@@ -524,7 +524,11 @@
     var headers = { "Content-Type": "application/json" };
     if (window.SUPABASE_ANON_KEY) {
       headers.apikey = window.SUPABASE_ANON_KEY;
-      headers.Authorization = "Bearer " + window.SUPABASE_ANON_KEY;
+      // New sb_publishable keys are API keys, not JWTs. They belong on the
+      // apikey header only; legacy anon JWTs retain the old bearer behavior.
+      if (String(window.SUPABASE_ANON_KEY).indexOf("sb_") !== 0) {
+        headers.Authorization = "Bearer " + window.SUPABASE_ANON_KEY;
+      }
     }
     if (apiKey) headers["x-api-key"] = apiKey;
     return headers;
