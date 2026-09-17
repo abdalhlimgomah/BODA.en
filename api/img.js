@@ -3,7 +3,11 @@ const sharp = require("sharp");
 const ALLOWED_HOSTS = new Set([
   "media.taager.com",
   "msgqzgzoslearaprgiqq.supabase.co",
+  "wwlwwgqfjhmchrijaojr.supabase.co",
 ]);
+
+const PRIMARY_SUPABASE_HOST = "msgqzgzoslearaprgiqq.supabase.co";
+const BACKUP_SUPABASE_HOST = "wwlwwgqfjhmchrijaojr.supabase.co";
 
 const VIDEO_EXT_RE = /\.(mp4|webm|mov|m4v|ogv|mkv|avi|m3u8|mpg|mpeg|ts)([?#].*)?$/i;
 
@@ -17,6 +21,21 @@ function toImageUrl(value) {
   } catch {
     return "";
   }
+}
+
+function backupImageUrl(value) {
+  try {
+    const url = new URL(value);
+    if (url.hostname !== PRIMARY_SUPABASE_HOST) return "";
+    url.hostname = BACKUP_SUPABASE_HOST;
+    return url.toString();
+  } catch {
+    return "";
+  }
+}
+
+function canFailOver(status) {
+  return status === 402 || status === 500 || status === 502 || status === 503 || status === 504;
 }
 
 module.exports = async function handler(req, res) {
@@ -35,10 +54,23 @@ module.exports = async function handler(req, res) {
   const quality = Math.min(Math.max(Number.isFinite(requestedQuality) ? requestedQuality : 75, 50), 90);
 
   try {
-    const upstream = await fetch(target, {
+    const requestImage = (url) => fetch(url, {
       redirect: "follow",
       headers: { "user-agent": "Mozilla/5.0 (compatible; BodaImageResizer/1.0)" },
     });
+    const fallbackTarget = backupImageUrl(target);
+    let upstream;
+    try {
+      upstream = await requestImage(target);
+    } catch (firstError) {
+      if (!fallbackTarget) throw firstError;
+      upstream = await requestImage(fallbackTarget);
+    }
+    // Existing product rows may still contain the primary Storage URL. If it
+    // is unavailable, request the identical object path from replicated backup.
+    if (fallbackTarget && (!upstream.ok && canFailOver(upstream.status))) {
+      upstream = await requestImage(fallbackTarget);
+    }
     if (!upstream.ok) {
       return res.redirect(302, target);
     }
