@@ -508,6 +508,15 @@ function getImage(product) {
     ? window.BudaStore.getImagePath(primary)
     : primary;
 }
+function getImagePathRaw(path, width) {
+  if (!path) return path;
+  if (width && window.BudaStore?.getResizedImageUrl) {
+    return window.BudaStore.getResizedImageUrl(path, width) || path;
+  }
+  return window.BudaStore?.getImagePath
+    ? window.BudaStore.getImagePath(path)
+    : path;
+}
 function getGalleryImages(product) {
   var candidates = window.BudaStore?.getProductImages
     ? window.BudaStore.getProductImages(product)
@@ -1516,7 +1525,7 @@ HM.renderHero = function () {
       escapeHtml(s.link || "#") +
       '">' +
       '<div class="hm-hero-slide-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' +
-      s.img +
+      getImagePathRaw(s.img, 1400) +
       '" alt="" loading="' +
       (si === 0 ? "eager" : "lazy") +
       '" /></div>' +
@@ -1551,7 +1560,7 @@ HM.renderBanner = function (section) {
     if (dyn && dyn.type === 'image_banner' && banner.url) {
       html = '<div class="hm-banner-top-wrap hm-fade" style="padding:0 16px var(--hm-top-gap,6px);">' +
         '<a href="' + escapeHtml(banner.link || '#') + '" style="display:block;border-radius:10px;overflow:hidden;">' +
-        '<div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + banner.url + '" style="width:100%;display:block;border-radius:10px;" onerror="this.style.display=\'none\'" /></div>' +
+        '<div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + getImagePathRaw(banner.url, 1400) + '" style="width:100%;display:block;border-radius:10px;" onerror="this.style.display=\'none\'" /></div>' +
         '</a></div>';
     } else if (dyn && dyn.type === 'icon_banner') {
       html = '<div class="hm-banner-top-wrap hm-fade">' +
@@ -1578,7 +1587,7 @@ HM.renderBanner = function (section) {
     var html =
       '<div class="hm-banner-wrap hm-fade">' +
       '<div class="hm-banner ' + sizeClass + '">' +
-      '<a href="' + escapeHtml(ad.link_url || "#") + '"><div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + ad.image_url + '" alt="" loading="lazy" /></div></a>' +
+'<a href="' + escapeHtml(ad.link_url || "#") + '"><div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + getImagePathRaw(ad.image_url) + '" alt="" loading="lazy" /></div></a>' +
       '<span class="ad-badge">' + escapeHtml(ad.badge_text || 'مدفوع') + '</span>' +
       "</div></div>";
     var temp = document.createElement("div");
@@ -1596,7 +1605,7 @@ HM.renderBanner = function (section) {
     '<a href="' +
     escapeHtml(banner.link || "#") +
     '"><div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' +
-    banner.url +
+    getImagePathRaw(banner.url) +
     '" alt="" loading="lazy" /></div></a>' +
     '<span class="ad-badge">مدفوع</span>' +
     "</div></div>";
@@ -1626,7 +1635,7 @@ HM.renderAdHero = function () {
   var html =
     '<div class="buda-home-banner-wrap hm-fade">' +
     '<div class="buda-home-banner">' +
-    '<a href="' + escapeHtml(ad.link_url || "#") + '"><div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + ad.image_url + '" alt="" loading="lazy" /></div></a>' +
+    '<a href="' + escapeHtml(ad.link_url || "#") + '"><div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + getImagePathRaw(ad.image_url) + '" alt="" loading="lazy" /></div></a>' +
     '<span class="ad-badge">' + escapeHtml(ad.badge_text || "مدفوع") + '</span>' +
     "</div></div>";
   var temp = document.createElement("div");
@@ -1648,7 +1657,7 @@ HM.renderCategories = function () {
       escapeHtml(cat1.link || "#") +
       '">' +
       '<div class="hm-cat-card-img"><img src="' +
-      cat1.img +
+      getImagePathRaw(cat1.img) +
       '" alt="' +
       escapeHtml(cat1.name) +
       '" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
@@ -1662,7 +1671,7 @@ HM.renderCategories = function () {
         escapeHtml(cat2.link || "#") +
         '">' +
         '<div class="hm-cat-card-img"><img src="' +
-        cat2.img +
+        getImagePathRaw(cat2.img) +
         '" alt="' +
         escapeHtml(cat2.name) +
         '" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
@@ -1739,7 +1748,7 @@ HM.renderBrands = function () {
       escapeHtml(b.link || "#") +
       '">' +
       '<div class="hm-brand-logo"><img src="' +
-      b.img +
+      getImagePathRaw(b.img) +
       '" alt="' +
       escapeHtml(b.name) +
       '" loading="lazy" /></div>' +
@@ -1782,7 +1791,7 @@ HM.renderSmartCategories = function (section) {
       (card.icon
         ? '<span class="material-icons-outlined hm-smart-cat-icon">' + card.icon + '</span>'
         : '<div class="hm-smart-cat-media">' +
-      '<img src="' + card.image_url + '" alt="' + escapeHtml(card.title) + '" loading="' + (i < 2 ? 'eager' : 'lazy') + '" onerror="this.style.display=\'none\'" />' +
+      '<img src="' + getImagePathRaw(card.image_url) + '" alt="' + escapeHtml(card.title) + '" loading="' + (i < 2 ? 'eager' : 'lazy') + '" onerror="this.style.display=\'none\'" />' +
       '</div>') +
       '<div class="hm-smart-cat-overlay"></div>' +
       '<div class="hm-smart-cat-content">' +
@@ -2366,7 +2375,7 @@ HM.renderSheinBrands = function (section) {
       '<div class="hm-shein-brand-logo" style="border-color:' +
       borderColor +
       '"><img src="' +
-      b.img +
+      getImagePathRaw(b.img) +
       '" alt="' +
       escapeHtml(b.name) +
       '" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
@@ -3003,7 +3012,7 @@ HM.renderMegaOffers = function (section) {
     html +=
       '      <a class="buda-mega-banner buda-coupon" href="' + escapeHtml(b.link_url || '#') + '">' +
       '        <span class="buda-coupon-tag">وفّر أكثر</span>' +
-      '        <div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + b.image_url + '" alt="" loading="lazy" onerror="this.closest(\'.buda-mega-banner\').style.display=\'none\'" /></div>' +
+      '        <div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + getImagePathRaw(b.image_url) + '" alt="" loading="lazy" onerror="this.closest(\'.buda-mega-banner\').style.display=\'none\'" /></div>' +
       '        <div class="buda-mega-banner-overlay"><strong>' + escapeHtml(b.title || '') + '</strong><span>' + escapeHtml(b.subtitle || '') + '</span></div>' +
       '      </a>';
   });

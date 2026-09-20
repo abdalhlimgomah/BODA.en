@@ -103,6 +103,12 @@ function clGetImage(product) {
   return product.image || "";
 }
 
+function clImagePath(path) {
+  if (!path) return path;
+  if (window.BudaStore && typeof window.BudaStore.getImagePath === "function") return window.BudaStore.getImagePath(path);
+  return path;
+}
+
 function clSkeletonHTML() {
   return '<div class="cl-skeleton-wrap">' +
     '<div class="cl-sk-hero"><div class="cl-sk-shimmer"></div></div>' +
@@ -262,7 +268,7 @@ function clRenderHero(banners) {
   var slidesHtml = "", dotsHtml = "";
   for (var si = 0; si < banners.length; si++) {
     var b = banners[si];
-    var imgUrl = b.image_url || b.image || "";
+    var imgUrl = clImagePath(b.image_url || b.image || "");
     var title = b.title || "";
     var subtitle = b.subtitle || "";
     slidesHtml +=
@@ -396,7 +402,7 @@ function clRenderBrands(brands) {
     '<div class="cl-brands-grid">';
   for (var bi = 0; bi < brands.length; bi++) {
     var b = brands[bi];
-    var imgUrl = b.image || b.logo || b.logo_url || b.cover_image || b.cover_url || "";
+    var imgUrl = clImagePath(b.image || b.logo || b.logo_url || b.cover_image || b.cover_url || "");
     var name = b.name || "";
     html +=
       '<a class="cl-brand-card" href="brand-landing.html?slug=' + encodeURIComponent(b.slug || name) + '" title="' + escapeHtml(name) + '">' +
@@ -421,7 +427,7 @@ function clRenderCollections(collections) {
     '<div class="cl-collections">';
   for (var ci = 0; ci < collections.length && ci < 2; ci++) {
     var c = collections[ci];
-    var imgUrl = c.image_url || c.image || "";
+    var imgUrl = clImagePath(c.image_url || c.image || "");
     var name = c.name || "";
     var link = c.link_url || c.link || "product-listing.html?collection=" + encodeURIComponent(c.slug || name);
     html +=

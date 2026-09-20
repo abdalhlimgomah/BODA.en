@@ -159,11 +159,31 @@ function getSecUserEmail() {
     } catch (_e) {}
   }
 
-  function getFetchUrl(input) {
+function getFetchUrl(input) {
     if (typeof input === "string") return input;
     if (input && typeof input.url === "string") return input.url;
     if (input && typeof input.href === "string") return input.href;
     return "";
+  }
+
+  function applyBackendKey(init, backend) {
+    var value = backend && backend.key;
+    if (!value) return init;
+    init = init || {};
+    try {
+      if (typeof Headers !== "undefined" && !(init.headers instanceof Headers)) {
+        init.headers = new Headers(init.headers || {});
+      }
+    } catch (_e) {}
+    try {
+      if (init.headers) {
+        var apikey = init.headers.get("apikey") || "";
+        var auth = init.headers.get("Authorization") || init.headers.get("authorization") || "";
+        if (apikey !== value) init.headers.set("apikey", value);
+        if (auth !== value) init.headers.set("Authorization", value);
+      }
+    } catch (_e) {}
+    return init;
   }
 
   function getBackendNameForUrl(url) {
@@ -212,9 +232,11 @@ function getSecUserEmail() {
     return status === 402 || status === 500 || status === 502 || status === 503 || status === 504;
   }
 
-  function retryWithBackup(fetchThis, retryInput, init, retryAfter402) {
+function retryWithBackup(fetchThis, retryInput, init, retryAfter402) {
     var backupInput = routeFetchInput(retryInput, BODA_SUPABASE_BACKENDS.backup);
-    return originalFetch.call(fetchThis, backupInput, init).then(function (response) {
+    // The backup project validates its own publishable key; requests built by
+    // a client created for primary carry the primary key and would 401.
+    return originalFetch.call(fetchThis, backupInput, applyBackendKey(init, BODA_SUPABASE_BACKENDS.backup)).then(function (response) {
       if (retryAfter402 && response && response.status === 402) handleAllBackendsUnavailable();
       return response;
     });
@@ -234,7 +256,7 @@ function getSecUserEmail() {
         var email = getSecUserEmail();
         if (email) init.headers.set("x-user-email", email);
       }
-    } catch (e) {}
+} catch (e) {}
 
     var requestBackend = getBackendNameForUrl(url);
     var method = getFetchMethod(input, init);
@@ -242,6 +264,11 @@ function getSecUserEmail() {
     // This covers pages that retain an old primary SDK client after the shared
     // client has already switched to backup.
     var routedInput = routeFetchInput(input, activeBackend);
+    // When the active backend is backup, any Supabase request must carry the
+    // backup project's key. Old primary-created clients would otherwise 401.
+    if (activeBackend.name === "backup" && getBackendNameForUrl(url)) {
+      init = applyBackendKey(init, BODA_SUPABASE_BACKENDS.backup);
+    }
 
     return originalFetch.call(fetchThis, routedInput, init).then(function (response) {
       var primaryRequestFailed =

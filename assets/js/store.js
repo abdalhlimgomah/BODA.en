@@ -676,7 +676,12 @@ const getResizedImageUrl = (source, width) => {
         if (raw) s = decodeURIComponent(raw);
       } catch (_e) { /* keep original */ }
     }
-    const isRemoteImage = /^https?:\/\/(media\.taager\.com|msgqzgzoslearaprgiqq\.supabase\.co|wwlwwgqfjhmchrijaojr\.supabase\.co)\//i.test(s);
+    // Skip the dead primary when failover is active: point straight at the
+    // identical object on the backup storage (avoids the extra 402 round trip).
+    if (window.__bodaSupabaseBackendName === "backup") {
+      s = s.replace("https://msgqzgzoslearaprgiqq.supabase.co/", "https://wwlwwgqfjhmchrijaojr.supabase.co/");
+    }
+    const isRemoteImage = /^https?:\/\/(media\.taager\.com|aff\.ven-door\.com|iili\.io|a\.nooncdn\.com|f\.nooncdn\.com|msgqzgzoslearaprgiqq\.supabase\.co|wwlwwgqfjhmchrijaojr\.supabase\.co)\//i.test(s);
     if (!isRemoteImage) return s;
     const parsedWidth = parseInt(width, 10);
     const w = Math.min(Math.max(Number.isFinite(parsedWidth) ? parsedWidth : 400, 16), 1400);
@@ -706,7 +711,7 @@ const getImagePath = (path) => {
       : DEFAULT_PRODUCT_IMAGE
     : `/${DEFAULT_PRODUCT_IMAGE}`;
 
-  const source = collectImageCandidates(path)[0] || "";
+  let source = collectImageCandidates(path)[0] || "";
   if (!source) return fallback;
   if (/^\s*javascript:/i.test(source)) return fallback;
   if (/^(https?:|data:|blob:)/i.test(source)) {
@@ -717,9 +722,14 @@ const getImagePath = (path) => {
         if (raw) source = decodeURIComponent(raw);
       } catch (_e) { /* keep original */ }
     }
+    // Skip the dead primary when failover is active: point straight at the
+    // identical object on the backup storage (avoids the extra 402 round trip).
+    if (window.__bodaSupabaseBackendName === "backup") {
+      source = source.replace("https://msgqzgzoslearaprgiqq.supabase.co/", "https://wwlwwgqfjhmchrijaojr.supabase.co/");
+    }
     // Resize remote images through our own Vercel optimizer (CDN-cached),
     // except when serving from a local dev server (no /api there).
-    const isRemoteImage = /^https?:\/\/(media\.taager\.com|msgqzgzoslearaprgiqq\.supabase\.co|wwlwwgqfjhmchrijaojr\.supabase\.co)\//i.test(source);
+    const isRemoteImage = /^https?:\/\/(media\.taager\.com|aff\.ven-door\.com|iili\.io|a\.nooncdn\.com|f\.nooncdn\.com|msgqzgzoslearaprgiqq\.supabase\.co|wwlwwgqfjhmchrijaojr\.supabase\.co)\//i.test(source);
     if (isRemoteImage) {
       const host = String(window.location && window.location.hostname || "");
       if (!/^127\.0\.0\.1$|^localhost$/i.test(host)) {

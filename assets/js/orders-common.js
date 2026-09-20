@@ -584,7 +584,10 @@
     const value = String(src || "").trim();
     if (!value) return fallbackItemImage();
     if (value.startsWith("data:") || value.startsWith("blob:")) return value;
-    if (value.startsWith("http://") || value.startsWith("https://")) return value;
+    if (value.startsWith("http://") || value.startsWith("https://")) {
+      if (window.BudaStore?.getImagePath) return window.BudaStore.getImagePath(value);
+      return value;
+    }
     if (value.startsWith("//")) return `https:${value}`;
     if (value.startsWith("www.")) return `https://${value}`;
     if (window.BudaStore?.getImagePath) return window.BudaStore.getImagePath(value);

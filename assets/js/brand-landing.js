@@ -55,6 +55,12 @@ function blGetCountryCode() {
   return 'EG';
 }
 
+function blImagePath(path) {
+  if (!path) return path;
+  if (window.BudaStore && typeof window.BudaStore.getImagePath === 'function') return window.BudaStore.getImagePath(path);
+  return path;
+}
+
 function showBLSkeleton() {
   var el = document.getElementById('blSkeleton');
   if (el) el.style.display = '';
@@ -269,7 +275,7 @@ function renderHeroSlider(banners) {
       '<div class="bl-hero-slide-inner" style="background:' + bgColor + '">' +
       '<div class="bl-hero-overlay"></div>' +
       (b.image_url
-        ? '<img class="bl-hero-img" src="' + b.image_url + '" alt="' + escapeHtml(b.title || '') + '" loading="' + (i === 0 ? 'eager' : 'lazy') + '" />'
+        ? '<img class="bl-hero-img" src="' + blImagePath(b.image_url) + '" alt="' + escapeHtml(b.title || '') + '" loading="' + (i === 0 ? 'eager' : 'lazy') + '" />'
         : '') +
       '<div class="bl-hero-content">' +
       (b.title ? '<h2 class="bl-hero-title">' + escapeHtml(b.title) + '</h2>' : '') +
@@ -396,7 +402,7 @@ function renderPromoBanner(banner) {
     (banner.background_color ? ' style="background:' + banner.background_color + '"' : '') +
     '>' +
     (banner.image_url
-      ? '<img class="bl-promo-img" src="' + banner.image_url + '" alt="' + escapeHtml(banner.title || '') + '" loading="lazy" />'
+      ? '<img class="bl-promo-img" src="' + blImagePath(banner.image_url) + '" alt="' + escapeHtml(banner.title || '') + '" loading="lazy" />'
       : '') +
     '<div class="bl-promo-content">' +
     (banner.title ? '<h3 class="bl-promo-title">' + escapeHtml(banner.title) + '</h3>' : '') +
