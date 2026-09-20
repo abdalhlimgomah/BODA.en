@@ -15,6 +15,14 @@ function canFailOver(status) {
   return status === 402 || status === 500 || status === 502 || status === 503 || status === 504;
 }
 
+const FETCH_TIMEOUT_MS = 8000;
+
+function fetchWithTimeout(url, options) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -27,8 +35,8 @@ export default async function handler(req, res) {
     let url = `${backend.url}/rest/v1/products?select=*&order=created_at.desc`;
     if (filter) url += `&category=eq.${encodeURIComponent(filter)}`;
 
-    try {
-      const response = await fetch(url, { headers: { apikey: backend.key } });
+try {
+      const response = await fetchWithTimeout(url, { headers: { apikey: backend.key } });
       if (response.ok) {
         const data = await response.json();
         res.setHeader("Cache-Control", "public, max-age=0, s-maxage=3600, stale-while-revalidate=86400");

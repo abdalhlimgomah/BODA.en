@@ -2,6 +2,10 @@ const sharp = require("sharp");
 
 const ALLOWED_HOSTS = new Set([
   "media.taager.com",
+  "aff.ven-door.com",
+  "iili.io",
+  "a.nooncdn.com",
+  "f.nooncdn.com",
   "msgqzgzoslearaprgiqq.supabase.co",
   "wwlwwgqfjhmchrijaojr.supabase.co",
 ]);
@@ -10,6 +14,17 @@ const PRIMARY_SUPABASE_HOST = "msgqzgzoslearaprgiqq.supabase.co";
 const BACKUP_SUPABASE_HOST = "wwlwwgqfjhmchrijaojr.supabase.co";
 
 const VIDEO_EXT_RE = /\.(mp4|webm|mov|m4v|ogv|mkv|avi|m3u8|mpg|mpeg|ts)([?#].*)?$/i;
+const GIF_EXT_RE = /\.(gif)([?#].*)?$/i;
+
+const FETCH_TIMEOUT_MS = 10000;
+
+function fetchWithTimeout(url, opts) {
+  const controller = new AbortController();
+  const timer = setTimeout(function () { controller.abort(); }, FETCH_TIMEOUT_MS);
+  return fetch(url, Object.assign({}, opts, { signal: controller.signal })).finally(function () {
+    clearTimeout(timer);
+  });
+}
 
 function toImageUrl(value) {
   try {
@@ -54,7 +69,7 @@ module.exports = async function handler(req, res) {
   const quality = Math.min(Math.max(Number.isFinite(requestedQuality) ? requestedQuality : 75, 50), 90);
 
   try {
-    const requestImage = (url) => fetch(url, {
+    const requestImage = (url) => fetchWithTimeout(url, {
       redirect: "follow",
       headers: { "user-agent": "Mozilla/5.0 (compatible; BodaImageResizer/1.0)" },
     });
@@ -79,6 +94,15 @@ module.exports = async function handler(req, res) {
 
     if (input.length > 50 * 1024 * 1024) {
       return res.status(413).json({ error: "Image too large" });
+    }
+
+    // Animated GIFs: serve the original bytes unchanged to preserve motion.
+    // The edge cache still caches it, so repeat visits are fast.
+    if (GIF_EXT_RE.test(target)) {
+      res.setHeader("Content-Type", "image/gif");
+      res.setHeader("Cache-Control", "public, max-age=31536000, s-maxage=31536000, immutable");
+      res.setHeader("X-Content-Type-Options", "nosniff");
+      return res.status(200).send(input);
     }
 
     let output;
