@@ -174,16 +174,8 @@
 
 <script>
 (function () {
-  var SUPABASE_BACKENDS = [
-    {
-      url: "https://msgqzgzoslearaprgiqq.supabase.co",
-      key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE",
-    },
-    {
-      url: "https://wwlwwgqfjhmchrijaojr.supabase.co",
-      key: "sb_publishable_wIxpA7t3a2hII8asqYZ1Bg__NoMLLUU",
-    },
-  ];
+  var SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
+  var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
   var PERIOD = 30000;
 
   var stDot = document.getElementById("stDot");
@@ -197,23 +189,23 @@
 
   function goHome() { window.location.replace("home.html"); }
 
-  async function check() {
+  function check() {
     setStatus("st-check", "لحظة من فضلك...");
-    for (var i = 0; i < SUPABASE_BACKENDS.length; i += 1) {
-      var backend = SUPABASE_BACKENDS[i];
-      try {
-        var response = await fetch(backend.url + "/rest/v1/products?select=id&limit=1", {
-          headers: { apikey: backend.key, Authorization: "Bearer " + backend.key }
-        });
-        if (response.ok) {
+    fetch(SUPABASE_URL + "/rest/v1/products?select=id&limit=1", {
+      headers: { apikey: ANON_KEY, Authorization: "Bearer " + ANON_KEY }
+    })
+      .then(function (r) {
+        if (r.status === 402) {
+          setStatus("st-down", "الخدمة متوقفة حاليا");
+        } else {
           setStatus("st-back", "عادت الخدمة للعمل! جاري إعادتك للموقع...");
           setTimeout(goHome, 1800);
           clearTimeout(timer);
-          return;
         }
-      } catch (_e) {}
-    }
-    setStatus("st-down", "تعذر الاتصال بالخدمة");
+      })
+      .catch(function () {
+        setStatus("st-down", "تعذر الاتصال بالخدمة");
+      });
   }
 
   check();
