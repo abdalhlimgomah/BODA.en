@@ -568,25 +568,62 @@ async function handleGoogleCallback() {
     return;
   }
 
-  var edgeUrl = window.TAAGER_EDGE_FUNCTION_URL
-    ? window.TAAGER_EDGE_FUNCTION_URL.replace("taager-proxy", "google-oauth")
-    : "https://msgqzgzoslearaprgiqq.supabase.co/functions/v1/google-oauth";
+  var googleOauthCandidates = [];
+  function pushGoogleOauthUrl(value) {
+    var u = String(value || "");
+    if (u && googleOauthCandidates.indexOf(u) === -1) googleOauthCandidates.push(u);
+  }
+  pushGoogleOauthUrl(
+    window.TAAGER_EDGE_FUNCTION_URL
+      ? window.TAAGER_EDGE_FUNCTION_URL.replace("taager-proxy", "google-oauth")
+      : "https://msgqzgzoslearaprgiqq.supabase.co/functions/v1/google-oauth"
+  );
+  if (window.BODA_SUPABASE_BACKENDS) {
+    [
+      window.BODA_SUPABASE_BACKENDS.backup.url,
+      window.BODA_SUPABASE_BACKENDS.backup3.url,
+      window.BODA_SUPABASE_BACKENDS.primary.url,
+    ].forEach(function (base) {
+      pushGoogleOauthUrl(base + "/functions/v1/google-oauth");
+    });
+  }
 
   var redirectUri = window.location.origin + "/pages/signin/login.html";
+  var rawFetch = typeof window.__bodaRawFetch === "function" ? window.__bodaRawFetch : fetch;
+
+  var userData = null;
+  for (var gi = 0; gi < googleOauthCandidates.length; gi++) {
+    var response;
+    try {
+      response = await rawFetch(googleOauthCandidates[gi], {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: code, redirect_uri: redirectUri }),
+      });
+    } catch (fetchError) {
+      continue;
+    }
+    var payload;
+    try {
+      payload = await response.json();
+    } catch (jsonError) {
+      continue;
+    }
+    if (response.ok && payload && payload.email) {
+      userData = payload;
+      break;
+    }
+    if (response.status === 404 || response.status === 402 || response.status === 500) continue;
+    break;
+  }
+
+  if (!userData || !userData.email) {
+    console.error("Google OAuth failed: no host with a working google-oauth function");
+    authNotify("فشل تسجيل الدخول عبر Google.");
+    return;
+  }
 
   try {
-    var response = await fetch(edgeUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code: code, redirect_uri: redirectUri }),
-    });
-
-    var userData = await response.json();
-    if (!response.ok || !userData.email) {
-      authNotify("فشل تسجيل الدخول عبر Google.");
-      return;
-    }
-
     var googleUser = {
       id: "google_" + userData.id,
       email: userData.email,
