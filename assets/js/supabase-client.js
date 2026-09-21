@@ -369,6 +369,7 @@ var requestBackend = getBackendNameForUrl(url);
       });
     });
   };
+  window.__bodaRawFetch = originalFetch;
 })();
 (function ensureSingleSupabaseClient() {
   if (!window.supabase || typeof window.supabase.createClient !== "function") return;
