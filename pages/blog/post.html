@@ -1,11 +1,11 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>مقال - مدونة بودوكيو | نصائح وأدلة شراء</title>
-  <meta name="description" content="اقرأ مقالات ومدونة بودوكيو - محتوى تعليمي ومفيد حول أفضل المنتجات ونصائح الشراء وأحدث العروض والخصومات في مصر والسعودية." />
+  <title>Ù…Ù‚Ø§Ù„ - Ù…Ø¯ÙˆÙ†Ø© Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ | Ù†ØµØ§Ø¦Ø­ ÙˆØ£Ø¯Ù„Ø© Ø´Ø±Ø§Ø¡</title>
+  <meta name="description" content="Ø§Ù‚Ø±Ø£ Ù…Ù‚Ø§Ù„Ø§Øª ÙˆÙ…Ø¯ÙˆÙ†Ø© Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ - Ù…Ø­ØªÙˆÙ‰ ØªØ¹Ù„ÙŠÙ…ÙŠ ÙˆÙ…ÙÙŠØ¯ Ø­ÙˆÙ„ Ø£ÙØ¶Ù„ Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª ÙˆÙ†ØµØ§Ø¦Ø­ Ø§Ù„Ø´Ø±Ø§Ø¡ ÙˆØ£Ø­Ø¯Ø« Ø§Ù„Ø¹Ø±ÙˆØ¶ ÙˆØ§Ù„Ø®ØµÙˆÙ…Ø§Øª ÙÙŠ Ù…ØµØ± ÙˆØ§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©." />
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://budoq.com/pages/blog/post.html">
   <meta property="og:locale" content="ar_AR">
@@ -48,14 +48,14 @@
     (function () {
       var slug = new URLSearchParams(window.location.search).get('slug');
       if (!slug) {
-        document.getElementById('blog-post').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>المقال غير موجود</p></div>';
+        document.getElementById('blog-post').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>Ø§Ù„Ù…Ù‚Ø§Ù„ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯</p></div>';
         return;
       }
 
       BlogEngine.getPostBySlug(slug).then(function (post) {
         if (!post) {
-          document.getElementById('blog-post').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>المقال غير موجود</p></div>';
-          document.title = 'المقال غير موجود - BudoQ';
+          document.getElementById('blog-post').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>Ø§Ù„Ù…Ù‚Ø§Ù„ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯</p></div>';
+          document.title = 'Ø§Ù„Ù…Ù‚Ø§Ù„ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯ - BudoQ';
           return;
         }
 
@@ -73,7 +73,7 @@
         html += '<div class="post-meta">';
         if (author.name) html += '<span><span class="material-icons-outlined" style="font-size:16px">person</span> ' + BlogEngine.escHtml(author.name) + '</span>';
         if (dateStr) html += '<span><span class="material-icons-outlined" style="font-size:16px">calendar_today</span> ' + BlogEngine.formatDate(dateStr) + '</span>';
-        html += '<span><span class="material-icons-outlined" style="font-size:16px">schedule</span> ' + readTime + ' دقائق قراءة</span>';
+        html += '<span><span class="material-icons-outlined" style="font-size:16px">schedule</span> ' + readTime + ' Ø¯Ù‚Ø§Ø¦Ù‚ Ù‚Ø±Ø§Ø¡Ø©</span>';
         html += '</div></header>';
 
         if (post.featured_image) html += '<img src="' + post.featured_image + '" alt="' + BlogEngine.escHtml(post.title) + '" class="post-featured-image" loading="lazy">';
@@ -96,7 +96,7 @@
         var contentEl = document.getElementById('post-content');
         if (contentEl) BlogEngine.addHeadingIDs(contentEl);
 
-        document.title = (post.meta_title || post.title) + ' | مدونة BudoQ';
+        document.title = (post.meta_title || post.title) + ' | Ù…Ø¯ÙˆÙ†Ø© BudoQ';
         var canon = document.querySelector('link[rel="canonical"]');
         if (canon) canon.href = window.location.href;
 
@@ -112,8 +112,8 @@
         if (window.SchemaGenerator) {
           SchemaGenerator.injectArticle(post);
           SchemaGenerator.injectBreadcrumb([
-            { name: 'الرئيسية', url: '/' },
-            { name: 'المدونة', url: '/pages/blog/' },
+            { name: 'Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©', url: '/' },
+            { name: 'Ø§Ù„Ù…Ø¯ÙˆÙ†Ø©', url: '/pages/blog/' },
             { name: post.title, url: window.location.href },
           ]);
         }
@@ -122,7 +122,7 @@
           if (related && related.length) {
             var relContainer = document.getElementById('post-related');
             if (relContainer) {
-              var relHtml = '<div class="related-posts-section" style="max-width:800px;margin:40px auto;padding:0 20px"><h3 class="section-title">مقالات ذات صلة</h3><div class="blog-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))">';
+              var relHtml = '<div class="related-posts-section" style="max-width:800px;margin:40px auto;padding:0 20px"><h3 class="section-title">Ù…Ù‚Ø§Ù„Ø§Øª Ø°Ø§Øª ØµÙ„Ø©</h3><div class="blog-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr))">';
               related.forEach(function (rp) {
                 relHtml += BlogEngine.renderPostCard(rp);
               });
@@ -135,6 +135,6 @@
     })();
   </script>
   <script src="../../assets/vendor/supabase/supabase-js.js?v=20260810"></script>
-  <script src="../../assets/js/supabase-client.js?v=20260917-failover"></script>
+  <script src="../../assets/js/supabase-client.js?v=20260921-backup3"></script>
 </body>
 </html>

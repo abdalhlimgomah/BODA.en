@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>قارن المنتجات - بودوكيو | مقارنة الأسعار والمواصفات</title>
-  <meta name="description" content="قارن بين المنتجات في بودوكيو - مقارنة تفصيلية للأسعار والمميزات والمواصفات لمساعدتك في اختيار الأنسب لاحتياجاتك في مصر والسعودية." />
+  <title>Ù‚Ø§Ø±Ù† Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª - Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ | Ù…Ù‚Ø§Ø±Ù†Ø© Ø§Ù„Ø£Ø³Ø¹Ø§Ø± ÙˆØ§Ù„Ù…ÙˆØ§ØµÙØ§Øª</title>
+  <meta name="description" content="Ù‚Ø§Ø±Ù† Ø¨ÙŠÙ† Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª ÙÙŠ Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ - Ù…Ù‚Ø§Ø±Ù†Ø© ØªÙØµÙŠÙ„ÙŠØ© Ù„Ù„Ø£Ø³Ø¹Ø§Ø± ÙˆØ§Ù„Ù…Ù…ÙŠØ²Ø§Øª ÙˆØ§Ù„Ù…ÙˆØ§ØµÙØ§Øª Ù„Ù…Ø³Ø§Ø¹Ø¯ØªÙƒ ÙÙŠ Ø§Ø®ØªÙŠØ§Ø± Ø§Ù„Ø£Ù†Ø³Ø¨ Ù„Ø§Ø­ØªÙŠØ§Ø¬Ø§ØªÙƒ ÙÙŠ Ù…ØµØ± ÙˆØ§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©." />
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://budoq.com/pages/comparison.html">
-  <meta property="og:title" content="قارن المنتجات - بودوكيو" />
-  <meta property="og:description" content="قارن بين المنتجات واختر الأنسب لك في مصر والسعودية." />
+  <meta property="og:title" content="Ù‚Ø§Ø±Ù† Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª - Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ" />
+  <meta property="og:description" content="Ù‚Ø§Ø±Ù† Ø¨ÙŠÙ† Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª ÙˆØ§Ø®ØªØ± Ø§Ù„Ø£Ù†Ø³Ø¨ Ù„Ùƒ ÙÙŠ Ù…ØµØ± ÙˆØ§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©." />
   <meta property="og:locale" content="ar_AR">
   <meta name="twitter:card" content="summary_large_image">
   <meta property="og:image" content="https://budoq.com/assets/images/og-image.png" />
@@ -53,27 +53,27 @@
     (function () {
       var slug = new URLSearchParams(window.location.search).get('slug');
       if (!slug) {
-        document.getElementById('comparison-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>المقارنة غير موجودة</p></div>';
+        document.getElementById('comparison-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>Ø§Ù„Ù…Ù‚Ø§Ø±Ù†Ø© ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯Ø©</p></div>';
         return;
       }
 
       KnowledgeCenter.getComparisonBySlug(slug).then(function (comparison) {
         if (!comparison) {
-          document.getElementById('comparison-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>المقارنة غير موجودة</p></div>';
+          document.getElementById('comparison-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>Ø§Ù„Ù…Ù‚Ø§Ø±Ù†Ø© ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯Ø©</p></div>';
           return;
         }
 
         document.getElementById('comparison-loading').style.display = 'none';
 
         var typeLabels = {
-          'product_vs_product': 'مقارنة منتجات',
-          'brand_vs_brand': 'مقارنة براندات',
-          'category_vs_category': 'مقارنة فئات'
+          'product_vs_product': 'Ù…Ù‚Ø§Ø±Ù†Ø© Ù…Ù†ØªØ¬Ø§Øª',
+          'brand_vs_brand': 'Ù…Ù‚Ø§Ø±Ù†Ø© Ø¨Ø±Ø§Ù†Ø¯Ø§Øª',
+          'category_vs_category': 'Ù…Ù‚Ø§Ø±Ù†Ø© ÙØ¦Ø§Øª'
         };
 
         var html = '<header class="post-header">
   <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" />';
-        html += '<span class="guide-card-type guide-type-comparison" style="display:inline-block">' + (typeLabels[comparison.comparison_type] || 'مقارنة') + '</span>';
+        html += '<span class="guide-card-type guide-type-comparison" style="display:inline-block">' + (typeLabels[comparison.comparison_type] || 'Ù…Ù‚Ø§Ø±Ù†Ø©') + '</span>';
         html += '<h1>' + KnowledgeCenter.escHtml(comparison.title) + '</h1>';
         if (comparison.subtitle) html += '<p style="color:#64748b;font-size:16px">' + KnowledgeCenter.escHtml(comparison.subtitle) + '</p>';
         html += '</header>';
@@ -100,13 +100,13 @@
         if (contentEl) contentEl.innerHTML = comparison.content_html || comparison.content || '';
         KnowledgeCenter.renderLandingFAQ(comparison, 'comparison-faq');
 
-        document.title = (comparison.meta_title || comparison.title) + ' | مقارنة | BudoQ';
+        document.title = (comparison.meta_title || comparison.title) + ' | Ù…Ù‚Ø§Ø±Ù†Ø© | BudoQ';
         var canon = document.querySelector('link[rel="canonical"]');
         if (canon) canon.href = window.location.href;
 
         if (window.MetaGenerator) {
           MetaGenerator.forStaticPage({
-            title: comparison.meta_title || comparison.title + ' | مقارنة | BudoQ',
+            title: comparison.meta_title || comparison.title + ' | Ù…Ù‚Ø§Ø±Ù†Ø© | BudoQ',
             description: comparison.meta_description || comparison.subtitle || '',
             image: comparison.image || '',
           });
@@ -114,8 +114,8 @@
 
         if (window.SchemaGenerator) {
           SchemaGenerator.injectBreadcrumb([
-            { name: 'الرئيسية', url: '/' },
-            { name: 'المقارنات', url: '/pages/knowledge-center.html' },
+            { name: 'Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©', url: '/' },
+            { name: 'Ø§Ù„Ù…Ù‚Ø§Ø±Ù†Ø§Øª', url: '/pages/knowledge-center.html' },
             { name: comparison.title, url: window.location.href },
           ]);
         }
@@ -123,7 +123,7 @@
     })();
   </script>
   <script src="../assets/vendor/supabase/supabase-js.js?v=20260810"></script>
-  <script src="../assets/js/supabase-client.js?v=20260917-failover"></script>
+  <script src="../assets/js/supabase-client.js?v=20260921-backup3"></script>
 <script src="../assets/js/taager-integration.js?v=20260917-failover"></script>
 <script src="../assets/js/noon-shell.js?v=20260913f"></script>
 </body>

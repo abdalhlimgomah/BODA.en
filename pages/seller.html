@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>متاجر البائعين - بودوكيو | تسوق أونلاين مصر والسعودية</title>
-  <meta name="description" content="تصفح متجر البائع على بودوكيو - منتجات وتقييمات وعروض حصرية بأسعار تنافسية مع شحن سريع في مصر والسعودية." />
+  <title>Ù…ØªØ§Ø¬Ø± Ø§Ù„Ø¨Ø§Ø¦Ø¹ÙŠÙ† - Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ | ØªØ³ÙˆÙ‚ Ø£ÙˆÙ†Ù„Ø§ÙŠÙ† Ù…ØµØ± ÙˆØ§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©</title>
+  <meta name="description" content="ØªØµÙØ­ Ù…ØªØ¬Ø± Ø§Ù„Ø¨Ø§Ø¦Ø¹ Ø¹Ù„Ù‰ Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ - Ù…Ù†ØªØ¬Ø§Øª ÙˆØªÙ‚ÙŠÙŠÙ…Ø§Øª ÙˆØ¹Ø±ÙˆØ¶ Ø­ØµØ±ÙŠØ© Ø¨Ø£Ø³Ø¹Ø§Ø± ØªÙ†Ø§ÙØ³ÙŠØ© Ù…Ø¹ Ø´Ø­Ù† Ø³Ø±ÙŠØ¹ ÙÙŠ Ù…ØµØ± ÙˆØ§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©." />
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://budoq.com/pages/seller.html">
-  <meta property="og:title" content="متجر البائع - بودوكيو" />
-  <meta property="og:description" content="ملف البائع ومنتجاته مع أسعار تنافسية وشحن سريع في مصر والسعودية." />
+  <meta property="og:title" content="Ù…ØªØ¬Ø± Ø§Ù„Ø¨Ø§Ø¦Ø¹ - Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ" />
+  <meta property="og:description" content="Ù…Ù„Ù Ø§Ù„Ø¨Ø§Ø¦Ø¹ ÙˆÙ…Ù†ØªØ¬Ø§ØªÙ‡ Ù…Ø¹ Ø£Ø³Ø¹Ø§Ø± ØªÙ†Ø§ÙØ³ÙŠØ© ÙˆØ´Ø­Ù† Ø³Ø±ÙŠØ¹ ÙÙŠ Ù…ØµØ± ÙˆØ§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©." />
   <meta property="og:locale" content="ar_AR">
   <meta name="twitter:card" content="summary_large_image">
   <meta property="og:image" content="https://budoq.com/assets/images/og-image.png" />
@@ -59,7 +59,7 @@
     (function () {
       var sellerId = new URLSearchParams(window.location.search).get('id');
       if (!sellerId) {
-        document.querySelector('.seller-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">store</span><p>البائع غير موجود</p></div>';
+        document.querySelector('.seller-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">store</span><p>Ø§Ù„Ø¨Ø§Ø¦Ø¹ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯</p></div>';
         return;
       }
 
@@ -70,7 +70,7 @@
             var grid = document.getElementById("seller-products");
             if (!grid) return;
             if (res.error || !res.data || !res.data.length) {
-              grid.innerHTML = '<div class="blog-empty"><p>لا توجد منتجات حالياً</p></div>';
+              grid.innerHTML = '<div class="blog-empty"><p>Ù„Ø§ ØªÙˆØ¬Ø¯ Ù…Ù†ØªØ¬Ø§Øª Ø­Ø§Ù„ÙŠØ§Ù‹</p></div>';
               return;
             }
             grid.innerHTML = res.data.map(function (p) {
@@ -78,7 +78,7 @@
               return '<a href="product.html?id=' + p.id + '" class="product-mini-card" style="background:#fff;border:1px solid #f1f5f9;border-radius:12px;overflow:hidden;text-decoration:none;color:inherit">' +
                 (img ? '<div style="width:100%;height:180px;overflow:hidden"><img src="' + img + '" alt="' + BlogEngine.escHtml(p.name) + '" style="width:100%;height:100%;object-fit:cover" loading="lazy"></div>' : '') +
                 '<div style="padding:12px"><h4 style="font-size:14px;font-weight:600;color:#1a2530;margin-bottom:4px">' + BlogEngine.escHtml(p.name) + '</h4>' +
-                (p.current_price ? '<span style="font-size:16px;font-weight:700;color:#1a2530">' + p.current_price + ' جنيه</span>' : '') +
+                (p.current_price ? '<span style="font-size:16px;font-weight:700;color:#1a2530">' + p.current_price + ' Ø¬Ù†ÙŠÙ‡</span>' : '') +
                 '</div></a>';
             }).join("");
           });
@@ -94,14 +94,14 @@
 
         if (window.SchemaGenerator) {
           SchemaGenerator.injectBreadcrumb([
-            { name: 'الرئيسية', url: '/' },
-            { name: (seoData && seoData.seller_name) || 'البائع', url: window.location.href },
+            { name: 'Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©', url: '/' },
+            { name: (seoData && seoData.seller_name) || 'Ø§Ù„Ø¨Ø§Ø¦Ø¹', url: window.location.href },
           ]);
         }
       });
     })();
   </script>
-  <script src="../assets/js/supabase-client.js?v=20260917-failover"></script>
+  <script src="../assets/js/supabase-client.js?v=20260921-backup3"></script>
 </body>
 </html>
 

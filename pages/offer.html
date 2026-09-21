@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>عرض خاص - بودوكيو | عروض حصرية في مصر والسعودية</title>
-  <meta name="description" content="عرض خاص على بودوكيو - اكتشف تفاصيل العرض والمنتجات المشمولة وأسعار حصرية لفترة محدودة في مصر والسعودية." />
+  <title>Ø¹Ø±Ø¶ Ø®Ø§Øµ - Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ | Ø¹Ø±ÙˆØ¶ Ø­ØµØ±ÙŠØ© ÙÙŠ Ù…ØµØ± ÙˆØ§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©</title>
+  <meta name="description" content="Ø¹Ø±Ø¶ Ø®Ø§Øµ Ø¹Ù„Ù‰ Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ - Ø§ÙƒØªØ´Ù ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø¹Ø±Ø¶ ÙˆØ§Ù„Ù…Ù†ØªØ¬Ø§Øª Ø§Ù„Ù…Ø´Ù…ÙˆÙ„Ø© ÙˆØ£Ø³Ø¹Ø§Ø± Ø­ØµØ±ÙŠØ© Ù„ÙØªØ±Ø© Ù…Ø­Ø¯ÙˆØ¯Ø© ÙÙŠ Ù…ØµØ± ÙˆØ§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©." />
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://budoq.com/pages/offer.html">
-  <meta property="og:title" content="العرض الخاص - بودوكيو" />
-  <meta property="og:description" content="تفاصيل العرض المميز في بودوكيو بعروض حصرية لمصر والسعودية" />
+  <meta property="og:title" content="Ø§Ù„Ø¹Ø±Ø¶ Ø§Ù„Ø®Ø§Øµ - Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ" />
+  <meta property="og:description" content="ØªÙØ§ØµÙŠÙ„ Ø§Ù„Ø¹Ø±Ø¶ Ø§Ù„Ù…Ù…ÙŠØ² ÙÙŠ Ø¨ÙˆØ¯ÙˆÙƒÙŠÙˆ Ø¨Ø¹Ø±ÙˆØ¶ Ø­ØµØ±ÙŠØ© Ù„Ù…ØµØ± ÙˆØ§Ù„Ø³Ø¹ÙˆØ¯ÙŠØ©" />
   <meta property="og:locale" content="ar_AR">
   <meta name="twitter:card" content="summary_large_image">
   <meta property="og:image" content="https://budoq.com/assets/images/og-image.png" />
@@ -51,13 +51,13 @@
     (function () {
       var slug = new URLSearchParams(window.location.search).get('slug');
       if (!slug) {
-        document.getElementById('offer-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">local_offer</span><p>العرض غير موجود</p></div>';
+        document.getElementById('offer-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">local_offer</span><p>Ø§Ù„Ø¹Ø±Ø¶ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯</p></div>';
         return;
       }
 
       ProductSEO.getOfferBySlug(slug).then(function (offer) {
         if (!offer) {
-          document.getElementById('offer-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">local_offer</span><p>العرض غير موجود</p></div>';
+          document.getElementById('offer-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">local_offer</span><p>Ø§Ù„Ø¹Ø±Ø¶ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯</p></div>';
           return;
         }
 
@@ -77,7 +77,7 @@
         if (offer.faq_data && offer.faq_data.length) {
           var faqContainer = document.getElementById('offer-faq');
           if (faqContainer) {
-            faqContainer.innerHTML = '<div class="faq-section" style="margin-top:32px"><h2 class="faq-title">الأسئلة الشائعة عن العرض</h2><div class="faq-list">' +
+            faqContainer.innerHTML = '<div class="faq-section" style="margin-top:32px"><h2 class="faq-title">Ø§Ù„Ø£Ø³Ø¦Ù„Ø© Ø§Ù„Ø´Ø§Ø¦Ø¹Ø© Ø¹Ù† Ø§Ù„Ø¹Ø±Ø¶</h2><div class="faq-list">' +
               offer.faq_data.map(function (item, i) {
                 return '<div class="faq-item"><button class="faq-question" onclick="this.parentElement.classList.toggle(\'faq-open\')">' +
                   '<span>' + BlogEngine.escHtml(item.question) + '</span>' +
@@ -87,14 +87,14 @@
           }
         }
 
-        document.title = (offer.seo_title || offer.title) + ' | عروض BudoQ';
+        document.title = (offer.seo_title || offer.title) + ' | Ø¹Ø±ÙˆØ¶ BudoQ';
         var canon = document.querySelector('link[rel="canonical"]');
         if (canon) canon.href = window.location.href;
       });
     })();
   </script>
   <script src="../assets/vendor/supabase/supabase-js.js?v=20260810"></script>
-  <script src="../assets/js/supabase-client.js?v=20260917-failover"></script>
+  <script src="../assets/js/supabase-client.js?v=20260921-backup3"></script>
 <script src="../assets/js/taager-integration.js?v=20260917-failover"></script>
 <script src="../assets/js/noon-shell.js?v=20260913f"></script>
 </body>

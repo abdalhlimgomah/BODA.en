@@ -1,15 +1,15 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" />
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>دليل - مركز المعرفة BudoQ</title>
-  <meta name="description" content="دليل شراء شامل على BudoQ - نصائح وتوصيات لاختيار أفضل المنتجات مع مقارنات تفصيلية وأفضل العروض المتاحة." />
+  <title>Ø¯Ù„ÙŠÙ„ - Ù…Ø±ÙƒØ² Ø§Ù„Ù…Ø¹Ø±ÙØ© BudoQ</title>
+  <meta name="description" content="Ø¯Ù„ÙŠÙ„ Ø´Ø±Ø§Ø¡ Ø´Ø§Ù…Ù„ Ø¹Ù„Ù‰ BudoQ - Ù†ØµØ§Ø¦Ø­ ÙˆØªÙˆØµÙŠØ§Øª Ù„Ø§Ø®ØªÙŠØ§Ø± Ø£ÙØ¶Ù„ Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª Ù…Ø¹ Ù…Ù‚Ø§Ø±Ù†Ø§Øª ØªÙØµÙŠÙ„ÙŠØ© ÙˆØ£ÙØ¶Ù„ Ø§Ù„Ø¹Ø±ÙˆØ¶ Ø§Ù„Ù…ØªØ§Ø­Ø©." />
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://budoq.com/pages/guide.html">
-  <meta property="og:title" content="دليل التسوق - BudoQ" />
-  <meta property="og:description" content="دليلك الشامل للتسوق من متجر BudoQ" />
+  <meta property="og:title" content="Ø¯Ù„ÙŠÙ„ Ø§Ù„ØªØ³ÙˆÙ‚ - BudoQ" />
+  <meta property="og:description" content="Ø¯Ù„ÙŠÙ„Ùƒ Ø§Ù„Ø´Ø§Ù…Ù„ Ù„Ù„ØªØ³ÙˆÙ‚ Ù…Ù† Ù…ØªØ¬Ø± BudoQ" />
   <meta property="og:locale" content="ar_AR">
   <meta name="twitter:card" content="summary_large_image">
   <meta property="og:image" content="https://budoq.com/assets/images/og-image.png" />
@@ -55,21 +55,21 @@
     (function () {
       var slug = new URLSearchParams(window.location.search).get('slug');
       if (!slug) {
-        document.getElementById('guide-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>الدليل غير موجود</p></div>';
+        document.getElementById('guide-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>Ø§Ù„Ø¯Ù„ÙŠÙ„ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯</p></div>';
         return;
       }
 
       KnowledgeCenter.getGuideBySlug(slug).then(function (guide) {
         if (!guide) {
-          document.getElementById('guide-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>الدليل غير موجود</p></div>';
+          document.getElementById('guide-page').innerHTML = '<div class="blog-empty"><span class="material-icons-outlined" style="font-size:64px">error_outline</span><p>Ø§Ù„Ø¯Ù„ÙŠÙ„ ØºÙŠØ± Ù…ÙˆØ¬ÙˆØ¯</p></div>';
           return;
         }
 
         document.getElementById('guide-loading').style.display = 'none';
 
         var typeLabels = {
-          buying: 'دليل شراء', how_to: 'كيفية', top_picks: 'أفضل المنتجات',
-          review: 'مراجعة', tutorial: 'درس تعليمي', comparison: 'مقارنة'
+          buying: 'Ø¯Ù„ÙŠÙ„ Ø´Ø±Ø§Ø¡', how_to: 'ÙƒÙŠÙÙŠØ©', top_picks: 'Ø£ÙØ¶Ù„ Ø§Ù„Ù…Ù†ØªØ¬Ø§Øª',
+          review: 'Ù…Ø±Ø§Ø¬Ø¹Ø©', tutorial: 'Ø¯Ø±Ø³ ØªØ¹Ù„ÙŠÙ…ÙŠ', comparison: 'Ù…Ù‚Ø§Ø±Ù†Ø©'
         };
 
         var html = '<header class="post-header">
@@ -98,7 +98,7 @@
 
         if (window.MetaGenerator) {
           MetaGenerator.forStaticPage({
-            title: guide.meta_title || guide.title + ' | دليل | BudoQ',
+            title: guide.meta_title || guide.title + ' | Ø¯Ù„ÙŠÙ„ | BudoQ',
             description: guide.meta_description || guide.subtitle || '',
             image: guide.image || '',
           });
@@ -106,8 +106,8 @@
 
         if (window.SchemaGenerator) {
           SchemaGenerator.injectBreadcrumb([
-            { name: 'الرئيسية', url: '/' },
-            { name: 'مركز المعرفة', url: '/pages/knowledge-center.html' },
+            { name: 'Ø§Ù„Ø±Ø¦ÙŠØ³ÙŠØ©', url: '/' },
+            { name: 'Ù…Ø±ÙƒØ² Ø§Ù„Ù…Ø¹Ø±ÙØ©', url: '/pages/knowledge-center.html' },
             { name: guide.title, url: window.location.href },
           ]);
         }
@@ -115,7 +115,7 @@
     })();
   </script>
   <script src="../assets/vendor/supabase/supabase-js.js?v=20260810"></script>
-  <script src="../assets/js/supabase-client.js?v=20260917-failover"></script>
+  <script src="../assets/js/supabase-client.js?v=20260921-backup3"></script>
 <script src="../assets/js/taager-integration.js?v=20260917-failover"></script>
 <script src="../assets/js/noon-shell.js?v=20260913f"></script>
 </body>
