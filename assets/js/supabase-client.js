@@ -278,6 +278,37 @@ function retryWithBackend(fetchThis, retryInput, init, backendName, retryAfter40
     });
   }
 
+  // Keep cascading the same request through every remaining backend until one
+  // answers with a healthy status. The single retry above stops at the first
+  // backup, so a transient 402 there would trigger the 402 screen even though
+  // a later backend in the chain works. Only when the whole chain has returned
+  // 402 (and the original failure was a 402) is the service marked unavailable.
+  function retryThroughRemainingBackends(fetchThis, retryInput, init, method, originalWas402) {
+    var chain = [getActiveBodaSupabaseBackend().name];
+    var cursor = getNextBodaSupabaseBackendName(getActiveBodaSupabaseBackend().name);
+    while (cursor) {
+      chain.push(cursor);
+      cursor = getNextBodaSupabaseBackendName(cursor);
+    }
+    var lastResponse = null;
+    var index = 0;
+    function attempt() {
+      if (index >= chain.length) {
+        if (originalWas402) handleAllBackendsUnavailable();
+        return lastResponse;
+      }
+      var name = chain[index++];
+      activateBodaSupabaseBackend(name, "http-cascade");
+      return retryWithBackend(fetchThis, retryInput, init, name, false).then(function (response) {
+        lastResponse = response;
+        if (response && response.status === 402) return attempt();
+        if (isReadMethod(method) && response && isRecoverableStatus(response.status)) return attempt();
+        return response;
+      });
+    }
+    return Promise.resolve().then(attempt);
+  }
+
   window.fetch = function (input, init) {
     var fetchThis = this;
     var retryInput = cloneFetchInput(input);
@@ -321,7 +352,7 @@ var requestBackend = getBackendNameForUrl(url);
         // A 402 is returned before Supabase processes the request, so retrying
         // it is safe. For 5xx, retry only reads: a write may have reached the DB.
         if (response.status === 402 || isReadMethod(method)) {
-          return retryWithBackend(fetchThis, retryInput, init, nextBackend.name, response.status === 402);
+          return retryThroughRemainingBackends(fetchThis, retryInput, init, method, response.status === 402);
         }
         return response;
       });
