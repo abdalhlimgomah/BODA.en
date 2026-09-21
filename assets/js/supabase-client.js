@@ -1,6 +1,6 @@
 ﻿// Central Supabase helper. Load once per page after supabase-js library.
 
-// The backup project is deliberately configured with its *publishable* key.
+// The backup projects are deliberately configured with their *publishable* keys.
 // Secret/service-role keys must never be placed in browser code.
 var BODA_SUPABASE_BACKENDS = {
   primary: {
@@ -13,7 +13,15 @@ var BODA_SUPABASE_BACKENDS = {
     url: "https://wwlwwgqfjhmchrijaojr.supabase.co",
     key: "sb_publishable_wIxpA7t3a2hII8asqYZ1Bg__NoMLLUU",
   },
+  backup3: {
+    name: "backup3",
+    url: "https://qhqkgrpezoaugyhzrgyc.supabase.co",
+    key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocWtncnBlem9hdWd5aHpyZ3ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4OTM2ODYsImV4cCI6MjEwNTQ2OTY4Nn0.1ANBV4Bm4JyZWMnXb1CTxkf36eRDGZOIOShK_j3Ynt8",
+  },
 };
+
+// Order used when cascading from a dead backend to the next one.
+var BODA_SUPABASE_BACKEND_ORDER = ["primary", "backup", "backup3"];
 
 var BODA_SUPABASE_BACKEND_STORAGE_KEY = "boda_supabase_active_backend";
 var BODA_SUPABASE_BACKEND_TTL_MS = 15 * 60 * 1000;
@@ -26,8 +34,8 @@ function getBodaSupabaseBackend(name) {
 function getStoredBodaSupabaseBackend() {
   try {
     var saved = JSON.parse(sessionStorage.getItem(BODA_SUPABASE_BACKEND_STORAGE_KEY) || "null");
-    if (saved && saved.name === "backup" && Number(saved.until) > Date.now()) {
-      return getBodaSupabaseBackend("backup");
+    if (saved && saved.name !== "primary" && getBodaSupabaseBackend(saved.name) && Number(saved.until) > Date.now()) {
+      return getBodaSupabaseBackend(saved.name);
     }
     sessionStorage.removeItem(BODA_SUPABASE_BACKEND_STORAGE_KEY);
   } catch (_e) {}
@@ -46,13 +54,17 @@ function applyBodaSupabaseBackend(backend) {
   window.TAAGER_EDGE_FUNCTION_URL = backend.url + "/functions/v1/taager-proxy";
 }
 
-function persistBodaSupabaseBackup(reason) {
+function persistBodaSupabaseBackend(name, reason) {
   try {
     sessionStorage.setItem(
       BODA_SUPABASE_BACKEND_STORAGE_KEY,
-      JSON.stringify({ name: "backup", reason: String(reason || "failover"), until: Date.now() + BODA_SUPABASE_BACKEND_TTL_MS })
+      JSON.stringify({ name: String(name || "backup"), reason: String(reason || "failover"), until: Date.now() + BODA_SUPABASE_BACKEND_TTL_MS })
     );
   } catch (_e) {}
+}
+
+function persistBodaSupabaseBackup(reason) {
+  persistBodaSupabaseBackend("backup", reason);
 }
 
 function activateBodaSupabaseBackend(name, reason) {
@@ -67,10 +79,10 @@ function activateBodaSupabaseBackend(name, reason) {
     }
   } catch (_e) {}
 
-  window._clientInstance = null;
+window._clientInstance = null;
   window.__rawSupabase = null;
   applyBodaSupabaseBackend(next);
-  if (next.name === "backup") persistBodaSupabaseBackup(reason);
+  if (next.name !== "primary") persistBodaSupabaseBackend(next.name, reason);
   else {
     try { sessionStorage.removeItem(BODA_SUPABASE_BACKEND_STORAGE_KEY); } catch (_e) {}
   }
@@ -97,11 +109,23 @@ function activateBodaSupabaseBackend(name, reason) {
   return next;
 }
 
-function failOverToBodaSupabaseBackup(reason) {
-  if (getActiveBodaSupabaseBackend().name === "backup") return Promise.resolve(BODA_SUPABASE_BACKENDS.backup);
+function getNextBodaSupabaseBackendName(name) {
+  var i = BODA_SUPABASE_BACKEND_ORDER.indexOf(name);
+  for (var k = i + 1; k < BODA_SUPABASE_BACKEND_ORDER.length; k++) {
+    if (getBodaSupabaseBackend(BODA_SUPABASE_BACKEND_ORDER[k])) return BODA_SUPABASE_BACKEND_ORDER[k];
+  }
+  return "";
+}
+
+// Cascade: primary -> backup -> backup3. Resolves with the newly activated
+// backend, or null when there is no working backend left in the chain.
+function failOverToNextBodaSupabaseBackend(reason) {
+  var active = getActiveBodaSupabaseBackend();
+  var nextName = getNextBodaSupabaseBackendName(active.name);
+  if (!nextName) return Promise.resolve(null);
   if (_bodaFailoverPromise) return _bodaFailoverPromise;
   _bodaFailoverPromise = Promise.resolve().then(function () {
-    return activateBodaSupabaseBackend("backup", reason);
+    return activateBodaSupabaseBackend(nextName, reason);
   });
   _bodaFailoverPromise.then(
     function () { _bodaFailoverPromise = null; },
@@ -110,12 +134,21 @@ function failOverToBodaSupabaseBackup(reason) {
   return _bodaFailoverPromise;
 }
 
-// A prior outage keeps this browser tab on the working backup for 15 minutes;
+// Compatibility wrapper kept for callers that explicitly ask for the first backup.
+function failOverToBodaSupabaseBackup(reason) {
+  if (getActiveBodaSupabaseBackend().name !== "primary") {
+    return Promise.resolve(getActiveBodaSupabaseBackend());
+  }
+  return failOverToNextBodaSupabaseBackend(reason);
+}
+
+// A prior outage keeps this browser tab on the working backend for 15 minutes;
 // a new visit starts with primary again.
 applyBodaSupabaseBackend(getStoredBodaSupabaseBackend() || BODA_SUPABASE_BACKENDS.primary);
 window.getActiveBodaSupabaseBackend = getActiveBodaSupabaseBackend;
 window.activateBodaSupabaseBackend = activateBodaSupabaseBackend;
 window.failOverToBodaSupabaseBackup = failOverToBodaSupabaseBackup;
+window.failOverToNextBodaSupabaseBackend = failOverToNextBodaSupabaseBackend;
 
 if (typeof window._clientInstance === 'undefined') {
   window._clientInstance = null;
@@ -186,10 +219,11 @@ function getFetchUrl(input) {
     return init;
   }
 
-  function getBackendNameForUrl(url) {
+function getBackendNameForUrl(url) {
     var value = String(url || "");
     if (value.indexOf(BODA_SUPABASE_BACKENDS.primary.url) === 0) return "primary";
     if (value.indexOf(BODA_SUPABASE_BACKENDS.backup.url) === 0) return "backup";
+    if (value.indexOf(BODA_SUPABASE_BACKENDS.backup3.url) === 0) return "backup3";
     return "";
   }
 
@@ -198,7 +232,8 @@ function getFetchUrl(input) {
     if (!targetBackend || !getBackendNameForUrl(value)) return value;
     return value
       .replace(BODA_SUPABASE_BACKENDS.primary.url, targetBackend.url)
-      .replace(BODA_SUPABASE_BACKENDS.backup.url, targetBackend.url);
+      .replace(BODA_SUPABASE_BACKENDS.backup.url, targetBackend.url)
+      .replace(BODA_SUPABASE_BACKENDS.backup3.url, targetBackend.url);
   }
 
   function routeFetchInput(input, targetBackend) {
@@ -232,11 +267,12 @@ function getFetchUrl(input) {
     return status === 402 || status === 500 || status === 502 || status === 503 || status === 504;
   }
 
-function retryWithBackup(fetchThis, retryInput, init, retryAfter402) {
-    var backupInput = routeFetchInput(retryInput, BODA_SUPABASE_BACKENDS.backup);
-    // The backup project validates its own publishable key; requests built by
-    // a client created for primary carry the primary key and would 401.
-    return originalFetch.call(fetchThis, backupInput, applyBackendKey(init, BODA_SUPABASE_BACKENDS.backup)).then(function (response) {
+function retryWithBackend(fetchThis, retryInput, init, backendName, retryAfter402) {
+    var backend = getBodaSupabaseBackend(backendName) || BODA_SUPABASE_BACKENDS.backup;
+    // The target backend validates its own publishable key; requests built by a
+    // client created for another project carry that project's key and would 401.
+    var backendInput = routeFetchInput(retryInput, backend);
+    return originalFetch.call(fetchThis, backendInput, applyBackendKey(init, backend)).then(function (response) {
       if (retryAfter402 && response && response.status === 402) handleAllBackendsUnavailable();
       return response;
     });
@@ -258,39 +294,46 @@ function retryWithBackup(fetchThis, retryInput, init, retryAfter402) {
       }
 } catch (e) {}
 
-    var requestBackend = getBackendNameForUrl(url);
+var requestBackend = getBackendNameForUrl(url);
     var method = getFetchMethod(input, init);
     var activeBackend = getActiveBodaSupabaseBackend();
     // This covers pages that retain an old primary SDK client after the shared
-    // client has already switched to backup.
+    // client has already switched to another backend.
     var routedInput = routeFetchInput(input, activeBackend);
-    // When the active backend is backup, any Supabase request must carry the
-    // backup project's key. Old primary-created clients would otherwise 401.
-    if (activeBackend.name === "backup" && getBackendNameForUrl(url)) {
-      init = applyBackendKey(init, BODA_SUPABASE_BACKENDS.backup);
+    // When the active backend is not primary, any Supabase request must carry
+    // that backend's key. Old primary-created clients would otherwise 401.
+    if (activeBackend.name !== "primary" && getBackendNameForUrl(url)) {
+      init = applyBackendKey(init, activeBackend);
     }
 
     return originalFetch.call(fetchThis, routedInput, init).then(function (response) {
-      var primaryRequestFailed =
-        requestBackend === "primary" && activeBackend.name === "primary" && response && isRecoverableStatus(response.status);
-      if (!primaryRequestFailed) return response;
+      // A request to the currently-active backend failed; cascade to the next one.
+      var activeRequestFailed =
+        requestBackend === activeBackend.name && response && isRecoverableStatus(response.status);
+      if (!activeRequestFailed) return response;
 
-      return failOverToBodaSupabaseBackup("http-" + response.status).then(function () {
+      return failOverToNextBodaSupabaseBackend("http-" + response.status).then(function (nextBackend) {
+        if (!nextBackend) {
+          // Nothing left in the chain to try.
+          if (response.status === 402) handleAllBackendsUnavailable();
+          return response;
+        }
         // A 402 is returned before Supabase processes the request, so retrying
         // it is safe. For 5xx, retry only reads: a write may have reached the DB.
         if (response.status === 402 || isReadMethod(method)) {
-          return retryWithBackup(fetchThis, retryInput, init, response.status === 402);
+          return retryWithBackend(fetchThis, retryInput, init, nextBackend.name, response.status === 402);
         }
         return response;
       });
     }).catch(function (error) {
-      var primaryNetworkFailure = requestBackend === "primary" && activeBackend.name === "primary";
-      if (!primaryNetworkFailure) throw error;
+      var activeNetworkFailure = requestBackend === activeBackend.name;
+      if (!activeNetworkFailure) throw error;
 
-      return failOverToBodaSupabaseBackup("network").then(function () {
+      return failOverToNextBodaSupabaseBackend("network").then(function (nextBackend) {
+        if (!nextBackend) throw error;
         // Never replay a write after an unknown network failure; it could have
-        // been committed by primary and replaying could duplicate an order.
-        if (isReadMethod(method)) return retryWithBackup(fetchThis, retryInput, init, false);
+        // been committed by the previous backend and replaying could duplicate an order.
+        if (isReadMethod(method)) return retryWithBackend(fetchThis, retryInput, init, nextBackend.name, false);
         throw error;
       });
     });
@@ -326,6 +369,7 @@ function getBackendNameForSupabaseClientArg(value) {
   var url = String(value || "");
   if (url.indexOf(BODA_SUPABASE_BACKENDS.primary.url) === 0) return "primary";
   if (url.indexOf(BODA_SUPABASE_BACKENDS.backup.url) === 0) return "backup";
+  if (url.indexOf(BODA_SUPABASE_BACKENDS.backup3.url) === 0) return "backup3";
   return "";
 }
 
