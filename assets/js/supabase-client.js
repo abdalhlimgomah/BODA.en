@@ -177,7 +177,7 @@ function getSecUserEmail() {
   var originalFetch = window.fetch;
   if (typeof originalFetch !== "function") return;
 
-  function handleAllBackendsUnavailable() {
+function handleAllBackendsUnavailable() {
     if (window.__boda402Fired) return;
     window.__boda402Fired = true;
     try { document.dispatchEvent(new CustomEvent("boda:service-402")); } catch (_e) {}
@@ -187,9 +187,35 @@ function getSecUserEmail() {
       var last = Number(sessionStorage.getItem("boda_402_at") || 0);
       if (Date.now() - last < 20000) return;
       sessionStorage.setItem("boda_402_at", String(Date.now()));
-      var target = path.indexOf("/pages/") !== -1 ? "error-402.html" : "pages/error-402.html";
-      setTimeout(function () { window.location.replace(target); }, 500);
+      confirmAllBackendsDown().then(function (allDown) {
+        if (!allDown) {
+          window.__boda402Fired = false;
+          return;
+        }
+        var target = path.indexOf("/pages/") !== -1 ? "error-402.html" : "pages/error-402.html";
+        setTimeout(function () { window.location.replace(target); }, 400);
+      }).catch(function () {
+        window.__boda402Fired = false;
+      });
     } catch (_e) {}
+  }
+
+  function confirmAllBackendsDown() {
+    var names = ["primary", "backup", "backup3"];
+    var probes = names.map(function (name) {
+      var b = getBodaSupabaseBackend(name);
+      if (!b) return Promise.resolve(false);
+      return originalFetch.call(window, b.url + "/rest/v1/products?select=id&limit=1", {
+        headers: { apikey: b.key, Authorization: "Bearer " + b.key }
+      }).then(function (r) {
+        return !(r.status >= 200 && r.status < 500 && r.status !== 402);
+      }).catch(function () {
+        return false;
+      });
+    });
+    return Promise.all(probes).then(function (results) {
+      return results.indexOf(false) === -1;
+    });
   }
 
 function getFetchUrl(input) {
@@ -1659,6 +1685,8 @@ async function insertOrderWithFallbackPatterns(client, order, items = []) {
   return { payload: null, error: lastError };
 }
 
+let _ratingsCache = null;
+
 async function annotateProductsWithRatingsTable(client, products = []) {
   if (!Array.isArray(products) || !products.length) return [];
 
@@ -1678,58 +1706,88 @@ async function annotateProductsWithRatingsTable(client, products = []) {
   }
 
   try {
-    const ratingsMap = {};
-    const chunkSize = 100;
-    const chunks = [];
-
-    for (let i = 0; i < ids.length; i += chunkSize) {
-      chunks.push(ids.slice(i, i + chunkSize));
-    }
-
-    const results = await Promise.all(chunks.map(async (chunk) => {
-      let res;
+    if (!_ratingsCache) {
+      let loaded = {};
       try {
-        res = await client.rpc("get_ratings_summary", { product_ids: chunk });
-        if (res.error) throw res.error;
-      } catch (e) {
-        res = await client.from("ratings").select("item_id,rating").in("item_id", chunk);
-      }
-      return res;
-    }));
+        const storedCache = JSON.parse(localStorage.getItem("boda_ratings_cache") || "{}");
+        if (storedCache && storedCache.data && storedCache.at && Date.now() - Number(storedCache.at) < 86400000) {
+          loaded = storedCache.data;
+        }
+      } catch (e) {}
+      _ratingsCache = loaded;
+    }
+    const seenIds = {};
+    const missingIds = [];
+    for (const id of ids) {
+      if (seenIds[id]) continue;
+      seenIds[id] = 1;
+      const known = _ratingsCache[id];
+      if (!known || (!known.total && !known.checked)) missingIds.push(id);
+    }
+    if (missingIds.length) {
+      const chunkSize = 100;
+      const chunks = [];
 
-    for (const { data, error } of results) {
-      if (error) {
-        console.warn("supabase ratings fetch error", error);
-        continue;
+      for (let i = 0; i < missingIds.length; i += chunkSize) {
+        chunks.push(missingIds.slice(i, i + chunkSize));
       }
-      if (Array.isArray(data)) {
-        data.forEach((row) => {
-          const itemId = String(row.item_id || "");
-          if (!itemId) return;
-          if (row.total !== undefined) {
-            const total = Math.round(Number(row.total)) || 0;
-            if (total <= 0) return;
-            if (!ratingsMap[itemId]) ratingsMap[itemId] = { sum: 0, total: 0 };
-            ratingsMap[itemId].total = total;
-            ratingsMap[itemId].sum = (Math.round(Number(row.star1)) || 0) * 1
-              + (Math.round(Number(row.star2)) || 0) * 2
-              + (Math.round(Number(row.star3)) || 0) * 3
-              + (Math.round(Number(row.star4)) || 0) * 4
-              + (Math.round(Number(row.star5)) || 0) * 5;
-            return;
-          }
-          const ratingValue = Number(row.rating) || 0;
-          if (!itemId || ratingValue <= 0) return;
-          if (!ratingsMap[itemId]) ratingsMap[itemId] = { sum: 0, total: 0 };
-          ratingsMap[itemId].sum += ratingValue;
-          ratingsMap[itemId].total++;
-        });
+
+      const results = await Promise.all(chunks.map(async (chunk) => {
+        let res;
+        try {
+          res = await client.rpc("get_ratings_summary", { product_ids: chunk });
+          if (res.error) throw res.error;
+        } catch (e) {
+          res = await client.from("ratings").select("item_id,rating").in("item_id", chunk);
+        }
+        return res;
+      }));
+
+      for (const { data, error } of results) {
+        if (error) {
+          console.warn("supabase ratings fetch error", error);
+          continue;
+        }
+        if (Array.isArray(data)) {
+          data.forEach((row) => {
+            const itemId = String(row.item_id || "");
+            if (!itemId) return;
+            const entry = _ratingsCache[itemId] || (_ratingsCache[itemId] = { sum: 0, total: 0 });
+            if (row.total !== undefined) {
+              const total = Math.round(Number(row.total)) || 0;
+              if (total <= 0) {
+                entry.checked = true;
+                return;
+              }
+              entry.total = total;
+              entry.sum = (Math.round(Number(row.star1)) || 0) * 1
+                + (Math.round(Number(row.star2)) || 0) * 2
+                + (Math.round(Number(row.star3)) || 0) * 3
+                + (Math.round(Number(row.star4)) || 0) * 4
+                + (Math.round(Number(row.star5)) || 0) * 5;
+              return;
+            }
+            const ratingValue = Number(row.rating) || 0;
+            if (ratingValue <= 0) {
+              entry.checked = true;
+              return;
+            }
+            entry.sum += ratingValue;
+            entry.total++;
+          });
+        }
       }
+      try {
+        localStorage.setItem(
+          "boda_ratings_cache",
+          JSON.stringify({ at: Date.now(), data: _ratingsCache })
+        );
+      } catch (e) {}
     }
 
     return products.map((product) => {
       const itemId = String(product?.id || "");
-      const r = ratingsMap[itemId];
+      const r = _ratingsCache[itemId];
 
       if (!r || !r.total) {
         return {

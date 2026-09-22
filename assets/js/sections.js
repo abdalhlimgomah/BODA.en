@@ -6,6 +6,31 @@
   var EXPANDED_CLASS = 'expanded';
   var HAS_BRANCHES_CLASS = 'has-branches';
   var allProducts = [];
+  var _productIndex = null;
+
+  function buildProductIndex() {
+    if (_productIndex) return;
+    var list = [];
+    for (var i = 0; i < allProducts.length; i++) {
+      var p = allProducts[i] || {};
+      var raw = ((p.name || '') + ' ' + (p.category || '') + ' ' + (p.description || '') + ' ' + ((p.keywords || []) || []).join(' ')).toLowerCase();
+      list.push(raw.replace(/\s+/g, ''));
+    }
+    _productIndex = list;
+  }
+
+  function getProductCountForKeywords(keywordSet) {
+    if (!keywordSet || !keywordSet.length || !allProducts.length) return 0;
+    buildProductIndex();
+    var count = 0;
+    for (var i = 0; i < _productIndex.length; i++) {
+      var st = _productIndex[i];
+      for (var k = 0; k < keywordSet.length; k++) {
+        if (st.indexOf(keywordSet[k]) !== -1) { count++; break; }
+      }
+    }
+    return count;
+  }
 
   function getCachedCategories() {
     try {
@@ -84,39 +109,15 @@
   }
 
   function getProductCountForCategory(category) {
-    var count = 0;
     var keywords = category.keywords || [];
     if (!keywords.length) return 0;
-    if (!allProducts.length) return 0;
-
-    var keywordSet = keywords.map(function (k) { return k.toLowerCase().trim().replace(/\s+/g, ''); }).filter(Boolean);
-
-    allProducts.forEach(function (p) {
-      var searchText = ((p.name || '') + ' ' + (p.category || '') + ' ' + (p.description || '') + ' ' + ((p.keywords || []) || []).join(' ')).toLowerCase();
-      searchText = searchText.replace(/\s+/g, '');
-      var match = keywordSet.some(function (kw) { return searchText.indexOf(kw) !== -1; });
-      if (match) count++;
-    });
-
-    return count;
+    return getProductCountForKeywords(keywords.map(function (k) { return k.toLowerCase().trim().replace(/\s+/g, ''); }).filter(Boolean));
   }
 
   function getProductCountForBranch(branch) {
-    var count = 0;
     var keywords = branch.branch_keywords || [];
     if (!keywords.length) return 0;
-    if (!allProducts.length) return 0;
-
-    var keywordSet = keywords.map(function (k) { return k.toLowerCase().trim().replace(/\s+/g, ''); }).filter(Boolean);
-
-    allProducts.forEach(function (p) {
-      var searchText = ((p.name || '') + ' ' + (p.category || '') + ' ' + (p.description || '') + ' ' + ((p.keywords || []) || []).join(' ')).toLowerCase();
-      searchText = searchText.replace(/\s+/g, '');
-      var match = keywordSet.some(function (kw) { return searchText.indexOf(kw) !== -1; });
-      if (match) count++;
-    });
-
-    return count;
+    return getProductCountForKeywords(keywords.map(function (k) { return k.toLowerCase().trim().replace(/\s+/g, ''); }).filter(Boolean));
   }
 
   function renderBranchHTML(category) {
@@ -265,11 +266,14 @@
       }
     }
 
-    if (!allProducts.length) {
-      allProducts = await fetchTaagerProducts();
-    }
+    var categoriesPromise = fetchCategories();
 
-    var categories = await fetchCategories();
+    if (!allProducts.length) {
+      allProducts = (await fetchTaagerProducts()) || allProducts;
+    }
+    _productIndex = null;
+
+    var categories = await categoriesPromise;
     renderCategories(categories);
 
     document.body.classList.remove('sections-loading');

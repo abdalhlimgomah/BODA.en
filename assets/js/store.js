@@ -681,7 +681,7 @@ const getResizedImageUrl = (source, width) => {
     if (window.__bodaSupabaseBackendName === "backup") {
       s = s.replace("https://msgqzgzoslearaprgiqq.supabase.co/", "https://wwlwwgqfjhmchrijaojr.supabase.co/");
     }
-    const isRemoteImage = /^https?:\/\/(media\.taager\.com|aff\.ven-door\.com|iili\.io|a\.nooncdn\.com|f\.nooncdn\.com|msgqzgzoslearaprgiqq\.supabase\.co|wwlwwgqfjhmchrijaojr\.supabase\.co)\//i.test(s);
+    const isRemoteImage = /^https?:\/\/(media\.taager\.com|aff\.ven-door\.com|iili\.io|a\.nooncdn\.com|f\.nooncdn\.com|[\w-]+\.supabase\.co)\//i.test(s);
     if (!isRemoteImage) return s;
     const parsedWidth = parseInt(width, 10);
     const w = Math.min(Math.max(Number.isFinite(parsedWidth) ? parsedWidth : 400, 16), 1400);
@@ -1638,10 +1638,8 @@ async function autoLoadCartFromSupabase() {
       localStorage.setItem(getCartKey(), JSON.stringify(merged));
     }
   } else {
-    // Supabase فاضي والمستخدم مسحها يدوي → طهر localStorage كمان
-    if (localCart.length > 0) {
-      localStorage.removeItem(getCartKey());
-    }
+    // الـ Supabase رجع فاضي: مينمسحش السلة المحلية — ممكن تكون المنتجات مضافة على الجهاز ومتسنتش بعد،
+    // أو كان فيه فشل تزامن. المحلي = مصدر الحقيقة هنا، وهيتم رفعه للسيرفر في syncCartToSupabase تحت.
   }
 
   _cartLoadedFromSupabase = true;

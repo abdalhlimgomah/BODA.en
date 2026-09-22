@@ -404,51 +404,92 @@ async function annotateProductsWithSupabaseRatings(products) {
   if (!ids.length) return markAsRatingsSource(products);
   try {
     var ratingMap = {};
-    var chunkSize = 100;
-    var chunks = [];
-    for (var i = 0; i < ids.length; i += chunkSize) {
-      chunks.push(ids.slice(i, i + chunkSize));
+    try {
+      var cached = JSON.parse(
+        localStorage.getItem("hm_ratings_cache_v2") || "{}"
+      );
+      if (cached && cached.data && cached.at && Date.now() - Number(cached.at) < 86400000) {
+        ratingMap = cached.data;
+      }
+    } catch (e) {}
+    var seenIds = {};
+    var missingIds = [];
+    for (var ii = 0; ii < ids.length; ii++) {
+      if (seenIds[ids[ii]]) continue;
+      seenIds[ids[ii]] = 1;
+      var known = ratingMap[ids[ii]];
+      if (!known || (!known.total && !known.checked)) {
+        missingIds.push(ids[ii]);
+      }
     }
-    async function fetchRatingsFor(chunk) {
-      var res;
+    if (missingIds.length) {
+      var chunkSize = 100;
+      var chunks = [];
+      for (var i = 0; i < missingIds.length; i += chunkSize) {
+        chunks.push(missingIds.slice(i, i + chunkSize));
+      }
+      async function fetchRatingsFor(chunk) {
+        var res;
+        try {
+          res = await client.rpc("get_ratings_summary", { product_ids: chunk });
+          if (res.error) throw res.error;
+        } catch (e) {
+          res = await client.from("ratings").select("item_id,rating").in("item_id", chunk);
+        }
+        return res;
+      }
+      var results = await Promise.all(chunks.map(fetchRatingsFor));
+      for (var ri = 0; ri < results.length; ri++) {
+        var result = results[ri];
+        if (!result || result.error) {
+          console.warn("ratings fetch error", result && result.error);
+          continue;
+        }
+        if (Array.isArray(result.data)) {
+          result.data.forEach(function (row) {
+            var itemId = String(row.item_id || "");
+            if (!itemId) return;
+            var entry = ratingMap[itemId] || (ratingMap[itemId] = { sum: 0, total: 0 });
+            if (row.total !== undefined) {
+              var total = Math.round(Number(row.total)) || 0;
+              if (total <= 0) {
+                entry.checked = true;
+                return;
+              }
+              entry.total = total;
+              entry.sum = (Math.round(Number(row.star1)) || 0) * 1 +
+                (Math.round(Number(row.star2)) || 0) * 2 +
+                (Math.round(Number(row.star3)) || 0) * 3 +
+                (Math.round(Number(row.star4)) || 0) * 4 +
+                (Math.round(Number(row.star5)) || 0) * 5;
+              return;
+            }
+            var v = Number(row.rating) || 0;
+            if (v <= 0) {
+              entry.checked = true;
+              return;
+            }
+            entry.sum += v;
+            entry.total++;
+          });
+        }
+      }
       try {
-        res = await client.rpc("get_ratings_summary", { product_ids: chunk });
-        if (res.error) throw res.error;
-      } catch (e) {
-        res = await client.from("ratings").select("item_id,rating").in("item_id", chunk);
-      }
-      return res;
-    }
-    var results = await Promise.all(chunks.map(fetchRatingsFor));
-    for (var ri = 0; ri < results.length; ri++) {
-      var result = results[ri];
-      if (!result || result.error) {
-        console.warn("ratings fetch error", result && result.error);
-        continue;
-      }
-      if (Array.isArray(result.data)) {
-        result.data.forEach(function (row) {
-          var itemId = String(row.item_id || "");
-          if (!itemId) return;
-          if (row.total !== undefined) {
-            var total = Math.round(Number(row.total)) || 0;
-            if (total <= 0) return;
-            if (!ratingMap[itemId]) ratingMap[itemId] = { sum: 0, total: 0 };
-            ratingMap[itemId].total = total;
-            ratingMap[itemId].sum = (Math.round(Number(row.star1)) || 0) * 1 +
-              (Math.round(Number(row.star2)) || 0) * 2 +
-              (Math.round(Number(row.star3)) || 0) * 3 +
-              (Math.round(Number(row.star4)) || 0) * 4 +
-              (Math.round(Number(row.star5)) || 0) * 5;
-            return;
-          }
-          var v = Number(row.rating) || 0;
-          if (!itemId || v <= 0) return;
-          if (!ratingMap[itemId]) ratingMap[itemId] = { sum: 0, total: 0 };
-          ratingMap[itemId].sum += v;
-          ratingMap[itemId].total++;
+        var prev = {};
+        try {
+          var stale = JSON.parse(localStorage.getItem("hm_ratings_cache_v2") || "{}");
+          if (stale && stale.data) prev = stale.data;
+        } catch (e2) {}
+        var merged = {};
+        Object.keys(ratingMap).forEach(function (k) { merged[k] = ratingMap[k]; });
+        Object.keys(prev).forEach(function (k) {
+          if (!merged[k]) merged[k] = prev[k];
         });
-      }
+        localStorage.setItem(
+          "hm_ratings_cache_v2",
+          JSON.stringify({ at: Date.now(), data: merged })
+        );
+      } catch (e2) {}
     }
     return products.map(function (product) {
       var itemId = String(product?.id || "");
@@ -499,14 +540,12 @@ function escapeHtml(value) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#39;");
 }
-function getImage(product) {
+function getImage(product, width) {
   var candidates = window.BudaStore?.getProductImages
     ? window.BudaStore.getProductImages(product)
     : [product?.image || "assets/images/unnamed.png"];
   var primary = candidates[0] || "assets/images/unnamed.png";
-  return window.BudaStore?.getImagePath
-    ? window.BudaStore.getImagePath(primary)
-    : primary;
+  return getImagePathRaw(primary, width || 400);
 }
 function getImagePathRaw(path, width) {
   if (!path) return path;
@@ -1088,32 +1127,19 @@ function buildProductCard(product) {
         window.BudaStore.DEFAULT_PRODUCT_IMAGE || "assets/images/unnamed.png",
       )
     : "../assets/images/unnamed.png";
-  var imgs = "",
-    dots = "",
+  // Single, compressed image per card. Rendering every gallery photo made
+  // each section fetch several full-size originals at once — that stalls the
+  // page. The first image is resized to a small width via the /api/img CDN.
+  var imgs =
+    '<img class="noon-gallery-img active" src="' +
+    (images[0] ? getImagePathRaw(images[0], 400) : fb) +
+    '" alt="' +
+    escapeHtml(product.name || "منتج") +
+    '" loading="lazy" decoding="async" onerror="this.onerror=null;this.src=\'' +
+    fb +
+    "'\" />";
+  var dots = "",
     counter = "";
-  for (var gi = 0; gi < images.length; gi++) {
-    var imgLoad = ' loading="lazy" decoding="async"';
-    imgs +=
-      '<img class="noon-gallery-img' +
-      (gi === 0 ? " active" : "") +
-      '" src="' +
-      images[gi] +
-      '" alt="' +
-      escapeHtml(product.name || "منتج") +
-      '"' + imgLoad + ' onerror="this.onerror=null;this.src=\'' +
-      fb +
-      "'\" />";
-    if (images.length > 1)
-      dots +=
-        "<span" +
-        (gi === 0 ? ' class="active"' : "") +
-        ' data-index="' +
-        gi +
-        '"></span>';
-  }
-  if (images.length > 1) {
-    counter = '<span class="noon-img-counter"><span class="noon-img-current">1</span>/<span class="noon-img-total">' + images.length + '</span></span>';
-  }
   var sellerName = product.seller || product.brand || "";
   var instMonths = Math.min(24, Math.max(3, Number(product.installment_months) || 3));
   var isOfficial = product.official_store || product.is_official || false;
@@ -1144,13 +1170,7 @@ function buildProductCard(product) {
     (dots ? '<span class="noon-img-dots">' + dots + "</span>" : "") +
     (counter) +
     "</button>" +
-    (images.length > 1
-      ? '<button class="noon-gallery-arrow noon-gallery-arrow-prev" data-gallery-prev="' +
-        id +
-        '" aria-label="السابق"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg></button><button class="noon-gallery-arrow noon-gallery-arrow-next" data-gallery-next="' +
-        id +
-        '" aria-label="التالي"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></button>'
-      : "") +
+    "" +
     '<button class="noon-add-square" data-add-to-cart="' +
     id +
     '" aria-label="إضافة إلى السلة">+</button>' +
@@ -1558,10 +1578,11 @@ HM.enableCarouselDrag = function (container) {
   });
 };
 
-// Render a product carousel section
+// Render a product carousel section — capped at 10 products per section so
+// the home page stays light (each card now shows a single image too).
 HM.renderProductCarousel = function (section, products) {
   if (!window.BudaStore || !HM.contentEl) return null;
-  var list = normalizeProducts(products || []);
+  var list = normalizeProducts(products || []).slice(0, 10);
   var id = section.id || "hm-section-" + Math.random().toString(36).slice(2);
   var html =
     '<section class="hm-section hm-fade" id="sec-' +
@@ -1965,7 +1986,7 @@ HM.renderOffers = function (section) {
 
 HM.renderForYou = function (section) {
   var products = HM.allProducts;
-  var picks = pickRandomProducts(products, 8, []);
+  var picks = pickRandomProducts(products, 10, []);
   return HM.renderProductCarousel(section, picks);
 };
 
@@ -2062,7 +2083,7 @@ function initSheinCarousel(sectionEl, gridSel, wrapSel) {
 /** SHEIN Trend — Bold gradient header, large product cards with trend badge */
 HM.renderSheinTrend = function (section) {
   if (!HM.allProducts.length) return null;
-  var pool = shuffleProducts([].concat(HM.allProducts)).slice(0, 12);
+  var pool = shuffleProducts([].concat(HM.allProducts)).slice(0, 10);
   var palettes = [
     ["#ff6b9d", "#c44dff"],
     ["#00d2ff", "#3a7bd5"],
@@ -2165,11 +2186,11 @@ HM.renderSheinTrend = function (section) {
 
 HM.renderSheinStyle = function (section) {
   if (!HM.allProducts.length) return null;
-  var pool = shuffleProducts([].concat(HM.allProducts)).slice(0, 8);
+  var pool = shuffleProducts([].concat(HM.allProducts)).slice(0, 10);
   var hero = pool[0];
-  var rest = pool.slice(1, 8);
+  var rest = pool.slice(1, 10);
   if (!hero) return null;
-  var heroImg = getImage(hero);
+  var heroImg = getImage(hero, 900);
   var rp = resolvePrice(hero);
   var palettes = [
     ["#2d1b69", "#11998e"],
@@ -2267,9 +2288,9 @@ HM.renderSheinDeal = function (section) {
   pool.sort(function (a, b) {
     return resolvePrice(b).discountPercent - resolvePrice(a).discountPercent;
   });
-  var picks = pool.slice(0, 9);
+  var picks = pool.slice(0, 10);
   var hero = picks[0];
-  var rest = picks.slice(1, 9);
+  var rest = picks.slice(1, 10);
   if (!hero) return null;
   var heroImg = getImage(hero);
   var rp = resolvePrice(hero);
@@ -2358,7 +2379,7 @@ HM.renderSheinNew = function (section) {
       ) || 0
     );
   });
-  var picks = pool.slice(0, 12);
+  var picks = pool.slice(0, 10);
   var palettes = [
     ["#ff6b9d", "#c44dff"],
     ["#00d2ff", "#3a7bd5"],
@@ -3023,7 +3044,7 @@ async function renderSupabaseSections() {
         else if (rules.sort_by === "rating") products.sort(function(a,b) { return (b.rating || 0) - (a.rating || 0); });
         else if (rules.sort_by === "price") products.sort(function(a,b) { return (a.price || 0) - (b.price || 0); });
         else products.sort(function() { return 0.5 - Math.random(); });
-        products = products.slice(0, sec.display_count || 12);
+        products = products.slice(0, Math.min(Number(sec.display_count) || 12, 10));
       }
       if (!products.length) continue;
       var sectionConfig = {
@@ -3223,186 +3244,272 @@ HM.renderSection = function (section) {
   return _origRenderSection(section);
 };
 
-// ========== DYNAMIC CONFIG FROM SUPABASE ==========
+// ========== DYNAMIC CONFIG (cached → edge API → Supabase) ==========
+// The home config (hero, banners, sections) is the top LCP bottleneck, so it
+// resolves from three tiers — returning visitors paint instantly with zero
+// network, and even first visitors skip Supabase's per-query latency:
+//   1. local cache (10 min)            — instant, no network
+//   2. /api/home-config (CDN-cached)   — one fast edge request
+//   3. direct parallel Supabase reads  — fallback (local dev / API outage)
+
+var HM_CONFIG_CACHE_KEY = "hm_config_cache_v1";
+var HM_CONFIG_CACHE_TTL_MS = 10 * 60 * 1000;
+
+function _hmCurrentDevice() { return window.innerWidth >= 1024 ? 'desktop' : 'mobile'; }
+function _hmPickDeviceRows(rows, device) {
+  if (!rows || !rows.length) return rows;
+  var exact = rows.filter(function (r) { return r.device === device; });
+  if (exact.length) return exact;
+  var fallback = rows.filter(function (r) { return !r.device || r.device === 'mobile'; });
+  return fallback.length ? fallback : rows;
+}
+
+function hmReadConfigCache() {
+  try {
+    var raw = localStorage.getItem(HM_CONFIG_CACHE_KEY);
+    if (!raw) return null;
+    var parsed = JSON.parse(raw);
+    if (!parsed || !parsed.data || Number(parsed.at) + HM_CONFIG_CACHE_TTL_MS < Date.now()) return null;
+    return parsed.data;
+  } catch (_e) { return null; }
+}
+
+function hmWriteConfigCache(data) {
+  try {
+    localStorage.setItem(HM_CONFIG_CACHE_KEY, JSON.stringify({ at: Date.now(), data: data }));
+  } catch (_e) {}
+}
+
+// Maps a raw config payload (rows produced by /api/home-config or by the
+// direct Supabase reads below) into HOME_CONFIG. Device-filtering runs here
+// so both transport tiers share exactly the same mapping.
+function hmApplyDynamicData(data) {
+  if (!data) return;
+  var device = _hmCurrentDevice();
+
+  if (Array.isArray(data.hero) && data.hero.length) {
+    var heroRows = _hmPickDeviceRows(data.hero, device);
+    if (heroRows.length) {
+      HOME_CONFIG.heroSlides = heroRows.map(function (s) {
+        return { img: s.image_url, link: s.link_url && s.link_url !== '#' ? s.link_url : undefined };
+      });
+    }
+  }
+
+  if (Array.isArray(data.categories) && data.categories.length) {
+    HOME_CONFIG.categories = data.categories.map(function (c) {
+      return { name: c.name, img: c.image_url, link: c.link_url };
+    });
+  }
+
+  // Banner top — replace the first banner entry with dynamic data
+  if (Array.isArray(data.banners) && data.banners.length) {
+    var bannerRows = _hmPickDeviceRows(data.banners, device);
+    if (bannerRows.length) {
+      var b = bannerRows[0];
+      if (b.type === 'image_banner' && b.image_url) {
+        HOME_CONFIG.banners[0] = {
+          url: b.image_url,
+          link: b.link_url || '#',
+          size: 'wide',
+          _dynamic: { type: 'image_banner', bg: 'transparent', border: 'none', padding: '0' }
+        };
+      } else {
+        HOME_CONFIG.banners[0] = {
+          url: '',
+          link: b.link_url || '#',
+          size: 'wide',
+          _dynamic: {
+            type: 'icon_banner',
+            icon: b.icon || 'local_shipping',
+            heading: b.heading || '',
+            subtext: b.subtext || '',
+            bg: b.background_color || '#f8f4ff',
+            border: b.border_color || '#f3e8ff',
+            textColor: b.text_color || '#1a2530',
+            accentColor: b.accent_color || '#7c3aed'
+          }
+        };
+      }
+    }
+  }
+
+  if (data.megaConfig && typeof data.megaConfig === 'object') HOME_CONFIG._megaConfig = data.megaConfig;
+  if (Array.isArray(data.megaCol1)) HOME_CONFIG._megaCol1Ids = data.megaCol1;
+  if (Array.isArray(data.megaCol2)) HOME_CONFIG._megaCol2Ids = data.megaCol2;
+  if (Array.isArray(data.megaBanners) && data.megaBanners.length) HOME_CONFIG._megaBanners = data.megaBanners;
+
+  if (Array.isArray(data.smartCategories) && data.smartCategories.length) {
+    HOME_CONFIG._smartCategories = data.smartCategories.map(function (c) {
+      var gf = /^#[0-9a-fA-F]{6}$/.test(String(c.gradient_from || '')) ? c.gradient_from : '#1e2a3a';
+      var gt = /^#[0-9a-fA-F]{6}$/.test(String(c.gradient_to || '')) ? c.gradient_to : '#33404f';
+      return {
+        title: c.title,
+        subtitle: c.subtitle || '',
+        image_url: c.image_url,
+        link_url: c.link_url || '#',
+        gradient_from: gf,
+        gradient_to: gt,
+      };
+    });
+  }
+
+  if (Array.isArray(data.adBanners) && data.adBanners.length) {
+    HOME_CONFIG._adBanners = _hmPickDeviceRows(data.adBanners, device);
+  }
+}
+
+async function hmFetchConfigViaApi(country) {
+  try {
+    var host = String(location.hostname || "");
+    if (location.protocol === "file:" || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(host)) return null;
+    var url = "/api/home-config?country=" + encodeURIComponent(country || "EG");
+    var resp = await fetch(url, { headers: { Accept: "application/json" } });
+    if (!resp.ok) return null;
+    var data = await resp.json();
+    var hasData = data && (Array.isArray(data.hero) || Array.isArray(data.banners));
+    return hasData ? data : null;
+  } catch (_e) { return null; }
+}
+
 HM.loadDynamicConfig = async function () {
   try {
-    if (typeof getSupabaseClient !== 'function') return;
-    var client = getSupabaseClient();
-    if (!client) return;
     var country = localStorage.getItem('userCountry') || 'EG';
 
-    // Get section IDs for this country (fall back to EG when the stored country has no page config)
-    var pageSecReq = await client.from('home_page_sections').select('id,section_type').eq('country', country).eq('is_active', true);
-    var pageSections = pageSecReq.data;
-    if (!pageSecReq.error && (!pageSections || !pageSections.length)) {
-      var psFb = await client.from('home_page_sections').select('id,section_type').eq('country', 'EG').eq('is_active', true);
-      if (psFb.data && psFb.data.length) pageSections = psFb.data;
-    }
-    if (!pageSections || !pageSections.length) return;
+    // Tier 1 — instant local cache, no network at all
+    var cached = hmReadConfigCache();
+    if (cached) { hmApplyDynamicData(cached); return; }
 
-    var sectionMap = {};
-    pageSections.forEach(function (s) { sectionMap[s.section_type] = s.id; });
-
-    // Device-aware image selection: desktop rows are used on wide screens,
-    // otherwise the mobile rows (fallback keeps old data working).
-    function _currentDevice() { return window.innerWidth >= 1024 ? 'desktop' : 'mobile'; }
-    function _pickDeviceRows(rows, device) {
-      if (!rows || !rows.length) return rows;
-      var exact = rows.filter(function (r) { return r.device === device; });
-      if (exact.length) return exact;
-      var fallback = rows.filter(function (r) { return !r.device || r.device === 'mobile'; });
-      return fallback.length ? fallback : rows;
+    // Tier 2 — single CDN-cached edge request
+    var viaApi = await hmFetchConfigViaApi(country);
+    if (viaApi) {
+      hmApplyDynamicData(viaApi);
+      hmWriteConfigCache(viaApi);
+      return;
     }
 
-    // Fire all section queries in parallel — they only depend on the section
-    // ids above, never on each other's rows. The slowest one (typically the
-    // hero slides) now caps the total time instead of stacking sequentially.
-    var configQueries = [];
-
-    // 1. Hero slides
-    if (sectionMap.hero) {
-      configQueries.push((async function () {
-        var { data: heroSlides } = await client.from('home_hero_slides').select('*').eq('section_id', sectionMap.hero).order('sort_order');
-        var devSlides = _pickDeviceRows(heroSlides, _currentDevice());
-        if (devSlides && devSlides.length) {
-          HOME_CONFIG.heroSlides = devSlides.map(function (s) {
-            return { img: s.image_url, link: s.link_url && s.link_url !== '#' ? s.link_url : undefined };
-          });
-        }
-      })());
-    }
-
-    // 2. Categories
-    if (sectionMap.categories) {
-      configQueries.push((async function () {
-        var { data: cats } = await client.from('home_categories').select('*').eq('section_id', sectionMap.categories).order('sort_order');
-        if (cats && cats.length) {
-          HOME_CONFIG.categories = cats.map(function (c) {
-            return { name: c.name, img: c.image_url, link: c.link_url };
-          });
-        }
-      })());
-    }
-
-    // 3. Banner top — replace the first banner entry with dynamic data
-    if (sectionMap.banner_top) {
-      configQueries.push((async function () {
-        var { data: banners } = await client.from('home_banners').select('*').eq('section_id', sectionMap.banner_top).order('sort_order');
-        var devBanners = _pickDeviceRows(banners, _currentDevice());
-        if (devBanners && devBanners.length) {
-          var b = devBanners[0];
-          if (b.type === 'image_banner' && b.image_url) {
-            HOME_CONFIG.banners[0] = {
-              url: b.image_url,
-              link: b.link_url || '#',
-              size: 'wide',
-              _dynamic: { type: 'image_banner', bg: 'transparent', border: 'none', padding: '0' }
-            };
-          } else {
-            HOME_CONFIG.banners[0] = {
-              url: '',
-              link: b.link_url || '#',
-              size: 'wide',
-              _dynamic: {
-                type: 'icon_banner',
-                icon: b.icon || 'local_shipping',
-                heading: b.heading || '',
-                subtext: b.subtext || '',
-                bg: b.background_color || '#f8f4ff',
-                border: b.border_color || '#f3e8ff',
-                textColor: b.text_color || '#1a2530',
-                accentColor: b.accent_color || '#7c3aed'
-              }
-            };
-          }
-        }
-      })());
-    }
-
-    // 4. Mega offers — config, then both columns, then banners (internal order kept)
-    if (sectionMap.mega_offers) {
-      configQueries.push((async function () {
-        HOME_CONFIG._megaConfig = {};
-        try {
-          var { data: megaCfg } = await client.from('home_section_config').select('config_key,config_value').eq('section_id', sectionMap.mega_offers);
-          if (megaCfg) megaCfg.forEach(function (c) { HOME_CONFIG._megaConfig[c.config_key] = c.config_value; });
-        } catch(e) { /* table not ready yet */ }
-
-        async function _fetchMegaCol(sid, col) {
-          var q = client.from('home_mega_products').select('product_id').eq('section_id', sid).order('sort_order');
-          if (window.__hasMegaCol !== false) {
-            q = q.eq('col', col);
-          }
-          try {
-            var { data } = await q;
-            return data ? data.map(function(p) { return p.product_id; }) : [];
-          } catch(e) {
-            if (window.__hasMegaCol === undefined) { window.__hasMegaCol = false; }
-            return [];
-          }
-        }
-        HOME_CONFIG._megaCol1Ids = await _fetchMegaCol(sectionMap.mega_offers, 1);
-        HOME_CONFIG._megaCol2Ids = await _fetchMegaCol(sectionMap.mega_offers, 2);
-
-        var { data: megaBanners } = await client.from('home_mega_banners').select('*').eq('section_id', sectionMap.mega_offers).order('sort_order');
-        if (megaBanners && megaBanners.length) {
-          HOME_CONFIG._megaBanners = megaBanners;
-        }
-      })());
-    }
-
-    // 5. Smart Category Showcase — runs independently so a failing step
-    //    above never leaves the section empty (renderer shows default cards)
-    configQueries.push((async function () {
-      try {
-        var smartCc = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || localStorage.getItem('userCountry') || 'EG';
-        var smartRows = null;
-        var scReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', smartCc).order('sort_order');
-        if (!scReq.error && scReq.data && scReq.data.length) smartRows = scReq.data;
-        if (!smartRows) {
-          var scFbReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', 'EG').order('sort_order');
-          if (!scFbReq.error && scFbReq.data && scFbReq.data.length) smartRows = scFbReq.data;
-        }
-        if (smartRows && smartRows.length) {
-          var smartCats = smartRows;
-          HOME_CONFIG._smartCategories = smartCats.map(function(c) {
-            var gf = /^#[0-9a-fA-F]{6}$/.test(String(c.gradient_from || '')) ? c.gradient_from : '#1e2a3a';
-            var gt = /^#[0-9a-fA-F]{6}$/.test(String(c.gradient_to || '')) ? c.gradient_to : '#33404f';
-            return {
-              title: c.title,
-              subtitle: c.subtitle || '',
-              image_url: c.image_url,
-              link_url: c.link_url || '#',
-              gradient_from: gf,
-              gradient_to: gt,
-            };
-          });
-        }
-      } catch (e) {
-        console.warn('[HM] Failed to load smart categories:', e);
-      }
-    })());
-
-    // 6. Ad banners
-    if (sectionMap && sectionMap.ad_banners) {
-      configQueries.push((async function () {
-        try {
-          var { data: adBanners } = await client.from('home_ad_banners').select('*').eq('section_id', sectionMap.ad_banners).eq('is_active', true).order('sort_order');
-          var devAdBanners = _pickDeviceRows(adBanners, _currentDevice());
-          if (devAdBanners && devAdBanners.length) {
-            HOME_CONFIG._adBanners = devAdBanners;
-          }
-        } catch (e) {
-          console.warn('[HM] Failed to load ad banners:', e);
-        }
-      })());
-    }
-
-    await Promise.all(configQueries);
+    // Tier 3 — direct parallel Supabase reads (local dev / API outage)
+    var raw = await hmLoadConfigFromSupabase(country);
+    if (!raw) return;
+    hmApplyDynamicData(raw);
+    hmWriteConfigCache(raw);
   } catch (e) {
     console.warn('[HM] Failed to load dynamic config:', e);
   }
 };
+
+async function hmLoadConfigFromSupabase(country) {
+  if (typeof getSupabaseClient !== 'function') return null;
+  var client = getSupabaseClient();
+  if (!client) return null;
+
+  // Get section IDs for this country (fall back to EG when the stored country has no page config)
+  var pageSecReq = await client.from('home_page_sections').select('id,section_type').eq('country', country).eq('is_active', true);
+  var pageSections = pageSecReq.data;
+  if (!pageSecReq.error && (!pageSections || !pageSections.length)) {
+    var psFb = await client.from('home_page_sections').select('id,section_type').eq('country', 'EG').eq('is_active', true);
+    if (psFb.data && psFb.data.length) pageSections = psFb.data;
+  }
+  if (!pageSections || !pageSections.length) return null;
+
+  var sectionMap = {};
+  pageSections.forEach(function (s) { sectionMap[s.section_type] = s.id; });
+
+  var raw = {};
+
+  // Fire all section queries in parallel — they only depend on the section
+  // ids above, never on each other's rows. The slowest one (typically the
+  // hero slides) now caps the total time instead of stacking sequentially.
+  var configQueries = [];
+
+  // 1. Hero slides (raw rows kept; device filtering happens in hmApplyDynamicData)
+  if (sectionMap.hero) {
+    configQueries.push((async function () {
+      var { data: heroSlides } = await client.from('home_hero_slides').select('*').eq('section_id', sectionMap.hero).order('sort_order');
+      if (heroSlides && heroSlides.length) raw.hero = heroSlides;
+    })());
+  }
+
+  // 2. Categories
+  if (sectionMap.categories) {
+    configQueries.push((async function () {
+      var { data: cats } = await client.from('home_categories').select('*').eq('section_id', sectionMap.categories).order('sort_order');
+      if (cats && cats.length) raw.categories = cats;
+    })());
+  }
+
+  // 3. Banner top
+  if (sectionMap.banner_top) {
+    configQueries.push((async function () {
+      var { data: banners } = await client.from('home_banners').select('*').eq('section_id', sectionMap.banner_top).order('sort_order');
+      if (banners && banners.length) raw.banners = banners;
+    })());
+  }
+
+  // 4. Mega offers — config, then both columns, then banners (internal order kept)
+  if (sectionMap.mega_offers) {
+    configQueries.push((async function () {
+      var megaConfig = {};
+      try {
+        var { data: megaCfg } = await client.from('home_section_config').select('config_key,config_value').eq('section_id', sectionMap.mega_offers);
+        if (megaCfg) megaCfg.forEach(function (c) { megaConfig[c.config_key] = c.config_value; });
+      } catch(e) { /* table not ready yet */ }
+      if (Object.keys(megaConfig).length) raw.megaConfig = megaConfig;
+
+      async function _fetchMegaCol(sid, col) {
+        var q = client.from('home_mega_products').select('product_id').eq('section_id', sid).order('sort_order');
+        if (window.__hasMegaCol !== false) {
+          q = q.eq('col', col);
+        }
+        try {
+          var { data } = await q;
+          return data ? data.map(function(p) { return p.product_id; }) : [];
+        } catch(e) {
+          if (window.__hasMegaCol === undefined) { window.__hasMegaCol = false; }
+          return [];
+        }
+      }
+      raw.megaCol1 = await _fetchMegaCol(sectionMap.mega_offers, 1);
+      raw.megaCol2 = await _fetchMegaCol(sectionMap.mega_offers, 2);
+
+      var { data: megaBanners } = await client.from('home_mega_banners').select('*').eq('section_id', sectionMap.mega_offers).order('sort_order');
+      if (megaBanners && megaBanners.length) raw.megaBanners = megaBanners;
+    })());
+  }
+
+  // 5. Smart Category Showcase — runs independently so a failing step
+  //    above never leaves the section empty (renderer shows default cards)
+  configQueries.push((async function () {
+    try {
+      var smartCc = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || country || 'EG';
+      var smartRows = null;
+      var scReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', smartCc).order('sort_order');
+      if (!scReq.error && scReq.data && scReq.data.length) smartRows = scReq.data;
+      if (!smartRows) {
+        var scFbReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', 'EG').order('sort_order');
+        if (!scFbReq.error && scFbReq.data && scFbReq.data.length) smartRows = scFbReq.data;
+      }
+      if (smartRows && smartRows.length) raw.smartCategories = smartRows;
+    } catch (e) {
+      console.warn('[HM] Failed to load smart categories:', e);
+    }
+  })());
+
+  // 6. Ad banners
+  if (sectionMap && sectionMap.ad_banners) {
+    configQueries.push((async function () {
+      try {
+        var { data: adBanners } = await client.from('home_ad_banners').select('*').eq('section_id', sectionMap.ad_banners).eq('is_active', true).order('sort_order');
+        if (adBanners && adBanners.length) raw.adBanners = adBanners;
+      } catch (e) {
+        console.warn('[HM] Failed to load ad banners:', e);
+      }
+    })());
+  }
+
+  await Promise.all(configQueries);
+  return raw;
+}
 
 // ========== COUNTRY GATE (mandatory country selection before browsing) ==========
 function initCountryGate() {

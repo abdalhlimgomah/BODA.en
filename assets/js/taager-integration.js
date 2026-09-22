@@ -8,6 +8,8 @@
   ];
 
   var COUNTRY_STORAGE_KEY = "boda_selected_country";
+  var LEGACY_COUNTRY_STORAGE_KEY = "userCountry";
+  var DEFAULT_COUNTRY = { code: "EG", name: "مصر", flag: "🇪🇬", slug: "egypt" };
   var CACHE_KEY = "boda_taager_products_cache_v2";
   var CACHE_TTL_MS = 10 * 60 * 1000;
   var AUTH_FAILURE_BACKOFF_MS = 2 * 60 * 1000;
@@ -240,22 +242,55 @@
     idbSet(cacheKey, { timestamp: Date.now(), products: products }).catch(function () {});
   }
 
+  function findCountryByCode(code) {
+    if (!code) return null;
+    code = String(code).toUpperCase();
+    for (var i = 0; i < TAAGER_COUNTRIES.length; i++) {
+      if (TAAGER_COUNTRIES[i].code === code) return TAAGER_COUNTRIES[i];
+    }
+    return null;
+  }
+
   function getSelectedCountry() {
     try {
       var raw = localStorage.getItem(COUNTRY_STORAGE_KEY);
       if (raw) {
         var parsed = JSON.parse(raw);
-        if (parsed && parsed.code) return parsed;
+        var canonical = findCountryByCode(parsed && parsed.code);
+        if (canonical) {
+          try { localStorage.setItem(LEGACY_COUNTRY_STORAGE_KEY, canonical.code); } catch (_a) {}
+          return canonical;
+        }
       }
     } catch (_a) {}
-    return null;
+
+    // Legacy mirror key (userCountry) — restore it as the canonical selection.
+    try {
+      var legacy = findCountryByCode(localStorage.getItem(LEGACY_COUNTRY_STORAGE_KEY));
+      if (legacy) {
+        localStorage.setItem(COUNTRY_STORAGE_KEY, JSON.stringify(legacy));
+        localStorage.setItem(LEGACY_COUNTRY_STORAGE_KEY, legacy.code);
+        return legacy;
+      }
+    } catch (_a) {}
+
+    // Country must never be undefined — fall back to Egypt (the base country)
+    // and persist it so every consumer sees Egypt until the user changes it.
+    try {
+      localStorage.setItem(COUNTRY_STORAGE_KEY, JSON.stringify(DEFAULT_COUNTRY));
+      localStorage.setItem(LEGACY_COUNTRY_STORAGE_KEY, DEFAULT_COUNTRY.code);
+    } catch (_a) {}
+    return DEFAULT_COUNTRY;
   }
 
   function setSelectedCountry(country) {
+    var valid = findCountryByCode(country && country.code);
+    if (!valid) valid = DEFAULT_COUNTRY;
     try {
-      localStorage.setItem(COUNTRY_STORAGE_KEY, JSON.stringify(country));
+      localStorage.setItem(COUNTRY_STORAGE_KEY, JSON.stringify(valid));
+      localStorage.setItem(LEGACY_COUNTRY_STORAGE_KEY, valid.code);
       document.dispatchEvent(
-        new CustomEvent("boda:country-changed", { detail: country })
+        new CustomEvent("boda:country-changed", { detail: valid })
       );
     } catch (_a) {}
   }
@@ -612,9 +647,32 @@
     if (!client || typeof client.from !== "function") return products;
     var need = products.filter(function (p) { return !p || !(Number(p.reviewCount) > 0); });
     if (!need.length) return products;
+    var sumMap = {};
+    var cache = {};
+    try {
+      var stored = JSON.parse(localStorage.getItem("boda_ratings_cache") || "{}");
+      if (stored && stored.data && stored.at && Date.now() - Number(stored.at) < 86400000) {
+        cache = stored.data;
+      }
+      need.forEach(function (p) {
+        var id = String(p.id || "").trim();
+        var r = id && cache[id];
+        if (!r) return;
+        if (r.total > 0) {
+          p.rating = Number((r.sum / r.total).toFixed(1));
+          p.reviewCount = r.total;
+          p.ratingSource = "ratings";
+          p.rating_source = "ratings";
+        }
+      });
+      need = need.filter(function (p) {
+        var id = String(p.id || "").trim();
+        var r = id && cache[id];
+        return !r || (!r.total && !r.checked);
+      });
+    } catch (e) {}
     var ids = need.map(function (p) { return String(p.id || "").trim(); }).filter(Boolean);
     if (!ids.length) return products;
-    var sumMap = {};
     try {
       var chunks = [];
       for (var i = 0; i < ids.length; i += 100) chunks.push(ids.slice(i, i + 100));
@@ -627,13 +685,18 @@
         arr.forEach(function (row) {
           var id = String(row.item_id || "");
           var total = Math.round(Number(row.total)) || 0;
-          if (!id || total <= 0) return;
+          if (!id) return;
+          if (total <= 0) {
+            if (cache) cache[id] = { sum: 0, total: 0, checked: true };
+            return;
+          }
           var sum = (Math.round(Number(row.star1)) || 0) * 1
             + (Math.round(Number(row.star2)) || 0) * 2
             + (Math.round(Number(row.star3)) || 0) * 3
             + (Math.round(Number(row.star4)) || 0) * 4
             + (Math.round(Number(row.star5)) || 0) * 5;
           sumMap[id] = { sum: sum, total: total };
+          if (cache) cache[id] = { sum: sum, total: total };
         });
       });
     } catch (e) {
@@ -650,6 +713,9 @@
         p.rating_source = "ratings";
       }
     });
+    try {
+      localStorage.setItem("boda_ratings_cache", JSON.stringify({ at: Date.now(), data: cache }));
+    } catch (e2) {}
     return products;
   }
 

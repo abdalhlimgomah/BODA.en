@@ -276,7 +276,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   function updateSelectedCountryDisplay() {
     if (!selectedCountryName || !window.TaagerIntegration) return;
     var selected = window.TaagerIntegration.getSelectedCountry();
-    selectedCountryName.textContent = selected ? selected.name : "اختر دولة";
+    selectedCountryName.textContent = (selected && selected.name) ? selected.name : "مصر";
   }
 
   updateSelectedCountryDisplay();

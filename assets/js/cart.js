@@ -1038,53 +1038,94 @@ async function annotateSuggestionProductsWithSupabaseRatings(products, client) {
   if (!ids.length) return products;
 
   try {
-    const ratingMap = {};
-    const chunkSize = 100;
-    const chunks = [];
-
-    for (let i = 0; i < ids.length; i += chunkSize) {
-      chunks.push(ids.slice(i, i + chunkSize));
+    let ratingMap = {};
+    try {
+      const cached = JSON.parse(localStorage.getItem("boda_ratings_cache") || "{}");
+      if (cached && cached.data && cached.at && Date.now() - Number(cached.at) < 86400000) {
+        ratingMap = cached.data;
+      }
+    } catch (e) {}
+    const seenIds = {};
+    const missingIds = [];
+    for (const id of ids) {
+      if (seenIds[id]) continue;
+      seenIds[id] = 1;
+      const known = ratingMap[id];
+      if (!known || (!known.total && !known.checked)) missingIds.push(id);
     }
+    if (missingIds.length) {
+      const chunkSize = 100;
+      const chunks = [];
 
-    const results = await Promise.all(chunks.map(async (chunk) => {
-      let res;
+      for (let i = 0; i < missingIds.length; i += chunkSize) {
+        chunks.push(missingIds.slice(i, i + chunkSize));
+      }
+
+      const results = await Promise.all(chunks.map(async (chunk) => {
+        let res;
+        try {
+          res = await client.rpc("get_ratings_summary", { product_ids: chunk });
+          if (res.error) throw res.error;
+        } catch (e) {
+          res = await client.from("ratings").select("item_id,rating").in("item_id", chunk);
+        }
+        return res;
+      }));
+
+      for (const { data, error } of results) {
+        if (error) {
+          console.warn("supabase suggestion ratings fetch error", error);
+          continue;
+        }
+        if (Array.isArray(data)) {
+          data.forEach((row) => {
+            const itemId = String(row.item_id || "");
+            if (!itemId) return;
+            const entry = ratingMap[itemId] || (ratingMap[itemId] = { sum: 0, total: 0 });
+            if (row.total !== undefined) {
+              const total = Math.round(Number(row.total)) || 0;
+              if (total <= 0) {
+                entry.checked = true;
+                return;
+              }
+              entry.total = total;
+              entry.sum = (Math.round(Number(row.star1)) || 0) * 1
+                + (Math.round(Number(row.star2)) || 0) * 2
+                + (Math.round(Number(row.star3)) || 0) * 3
+                + (Math.round(Number(row.star4)) || 0) * 4
+                + (Math.round(Number(row.star5)) || 0) * 5;
+              return;
+            }
+            const value = Number(row.rating) || 0;
+            if (value <= 0) {
+              entry.checked = true;
+              return;
+            }
+            entry.sum += value;
+            entry.total++;
+          });
+        }
+      }
+
       try {
-        res = await client.rpc("get_ratings_summary", { product_ids: chunk });
-        if (res.error) throw res.error;
-      } catch (e) {
-        res = await client.from("ratings").select("item_id,rating").in("item_id", chunk);
-      }
-      return res;
-    }));
-
-    for (const { data, error } of results) {
-      if (error) {
-        console.warn("supabase suggestion ratings fetch error", error);
-        continue;
-      }
-      if (Array.isArray(data)) {
-        data.forEach((row) => {
-          const itemId = String(row.item_id || "");
-          if (!itemId) return;
-          if (row.total !== undefined) {
-            const total = Math.round(Number(row.total)) || 0;
-            if (total <= 0) return;
-            if (!ratingMap[itemId]) ratingMap[itemId] = { sum: 0, total: 0 };
-            ratingMap[itemId].total = total;
-            ratingMap[itemId].sum = (Math.round(Number(row.star1)) || 0) * 1
-              + (Math.round(Number(row.star2)) || 0) * 2
-              + (Math.round(Number(row.star3)) || 0) * 3
-              + (Math.round(Number(row.star4)) || 0) * 4
-              + (Math.round(Number(row.star5)) || 0) * 5;
-            return;
+        const prev = {};
+        try {
+          const stored = JSON.parse(localStorage.getItem("boda_ratings_cache") || "{}");
+          if (stored && stored.data) {
+            Object.keys(stored.data).forEach((k) => {
+              if (ratingMap[k]) return;
+              prev[k] = stored.data[k];
+            });
           }
-          const value = Number(row.rating) || 0;
-          if (!itemId || value <= 0) return;
-          if (!ratingMap[itemId]) ratingMap[itemId] = { sum: 0, total: 0 };
-          ratingMap[itemId].sum += value;
-          ratingMap[itemId].total++;
-        });
-      }
+        } catch (e2) {}
+        const merged = {};
+        Object.keys(ratingMap).forEach((k) => { merged[k] = ratingMap[k]; });
+        Object.keys(prev).forEach((k) => { if (!merged[k]) merged[k] = prev[k]; });
+        localStorage.setItem(
+          "boda_ratings_cache",
+          JSON.stringify({ at: Date.now(), data: merged })
+        );
+      } catch (e2) {}
     }
 
     return products.map((product) => {

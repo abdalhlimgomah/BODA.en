@@ -53,6 +53,52 @@ function getCheckoutCart() {
   return window.BudaStore.getCart();
 }
 
+const CUSTOMS_FEE = 25;
+
+function getCartItemCompanyKey(item) {
+  if (!item) return "";
+  var sellerId = String(item.seller_id || item.owner_id || item.vendor_id || item.merchant_id || "").trim();
+  if (sellerId) return "id:" + sellerId;
+  var sellerEmail = String(item.seller_email || item.owner_email || item.vendor_email || "").trim().toLowerCase();
+  return sellerEmail ? "email:" + sellerEmail : "internal";
+}
+
+function isCartItemFromTaager(item) {
+  if (!item) return false;
+  var source = String(item.source || "").toLowerCase();
+  var id = String(item.id || item.product_id || "");
+  var sellerId = String(item.seller_id || item.owner_id || item.vendor_id || "").toLowerCase();
+  return (
+    source === "taager" ||
+    id.indexOf("taager_") === 0 ||
+    sellerId === "taager" ||
+    sellerId.indexOf("taager_") === 0
+  );
+}
+
+function getCheckoutMerchantState() {
+  var cart = getCheckoutCart() || [];
+  var companies = {};
+  var hasTaager = false;
+  for (var i = 0; i < cart.length; i++) {
+    if (isCartItemFromTaager(cart[i])) hasTaager = true;
+    var key = getCartItemCompanyKey(cart[i]);
+    if (key) companies[key] = true;
+  }
+  return { hasTaager: hasTaager, companyCount: Object.keys(companies).length };
+}
+
+function getCheckoutCustomsFee() {
+  if (isSaudiArabia()) return 0;
+  return getCheckoutMerchantState().companyCount > 1 ? CUSTOMS_FEE : 0;
+}
+
+function renderCheckoutCustomsNotice() {
+  var container = document.getElementById("ch-mixed-customs-note");
+  if (!container) return;
+  container.style.display = getCheckoutCustomsFee() > 0 ? "flex" : "none";
+}
+
 function getCheckoutItemPrice(item) {
   var price = Number(item.price) || Number(item.currentPrice) || Number(item.finalPrice) || 0;
   if (window.PricingEngine?.tiersLoaded && price > 0) {
@@ -786,6 +832,48 @@ function selectPayment(el) {
   selectedPayment = el.getAttribute("data-payment") || "cod";
 }
 
+function unlockPaymentOption(el) {
+  if (!el) return;
+  el.classList.remove("disabled");
+  el.onclick = function () { selectPayment(el); };
+  var badge = el.querySelector(".ch-payment-badge");
+  if (badge) badge.parentNode.removeChild(badge);
+}
+
+function lockPaymentOption(el) {
+  if (!el) return;
+  el.classList.add("disabled");
+  el.onclick = function () { return false; };
+  var badge = el.querySelector(".ch-payment-badge");
+  var label = el.querySelector(".ch-payment-label");
+  if (!badge && label) {
+    var span = document.createElement("span");
+    span.className = "ch-payment-badge";
+    span.textContent = "قريباً";
+    label.appendChild(span);
+  }
+}
+
+function applyCheckoutPaymentAvailability() {
+  var visaEl = document.getElementById("ch-payment-visa");
+  var walletEl = document.getElementById("ch-payment-wallet");
+  if (isSaudiArabia()) {
+    unlockPaymentOption(visaEl);
+    if (walletEl) walletEl.style.display = "none";
+  } else {
+    if (walletEl) walletEl.style.display = "";
+    var state = getCheckoutMerchantState();
+    if (state.hasTaager) {
+      unlockPaymentOption(visaEl);
+      unlockPaymentOption(walletEl);
+    } else {
+      lockPaymentOption(visaEl);
+      lockPaymentOption(walletEl);
+    }
+  }
+  renderCheckoutCustomsNotice();
+}
+
 function setGovernorate(name) {
   selectedGovernorate = name;
   governorateShippingFee = window.ShippingZones ? window.ShippingZones.getCurrentFee(name) : 0;
@@ -926,6 +1014,8 @@ function renderCheckoutTotals() {
     return null;
   }
 
+  applyCheckoutPaymentAvailability();
+
   const subtotal = cart.reduce(
     (total, item) => total + getCheckoutItemPrice(item) * (Number(item.quantity) || 1),
     0
@@ -933,7 +1023,8 @@ function renderCheckoutTotals() {
   const activeCoupon = getActiveCoupon();
   const couponDiscount = calculateCouponDiscount(subtotal, activeCoupon);
   var shippingCost = getShippingCost();
-  const total = Math.max(subtotal + shippingCost + getCheckoutCodFee() - couponDiscount, 0);
+  const customsFee = getCheckoutCustomsFee();
+  const total = Math.max(subtotal + shippingCost + getCheckoutCodFee() + customsFee - couponDiscount, 0);
 
   const subtotalEl = document.getElementById("ch-subtotal");
   const shippingEl = document.getElementById("ch-shipping");
@@ -942,10 +1033,14 @@ function renderCheckoutTotals() {
   const discountEl = document.getElementById("ch-discount");
   const grandTotalEl = document.getElementById("ch-grand-total");
   const footerTotalEl = document.getElementById("ch-footer-total");
+  const customsLineEl = document.getElementById("ch-customs-line");
+  const customsFeeEl = document.getElementById("ch-customs-fee");
 
   if (subtotalEl) subtotalEl.innerHTML = formatCheckoutMoney(subtotal);
   if (shippingEl) shippingEl.innerHTML = shippingCost > 0 ? formatCheckoutMoney(shippingCost) : "--";
   if (taxEl) taxEl.innerHTML = formatCheckoutMoney(getCheckoutCodFee());
+  if (customsLineEl) customsLineEl.style.display = customsFee > 0 ? "flex" : "none";
+  if (customsFeeEl) customsFeeEl.innerHTML = formatCheckoutMoney(customsFee);
   if (discountRowEl) {
     discountRowEl.classList.toggle("hidden", couponDiscount <= 0);
   }
@@ -962,6 +1057,7 @@ function renderCheckoutTotals() {
     couponCode: activeCoupon?.code || "",
     shipping: shippingCost,
     codFee: getCheckoutCodFee(),
+    customsFee,
   };
 }
 
@@ -1094,7 +1190,7 @@ checkoutNotify("يرجى التحقق من رقم الهاتف أولاً.", "in
 
     var itemCouponDiscount = totals.subtotal > 0 ? Math.round((itemTotal / totals.subtotal) * totals.couponDiscount * 100) / 100 : 0;
     var discountedTotal = Math.max(itemTotal - itemCouponDiscount, 0);
-    var grandTotal = discountedTotal + totals.shipping + getCheckoutCodFee();
+    var grandTotal = discountedTotal + totals.shipping + getCheckoutCodFee() + (totals.customsFee || 0);
 
     var singleOrder = {
       user_name: fields.name,

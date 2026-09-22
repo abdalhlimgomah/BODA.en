@@ -1117,11 +1117,11 @@ function hideBottomNavOnDesktop() {
           ? window.TaagerIntegration.getSelectedCountry()
           : null;
       if (selected) {
-        flagEl.textContent = getCountryFlagEmoji(selected) || selected.code || "🌍";
-        nameEl.textContent = selected.name || selected.code || "الدولة";
+        flagEl.textContent = getCountryFlagEmoji(selected) || selected.code || "🇪🇬";
+        nameEl.textContent = selected.name || selected.code || "مصر";
       } else {
-        flagEl.textContent = "🌍";
-        nameEl.textContent = "الدولة";
+        flagEl.textContent = "🇪🇬";
+        nameEl.textContent = "مصر";
       }
     }
 
@@ -1304,8 +1304,10 @@ function hideBottomNavOnDesktop() {
     var userEmail = (localStorage.getItem("userEmail") || "").trim().toLowerCase();
     if (!isLoggedIn || !userEmail) return;
 
-    // If country already set in localStorage via TaagerIntegration, skip
-    if (window.TaagerIntegration && window.TaagerIntegration.getSelectedCountry()) return;
+    // If country already set in localStorage via TaagerIntegration, skip.
+    // NOTE: getSelectedCountry() now ALWAYS returns a country (Egypt fallback),
+    // so check the raw key here, otherwise a Saudi profile would never be restored.
+    if (localStorage.getItem("boda_selected_country")) return;
 
     // Check if we saved userCountry separately
     var savedCountry = localStorage.getItem("userCountry");
