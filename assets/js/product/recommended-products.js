@@ -64,18 +64,13 @@
     }
     var priceHtml = '<div class="noon-price-line"><p class="noon-price">' + formatMoney(rp.currentPrice) + '</p>' + discountHtml + '</div>';
 
-    // Image gallery
-    var imgs = "", dots = "";
-    for (var gi = 0; gi < images.length; gi++) {
-      imgs += '<img class="noon-gallery-img' + (gi === 0 ? " active" : "") + '" src="' + images[gi] + '" alt="' + escapeHtml(name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'' + fb + '\'" />';
-      if (images.length > 1) dots += '<span' + (gi === 0 ? ' class="active"' : "") + ' data-index="' + gi + '"></span>';
-    }
+    var imgs = '<img class="noon-gallery-img active" src="' + img + '" alt="' + escapeHtml(name) + '" loading="lazy" onerror="this.onerror=null;this.src=\'' + fb + '\'" />';
 
     var html = '<div class="noon-product-card" data-view-product="' + escapeHtml(id) + '">';
     html += '<div class="noon-product-media-wrap">';
     html += '<button class="icon-btn noon-wishlist-btn' + (isWish ? ' is-active' : '') + '" data-wishlist="' + escapeHtml(id) + '" aria-label="\u0625\u0636\u0627\u0641\u0629 \u0625\u0644\u0649 \u0627\u0644\u0645\u0641\u0636\u0644\u0629" aria-pressed="' + (isWish ? 'true' : 'false') + '"><span class="material-icons-outlined" style="font-size:18px;">' + (isWish ? 'favorite' : 'favorite_border') + '</span></button>';
-    html += '<div class="noon-product-media"><div class="buda-pulse-dot" data-pulse-dot="' + id + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div>' + imgs;
-    if (dots) html += '<span class="noon-img-dots">' + dots + '</span>';
+    html += '<div class="noon-product-media">';
+    html += '<div class="buda-pulse-dot" data-pulse-dot="' + id + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div>' + imgs;
     html += '</div>';
     html += '<button class="noon-add-square" data-add-to-cart="' + escapeHtml(id) + '" aria-label="\u0625\u0636\u0627\u0641\u0629 \u0625\u0644\u0649 \u0627\u0644\u0633\u0644\u0629">+</button>';
     var _vc = global.BudaStore && global.BudaStore.countProductVariants ? global.BudaStore.countProductVariants(product) : 0;
@@ -99,7 +94,7 @@
     if (!options.hideTitle) html += '<h2 class="pdp-section-title">' + escapeHtml(label) + '</h2>';
     html += '<div class="pdp-carousel-wrap">';
     html += '<div class="pdp-carousel-track" role="list" aria-label="' + escapeHtml(label) + '">';
-    products.slice(0, 27).forEach(function (p) {
+    products.slice(0, 13).forEach(function (p) {
       if (p) html += buildCard(p);
     });
     html += '</div>';
