@@ -174,9 +174,24 @@
 
 <script>
 (function () {
-  var SUPABASE_URL = "https://msgqzgzoslearaprgiqq.supabase.co";
-  var ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE";
-  var PERIOD = 30000;
+  var BACKENDS = [
+    {
+      name: "primary",
+      url: "https://msgqzgzoslearaprgiqq.supabase.co",
+      key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1zZ3F6Z3pvc2xlYXJhcHJnaXFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzAzMzk3MTIsImV4cCI6MjA4NTkxNTcxMn0.fQu1toCisGIly8FZqHy3yoEwnY-e7vthk8PCmkBMifE"
+    },
+    {
+      name: "backup",
+      url: "https://wwlwwgqfjhmchrijaojr.supabase.co",
+      key: "sb_publishable_wIxpA7t3a2hII8asqYZ1Bg__NoMLLUU"
+    },
+    {
+      name: "backup3",
+      url: "https://qhqkgrpezoaugyhzrgyc.supabase.co",
+      key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocWtncnBlem9hdWd5aHpyZ3ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4OTM2ODYsImV4cCI6MjEwNTQ2OTY4Nn0.1ANBV4Bm4JyZWMnXb1CTxkf36eRDGZOIOShK_j3Ynt8"
+    }
+  ];
+  var PERIOD = 15000;
 
   var stDot = document.getElementById("stDot");
   var stText = document.getElementById("stText");
@@ -187,25 +202,38 @@
     stText.textContent = text;
   }
 
-  function goHome() { window.location.replace("home.html"); }
+  function isAlive(status) {
+    return status >= 200 && status < 500 && status !== 402;
+  }
+
+  function goBack() {
+    var target = null;
+    try {
+      var ref = document.referrer;
+      if (ref && ref.indexOf(location.origin) === 0 && ref.indexOf("error-402") === -1) target = ref;
+    } catch (e) {}
+    window.location.replace(target || "/");
+  }
 
   function check() {
-    setStatus("st-check", "لحظة من فضلك...");
-    fetch(SUPABASE_URL + "/rest/v1/products?select=id&limit=1", {
-      headers: { apikey: ANON_KEY, Authorization: "Bearer " + ANON_KEY }
-    })
-      .then(function (r) {
-        if (r.status === 402) {
-          setStatus("st-down", "الخدمة متوقفة حاليا");
-        } else {
-          setStatus("st-back", "عادت الخدمة للعمل! جاري إعادتك للموقع...");
-          setTimeout(goHome, 1800);
-          clearTimeout(timer);
-        }
+    setStatus("st-check", "نفحص السيرفرات...");
+    var probes = BACKENDS.map(function (b) {
+      return fetch(b.url + "/rest/v1/products?select=id&limit=1", {
+        headers: { apikey: b.key, Authorization: "Bearer " + b.key }
       })
-      .catch(function () {
-        setStatus("st-down", "تعذر الاتصال بالخدمة");
-      });
+        .then(function (r) { return isAlive(r.status); })
+        .catch(function () { return false; });
+    });
+    Promise.all(probes).then(function (results) {
+      var alive = results.indexOf(true) !== -1;
+      if (alive) {
+        setStatus("st-back", "عادت الخدمة للعمل! جاري إعادتك للموقع...");
+        setTimeout(goBack, 1500);
+        clearTimeout(timer);
+      } else {
+        setStatus("st-down", "الخدمة متوقفة حاليا");
+      }
+    });
   }
 
   check();
