@@ -309,6 +309,33 @@ function resolveImagePath(path) {
   return String(path || "assets/images/placeholder.jpg");
 }
 
+function resolveCartStockStatus(item, linkedProduct) {
+  var declared = String(
+    item.stockStatus ||
+      item.stock_status ||
+      (linkedProduct && (linkedProduct.stockStatus || linkedProduct.stock_status)) ||
+      ""
+  ).toLowerCase();
+  var stockQty = -1;
+  if (linkedProduct) {
+    if (Array.isArray(linkedProduct.sizes) && linkedProduct.sizes.length) {
+      stockQty = 0;
+      for (var si = 0; si < linkedProduct.sizes.length; si += 1) {
+        stockQty += Math.max(0, Number(linkedProduct.sizes[si] && linkedProduct.sizes[si].stock) || 0);
+      }
+    } else {
+      stockQty = Math.max(0, Number(linkedProduct.stock) || 0);
+    }
+  }
+  if (declared === "out_of_stock" || declared === "out" || declared === "oos" || declared === "unavailable" || stockQty === 0) {
+    return "out";
+  }
+  if (declared === "low_stock" || declared === "low" || declared === "limited") {
+    return "low";
+  }
+  return "";
+}
+
 function resolveCartItemView(item = {}) {
   const itemId = String(item.id ?? item.product_id ?? "");
   const linkedProduct = itemId && window.BudaStore?.getProductById
@@ -478,7 +505,7 @@ function resolveCartItemView(item = {}) {
     variant,
     deliveryWindowText: getDeliveryWindowText(),
     deliveryCountdownText: getDeliveryCountdownText(),
-    stockStatus: item.stockStatus || linkedProduct?.stockStatus || "",
+    stockStatus: resolveCartStockStatus(item, linkedProduct),
     freeDelivery: !!(item.freeDelivery || linkedProduct?.freeDelivery),
     bestSeller: !!(item.bestSeller || linkedProduct?.bestSeller),
     source: source,
@@ -503,14 +530,28 @@ function renderCartItem(viewItem) {
     variantHtml = '<div class="cart-product-variant">' + chipColor + escapeHtml([viewItem.selected_color ? "اللون: " + viewItem.selected_color : "", viewItem.selected_size ? "المقاس: " + viewItem.selected_size : ""].filter(Boolean).join(" / ")) + '</div>';
   }
   var lineTotal = (Number(viewItem.currentPrice) || 0) * (Number(viewItem.quantity) || 0);
+  var isOut = viewItem.stockStatus === "out";
   var badges = "";
   if (viewItem.bestSeller) badges += '<span class="cart-product-badge best-seller">الأكثر مبيعاً</span>';
   if (viewItem.stockStatus === "low") badges += '<span class="cart-product-badge stock-low">كمية محدودة</span>';
-  if (viewItem.stockStatus === "out") badges += '<span class="cart-product-badge stock-out">غير متوفر</span>';
   if (badges) badges = '<div class="cart-product-badges">' + badges + '</div>';
+  var stockOutMsg = isOut
+    ? '<div class="cart-stock-out-msg"><span class="material-icons-outlined" style="font-size:16px">error_outline</span>لقد نفد المخزون</div>'
+    : "";
+  var actionsHtml = isOut
+    ? '<div class="cart-action-btns"><button class="cart-action-btn remove-only" type="button" data-remove="' + escapeHtml(viewItem.id) + '" aria-label="حذف"><span class="material-icons-outlined">delete_outline</span></button></div>'
+    : '<div class="cart-qty-wrap">' +
+      '<button class="cart-qty-btn" type="button" data-qty="' + escapeHtml(viewItem.id) + '" data-action="decrease" aria-label="تقليل">−</button>' +
+      '<span class="cart-qty-val" data-qty-value="' + escapeHtml(viewItem.id) + '">' + viewItem.quantity + '</span>' +
+      '<button class="cart-qty-btn" type="button" data-qty="' + escapeHtml(viewItem.id) + '" data-action="increase" aria-label="زيادة">+</button>' +
+      '</div>' +
+      '<div class="cart-action-btns">' +
+      '<button class="cart-action-btn wishlist" type="button" data-save="' + escapeHtml(viewItem.id) + '" aria-label="مفضلة"><span class="material-icons-outlined">favorite_border</span></button>' +
+      '<button class="cart-action-btn" type="button" data-remove="' + escapeHtml(viewItem.id) + '" aria-label="حذف"><span class="material-icons-outlined">delete_outline</span></button>' +
+      '</div>';
   var productLink = 'product.html?id=' + encodeURIComponent(viewItem.id);
   return `
-    <div class="cart-product-card">
+    <div class="cart-product-card${isOut ? " out-of-stock" : ""}">
       <a class="cart-product-img-wrap" href="${productLink}">
         <img alt="${escapeHtml(viewItem.name || "منتج")}" src="${viewItem.imageSrc}" loading="lazy" onerror="this.onerror=null;this.src='${fallbackImage}'" />
       </a>
@@ -526,19 +567,13 @@ function renderCartItem(viewItem) {
         <div class="cart-product-delivery">${escapeHtml(viewItem.deliveryWindowText)}</div>
         ${badges}
         <div class="cart-product-line-total">المجموع: <strong>${formatEgp(lineTotal)}</strong></div>
+        ${stockOutMsg}
       </div>
       <div class="cart-product-actions">
-        <div class="cart-qty-wrap">
-          <button class="cart-qty-btn" type="button" data-qty="${escapeHtml(viewItem.id)}" data-action="decrease" aria-label="تقليل">−</button>
-          <span class="cart-qty-val" data-qty-value="${escapeHtml(viewItem.id)}">${viewItem.quantity}</span>
-          <button class="cart-qty-btn" type="button" data-qty="${escapeHtml(viewItem.id)}" data-action="increase" aria-label="زيادة">+</button>
-        </div>
-        <div class="cart-action-btns">
-          <button class="cart-action-btn wishlist" type="button" data-save="${escapeHtml(viewItem.id)}" aria-label="مفضلة"><span class="material-icons-outlined">favorite_border</span></button>
-          <button class="cart-action-btn" type="button" data-remove="${escapeHtml(viewItem.id)}" aria-label="حذف"><span class="material-icons-outlined">delete_outline</span></button>
-        </div>
+        ${actionsHtml}
       </div>
     </div>
+    ${isOut ? '<div class="cart-out-divider"></div>' : ''}
   `;
 }
 

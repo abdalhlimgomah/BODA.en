@@ -1604,6 +1604,20 @@ HM.renderProductCarousel = function (section, products) {
 };
 
 // ========== RENDER SECTIONS ==========
+// Preloads the first hero slide image (the LCP candidate) the moment the
+// dynamic config is ready, so its fetch starts before static sections paint.
+HM.preloadHeroLcp = function () {
+  var slides = HOME_CONFIG && HOME_CONFIG.heroSlides;
+  if (!slides || !slides.length || !slides[0] || !slides[0].img) return;
+  if (document.querySelector('link[rel="preload"][href="' + getImagePathRaw(slides[0].img, 1400) + '"]')) return;
+  var preload = document.createElement("link");
+  preload.rel = "preload";
+  preload.as = "image";
+  preload.href = getImagePathRaw(slides[0].img, 1400);
+  preload.fetchPriority = "high";
+  document.head.appendChild(preload);
+};
+
 HM.renderHero = function () {
   var slides = HOME_CONFIG.heroSlides;
   if (!slides || !slides.length) return;
@@ -1628,7 +1642,9 @@ HM.renderHero = function () {
       getImagePathRaw(s.img, 1400) +
       '" alt="" loading="' +
       (si === 0 ? "eager" : "lazy") +
-      '" /></div>' +
+      '"' +
+      (si === 0 ? ' fetchpriority="high"' : "") +
+      ' /></div>' +
       "</a></div>";
   }
   var html =
@@ -1645,6 +1661,7 @@ HM.renderHero = function () {
     "</div></div>";
   var temp = document.createElement("div");
   temp.innerHTML = html;
+  HM.preloadHeroLcp();
   HM.contentEl.appendChild(temp.firstElementChild);
 };
 
@@ -3596,6 +3613,7 @@ HM.init = async function () {
   // PHASE 1 — top-of-page (banner, hero, categories, features) renders as
   // soon as the lightweight dynamic config is ready, before products arrive.
   if (configPromise) await configPromise;
+  HM.preloadHeroLcp();
   if (skeletonEl) {
     await hmRenderStaticSkeleton(skeletonEl);
   }
