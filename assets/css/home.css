@@ -38,42 +38,65 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
 .sk-line { display: block; height: 10px; border-radius: 999px; }
 .sk-line-lg { width: min(180px, 72%); height: 12px; }
 .sk-line-sm { width: 96px; height: 8px; }
-.sk-banner-top-wrap { padding: 0 16px 6px; }
-.sk-banner-top { min-height: 58px; padding: 10px 14px; display: flex; align-items: center; gap: 10px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
-.sk-banner-top-icon { width: 36px; height: 36px; border-radius: 50%; flex: 0 0 auto; }
-.sk-banner-top-copy { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.sk-banner-top-wrap { padding: 0 16px 2px; }
+.sk-banner-top { min-height: 39px; padding: 6px 10px; display: flex; align-items: center; gap: 10px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); }
+.sk-banner-top-icon { width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto; }
+.sk-banner-top-copy { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.sk-banner-top-copy .sk-banner-top-line { height: 9px; border-radius: 999px; width: 62%; }
 .sk-banner-top-arrow { width: 20px; height: 20px; border-radius: 50%; flex: 0 0 auto; }
+
+/* Hero — مستطيل عريض يطابق الكاروسيل الحقيقي */
 .sk-hero-wrap { padding: 0 16px; margin: 8px 0 4px; }
-.sk-hero { width: 100%; aspect-ratio: 16/9; border-radius: var(--radius-lg); }
+.sk-hero { width: 100%; aspect-ratio: 20/9; border-radius: var(--radius-lg); }
+
+/* Ad strip تحت الهيرو (موبايل فقط) — يطابق buda-home-banner */
+.sk-ad-hero-wrap { padding: 0 16px; margin: 4px 0 0; }
+.sk-ad-hero { width: 100%; aspect-ratio: 16/5; border-radius: var(--radius-lg); }
+
+/* Categories — كارت بأزواج صور عمودية (كل زوج صورتين، مثل hm-cats الحقيقي) */
+.sk-cats-wrap { padding: 0 16px 6px; margin: 8px 0 16px; }
+.sk-cats-section { background: var(--color-card); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
+.sk-cats-head { display: flex; align-items: center; padding: 16px 14px 10px; }
+.sk-cats-title { width: 132px; height: 18px; border-radius: 999px; }
+.sk-cats-body { padding: 0 12px 20px; }
+.sk-cats-row { display: flex; align-items: flex-start; gap: 16px; overflow: hidden; }
+.sk-cats-pair { display: flex; flex-direction: column; gap: 10px; flex: 0 0 auto; }
+.sk-cat-thumb { flex: 0 0 auto; width: 60px; aspect-ratio: 60 / 83; border-radius: var(--radius-md); background: var(--color-skeleton); border: 1px solid var(--color-border); }
+
+/* Features — السكشن الحقيقي فاضي (div فارغ) فنخلي البلاصهولدر بنفس الحجم */
+.sk-features { height: 0; overflow: hidden; }
+
+/* Mega offers — 3 كروت مثل buda-mega-offers الحقيقي */
+.sk-mega-wrap { padding: 0 16px; margin: 0 0 12px; }
+.sk-mega-stack { display: flex; flex-direction: column; gap: 12px; }
+.sk-mega-col { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+.sk-mega-col-title { width: 46%; height: 12px; border-radius: 6px; }
+.sk-mega-thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.sk-mega-tile { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.sk-mega-thumb { width: 100%; aspect-ratio: 1/1; border-radius: var(--radius-md); background: var(--color-skeleton); border: 1px solid var(--color-border); }
+.sk-mega-tile-line { height: 8px; width: 78%; border-radius: 999px; }
+.sk-mega-tile-line2 { width: 52%; }
+.sk-mega-tile-price { height: 10px; width: 44%; border-radius: 999px; margin-top: 2px; }
+.sk-mega-banners { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.sk-mega-banner { width: 100%; aspect-ratio: 16/9; border-radius: var(--radius-md); background: var(--color-skeleton); border: 1px solid var(--color-border); flex: 1; }
+
+/* Banner عريض */
 .sk-banner-wrap { padding: 0 16px; }
 .sk-banner { width: 100%; border-radius: var(--radius-lg); }
 .sk-banner-half { aspect-ratio: 16/4; }
-.sk-cats-wrap { padding: 0 16px 6px; }
-.sk-cats-section { background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
-.sk-cats-head { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px 0; }
-.sk-cats-title { width: 136px; height: 16px; border-radius: 999px; }
-.sk-cats-body { position: relative; padding: 8px 12px 16px; }
-.sk-cats-scroll { display: flex; gap: 10px; overflow: hidden; padding: 2px 0 10px; }
-.sk-cat-card { width: 86px; height: 110px; display: flex; flex-shrink: 0; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: var(--color-skeleton); border: 1px solid var(--color-border); border-radius: 10px 10px 0 0; overflow: hidden; }
-.sk-cat-circle { width: 46px; height: 46px; border-radius: 50%; }
-.sk-cat-label { width: 54px; height: 9px; border-radius: 999px; }
-.sk-cats-indicator { display: flex; justify-content: center; gap: 5px; height: 4px; margin-top: -2px; direction: ltr; }
-.sk-cats-indicator span { width: 6px; height: 4px; border-radius: 2px; background: var(--color-border); }
-.sk-cats-indicator span.active { width: 16px; background: var(--color-text-muted); }
-.sk-product-section, .sk-brands-section, .sk-smart-cats { background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
-.sk-smart-cats-body { padding: 12px 16px 16px; }
-.sk-smart-cats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
-.sk-smart-cat-skeleton { aspect-ratio: 3/4; border-radius: var(--radius-xl); overflow: hidden; }
+
+/* Products — شريط كروت منتجات يطابق hm-shein-grid */
+.sk-product-section { background: var(--color-surface); border-radius: var(--radius-lg); overflow: hidden; box-shadow: var(--shadow-sm); }
 .sk-product-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px 0; }
 .sk-section-title { width: 154px; height: 16px; border-radius: 999px; }
 .sk-section-link { width: 56px; height: 10px; border-radius: 999px; }
 .sk-products-body { padding: 12px 16px 16px; }
 .sk-products-row { display: flex; gap: 10px; overflow: hidden; padding-bottom: 4px; direction: ltr; }
-.sk-product-card { flex: 0 0 auto; width: 155px; direction: rtl; background: var(--color-skeleton); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 8px 16px rgba(15, 23, 42, 0.04); }
-.sk-product-media { position: relative; width: 100%; aspect-ratio: 3 / 4; border-radius: 0; }
+.sk-product-card { flex: 0 0 auto; width: 145px; direction: rtl; background: var(--color-skeleton); border: 1px solid var(--color-border); border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 8px 16px rgba(15, 23, 42, 0.04); }
+.sk-product-media { position: relative; width: 100%; aspect-ratio: 1/1; border-radius: 0; }
 .sk-product-wish, .sk-product-add { position: absolute; z-index: 1; }
-.sk-product-wish { top: 8px; right: 8px; width: 34px; height: 34px; border-radius: 50%; }
-.sk-product-add { left: 10px; bottom: 10px; width: 34px; height: 34px; border-radius: var(--radius-sm); }
+.sk-product-wish { top: 8px; right: 8px; width: 30px; height: 30px; border-radius: 50%; }
+.sk-product-add { left: 10px; bottom: 10px; width: 30px; height: 30px; border-radius: var(--radius-sm); }
 .sk-product-body { display: grid; gap: 6px; padding: 10px; }
 .sk-product-name { height: 10px; width: 100%; border-radius: 999px; }
 .sk-product-name-short { width: 72%; }
@@ -83,15 +106,31 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
 .sk-product-old { width: 42px; height: 10px; border-radius: 999px; }
 .sk-product-discount { width: 34px; height: 14px; border-radius: 6px; }
 
-/* Mega section (mobile default) */
-.sk-mega-row { margin: 0 12px; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
-.sk-mega-tile { background: var(--color-surface); border-radius: var(--radius-lg); padding: 14px; display: flex; flex-direction: column; gap: 8px; }
-.sk-mega-tile-title { width: 60%; height: 12px; border-radius: 4px; }
-.sk-mega-tile-img { width: 100%; border-radius: 8px; }
-.sk-mega-img-square { aspect-ratio: 1; }
-.sk-mega-img-wide { aspect-ratio: 1.6; }
-.sk-mega-tile-line { width: 50%; height: 10px; border-radius: 4px; }
-.sk-mega-tile-line-short { width: 40%; }
+/* نسخة الموبايل بتتشكل على التابلت (768–1199) لتطابق المحتوى الحقيقي */
+@media (min-width: 768px) {
+  .sk-banner-top-wrap { padding: 0 24px 12px; }
+  .sk-hero-wrap { padding: 0; margin: 12px 0 8px; }
+  .sk-hero { aspect-ratio: 5/1; max-height: 300px; }
+  .sk-ad-hero-wrap { display: none; }
+  .sk-cats-wrap { padding: 0 24px 1px; margin: 24px 0; }
+  .sk-cats-head { padding: 16px 20px 0; }
+  .sk-cats-body { padding: 12px 20px 16px; }
+  .sk-cats-row { gap: 20px; }
+  .sk-cats-pair { flex-direction: row; gap: 20px; }
+  .sk-cat-thumb { width: 130px; }
+  .sk-mega-wrap { padding: 0 24px; margin: 0 0 24px; }
+  .sk-mega-stack { flex-direction: row; gap: 16px; }
+  .sk-mega-col { flex: 1; padding: 16px; }
+  .sk-mega-col:nth-child(2) { flex: 1.2; }
+  .sk-banner-wrap { padding: 0; }
+  .sk-banner-half { aspect-ratio: 6/1; max-height: 140px; }
+  .sk-product-card { width: 180px; }
+}
+@media (min-width: 1200px) {
+  .sk-cats-head { display: none; }
+  .sk-cats-body { padding: 20px; }
+  .sk-cat-thumb { width: 144px; }
+}
 
 /* ========== PAGE LAYOUT ========== */
 .hm-page { display: flex; flex-direction: column; background: var(--color-bg); min-height: 100vh; }
@@ -1476,11 +1515,12 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
   .hm-skeleton-block.sk-mob { display: none; }
   .sk-desk { display: block; }
 
-  /* حاوية السكلتون مطابقة لعرض المحتوى الحقيقي */
+  /* حاوية السكلتون: بدون padding إضافي لأن .hm-content أصلاً عاملها 48px،
+     فتبدأ بلوكات السكلتون من نفس إحداثيات السكشنز الحقيقية مباشرة. */
   .hm-skeleton {
     max-width: 1440px;
     margin: 0 auto;
-    padding: 4px 48px 0;
+    padding: 4px 0 0;
     gap: 26px;
   }
 
@@ -1493,9 +1533,9 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
   .sk-header-overlay .buda-search-box { height: 48px; border-radius: 999px; }
   .sk-search-mobile { display: none !important; }
 
-  /* شريط الإعلان العلوي */
-  .skd-banner-top-wrap { padding: 0; }
-  .skd-banner-top { min-height: 64px; padding: 14px 22px; display: flex; align-items: center; gap: 14px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; }
+  /* شريط الإعلان العلوي — بعرض كامل (يمطّد على كل الشاشة مثل الحقيقي) */
+  .skd-banner-top-wrap { width: 100vw; margin: 0 -48px 0; padding: 0 0 16px; max-width: none; }
+  .skd-banner-top { min-height: 91px; padding: 16px 24px; display: flex; align-items: center; gap: 14px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; }
   .skd-banner-top-icon { width: 42px; height: 42px; border-radius: 14px; flex: 0 0 auto; }
   .skd-banner-top-copy { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
   .skd-line { display: block; border-radius: 999px; }
@@ -1503,52 +1543,51 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
   .skd-line-sm { width: 190px; height: 10px; }
   .skd-banner-top-arrow { width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto; }
 
-  /* البانر الرئيسي الكبير */
-  .skd-hero-wrap { padding: 0; margin: 6px 0 0; }
-  .skd-hero { width: 100%; aspect-ratio: 5 / 1; border-radius: 26px; max-height: 300px; }
+  /* البانر الرئيسي الكبير — يطابق hm-hero بحواف ممتدة (full-bleed) */
+  .skd-hero-wrap { width: 100vw; padding: 0; margin: -16.5px -48px -3.5px; }
+  .skd-hero { width: 100%; aspect-ratio: 5 / 1; max-height: 300px; border-radius: 0; }
 
-  /* التصنيفات: شبكة 8 خانات مستطيلة (كروت مصغّرة) */
-  .skd-cats-wrap { padding: 0; }
-  .skd-cats-section { background: var(--color-surface); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-md); }
-  .skd-cats-head { padding: 20px 24px 0; display: flex; align-items: center; justify-content: space-between; }
-  .skd-cats-title { width: 180px; height: 18px; border-radius: 999px; }
-  .skd-cats-body { padding: 16px 20px 22px; }
-  .skd-cats-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 14px; }
-  .skd-cat-card { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; height: 136px; background: var(--color-skeleton); border: 1px solid var(--color-border); border-radius: 16px; overflow: hidden; }
-  .skd-cat-img { width: 62px; height: 62px; border-radius: 14px; }
-  .skd-cat-label { width: 62px; height: 10px; border-radius: 999px; }
+  /* Ad strip — مخفي على الديسكتوب مثل الحقيقي */
+  .skd-ad-hero-wrap { display: none; }
+
+  /* التصنيفات: شريط صور أفقي بحواف ممتدة (مثل hm-cats الديسكتوب full-bleed) */
+  .skd-cats-wrap { width: 100vw; margin: -5px -48px 18px; padding: 0; max-width: none; }
+  .skd-cats-section { background: #FFFFFF; border-radius: 0; box-shadow: none; overflow: hidden; }
+  .skd-cats-body { padding: 24px 0 36px 20px; }
+  .skd-cats-row { display: flex; align-items: center; gap: 20px; overflow: hidden; }
+  .skd-cat-thumb { flex: 0 0 auto; width: 87px; aspect-ratio: 87 / 121; border-radius: 14px; background: var(--color-skeleton); border: 1px solid var(--color-border); }
+
+  /* Features — السكشن الحقيقي فاضي */
+  .skd-features { height: 0; overflow: hidden; }
+
+  /* الميجا: 3 اعمدة بصور مربعة + بانرات عمودية (مثل buda-mega-offers) */
+  .skd-mega-wrap { padding: 0; }
+  .skd-mega-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .skd-mega-col { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 22px; box-shadow: var(--shadow-md); padding: 20px; display: flex; flex-direction: column; gap: 14px; }
+  .skd-mega-col-title { width: 40%; height: 14px; border-radius: 6px; }
+  .skd-mega-thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-content: start; }
+  .skd-mega-tile { display: flex; flex-direction: column; gap: 7px; min-width: 0; }
+  .skd-mega-thumb { width: 100%; aspect-ratio: 1/1; border-radius: 14px; background: var(--color-skeleton); border: 1px solid var(--color-border); }
+  .skd-mega-tile-line { height: 9px; width: 78%; border-radius: 999px; }
+  .skd-mega-tile-line2 { width: 52%; }
+  .skd-mega-tile-price { height: 12px; width: 44%; border-radius: 999px; margin-top: 2px; }
+  .skd-mega-banners { display: flex; flex-direction: column; gap: 12px; flex: 1; }
+  .skd-mega-banner { width: 100%; aspect-ratio: 16/9; border-radius: 14px; background: var(--color-skeleton); border: 1px solid var(--color-border); flex: 1; }
 
   /* البانرات العريضة */
   .skd-banner-wrap { padding: 0; }
   .skd-banner { width: 100%; border-radius: 24px; }
-  .skd-banner-wide { aspect-ratio: 6.5 / 1; max-height: 140px; }
+  .skd-banner-wide { aspect-ratio: 32 / 5; max-height: 140px; }
 
-  /* الميجا: 4 كروت بصورة 16/9 */
-  .skd-mega-row { margin: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
-  .skd-mega-tile { background: var(--color-surface); border-radius: 22px; padding: 18px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow-md); }
-  .skd-mega-tile-img { width: 100%; aspect-ratio: 16 / 9; border-radius: 14px; }
-  .skd-mega-tile-line { width: 45%; height: 12px; border-radius: 4px; }
-  .skd-mega-tile-line-short { width: 32%; }
-
-  /* التصنيفات الذكية: 6 كروت بارزة */
-  .skd-smart-cats { background: var(--color-surface); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-md); }
+  /* المنتجات: شريط كروت مربعة مثل hm-shein-grid */
+  .skd-product-section { background: var(--color-surface); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-md); }
   .skd-head { display: flex; align-items: center; justify-content: space-between; padding: 20px 24px 0; }
   .skd-section-title { width: 200px; height: 18px; border-radius: 999px; }
   .skd-section-link { width: 70px; height: 12px; border-radius: 999px; }
-  .skd-smart-body { padding: 18px 22px 24px; }
-  .skd-smart-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-  .skd-smart-card { display: flex; flex-direction: column; gap: 10px; }
-  .skd-smart-img { width: 100%; aspect-ratio: 2 / 3; border-radius: 20px; }
-  .skd-smart-title { width: 70%; height: 12px; border-radius: 999px; }
-  .skd-smart-sub { width: 45%; height: 10px; border-radius: 999px; }
-  .skd-smart-btn { width: 36%; height: 26px; border-radius: 50px; }
-
-  /* المنتجات: شبكة 6 أعمدة */
-  .skd-product-section { background: var(--color-surface); border-radius: 24px; overflow: hidden; box-shadow: var(--shadow-md); }
   .skd-products-body { padding: 18px 22px 24px; }
-  .skd-products-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 16px; }
-  .skd-product-card { background: var(--color-skeleton); border: 1px solid var(--color-border); border-radius: 18px; overflow: hidden; }
-  .skd-product-img { width: 100%; aspect-ratio: 3 / 4; border-radius: 0; }
+  .skd-products-row { display: flex; gap: 14px; overflow: hidden; }
+  .skd-product-card { flex: 0 0 auto; width: 145px; background: var(--color-skeleton); border: 1px solid var(--color-border); border-radius: 18px; overflow: hidden; }
+  .skd-product-img { width: 100%; aspect-ratio: 1/1; border-radius: 0; }
   .skd-product-body { display: grid; gap: 8px; padding: 12px; }
   .skd-product-name { width: 100%; height: 12px; border-radius: 999px; }
   .skd-product-rating { width: 40%; height: 12px; border-radius: 999px; }

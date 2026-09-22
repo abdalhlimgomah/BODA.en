@@ -785,6 +785,27 @@ body.checkout-page {
   .ch-payment-grid { grid-template-columns: 1fr 1fr; }
 }
 
+/* ── Mixed-Origin Customs Notice ── */
+.ch-mixed-customs-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 12px;
+  background: #FFF7ED;
+  border: 1px solid #FED7AA;
+  border-radius: var(--radius-md, 12px);
+  color: #9A3412;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}
+.ch-mixed-customs-note svg {
+  flex-shrink: 0;
+  margin-top: 2px;
+  color: #EA580C;
+}
+.ch-mixed-customs-note b { color: #C2410C; }
+
 /* ── Card Payment Form ── */
 .ch-card-form {
   margin-top: var(--gap-text);
