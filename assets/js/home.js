@@ -3254,135 +3254,151 @@ HM.loadDynamicConfig = async function () {
       return fallback.length ? fallback : rows;
     }
 
+    // Fire all section queries in parallel — they only depend on the section
+    // ids above, never on each other's rows. The slowest one (typically the
+    // hero slides) now caps the total time instead of stacking sequentially.
+    var configQueries = [];
+
     // 1. Hero slides
     if (sectionMap.hero) {
-      var { data: heroSlides } = await client.from('home_hero_slides').select('*').eq('section_id', sectionMap.hero).order('sort_order');
-      var devSlides = _pickDeviceRows(heroSlides, _currentDevice());
-      if (devSlides && devSlides.length) {
-        HOME_CONFIG.heroSlides = devSlides.map(function (s) {
-          return { img: s.image_url, link: s.link_url && s.link_url !== '#' ? s.link_url : undefined };
-        });
-      }
+      configQueries.push((async function () {
+        var { data: heroSlides } = await client.from('home_hero_slides').select('*').eq('section_id', sectionMap.hero).order('sort_order');
+        var devSlides = _pickDeviceRows(heroSlides, _currentDevice());
+        if (devSlides && devSlides.length) {
+          HOME_CONFIG.heroSlides = devSlides.map(function (s) {
+            return { img: s.image_url, link: s.link_url && s.link_url !== '#' ? s.link_url : undefined };
+          });
+        }
+      })());
     }
 
     // 2. Categories
     if (sectionMap.categories) {
-      var { data: cats } = await client.from('home_categories').select('*').eq('section_id', sectionMap.categories).order('sort_order');
-      if (cats && cats.length) {
-        HOME_CONFIG.categories = cats.map(function (c) {
-          return { name: c.name, img: c.image_url, link: c.link_url };
-        });
-      }
+      configQueries.push((async function () {
+        var { data: cats } = await client.from('home_categories').select('*').eq('section_id', sectionMap.categories).order('sort_order');
+        if (cats && cats.length) {
+          HOME_CONFIG.categories = cats.map(function (c) {
+            return { name: c.name, img: c.image_url, link: c.link_url };
+          });
+        }
+      })());
     }
 
     // 3. Banner top — replace the first banner entry with dynamic data
     if (sectionMap.banner_top) {
-      var { data: banners } = await client.from('home_banners').select('*').eq('section_id', sectionMap.banner_top).order('sort_order');
-      var devBanners = _pickDeviceRows(banners, _currentDevice());
-      if (devBanners && devBanners.length) {
-        var b = devBanners[0];
-        if (b.type === 'image_banner' && b.image_url) {
-          HOME_CONFIG.banners[0] = {
-            url: b.image_url,
-            link: b.link_url || '#',
-            size: 'wide',
-            _dynamic: { type: 'image_banner', bg: 'transparent', border: 'none', padding: '0' }
-          };
-        } else {
-          HOME_CONFIG.banners[0] = {
-            url: '',
-            link: b.link_url || '#',
-            size: 'wide',
-            _dynamic: {
-              type: 'icon_banner',
-              icon: b.icon || 'local_shipping',
-              heading: b.heading || '',
-              subtext: b.subtext || '',
-              bg: b.background_color || '#f8f4ff',
-              border: b.border_color || '#f3e8ff',
-              textColor: b.text_color || '#1a2530',
-              accentColor: b.accent_color || '#7c3aed'
-            }
-          };
+      configQueries.push((async function () {
+        var { data: banners } = await client.from('home_banners').select('*').eq('section_id', sectionMap.banner_top).order('sort_order');
+        var devBanners = _pickDeviceRows(banners, _currentDevice());
+        if (devBanners && devBanners.length) {
+          var b = devBanners[0];
+          if (b.type === 'image_banner' && b.image_url) {
+            HOME_CONFIG.banners[0] = {
+              url: b.image_url,
+              link: b.link_url || '#',
+              size: 'wide',
+              _dynamic: { type: 'image_banner', bg: 'transparent', border: 'none', padding: '0' }
+            };
+          } else {
+            HOME_CONFIG.banners[0] = {
+              url: '',
+              link: b.link_url || '#',
+              size: 'wide',
+              _dynamic: {
+                type: 'icon_banner',
+                icon: b.icon || 'local_shipping',
+                heading: b.heading || '',
+                subtext: b.subtext || '',
+                bg: b.background_color || '#f8f4ff',
+                border: b.border_color || '#f3e8ff',
+                textColor: b.text_color || '#1a2530',
+                accentColor: b.accent_color || '#7c3aed'
+              }
+            };
+          }
         }
-      }
+      })());
     }
 
-    // 4. Mega offers
+    // 4. Mega offers — config, then both columns, then banners (internal order kept)
     if (sectionMap.mega_offers) {
-      // Config (mode per col) — try, table may not exist
-      HOME_CONFIG._megaConfig = {};
-      try {
-        var { data: megaCfg } = await client.from('home_section_config').select('config_key,config_value').eq('section_id', sectionMap.mega_offers);
-        if (megaCfg) megaCfg.forEach(function (c) { HOME_CONFIG._megaConfig[c.config_key] = c.config_value; });
-      } catch(e) { /* table not ready yet */ }
-
-      // Helper: fetch products for a col (fallback if col column missing)
-      async function _fetchMegaCol(sid, col) {
-        var q = client.from('home_mega_products').select('product_id').eq('section_id', sid).order('sort_order');
-        if (window.__hasMegaCol !== false) {
-          q = q.eq('col', col);
-        }
+      configQueries.push((async function () {
+        HOME_CONFIG._megaConfig = {};
         try {
-          var { data } = await q;
-          return data ? data.map(function(p) { return p.product_id; }) : [];
-        } catch(e) {
-          if (window.__hasMegaCol === undefined) { window.__hasMegaCol = false; }
-          return [];
-        }
-      }
-      HOME_CONFIG._megaCol1Ids = await _fetchMegaCol(sectionMap.mega_offers, 1);
-      HOME_CONFIG._megaCol2Ids = await _fetchMegaCol(sectionMap.mega_offers, 2);
+          var { data: megaCfg } = await client.from('home_section_config').select('config_key,config_value').eq('section_id', sectionMap.mega_offers);
+          if (megaCfg) megaCfg.forEach(function (c) { HOME_CONFIG._megaConfig[c.config_key] = c.config_value; });
+        } catch(e) { /* table not ready yet */ }
 
-      // Mega banners
-      var { data: megaBanners } = await client.from('home_mega_banners').select('*').eq('section_id', sectionMap.mega_offers).order('sort_order');
-      if (megaBanners && megaBanners.length) {
-        HOME_CONFIG._megaBanners = megaBanners;
-      }
+        async function _fetchMegaCol(sid, col) {
+          var q = client.from('home_mega_products').select('product_id').eq('section_id', sid).order('sort_order');
+          if (window.__hasMegaCol !== false) {
+            q = q.eq('col', col);
+          }
+          try {
+            var { data } = await q;
+            return data ? data.map(function(p) { return p.product_id; }) : [];
+          } catch(e) {
+            if (window.__hasMegaCol === undefined) { window.__hasMegaCol = false; }
+            return [];
+          }
+        }
+        HOME_CONFIG._megaCol1Ids = await _fetchMegaCol(sectionMap.mega_offers, 1);
+        HOME_CONFIG._megaCol2Ids = await _fetchMegaCol(sectionMap.mega_offers, 2);
+
+        var { data: megaBanners } = await client.from('home_mega_banners').select('*').eq('section_id', sectionMap.mega_offers).order('sort_order');
+        if (megaBanners && megaBanners.length) {
+          HOME_CONFIG._megaBanners = megaBanners;
+        }
+      })());
     }
 
     // 5. Smart Category Showcase — runs independently so a failing step
     //    above never leaves the section empty (renderer shows default cards)
-    try {
-      var smartCc = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || localStorage.getItem('userCountry') || 'EG';
-      var smartRows = null;
-      var scReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', smartCc).order('sort_order');
-      if (!scReq.error && scReq.data && scReq.data.length) smartRows = scReq.data;
-      if (!smartRows) {
-        var scFbReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', 'EG').order('sort_order');
-        if (!scFbReq.error && scFbReq.data && scFbReq.data.length) smartRows = scFbReq.data;
+    configQueries.push((async function () {
+      try {
+        var smartCc = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || localStorage.getItem('userCountry') || 'EG';
+        var smartRows = null;
+        var scReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', smartCc).order('sort_order');
+        if (!scReq.error && scReq.data && scReq.data.length) smartRows = scReq.data;
+        if (!smartRows) {
+          var scFbReq = await client.from('smart_category_showcase').select('*').eq('is_active', true).eq('country_code', 'EG').order('sort_order');
+          if (!scFbReq.error && scFbReq.data && scFbReq.data.length) smartRows = scFbReq.data;
+        }
+        if (smartRows && smartRows.length) {
+          var smartCats = smartRows;
+          HOME_CONFIG._smartCategories = smartCats.map(function(c) {
+            var gf = /^#[0-9a-fA-F]{6}$/.test(String(c.gradient_from || '')) ? c.gradient_from : '#1e2a3a';
+            var gt = /^#[0-9a-fA-F]{6}$/.test(String(c.gradient_to || '')) ? c.gradient_to : '#33404f';
+            return {
+              title: c.title,
+              subtitle: c.subtitle || '',
+              image_url: c.image_url,
+              link_url: c.link_url || '#',
+              gradient_from: gf,
+              gradient_to: gt,
+            };
+          });
+        }
+      } catch (e) {
+        console.warn('[HM] Failed to load smart categories:', e);
       }
-      if (smartRows && smartRows.length) {
-        var smartCats = smartRows;
-        HOME_CONFIG._smartCategories = smartCats.map(function(c) {
-          var gf = /^#[0-9a-fA-F]{6}$/.test(String(c.gradient_from || '')) ? c.gradient_from : '#1e2a3a';
-          var gt = /^#[0-9a-fA-F]{6}$/.test(String(c.gradient_to || '')) ? c.gradient_to : '#33404f';
-          return {
-            title: c.title,
-            subtitle: c.subtitle || '',
-            image_url: c.image_url,
-            link_url: c.link_url || '#',
-            gradient_from: gf,
-            gradient_to: gt,
-          };
-        });
-      }
-    } catch (e) {
-      console.warn('[HM] Failed to load smart categories:', e);
-    }
+    })());
 
     // 6. Ad banners
-    try {
-      if (sectionMap && sectionMap.ad_banners) {
-        var { data: adBanners } = await client.from('home_ad_banners').select('*').eq('section_id', sectionMap.ad_banners).eq('is_active', true).order('sort_order');
-        var devAdBanners = _pickDeviceRows(adBanners, _currentDevice());
-        if (devAdBanners && devAdBanners.length) {
-          HOME_CONFIG._adBanners = devAdBanners;
+    if (sectionMap && sectionMap.ad_banners) {
+      configQueries.push((async function () {
+        try {
+          var { data: adBanners } = await client.from('home_ad_banners').select('*').eq('section_id', sectionMap.ad_banners).eq('is_active', true).order('sort_order');
+          var devAdBanners = _pickDeviceRows(adBanners, _currentDevice());
+          if (devAdBanners && devAdBanners.length) {
+            HOME_CONFIG._adBanners = devAdBanners;
+          }
+        } catch (e) {
+          console.warn('[HM] Failed to load ad banners:', e);
         }
-      }
-    } catch (e) {
-      console.warn('[HM] Failed to load ad banners:', e);
+      })());
     }
+
+    await Promise.all(configQueries);
   } catch (e) {
     console.warn('[HM] Failed to load dynamic config:', e);
   }
