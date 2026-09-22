@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" />
@@ -29,65 +29,187 @@
 <link rel="icon" type="image/png" sizes="64x64" href="../../assets/icons/favicon-64x64.png">
 <link rel="apple-touch-icon" href="../../assets/icons/apple-touch-icon.png">
 <link rel="manifest" href="../../assets/icons/site.webmanifest">
-<meta name="theme-color" content="#FFD500">
+<meta name="theme-color" content="#6D28D9">
   <meta property="og:image" content="https://budoq.com/assets/images/og-image.png" />
   <meta name="twitter:image" content="https://budoq.com/assets/images/og-image.png" />
 <script defer src="https://cdn.vercel-insights.com/beacon.js"></script>
 </head>
 <body>
   <div class="auth-shell">
-    <div class="auth-card">
-      <a class="auth-brand" href="../home.html">
-        <span class="material-icons-outlined"></span>
-        BudoQ
-      </a>
-      <h1 class="auth-title">إنشاء حساب جديد</h1>
-      <p class="auth-subtitle">سجّل بياناتك ثم أكمل التحقق عبر رمز OTP.</p>
-      <p id="auth-feedback" class="status-note hidden" aria-live="polite"></p>
+    <div class="auth-shape auth-shape-1"></div>
+    <div class="auth-shape auth-shape-2"></div>
+    <div class="auth-shape auth-shape-3"></div>
+    <div class="auth-shape auth-shape-4"></div>
 
-      <form class="auth-form" onsubmit="handleSignUp(event)">
-        <div class="auth-field">
-          <label for="signup-name">الاسم الكامل</label>
-          <input id="signup-name" class="auth-input" type="text" name="name" required />
+    <div class="auth-layout">
+      <!-- ==== Brand showcase ==== -->
+      <aside class="auth-showcase">
+        <div class="auth-showcase-brand">
+          <a class="auth-showcase-logo" href="../home.html">
+            <span class="material-icons-outlined">shopping_bag</span>
+            BudoQ
+          </a>
         </div>
-        <div class="auth-field">
-          <label for="signup-country">الدولة</label>
-          <select id="signup-country" class="auth-input" name="country" required>
-            <option value="EG">🇪🇬 مصر</option>
-            <option value="SA">🇸🇦 السعودية</option>
-          </select>
-        </div>
-        <div class="auth-field">
-          <label for="signup-email">البريد الإلكتروني</label>
-          <input id="signup-email" class="auth-input" type="email" name="email" autocomplete="email" required />
-        </div>
-        <div class="auth-field">
-          <label for="signup-password">كلمة المرور</label>
-          <input id="signup-password" class="auth-input" type="password" name="password" minlength="8" autocomplete="new-password" required />
-        </div>
-        <div class="auth-field">
-          <label for="signup-confirm">تأكيد كلمة المرور</label>
-          <input id="signup-confirm" class="auth-input" type="password" name="confirm-password" minlength="8" autocomplete="new-password" required />
-        </div>
-        <button type="submit" class="auth-btn">إنشاء الحساب</button>
-      </form>
 
-      <div class="auth-footer">
-        لديك حساب بالفعل؟ <a href="../signin/login.html">تسجيل الدخول</a>
+        <span class="auth-tag">
+          <span class="material-icons-outlined">rocket_launch</span>
+          ابدأ مجاناً الآن
+        </span>
+        <h2>أنشئ حسابك في ثوانٍ</h2>
+        <div class="auth-showcase-copy">
+          <p>انضم إلى آلاف المتسوقين واستمتع بعروض حصرية وتتبع لحظي لكل طلب من المتجر حتى باب منزلك.</p>
+        </div>
+
+        <ul class="auth-features">
+          <li>
+            <span class="auth-feature-icon"><span class="material-icons-outlined">local_shipping</span></span>
+            <div><b>تتبع الشحنات لحظياً</b><small>متابعة طلبك في كل خطوة حتى باب المنزل</small></div>
+          </li>
+          <li>
+            <span class="auth-feature-icon"><span class="material-icons-outlined">favorite</span></span>
+            <div><b>المفضلة الذكية</b><small>احفظ منتجاتك وأعد الشراء بلمسة واحدة</small></div>
+          </li>
+          <li>
+            <span class="auth-feature-icon"><span class="material-icons-outlined">local_offer</span></span>
+            <div><b>عروض وكوبونات</b><small>خصومات حصرية تخص أعضاء BudoQ فقط</small></div>
+          </li>
+          <li>
+            <span class="auth-feature-icon"><span class="material-icons-outlined">savings</span></span>
+            <div><b>كوبون ترحيبي فوراً</b><small>خصم على أول طلب بعد تفعيل حسابك</small></div>
+          </li>
+        </ul>
+
+        <div class="auth-showcase-stats">
+          <div><strong>120K+</strong><span>عميل سعيد</span></div>
+          <div><strong>35K+</strong><span>طلب مكتمل</span></div>
+          <div><strong>4.8</strong><span>تقييم المتجر</span></div>
+        </div>
+
+        <!-- Decorative scene -->
+        <div class="auth-scene" aria-hidden="true">
+          <div class="auth-scene-halo"></div>
+          <div class="auth-cc auth-cc-b auth-cc-bg">
+            <div class="auth-cc-top">
+              <span class="auth-cc-chip"></span>
+              <span class="auth-cc-brand">BudoQ</span>
+            </div>
+            <span class="auth-cc-nums">•••• 6202</span>
+            <div class="stripes"><i></i><i></i></div>
+          </div>
+          <div class="auth-cc auth-cc-a auth-cc-a-g">
+            <div class="auth-cc-top">
+              <span class="auth-cc-chip"></span>
+              <span class="auth-cc-brand">BudoQ Pay</span>
+            </div>
+            <span class="auth-cc-nums">•••• 1524</span>
+            <div class="stripes"><i></i><i></i></div>
+          </div>
+          <span class="auth-floater auth-floater-1"><span class="material-icons-outlined">local_offer</span></span>
+          <span class="auth-floater auth-floater-2"><span class="material-icons-outlined">verified_user</span></span>
+        </div>
+      </aside>
+
+      <!-- ==== Form column ==== -->
+      <div class="auth-form-col">
+        <div class="auth-card">
+          <a class="auth-brand" href="../home.html">
+            <span class="material-icons-outlined">shopping_bag</span>
+            BudoQ
+          </a>
+          <h1 class="auth-title">إنشاء حساب جديد</h1>
+          <p class="auth-subtitle">سجّل بياناتك ثم أكمل التحقق عبر رمز OTP.</p>
+          <p id="auth-feedback" class="status-note hidden" aria-live="polite"></p>
+
+          <form class="auth-form" onsubmit="handleSignUp(event)">
+            <div class="auth-field">
+              <label for="signup-name">الاسم الكامل</label>
+              <div class="auth-input-wrap">
+                <span class="auth-input-icon material-icons-outlined">person</span>
+                <input id="signup-name" class="auth-input" type="text" name="name" placeholder="مثال: أحمد محمد" required />
+              </div>
+            </div>
+            <div class="auth-field">
+              <label for="signup-country">الدولة</label>
+              <select id="signup-country" class="auth-input" name="country" required>
+                <option value="EG">🇪🇬 مصر</option>
+                <option value="SA">🇸🇦 السعودية</option>
+              </select>
+            </div>
+            <div class="auth-field">
+              <label for="signup-email">البريد الإلكتروني</label>
+              <div class="auth-input-wrap">
+                <span class="auth-input-icon material-icons-outlined">mail</span>
+                <input id="signup-email" class="auth-input" type="email" name="email" autocomplete="email" placeholder="name@example.com" required />
+              </div>
+            </div>
+            <div class="auth-field">
+              <label for="signup-password">كلمة المرور</label>
+              <div class="input-with-action">
+                <span class="auth-input-icon material-icons-outlined">lock</span>
+                <input id="signup-password" class="auth-input" type="password" name="password" minlength="8" autocomplete="new-password" placeholder="8 أحرف على الأقل" required />
+                <span class="eye" data-toggle-pass="signup-password" role="button" tabindex="0" aria-label="إظهار كلمة المرور"><i class="fa-solid fa-eye"></i></span>
+              </div>
+            </div>
+            <div class="auth-field">
+              <label for="signup-confirm">تأكيد كلمة المرور</label>
+              <div class="input-with-action">
+                <span class="auth-input-icon material-icons-outlined">lock</span>
+                <input id="signup-confirm" class="auth-input" type="password" name="confirm-password" minlength="8" autocomplete="new-password" placeholder="أعد إدخال كلمة المرور" required />
+                <span class="eye" data-toggle-pass="signup-confirm" role="button" tabindex="0" aria-label="إظهار كلمة المرور"><i class="fa-solid fa-eye"></i></span>
+              </div>
+            </div>
+            <button type="submit" class="auth-btn">
+              <span class="material-icons-outlined">person_add</span>
+              إنشاء الحساب
+            </button>
+          </form>
+
+          <div class="auth-footer">
+            لديك حساب بالفعل؟ <a href="../signin/login.html">تسجيل الدخول</a>
+          </div>
+
+          <div class="google-wrap" id="google-button-wrap"></div>
+        </div>
+
+        <p class="auth-safe">
+          <span class="material-icons-outlined">lock</span>
+          بياناتك محمية بتشفير كامل
+        </p>
       </div>
-
-      <div class="google-wrap" id="google-button-wrap"></div>
     </div>
   </div>
 
   <script src="../../assets/vendor/supabase/supabase-js.js"></script>
-  <script src="../../assets/js/supabase-client.js?v=20260922-failover-deep"></script>
-  <script src="../../assets/js/store.js?v=20260913a"></script>
+  <script src="../../assets/js/supabase-client.js?v=20260922-confirm402"></script>
+  <script src="../../assets/js/store.js?v=20260922-cartfix"></script>
   <script src="../../assets/js/security-utils.js"></script>
-  <script src="../../assets/js/auth.config.js"></script>
+<script src="../../assets/js/auth.config.js"></script>
   <script src="../signin/signin.js?v=20260912c"></script>
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+  <script>
+    /* Password visibility toggle for the signup form */
+    document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll("[data-toggle-pass]").forEach(function (btn) {
+        var target = document.getElementById(btn.getAttribute("data-toggle-pass"));
+        var icon = btn.querySelector("i");
+        if (!target || !icon) return;
+        var toggle = function () {
+          var hidden = target.type === "password";
+          target.type = hidden ? "text" : "password";
+          if (icon) {
+            icon.classList.toggle("fa-eye", !hidden);
+            icon.classList.toggle("fa-eye-slash", hidden);
+          }
+          btn.setAttribute("aria-label", hidden ? "إخفاء كلمة المرور" : "إظهار كلمة المرور");
+        };
+        btn.addEventListener("click", toggle);
+        btn.addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); }
+        });
+      });
+    });
+  </script>
 </body>
 </html>
 

@@ -1,4 +1,4 @@
-﻿﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" />
@@ -793,6 +793,950 @@
       box-shadow: 0 2px 6px rgba(220, 38, 38, 0.3) !important;
     }
 
+    /* ============================================================
+       ===== Premium Login-Required (Guest) Section =====
+       ============================================================ */
+    #login-required.section-block {
+      background: transparent !important;
+      border: none !important;
+      box-shadow: none !important;
+      padding: 0 !important;
+      margin: 20px auto 40px !important;
+      max-width: 980px;
+      transition: none !important;
+    }
+    #login-required.section-block:hover { transform: none !important; box-shadow: none !important; }
+
+    .lr-card {
+      background: #ffffff;
+      border: 1px solid #eef1f6;
+      border-radius: 26px;
+      overflow: hidden;
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.10), 0 4px 14px rgba(15, 23, 42, 0.05);
+      animation: lrCardIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+    }
+    @keyframes lrCardIn {
+      from { opacity: 0; transform: translateY(28px) scale(0.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes lrFadeUp {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ---------- Hero ---------- */
+    .lr-hero {
+      position: relative;
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 20px;
+      align-items: center;
+      padding: 38px 36px;
+      color: #fff;
+      background: linear-gradient(135deg, #3B0F79 0%, #6D28D9 48%, #8B5CF6 100%);
+      overflow: hidden;
+      isolation: isolate;
+    }
+    .lr-hero::before {
+      content: "";
+      position: absolute;
+      top: -120px;
+      right: -80px;
+      width: 340px;
+      height: 340px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0) 70%);
+      animation: lrDrift 9s ease-in-out infinite alternate;
+      z-index: -1;
+    }
+    .lr-hero::after {
+      content: "";
+      position: absolute;
+      bottom: -140px;
+      left: -90px;
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.35) 0%, rgba(236, 72, 153, 0) 70%);
+      animation: lrDrift 11s ease-in-out infinite alternate-reverse;
+      z-index: -1;
+    }
+    @keyframes lrDrift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(-26px, 22px) scale(1.12); }
+    }
+    .lr-hero-grid-lines {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 75%);
+      -webkit-mask-image: radial-gradient(ellipse at 50% 50%, #000 30%, transparent 75%);
+      z-index: -1;
+      pointer-events: none;
+    }
+
+    .lr-hero-text { animation: lrFadeUp 0.6s 0.15s ease both; }
+
+    .lr-welcome-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 6px 14px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      animation: lrFadeUp 0.6s 0.1s ease both;
+    }
+    .lr-welcome-badge .material-icons-outlined { font-size: 16px; color: #FDE047; }
+
+    .lr-lock {
+      position: relative;
+      width: 74px;
+      height: 74px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.18);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+      animation: lrFadeUp 0.6s 0.2s ease both, lrFloaty 4.5s 1s ease-in-out infinite;
+    }
+    .lr-lock .material-icons-outlined { font-size: 38px; color: #fff; }
+    .lr-lock::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      border-radius: 22px;
+      box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.5);
+      animation: lrPulseRing 2.6s ease-out infinite;
+    }
+    @keyframes lrPulseRing {
+      0%   { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.45); }
+      70%  { box-shadow: 0 0 0 20px rgba(255, 255, 255, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    }
+    @keyframes lrFloaty {
+      0%, 100% { transform: translateY(0); }
+      50%      { transform: translateY(-8px); }
+    }
+
+    .lr-hero h2 {
+      margin: 0 0 8px;
+      font-size: clamp(1.4rem, 3.4vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.01em;
+      text-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+    }
+    .lr-hero-sub {
+      margin: 0 0 22px;
+      font-size: clamp(0.86rem, 1.8vw, 0.98rem);
+      line-height: 1.7;
+      color: rgba(255, 255, 255, 0.9);
+      max-width: 44ch;
+    }
+
+    .lr-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .lr-stat {
+      background: rgba(255, 255, 255, 0.13);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      border-radius: 14px;
+      padding: 10px 16px;
+      min-width: 108px;
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: transform 0.25s ease, background 0.25s ease;
+    }
+    .lr-stat:hover { transform: translateY(-3px); background: rgba(255, 255, 255, 0.2); }
+    .lr-stat strong {
+      display: block;
+      font-size: 1.25rem;
+      font-weight: 800;
+      line-height: 1.2;
+      color: #FDE047;
+    }
+    .lr-stat span {
+      font-size: 0.7rem;
+      color: rgba(255, 255, 255, 0.85);
+      font-weight: 600;
+    }
+
+    /* ---------- Hero Art ---------- */
+    .lr-art {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 250px;
+      animation: lrFadeUp 0.7s 0.3s ease both;
+    }
+    .lr-art-glow {
+      position: absolute;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0) 68%);
+      animation: lrGlowPulse 4s ease-in-out infinite;
+    }
+    @keyframes lrGlowPulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50%      { transform: scale(1.14); opacity: 1; }
+    }
+    .lr-art-svg {
+      position: relative;
+      width: 210px;
+      max-width: 100%;
+      filter: drop-shadow(0 22px 34px rgba(20, 8, 60, 0.35));
+      animation: lrPhoneFloat 6s ease-in-out infinite;
+    }
+    @keyframes lrPhoneFloat {
+      0%, 100% { transform: translateY(0) rotate(-1.5deg); }
+      50%      { transform: translateY(-14px) rotate(1.5deg); }
+    }
+    .lr-art-svg .lr-check-badge {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: lrCheckPop 2.8s ease-in-out infinite;
+    }
+    @keyframes lrCheckPop {
+      0%, 100% { transform: scale(1); }
+      40%      { transform: scale(1.14); }
+      55%      { transform: scale(1); }
+    }
+
+    .lr-chip {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      border-radius: 16px;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.22);
+      animation: lrFloaty 4s ease-in-out infinite;
+    }
+    .lr-chip .material-icons-outlined { font-size: 25px; color: #6D28D9; }
+    .lr-chip-1 { top: 6%;  right: 6%;  animation-delay: 0s;    background: #EDE9FE; }
+    .lr-chip-1 .material-icons-outlined { color: #6D28D9; }
+    .lr-chip-2 { top: 20%; left: 4%;   animation-delay: 0.7s;  background: #FEE2E2; }
+    .lr-chip-2 .material-icons-outlined { color: #EF4444; }
+    .lr-chip-3 { bottom: 24%; right: 2%; animation-delay: 1.3s; background: #FEF3C7; }
+    .lr-chip-3 .material-icons-outlined { color: #D97706; }
+    .lr-chip-4 { bottom: 8%; left: 12%; animation-delay: 1.9s; background: #DBEAFE; }
+    .lr-chip-4 .material-icons-outlined { color: #2563EB; }
+    .lr-chip-5 { top: 46%; left: -2%;  animation-delay: 2.4s; background: #D1FAE5; }
+    .lr-chip-5 .material-icons-outlined { color: #059669; }
+
+    /* ---------- Marquee strip ---------- */
+    .lr-marquee {
+      background: linear-gradient(90deg, #0F172A 0%, #1E1B4B 55%, #312E81 100%);
+      color: #fff;
+      overflow: hidden;
+      padding: 11px 0;
+      direction: ltr;
+      border-top: 1px solid rgba(255, 255, 255, 0.06);
+    }
+    .lr-marquee-track {
+      display: flex;
+      width: max-content;
+      gap: 34px;
+      align-items: center;
+      animation: lrMarquee 26s linear infinite;
+      will-change: transform;
+    }
+    .lr-marquee:hover .lr-marquee-track { animation-play-state: paused; }
+    @keyframes lrMarquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .lr-marquee-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      white-space: nowrap;
+      direction: rtl;
+      color: rgba(255, 255, 255, 0.92);
+    }
+    .lr-marquee-item .material-icons-outlined { font-size: 17px; color: #FDE047; }
+    .lr-marquee-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(255,255,255,0.35); flex-shrink: 0; }
+
+    /* ---------- Body ---------- */
+    .lr-body { padding: 30px 32px 28px; }
+
+    .lr-section-head { text-align: center; margin-bottom: 22px; }
+    .lr-section-head h3 {
+      margin: 0 0 6px;
+      font-size: clamp(1.1rem, 2.6vw, 1.35rem);
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .lr-section-head p {
+      margin: 0;
+      font-size: 0.85rem;
+      color: #64748b;
+    }
+    .lr-section-head .lr-title-underline {
+      display: block;
+      width: 56px;
+      height: 4px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #6D28D9, #EC4899);
+      margin: 10px auto 0;
+      animation: lrUnderline 0.8s 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+      transform-origin: center;
+    }
+    @keyframes lrUnderline { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+
+    .lr-benefits {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-bottom: 26px;
+    }
+    .lr-benefit {
+      position: relative;
+      background: #F8FAFC;
+      border: 1px solid #EEF2F7;
+      border-radius: 18px;
+      padding: 18px 16px 16px;
+      text-align: right;
+      overflow: hidden;
+      transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+      animation: lrFadeUp 0.55s ease both;
+      cursor: default;
+    }
+    .lr-benefit:nth-child(1) { animation-delay: 0.15s; }
+    .lr-benefit:nth-child(2) { animation-delay: 0.25s; }
+    .lr-benefit:nth-child(3) { animation-delay: 0.35s; }
+    .lr-benefit:nth-child(4) { animation-delay: 0.45s; }
+    .lr-benefit:nth-child(5) { animation-delay: 0.55s; }
+    .lr-benefit:nth-child(6) { animation-delay: 0.65s; }
+    .lr-benefit::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 90px;
+      height: 90px;
+      background: radial-gradient(circle at top right, rgba(109, 40, 217, 0.10), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .lr-benefit:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 16px 34px rgba(15, 23, 42, 0.10);
+      border-color: #DDD6FE;
+      background: #ffffff;
+    }
+    .lr-benefit:hover::before { opacity: 1; }
+    .lr-benefit-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+      box-shadow: 0 6px 16px rgba(109, 40, 217, 0.18);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .lr-benefit:hover .lr-benefit-icon { transform: scale(1.1) rotate(-7deg); }
+    .lr-benefit-icon .material-icons-outlined { font-size: 25px; color: #fff; }
+    .lr-benefit-icon.c1 { background: linear-gradient(135deg, #6D28D9, #A855F7); }
+    .lr-benefit-icon.c2 { background: linear-gradient(135deg, #DB2777, #F472B6); box-shadow: 0 6px 16px rgba(219, 39, 119, 0.18); }
+    .lr-benefit-icon.c3 { background: linear-gradient(135deg, #D97706, #FBBF24); box-shadow: 0 6px 16px rgba(217, 119, 6, 0.20); }
+    .lr-benefit-icon.c4 { background: linear-gradient(135deg, #059669, #34D399); box-shadow: 0 6px 16px rgba(5, 150, 105, 0.20); }
+    .lr-benefit-icon.c5 { background: linear-gradient(135deg, #2563EB, #60A5FA); box-shadow: 0 6px 16px rgba(37, 99, 235, 0.20); }
+    .lr-benefit-icon.c6 { background: linear-gradient(135deg, #0F172A, #475569); box-shadow: 0 6px 16px rgba(15, 23, 42, 0.22); }
+    .lr-benefit h4 {
+      margin: 0 0 5px;
+      font-size: 0.94rem;
+      font-weight: 800;
+      color: #0f172a;
+    }
+    .lr-benefit p {
+      margin: 0;
+      font-size: 0.78rem;
+      line-height: 1.65;
+      color: #64748b;
+    }
+    .lr-benefit-num {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #C4B5FD;
+      letter-spacing: 0.06em;
+    }
+
+    /* ---------- CTA ---------- */
+    .lr-cta {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .lr-btn {
+      position: relative;
+      overflow: hidden;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 54px;
+      padding: 0 30px;
+      border-radius: 16px;
+      font-size: 1rem;
+      font-weight: 800;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.22s ease, box-shadow 0.22s ease, background 0.22s ease;
+      animation: lrFadeUp 0.55s 0.7s ease both;
+    }
+    .lr-btn .material-icons-outlined { font-size: 21px; }
+    .lr-btn:hover { transform: translateY(-3px); }
+    .lr-btn:active { transform: translateY(-1px) scale(0.98); }
+    .lr-btn-primary {
+      background: linear-gradient(135deg, #6D28D9 0%, #7C3AED 55%, #9333EA 100%);
+      color: #fff;
+      box-shadow: 0 12px 26px rgba(109, 40, 217, 0.35);
+      min-width: 240px;
+    }
+    .lr-btn-primary:hover {
+      box-shadow: 0 16px 34px rgba(109, 40, 217, 0.45);
+      background: linear-gradient(135deg, #5B21B6 0%, #6D28D9 55%, #7C3AED 100%);
+    }
+    .lr-btn-primary::after {
+      content: "";
+      position: absolute;
+      top: -20%;
+      bottom: -20%;
+      left: -70%;
+      width: 45%;
+      background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.5), transparent);
+      transform: skewX(-22deg);
+      animation: lrShine 3.4s ease-in-out infinite;
+    }
+    @keyframes lrShine {
+      0%, 55%  { left: -70%; }
+      100%     { left: 140%; }
+    }
+    .lr-btn-outline {
+      background: #ffffff;
+      color: #6D28D9;
+      border: 2px solid #DDD6FE;
+      min-width: 200px;
+      animation-delay: 0.8s;
+    }
+    .lr-btn-outline:hover {
+      background: #F5F3FF;
+      border-color: #A78BFA;
+      box-shadow: 0 10px 24px rgba(109, 40, 217, 0.15);
+    }
+
+    .lr-guest-link {
+      text-align: center;
+      font-size: 0.82rem;
+      color: #64748b;
+      margin: 0 0 22px;
+      animation: lrFadeUp 0.55s 0.85s ease both;
+    }
+    .lr-guest-link a {
+      color: #6D28D9;
+      font-weight: 800;
+      text-decoration: none;
+      border-bottom: 2px dashed #C4B5FD;
+      padding-bottom: 1px;
+      transition: border-color 0.2s ease, color 0.2s ease;
+    }
+    .lr-guest-link a:hover { color: #4C1D95; border-color: #6D28D9; }
+
+    /* ---------- Trust row ---------- */
+    .lr-trust {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      padding-top: 18px;
+      border-top: 1px dashed #E2E8F0;
+      animation: lrFadeUp 0.55s 0.95s ease both;
+    }
+    .lr-trust-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: #F1F5F9;
+      border: 1px solid #E9EEF5;
+      color: #475569;
+      font-size: 0.74rem;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 999px;
+      transition: background 0.2s ease, transform 0.2s ease, color 0.2s ease;
+    }
+    .lr-trust-item:hover { background: #EDE9FE; color: #5B21B6; transform: translateY(-2px); }
+    .lr-trust-item .material-icons-outlined { font-size: 17px; color: #6D28D9; }
+
+    .lr-terms {
+      margin: 18px 0 0;
+      font-size: 0.76rem;
+      color: #94A3B8;
+      text-align: center;
+      line-height: 1.8;
+    }
+    .lr-terms a { color: #6D28D9; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+    .lr-terms a:hover { color: #4C1D95; }
+
+    /* ---------- Responsive ---------- */
+    @media (max-width: 880px) {
+      .lr-hero { grid-template-columns: 1fr; text-align: center; padding: 32px 24px 26px; }
+      .lr-hero-sub { margin-left: auto; margin-right: auto; }
+      .lr-stats { justify-content: center; }
+      .lr-art { min-height: 230px; order: -1; }
+      .lr-art-svg { width: 180px; }
+      .lr-benefits { grid-template-columns: repeat(2, 1fr); }
+      .lr-body { padding: 26px 22px 24px; }
+    }
+    @media (max-width: 560px) {
+      #login-required.section-block { margin: 12px auto 28px !important; }
+      .lr-card { border-radius: 22px; }
+      .lr-hero { padding: 26px 18px 22px; }
+      .lr-lock { width: 64px; height: 64px; border-radius: 18px; }
+      .lr-lock .material-icons-outlined { font-size: 32px; }
+      .lr-stat { min-width: 92px; padding: 8px 12px; }
+      .lr-stat strong { font-size: 1.08rem; }
+      .lr-benefits { grid-template-columns: 1fr; gap: 10px; }
+      .lr-benefit { display: flex; align-items: center; gap: 14px; padding: 14px; }
+      .lr-benefit-icon { margin-bottom: 0; flex-shrink: 0; width: 44px; height: 44px; border-radius: 12px; }
+      .lr-benefit-num { display: none; }
+      .lr-benefit-text { min-width: 0; }
+      .lr-body { padding: 22px 16px 20px; }
+      .lr-btn { width: 100%; min-width: 0 !important; padding: 0 18px; }
+      .lr-cta { flex-direction: column; }
+      .lr-chip { width: 42px; height: 42px; border-radius: 13px; }
+      .lr-chip .material-icons-outlined { font-size: 21px; }
+      .lr-art-svg { width: 155px; }
+      .lr-art { min-height: 200px; }
+      .lr-trust-item { font-size: 0.7rem; padding: 7px 11px; }
+    }
+    @media (max-width: 360px) {
+      .lr-hero { padding: 22px 14px 18px; }
+      .lr-body { padding: 18px 12px 16px; }
+      .lr-stat { min-width: 84px; }
+      .lr-marquee-item { font-size: 0.72rem; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .lr-card, .lr-hero-text, .lr-welcome-badge, .lr-lock, .lr-art,
+      .lr-benefit, .lr-btn, .lr-guest-link, .lr-trust, .lr-section-head .lr-title-underline {
+        animation: none !important;
+      }
+      .lr-marquee-track, .lr-art-svg, .lr-chip, .lr-hero::before, .lr-hero::after,
+      .lr-art-glow, .lr-btn-primary::after, .lr-lock::after, .lr-art-svg .lr-check-badge {
+        animation: none !important;
+      }
+    }
+
+    /* ============================================================
+       ===== Premium Logged-in Profile Header =====
+       ============================================================ */
+    .acc-v2-profile-card.acc-hero-card {
+      position: relative;
+      overflow: hidden;
+      isolation: isolate;
+      padding: 26px 22px 22px;
+      background: linear-gradient(160deg, #2A0A54 0%, #5B21B6 48%, #7C3AED 100%) !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      border-radius: 22px !important;
+      box-shadow: 0 24px 50px rgba(91, 33, 182, 0.28), 0 6px 16px rgba(15, 23, 42, 0.10) !important;
+      text-align: center;
+      color: #fff;
+      animation: accHeroIn 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .acc-v2-profile-card.acc-hero-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 30px 60px rgba(91, 33, 182, 0.34), 0 8px 20px rgba(15, 23, 42, 0.12) !important;
+    }
+    @keyframes accHeroIn {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .acc-hero-bg {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+      background-size: 30px 30px;
+      mask-image: radial-gradient(ellipse at 50% 0%, #000 20%, transparent 78%);
+      -webkit-mask-image: radial-gradient(ellipse at 50% 0%, #000 20%, transparent 78%);
+      z-index: -2;
+      pointer-events: none;
+    }
+    .acc-blob {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: -1;
+      animation: accBlobDrift 12s ease-in-out infinite alternate;
+    }
+    .acc-blob-1 {
+      width: 220px; height: 220px;
+      top: -90px; right: -80px;
+      background: radial-gradient(circle, rgba(236, 72, 153, 0.35), rgba(236,72,153,0) 70%);
+    }
+    .acc-blob-2 {
+      width: 190px; height: 190px;
+      bottom: -80px; left: -70px;
+      background: radial-gradient(circle, rgba(253, 224, 71, 0.22), rgba(253,224,71,0) 70%);
+      animation-delay: -4s;
+      animation-direction: alternate-reverse;
+    }
+    @keyframes accBlobDrift {
+      from { transform: translate(0, 0) scale(1); }
+      to   { transform: translate(-18px, 16px) scale(1.15); }
+    }
+
+    .acc-star {
+      position: absolute;
+      pointer-events: none;
+      z-index: 1;
+      font-size: 14px;
+      opacity: 0;
+      animation: accStarFloat 5s ease-in-out infinite, accStarTwinkle 2.8s ease-in-out infinite;
+    }
+    .acc-star-1 { top: 14px;  right: 16px; font-size: 15px; color: #FFF7CC; animation-delay: 0s, 0.3s; }
+    .acc-star-2 { top: 40px;  left: 18px;  font-size: 20px; color: #F9A8D4; animation-delay: 0.9s, 0.9s; }
+    .acc-star-3 { top: 140px; right: 12px; font-size: 12px; color: #93C5FD; animation-delay: 1.4s, 1.2s; }
+    .acc-star-4 { bottom: 96px; left: 10px; font-size: 17px; color: #DDD6FE; animation-delay: 2s, 1.8s; }
+    .acc-star-5 { top: 78px;  right: 34px; font-size: 11px; color: #FDE047; animation-delay: 0.4s, 2.2s; }
+    .acc-star-6 { bottom: 40px; right: 42px; font-size: 13px; color: #F9A8D4; animation-delay: 2.6s, 0.6s; }
+    .acc-star-7 { bottom: 150px; left: 30px; font-size: 10px; color: #FFF7CC; animation-delay: 3.2s, 2.6s; }
+    .acc-star-8 { bottom: 24px; left: 70px; font-size: 16px; color: #93C5FD; animation-delay: 1.1s, 1.5s; }
+
+    @keyframes accStarFloat {
+      0%, 100% { transform: translateY(0) translateX(0) rotate(0deg); }
+      50%      { transform: translateY(-12px) translateX(4px) rotate(14deg); }
+    }
+    @keyframes accStarTwinkle {
+      0%, 100% { opacity: 0; }
+      40%, 70% { opacity: 1; }
+    }
+
+    .acc-chip {
+      position: absolute;
+      width: 40px;
+      height: 40px;
+      border-radius: 13px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+      color: #FDE047;
+      pointer-events: none;
+      z-index: 1;
+      animation: accChipFloat 5.5s ease-in-out infinite;
+    }
+    .acc-chip .material-icons-outlined { font-size: 20px; }
+    .acc-chip-1 { top: 96px; right: 12px; animation-delay: 0s; }
+    .acc-chip-2 { bottom: 180px; left: 12px; animation-delay: 1.6s; color: #C4B5FD; }
+    @keyframes accChipFloat {
+      0%, 100% { transform: translateY(0) rotate(-6deg); }
+      50%      { transform: translateY(-9px) rotate(6deg); }
+    }
+
+    .acc-member-badge {
+      position: relative;
+      z-index: 2;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.16);
+      border: 1px solid rgba(255, 255, 255, 0.26);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      padding: 5px 13px;
+      border-radius: 999px;
+      font-size: 0.72rem;
+      font-weight: 800;
+      color: #FDE047;
+      margin-bottom: 14px;
+      letter-spacing: 0.01em;
+    }
+    .acc-member-badge .acc-member-star { font-size: 15px; color: #FDE047; }
+
+    .acc-hero-card .acc-v2-avatar {
+      position: relative;
+      z-index: 2;
+      width: 84px !important;
+      height: 84px !important;
+      font-size: 1.9rem !important;
+      font-weight: 800 !important;
+      background: linear-gradient(135deg, #FDE047 0%, #F59E0B 55%, #F472B6 100%) !important;
+      color: #4C1D95 !important;
+      border: 3px solid rgba(255, 255, 255, 0.9) !important;
+      animation: accAvatarIn 0.8s 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both, accAvatarRing 3.2s ease-out infinite;
+    }
+    @keyframes accAvatarIn {
+      from { transform: scale(0.7); opacity: 0; }
+      to   { transform: scale(1); opacity: 1; }
+    }
+    @keyframes accAvatarRing {
+      0%   { box-shadow: 0 10px 26px rgba(15,23,42,0.35), 0 0 0 0 rgba(255,255,255,0.45); }
+      70%  { box-shadow: 0 10px 26px rgba(15,23,42,0.35), 0 0 0 18px rgba(255,255,255,0); }
+      100% { box-shadow: 0 10px 26px rgba(15,23,42,0.35), 0 0 0 0 rgba(255,255,255,0); }
+    }
+
+    .acc-hero-card .acc-v2-name-row {
+      position: relative;
+      z-index: 2;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+    .acc-hero-card .acc-v2-name {
+      font-size: 1.3rem !important;
+      font-weight: 900 !important;
+      color: #ffffff !important;
+      margin: 0 !important;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.22);
+    }
+    .acc-hero-card .acc-v2-email {
+      position: relative;
+      z-index: 2;
+      font-size: 0.82rem !important;
+      color: rgba(255, 255, 255, 0.78) !important;
+      margin: 0 0 16px !important;
+      direction: ltr;
+      word-break: break-all;
+    }
+    .acc-hero-card .acc-v2-edit-icon-btn {
+      position: relative;
+      z-index: 2;
+      width: 34px;
+      height: 34px;
+      background: rgba(255, 255, 255, 0.18) !important;
+      color: #ffffff !important;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18);
+      transition: transform 0.2s ease, background 0.2s ease, color 0.2s ease;
+    }
+    .acc-hero-card .acc-v2-edit-icon-btn .material-icons-outlined { font-size: 18px; }
+    .acc-hero-card .acc-v2-edit-icon-btn:hover {
+      background: #ffffff !important;
+      color: #6D28D9 !important;
+      transform: scale(1.1) rotate(-6deg);
+    }
+
+    .acc-hero-card .acc-v2-progress {
+      position: relative;
+      z-index: 2;
+      text-align: right;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 12px 14px;
+      margin-top: 4px;
+    }
+    .acc-hero-card .acc-v2-progress-text {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.76rem !important;
+      color: rgba(255, 255, 255, 0.9) !important;
+      font-weight: 700 !important;
+      margin-bottom: 8px;
+    }
+    .acc-hero-card #profileProgressLabel {
+      color: #FDE047 !important;
+      font-weight: 900 !important;
+      white-space: nowrap;
+    }
+    .acc-hero-card .acc-v2-progress-bar {
+      height: 9px !important;
+      background: rgba(255, 255, 255, 0.22) !important;
+      box-shadow: none !important;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .acc-hero-card .acc-v2-progress-fill {
+      background: linear-gradient(90deg, #FDE047, #EC4899 60%, #8B5CF6) !important;
+      box-shadow: 0 0 12px rgba(236, 72, 153, 0.55) !important;
+      border-radius: 999px;
+    }
+    .acc-hero-card .acc-v2-progress.is-complete .acc-v2-progress-fill {
+      background: linear-gradient(90deg, #22C55E, #34D399) !important;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.5) !important;
+    }
+    .acc-hero-card .acc-v2-progress.is-complete .acc-v2-progress-text { color: #BBF7D0 !important; }
+
+    @media (max-width: 1023px) {
+      .acc-v2-profile-card.acc-hero-card { padding: 24px 18px 20px; }
+    }
+    @media (max-width: 480px) {
+      .acc-v2-profile-card.acc-hero-card { border-radius: 18px !important; padding: 22px 16px 18px; }
+      .acc-hero-card .acc-v2-avatar { width: 76px !important; height: 76px !important; font-size: 1.7rem !important; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .acc-v2-profile-card.acc-hero-card,
+      .acc-hero-card .acc-v2-avatar {
+        animation: none !important;
+      }
+      .acc-stars { animation: none !important; }
+      .acc-blob, .acc-chip, .acc-star { animation: none !important; }
+      .acc-star { opacity: 0.85 !important; }
+    }
+
+    /* ============================================================
+       ===== Premium Stat Grid =====
+       ============================================================ */
+    .acc-stat-orders  { --stat-grad: linear-gradient(135deg, #2563EB, #60A5FA); --stat-glow: rgba(37, 99, 235, 0.18); }
+    .acc-stat-fav     { --stat-grad: linear-gradient(135deg, #DC2626, #F87171); --stat-glow: rgba(220, 38, 38, 0.16); }
+    .acc-stat-addr    { --stat-grad: linear-gradient(135deg, #059669, #34D399); --stat-glow: rgba(5, 150, 105, 0.16); }
+    .acc-stat-return  { --stat-grad: linear-gradient(135deg, #6D28D9, #A855F7); --stat-glow: rgba(109, 40, 217, 0.16); }
+
+    .acc-v2-stat-card {
+      display: flex !important;
+      align-items: center;
+      gap: 13px;
+      position: relative;
+      overflow: hidden;
+      background: #ffffff;
+      border: 1px solid #EEF2F7 !important;
+      border-radius: 18px !important;
+      padding: 15px 14px !important;
+      box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+      transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+      animation: statUp 0.5s ease both;
+    }
+    .acc-v2-stat-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, var(--stat-glow), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    .acc-v2-stat-card .acc-v2-stat-info { position: relative; z-index: 1; }
+    .acc-v2-stat-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 16px 32px rgba(15, 23, 42, 0.10), 0 4px 12px var(--stat-glow);
+      border-color: #E2E8F0 !important;
+    }
+    .acc-v2-stat-card:hover::before { opacity: 1; }
+    .acc-v2-stat-card:nth-child(1) { animation-delay: 0.05s; }
+    .acc-v2-stat-card:nth-child(2) { animation-delay: 0.12s; }
+    .acc-v2-stat-card:nth-child(3) { animation-delay: 0.19s; }
+    .acc-v2-stat-card:nth-child(4) { animation-delay: 0.26s; }
+    @keyframes statUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .acc-stat-icon {
+      position: relative;
+      flex-shrink: 0;
+      width: 46px;
+      height: 46px;
+      border-radius: 14px;
+      background: var(--stat-grad);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 18px var(--stat-glow);
+      transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .acc-v2-stat-card:hover .acc-stat-icon { transform: scale(1.08) rotate(-6deg); }
+    .acc-stat-icon .material-icons-outlined { font-size: 23px; color: #ffffff; }
+    .acc-stat-count {
+      position: absolute;
+      top: -6px;
+      left: -6px;
+      min-width: 21px;
+      height: 21px;
+      padding: 0 5px;
+      border-radius: 999px;
+      background: var(--stat-grad);
+      color: #ffffff;
+      font-size: 0.68rem;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid #ffffff;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.18);
+      z-index: 2;
+    }
+    .acc-v2-stat-info {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      min-width: 0;
+    }
+    .acc-v2-stat-label {
+      font-size: 0.95rem !important;
+      font-weight: 800 !important;
+      color: #0F172A !important;
+    }
+    .acc-v2-stat-desc {
+      font-size: 0.72rem !important;
+      color: #64748b !important;
+      margin: 0 !important;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 480px) {
+      .acc-v2-stat-card { gap: 10px; padding: 12px 11px !important; border-radius: 16px !important; }
+      .acc-stat-icon { width: 40px; height: 40px; border-radius: 12px; }
+      .acc-stat-icon .material-icons-outlined { font-size: 21px; }
+      .acc-v2-stat-label { font-size: 0.88rem !important; }
+      .acc-v2-stat-desc { font-size: 0.68rem !important; }
+      .acc-stat-count { min-width: 19px; height: 19px; font-size: 0.62rem; }
+    }
+    @media (max-width: 360px) {
+      .acc-v2-stat-card { flex-direction: column; align-items: flex-start; }
+      .acc-v2-stat-desc { display: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .acc-v2-stat-card { animation: none !important; }
+      .acc-stat-icon { transition: none !important; }
+      .acc-v2-stat-card { transition: none !important; }
+    }
+
     /* ===== Account page skeleton ===== */
     .account-page .skeleton-page-shell {
       display: none !important;
@@ -906,51 +1850,202 @@
 
     <p id="account-status" class="status-note hidden" aria-live="polite"></p>
 
-    <section id="login-required" class="section-block hidden" style="margin:40px auto;padding:0;">
-      <div style="background:linear-gradient(135deg,#6D28D9,#A855F7);border-radius:20px 20px 0 0;padding:32px 24px 24px;text-align:center;color:#fff;">
-        <div style="width:64px;height:64px;margin:0 auto 16px;background:rgba(255,255,255,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;">
-          <span class="material-icons-outlined" style="font-size:32px;color:#fff;">lock</span>
+    <section id="login-required" class="section-block hidden">
+      <div class="lr-card">
+        <!-- ==== Hero ==== -->
+        <div class="lr-hero">
+          <div class="lr-hero-grid-lines"></div>
+          <div class="lr-hero-text">
+            <div class="lr-welcome-badge">
+              <span class="material-icons-outlined">verified</span>
+              أهلاً بك في BudoQ
+            </div>
+            <div class="lr-lock">
+              <span class="material-icons-outlined">lock</span>
+            </div>
+            <h2>تسجيل الدخول مطلوب</h2>
+            <p class="lr-hero-sub">يجب تسجيل الدخول لتتمكن من الوصول إلى حسابك وإدارة طلباتك — كل التفاصيل في مكان واحد آمن وسريع.</p>
+            <div class="lr-stats">
+              <div class="lr-stat">
+                <strong><span class="lr-count" data-lr-count="120">0</span> ألف+</strong>
+                <span>عميل سعيد</span>
+              </div>
+              <div class="lr-stat">
+                <strong><span class="lr-count" data-lr-count="35">0</span> ألف+</strong>
+                <span>طلب مكتمل</span>
+              </div>
+              <div class="lr-stat">
+                <strong><span class="lr-count" data-lr-count="4.8" data-lr-decimals="1">0</span>/5</strong>
+                <span>تقييم المتجر</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Hero illustration -->
+          <div class="lr-art" aria-hidden="true">
+            <div class="lr-art-glow"></div>
+            <svg class="lr-art-svg" viewBox="0 0 220 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="lrGrad" x1="0" y1="0" x2="1" y2="1">
+                  <stop offset="0" stop-color="#8B5CF6"/>
+                  <stop offset="1" stop-color="#EC4899"/>
+                </linearGradient>
+              </defs>
+              <rect x="45" y="10" width="130" height="220" rx="24" fill="#ffffff"/>
+              <rect x="53" y="18" width="114" height="204" rx="18" fill="#F8F7FF"/>
+              <rect x="70" y="32" width="42" height="8" rx="4" fill="#EDE9FE"/>
+              <circle cx="110" cy="92" r="26" fill="#F1EDFD"/>
+              <circle cx="110" cy="82" r="10" fill="#7C3AED"/>
+              <path d="M95 108c2.5-9 8-13 15-13s12.5 4 15 13" stroke="#7C3AED" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <rect x="74" y="136" width="72" height="9" rx="4.5" fill="#E2E8F0"/>
+              <rect x="74" y="152" width="50" height="7" rx="3.5" fill="#EEF2F7"/>
+              <rect x="66" y="172" width="88" height="28" rx="11" fill="url(#lrGrad)"/>
+              <rect x="74" y="199" width="42" height="7" rx="3.5" fill="#EEF2F7"/>
+              <g class="lr-check-badge">
+                <circle cx="58" cy="198" r="19" fill="#22C55E" stroke="#ffffff" stroke-width="5"/>
+                <path d="M49 198l6.5 6.5L73 187" stroke="#ffffff" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+              </g>
+            </svg>
+            <span class="lr-chip lr-chip-1"><span class="material-icons-outlined">shopping_bag</span></span>
+            <span class="lr-chip lr-chip-2"><span class="material-icons-outlined">favorite</span></span>
+            <span class="lr-chip lr-chip-3"><span class="material-icons-outlined">local_offer</span></span>
+            <span class="lr-chip lr-chip-4"><span class="material-icons-outlined">local_shipping</span></span>
+            <span class="lr-chip lr-chip-5"><span class="material-icons-outlined">verified_user</span></span>
+          </div>
         </div>
-        <h2 style="margin:0 0 6px;font-size:1.4rem;font-weight:700;color:#fff;">تسجيل الدخول مطلوب</h2>
-        <p style="margin:0;font-size:0.9rem;opacity:0.9;color:#fff;">يجب تسجيل الدخول لتتمكن من الوصول إلى حسابك وإدارة طلباتك.</p>
-      </div>
-      <div style="background:var(--color-surface,#fff);border:1px solid var(--color-border,#e5e7eb);border-top:0;border-radius:0 0 20px 20px;padding:24px;">
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:20px;">
-          <div style="display:flex;align-items:center;gap:12px;font-size:0.88rem;color:var(--color-text-secondary,#6b7280);">
-            <span class="material-icons-outlined" style="font-size:20px;color:#6D28D9;">shopping_bag</span>
-            <span>متابعة طلباتك وتتبع الشحنات في الوقت الفعلي</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;font-size:0.88rem;color:var(--color-text-secondary,#6b7280);">
-            <span class="material-icons-outlined" style="font-size:20px;color:#6D28D9;">favorite</span>
-            <span>حفظ المنتجات المفضلة والوصول إليها بسرعة</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;font-size:0.88rem;color:var(--color-text-secondary,#6b7280);">
-            <span class="material-icons-outlined" style="font-size:20px;color:#6D28D9;">local_offer</span>
-            <span>الاستفادة من العروض والحصول على كوبونات الخصم</span>
-          </div>
-          <div style="display:flex;align-items:center;gap:12px;font-size:0.88rem;color:var(--color-text-secondary,#6b7280);">
-            <span class="material-icons-outlined" style="font-size:20px;color:#6D28D9;">location_on</span>
-            <span>إدارة عناوين التوصيل وتحديد المفضل منها</span>
+
+        <!-- ==== Marquee strip ==== -->
+        <div class="lr-marquee" aria-hidden="true">
+          <div class="lr-marquee-track">
+            <span class="lr-marquee-item"><span class="material-icons-outlined">local_shipping</span> شحن مجاني للطلبات فوق 500 جنيه</span>
+            <span class="lr-marquee-dot"></span>
+            <span class="lr-marquee-item"><span class="material-icons-outlined">assignment_return</span> إرجاع مجاني خلال 14 يوم</span>
+            <span class="lr-marquee-dot"></span>
+            <span class="lr-marquee-item"><span class="material-icons-outlined">payments</span> الدفع عند الاستلام متاح</span>
+            <span class="lr-marquee-dot"></span>
+            <span class="lr-marquee-item"><span class="material-icons-outlined">confirmation_number</span> كوبونات وعروض حصرية للأعضاء</span>
+            <span class="lr-marquee-dot"></span>
+            <span class="lr-marquee-item"><span class="material-icons-outlined">headset_mic</span> دعم فني 24/7</span>
+            <span class="lr-marquee-dot"></span>
+            <span class="lr-marquee-item"><span class="material-icons-outlined">local_shipping</span> شحن مجاني للطلبات فوق 500 جنيه</span>
+            <span class="lr-marquee-dot"></span>
+            <span class="lr-marquee-item"><span class="material-icons-outlined">assignment_return</span> إرجاع مجاني خلال 14 يوم</span>
+            <span class="lr-marquee-dot"></span>
+            <span class="lr-marquee-item"><span class="material-icons-outlined">payments</span> الدفع عند الاستلام متاح</span>
+            <span class="lr-marquee-dot"></span>
+            <span class="lr-marquee-item"><span class="material-icons-outlined">confirmation_number</span> كوبونات وعروض حصرية للأعضاء</span>
+            <span class="lr-marquee-dot"></span>
+            <span class="lr-marquee-item"><span class="material-icons-outlined">headset_mic</span> دعم فني 24/7</span>
+            <span class="lr-marquee-dot"></span>
           </div>
         </div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          <a class="btn-primary" href="signin/login.html" style="width:100%;padding:14px;border-radius:12px;font-size:1rem;font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <span class="material-icons-outlined" style="font-size:20px;">login</span>
-            تسجيل الدخول
-          </a>
-          <a class="btn-secondary" href="signup/index.html" style="width:100%;padding:14px;border-radius:12px;font-size:1rem;font-weight:600;text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;">
-            <span class="material-icons-outlined" style="font-size:20px;">person_add</span>
-            إنشاء حساب جديد
-          </a>
+
+        <!-- ==== Body ==== -->
+        <div class="lr-body">
+          <div class="lr-section-head">
+            <h3>لماذا تنضم إلى BudoQ؟</h3>
+            <p>حساب واحد يفتح لك كل مزايا المتجر</p>
+            <span class="lr-title-underline"></span>
+          </div>
+
+          <div class="lr-benefits">
+            <div class="lr-benefit">
+              <div class="lr-benefit-icon c1"><span class="material-icons-outlined">shopping_bag</span></div>
+              <div class="lr-benefit-text">
+                <h4>تتبع طلباتك لحظياً</h4>
+                <p>متابعة طلباتك وتتبع الشحنات في الوقت الفعلي من لحظة الطلب حتى باب منزلك.</p>
+              </div>
+              <span class="lr-benefit-num">01</span>
+            </div>
+            <div class="lr-benefit">
+              <div class="lr-benefit-icon c2"><span class="material-icons-outlined">favorite</span></div>
+              <div class="lr-benefit-text">
+                <h4>قائمة المفضلة الذكية</h4>
+                <p>حفظ المنتجات المفضلة والوصول إليها بسرعة من أي جهاز في أي وقت.</p>
+              </div>
+              <span class="lr-benefit-num">02</span>
+            </div>
+            <div class="lr-benefit">
+              <div class="lr-benefit-icon c3"><span class="material-icons-outlined">local_offer</span></div>
+              <div class="lr-benefit-text">
+                <h4>عروض وكوبونات خاصة</h4>
+                <p>الاستفادة من العروض الحصرية والحصول على كوبونات الخصم للأعضاء فقط.</p>
+              </div>
+              <span class="lr-benefit-num">03</span>
+            </div>
+            <div class="lr-benefit">
+              <div class="lr-benefit-icon c4"><span class="material-icons-outlined">location_on</span></div>
+              <div class="lr-benefit-text">
+                <h4>عناوين توصيلك أنت</h4>
+                <p>إدارة عناوين التوصيل وتحديد المفضل منها لتسريع عملية الشراء.</p>
+              </div>
+              <span class="lr-benefit-num">04</span>
+            </div>
+            <div class="lr-benefit">
+              <div class="lr-benefit-icon c5"><span class="material-icons-outlined">payments</span></div>
+              <div class="lr-benefit-text">
+                <h4>دفع آمن ومرن</h4>
+                <p>طرق دفع متعددة وآمنة تماماً، مع سجل واضح لكل عملياتك المالية.</p>
+              </div>
+              <span class="lr-benefit-num">05</span>
+            </div>
+            <div class="lr-benefit">
+              <div class="lr-benefit-icon c6"><span class="material-icons-outlined">support_agent</span></div>
+              <div class="lr-benefit-text">
+                <h4>دعم فوري 24/7</h4>
+                <p>فريق دعم متخصص جاهز لمساعدتك على مدار الساعة عبر الدردشة المباشرة.</p>
+              </div>
+              <span class="lr-benefit-num">06</span>
+            </div>
+          </div>
+
+          <div class="lr-cta">
+            <a class="lr-btn lr-btn-primary" href="signin/login.html">
+              <span class="material-icons-outlined">login</span>
+              تسجيل الدخول الآن
+            </a>
+            <a class="lr-btn lr-btn-outline" href="signup/index.html">
+              <span class="material-icons-outlined">person_add</span>
+              إنشاء حساب جديد
+            </a>
+          </div>
+
+          <p class="lr-guest-link">أو <a href="home.html">تصفح المنتجات كزائر</a> والمتابعة لاحقاً</p>
+
+          <div class="lr-trust">
+            <span class="lr-trust-item"><span class="material-icons-outlined">encrypted</span> اتصال مشفّر</span>
+            <span class="lr-trust-item"><span class="material-icons-outlined">verified_user</span> دفع آمن</span>
+            <span class="lr-trust-item"><span class="material-icons-outlined">local_shipping</span> شحن سريع</span>
+            <span class="lr-trust-item"><span class="material-icons-outlined">support_agent</span> دعم 24/7</span>
+          </div>
+
+          <p class="lr-terms">بالتسجيل أنت توافق على <a href="privacy.html">سياسة الخصوصية</a> والشروط والأحكام، وسنحافظ على بياناتك بأمان تام.</p>
         </div>
-        <p style="margin:16px 0 0;font-size:0.78rem;color:var(--color-text-muted,#9ca3af);text-align:center;">بالتسجيل أنت توافق على <a href="privacy.html" style="color:#6D28D9;text-decoration:underline;">سياسة الخصوصية</a> 
       </div>
     </section>
 
     <div id="profile-content" class="acc-v2-layout">
       <!-- Sidebar / Profile Card -->
       <aside class="acc-v2-sidebar">
-        <div class="acc-v2-profile-card">
+        <div class="acc-v2-profile-card acc-hero-card">
+          <div class="acc-hero-bg" aria-hidden="true"></div>
+          <span class="acc-blob acc-blob-1" aria-hidden="true"></span>
+          <span class="acc-blob acc-blob-2" aria-hidden="true"></span>
+          <span class="acc-chip acc-chip-1" aria-hidden="true"><span class="material-icons-outlined">shopping_bag</span></span>
+          <span class="acc-chip acc-chip-2" aria-hidden="true"><span class="material-icons-outlined">emoji_events</span></span>
+          <span class="material-icons-outlined acc-star acc-star-1" aria-hidden="true">star</span>
+          <span class="material-icons-outlined acc-star acc-star-2" aria-hidden="true">auto_awesome</span>
+          <span class="material-icons-outlined acc-star acc-star-3" aria-hidden="true">star</span>
+          <span class="material-icons-outlined acc-star acc-star-4" aria-hidden="true">auto_awesome</span>
+          <span class="material-icons-outlined acc-star acc-star-5" aria-hidden="true">star</span>
+          <span class="material-icons-outlined acc-star acc-star-6" aria-hidden="true">auto_awesome</span>
+          <span class="material-icons-outlined acc-star acc-star-7" aria-hidden="true">star</span>
+          <span class="material-icons-outlined acc-star acc-star-8" aria-hidden="true">auto_awesome</span>
+
+          <div class="acc-member-badge">
+            <span class="material-icons-outlined acc-member-star">star</span>
+            عضوية BudoQ
+          </div>
           <div id="profile-avatar" class="acc-v2-avatar">U</div>
           <div class="acc-v2-name-row">
             <h2 id="profile-name" class="acc-v2-name">المستخدم</h2>
@@ -989,25 +2084,29 @@
       <div class="acc-v2-main-content">
         <!-- Stats Grid -->
         <div class="acc-v2-stats-grid">
-          <a href="my-orders.html" class="acc-v2-stat-card" style="--card-accent: #3b82f6;">
+          <a href="my-orders.html" class="acc-v2-stat-card acc-stat-orders">
+            <div class="acc-stat-icon"><span class="material-icons-outlined">inventory_2</span><b id="stat-orders-count" class="acc-stat-count">0</b></div>
             <div class="acc-v2-stat-info">
               <span class="acc-v2-stat-label">طلباتي</span>
-              <p class="acc-v2-stat-desc">تتبع، طلباتك، أو إعادة شراء طلباتك السابقة</p>
+              <p class="acc-v2-stat-desc">تتبع طلباتك أو إعادة شراء طلباتك السابقة</p>
             </div>
           </a>
-          <a href="wishlist.html" class="acc-v2-stat-card" style="--card-accent: #ef4444;">
+          <a href="wishlist.html" class="acc-v2-stat-card acc-stat-fav">
+            <div class="acc-stat-icon"><span class="material-icons-outlined">favorite</span><b id="stat-wishlist-count" class="acc-stat-count">0</b></div>
             <div class="acc-v2-stat-info">
               <span class="acc-v2-stat-label">المفضلة</span>
-              <p class="acc-v2-stat-desc">عرض قائمة المنتجات التي أضفتها </p>
+              <p class="acc-v2-stat-desc">عرض قائمة المنتجات التي أضفتها</p>
             </div>
           </a>
-          <a href="addresses.html" class="acc-v2-stat-card" id="stat-addresses-card" style="--card-accent: #10b981;">
+          <a href="addresses.html" class="acc-v2-stat-card acc-stat-addr" id="stat-addresses-card">
+            <div class="acc-stat-icon"><span class="material-icons-outlined">location_on</span><b id="stat-addresses-count" class="acc-stat-count">0</b></div>
             <div class="acc-v2-stat-info">
               <span class="acc-v2-stat-label">عناويني</span>
               <p class="acc-v2-stat-desc">إدارة عناوين الشحن المحفوظة لديك</p>
             </div>
           </a>
-          <a href="returns.html" class="acc-v2-stat-card">
+          <a href="returns.html" class="acc-v2-stat-card acc-stat-return">
+            <div class="acc-stat-icon"><span class="material-icons-outlined">assignment_return</span></div>
             <div class="acc-v2-stat-info">
               <span class="acc-v2-stat-label">المرتجعات</span>
               <p class="acc-v2-stat-desc">متابعة أو إنشاء طلبات الإرجاع</p>
@@ -1176,9 +2275,9 @@
   </div>
 
   <script src="../assets/vendor/supabase/supabase-js.js?v=20260810"></script>
-  <script src="../assets/js/supabase-client.js?v=20260922-failover-deep"></script>
+  <script src="../assets/js/supabase-client.js?v=20260922-confirm402"></script>
   <script src="../assets/js/taager-integration.js?v=20260917-failover"></script>
-  <script src="../assets/js/store.js?v=20260913a"></script>
+  <script src="../assets/js/store.js?v=20260922-cartfix"></script>
   <script src="../assets/js/ahsab.js?v=20260812"></script>
   <script src="../assets/js/noon-shell.js?v=20260913f"></script>
   <script>
@@ -1876,11 +2975,34 @@
       if (!user) {
         profileContent.classList.add("hidden");
         loginRequired.classList.remove("hidden");
+        animateLoginCounters(loginRequired);
       } else {
         profileContent.classList.remove("hidden");
         loginRequired.classList.add("hidden");
       }
     });
+
+    // Animate the stats counters inside the login-required section
+    function animateLoginCounters(root) {
+      if (!root) return;
+      var counters = root.querySelectorAll(".lr-count");
+      if (!counters.length) return;
+      counters.forEach(function(el) {
+        var target = parseFloat(el.getAttribute("data-lr-count") || "0");
+        var decimals = parseInt(el.getAttribute("data-lr-decimals") || "0", 10);
+        var duration = 1200;
+        var start = null;
+        function step(ts) {
+          if (!start) start = ts;
+          var progress = Math.min((ts - start) / duration, 1);
+          var eased = 1 - Math.pow(1 - progress, 3);
+          el.textContent = (target * eased).toFixed(decimals);
+          if (progress < 1) requestAnimationFrame(step);
+          else el.textContent = target.toFixed(decimals);
+        }
+        requestAnimationFrame(step);
+      });
+    }
 
     // Hide skeleton after a short delay to allow content to render
     function hideSkeleton() {

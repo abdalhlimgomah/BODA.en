@@ -688,13 +688,22 @@ function attachPasswordToggle() {
   const eye = document.getElementById("eye");
   if (!password || !eye) return;
 
-  eye.addEventListener("click", () => {
+  const toggle = () => {
     const icon = eye.children[0];
     const hidden = password.type === "password";
     password.type = hidden ? "text" : "password";
     if (icon) {
       icon.classList.toggle("fa-eye", !hidden);
       icon.classList.toggle("fa-eye-slash", hidden);
+    }
+    eye.setAttribute("aria-label", hidden ? "إخفاء كلمة المرور" : "إظهار كلمة المرور");
+  };
+
+  eye.addEventListener("click", toggle);
+  eye.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" || e.key === " ") {
+      e.preventDefault();
+      toggle();
     }
   });
 }

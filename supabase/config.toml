@@ -404,6 +404,12 @@ s3_access_key = "env(S3_ACCESS_KEY)"
 # Configures AWS_SECRET_ACCESS_KEY for S3 bucket
 s3_secret_key = "env(S3_SECRET_KEY)"
 
+# Public functions called from the browser WITHOUT an Authorization header must
+# skip JWT verification; otherwise every request (including the CORS preflight)
+# is rejected with 401 and Google sign-in fails with "فشل الاتصال بخدمة Google".
+[functions.google-oauth]
+verify_jwt = false
+
 # pg-delta is the schema diff engine for db diff / db pull / db remote commit.
 # Set enabled = false to fall back to the legacy migra engine.
 [experimental.pgdelta]
