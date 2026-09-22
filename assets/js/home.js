@@ -715,6 +715,80 @@ function syncWishlistButtons(container) {
 }
 
 // ========== FETCH DATA ==========
+// Shared IndexedDB cache (same schema as supabase-client.js's fetchAllProducts)
+// so the home page reuses the cross-page product cache instead of re-downloading
+// the whole catalog on every visit.
+const HOME_PRODUCTS_IDB_TTL_MS = 10 * 60 * 1000;
+function readHomeProductsIdbCache() {
+  if (!window.indexedDB) return Promise.resolve(null);
+  return new Promise(function (resolve) {
+    var req;
+    try {
+      req = window.indexedDB.open("buda_products_cache", 1);
+    } catch (_e) {
+      resolve(null);
+      return;
+    }
+    req.onsuccess = function () {
+      var db = req.result;
+      try {
+        var tx = db.transaction("products", "readonly");
+        var g = tx.objectStore("products").get("PRODUCTS:ALL");
+        g.onsuccess = function () {
+          var entry = g.result;
+          if (db && db.close) { try { db.close(); } catch (_c) {} }
+          resolve(entry || null);
+        };
+        g.onerror = function () {
+          if (db && db.close) { try { db.close(); } catch (_c) {} }
+          resolve(null);
+        };
+      } catch (_e2) {
+        if (db && db.close) { try { db.close(); } catch (_c) {} }
+        resolve(null);
+      }
+    };
+    req.onerror = function () {
+      resolve(null);
+    };
+  });
+}
+function writeHomeProductsIdbCache(products) {
+  if (!window.indexedDB || !Array.isArray(products) || !products.length)
+    return Promise.resolve();
+  return new Promise(function (resolve) {
+    var req;
+    try {
+      req = window.indexedDB.open("buda_products_cache", 1);
+    } catch (_e) {
+      resolve();
+      return;
+    }
+    req.onupgradeneeded = function () {
+      var db = req.result;
+      if (!db.objectStoreNames.contains("products"))
+        db.createObjectStore("products");
+    };
+    req.onsuccess = function () {
+      var db = req.result;
+      try {
+        var tx = db.transaction("products", "readwrite");
+        tx.objectStore("products")
+          .put({ t: Date.now(), products: products }, "PRODUCTS:ALL");
+        tx.oncomplete = function () { if (db && db.close) { try { db.close(); } catch (_c) {} } resolve(); };
+        tx.onerror = function () { if (db && db.close) { try { db.close(); } catch (_c) {} } resolve(); };
+        tx.onabort = function () { if (db && db.close) { try { db.close(); } catch (_c) {} } resolve(); };
+      } catch (_e2) {
+        if (db && db.close) { try { db.close(); } catch (_c) {} }
+        resolve();
+      }
+    };
+    req.onerror = function () {
+      resolve();
+    };
+  });
+}
+
 async function fetchSupabaseProducts(filter) {
   if (isHomeSupabaseBackoffActive()) return [];
   var q = String(filter || "").trim().toLowerCase();
@@ -722,13 +796,36 @@ async function fetchSupabaseProducts(filter) {
   var data = null;
   var isLocalDev =
     location.hostname === "localhost" || location.hostname === "127.0.0.1";
-  if (!window.__productsProxyUnavailable && !isLocalDev) {
+  var proxyLoaded = false;
+
+  // Warm-cache fast path: reuse the shared IndexedDB product cache
+  // (10-minute TTL) so repeat visits render without a catalog download.
+  if (!isLocalDev && !mapped) {
+    try {
+      var cachedEntry = await readHomeProductsIdbCache();
+      if (
+        cachedEntry &&
+        cachedEntry.t &&
+        Array.isArray(cachedEntry.products) &&
+        cachedEntry.products.length &&
+        Date.now() - Number(cachedEntry.t) < HOME_PRODUCTS_IDB_TTL_MS
+      ) {
+        data = cachedEntry.products;
+      }
+    } catch (_e0) {
+      data = null;
+    }
+  }
+
+  if (!data && !window.__productsProxyUnavailable && !isLocalDev) {
     try {
       var url = "/api/products";
       if (mapped) url += "?filter=" + encodeURIComponent(mapped);
       var res = await fetch(url);
-      if (res.ok) data = await res.json();
-      else window.__productsProxyUnavailable = true;
+      if (res.ok) {
+        data = await res.json();
+        proxyLoaded = true;
+      } else window.__productsProxyUnavailable = true;
     } catch (e) {
       window.__productsProxyUnavailable = true;
       console.warn("cache proxy failed, falling back:", e);
@@ -760,6 +857,9 @@ async function fetchSupabaseProducts(filter) {
   var matched = normalizeProducts(data);
   var needsRatings = !matched.length || !matched.some(function (p) { return p.hasSupabaseRatings; });
   var enriched = needsRatings ? await annotateProductsWithSupabaseRatings(matched) : matched;
+  if (proxyLoaded && !q && enriched.length) {
+    writeHomeProductsIdbCache([].concat(enriched)).catch(function () {});
+  }
   if (window.addProductToStore)
     enriched.forEach(function (p) {
       window.addProductToStore(p);
@@ -992,7 +1092,7 @@ function buildProductCard(product) {
     dots = "",
     counter = "";
   for (var gi = 0; gi < images.length; gi++) {
-    var imgLoad = gi === 0 ? ' loading="eager" fetchpriority="high" decoding="async"' : ' loading="lazy" decoding="async"';
+    var imgLoad = ' loading="lazy" decoding="async"';
     imgs +=
       '<img class="noon-gallery-img' +
       (gi === 0 ? " active" : "") +
@@ -2470,15 +2570,15 @@ HM.promoteHydratedSkeleton = function (skeletonEl) {
   skeletonEl.remove();
 };
 
-HM.renderInitialProgressively = function () {
-  if (!HM.contentEl) return Promise.resolve();
+// Static (non-product) sections render before the products feed arrives:
+// banner(0), hero(1), ad-hero(2), categories(3), features(4). Everything after
+// index 4 needs the product list.
+var HM_STATIC_END_INDEX = 4;
+
+function hmPrepareSkeleton() {
+  if (!HM.contentEl) return null;
   var skeletonEl = document.getElementById("hm-skeleton");
-  if (!skeletonEl) {
-    document.body.classList.remove("home-loading");
-    HM.renderAll();
-    HM.initHeroSlider();
-    return Promise.resolve();
-  }
+  if (!skeletonEl) return null;
 
   // Keep only the skeleton variant matching the current viewport so
   // hydration replaces the right placeholders (mobile vs desktop).
@@ -2488,54 +2588,83 @@ HM.renderInitialProgressively = function () {
 
   document.body.classList.add("home-hydrating");
   document.body.classList.remove("home-loading");
+  return skeletonEl;
+}
 
+function hmRenderRange(skeletonEl, startIndex, endIndex, onDone) {
+  if (!skeletonEl) {
+    if (onDone) onDone();
+    return;
+  }
+  var index = startIndex;
+  function renderOne() {
+    var section = HOME_CONFIG.sections[index];
+    var placeholder = skeletonEl.querySelector(
+      '[data-skeleton-index="' + index + '"]',
+    );
+    var node = HM.renderSectionIntoSkeleton(skeletonEl, section, index);
+    if (node) {
+      node.classList.add("hm-reveal");
+      if (placeholder && placeholder !== node) placeholder.replaceWith(node);
+    } else if (placeholder) {
+      placeholder.remove();
+    }
+    index++;
+  }
+
+  function renderBatch() {
+    if (index > endIndex) {
+      if (onDone) onDone();
+      return;
+    }
+    var batchSize = index <= HM_STATIC_END_INDEX ? 1 : 2;
+    for (var i = 0; i < batchSize && index <= endIndex; i++) renderOne();
+    window.setTimeout(renderBatch, index <= HM_STATIC_END_INDEX ? 90 : 70);
+  }
+
+  window.requestAnimationFrame(renderBatch);
+}
+
+function hmFinishHydration(skeletonEl) {
+  if (!skeletonEl) return;
+  HM.promoteHydratedSkeleton(skeletonEl);
+  document.body.classList.remove("home-hydrating");
+  document.body.classList.add("home-loaded");
+}
+
+function hmRenderStaticSkeleton(skeletonEl) {
   return new Promise(function (resolve) {
-    var index = 0;
-    function renderOne() {
-      var section = HOME_CONFIG.sections[index];
-      var placeholder = skeletonEl.querySelector(
-        '[data-skeleton-index="' + index + '"]',
-      );
-      var node = HM.renderSectionIntoSkeleton(skeletonEl, section, index);
-      if (node) {
-        node.classList.add("hm-reveal");
-        if (placeholder && placeholder !== node) placeholder.replaceWith(node);
-      } else if (placeholder) {
-        placeholder.remove();
-      }
-      index++;
-    }
-
-    function renderBatch() {
-      if (index >= HOME_CONFIG.sections.length) {
-HM.promoteHydratedSkeleton(skeletonEl);
-         document.body.classList.remove("home-hydrating");
-         document.body.classList.add("home-loaded");
-         HM.initHeroSlider();
-         startNoonBadgeRotator();
-         resolve();
-        return;
-      }
-
-      var batchSize = index < 4 ? 1 : 2;
-      for (var i = 0; i < batchSize && index < HOME_CONFIG.sections.length; i++)
-        renderOne();
-      window.setTimeout(renderBatch, index < 4 ? 90 : 70);
-    }
-
-    window.requestAnimationFrame(renderBatch);
+    hmRenderRange(skeletonEl, 0, HM_STATIC_END_INDEX, resolve);
   });
-};
+}
+
+function hmRenderProductSkeleton(skeletonEl) {
+  return new Promise(function (resolve) {
+    hmRenderRange(
+      skeletonEl,
+      HM_STATIC_END_INDEX + 1,
+      HOME_CONFIG.sections.length - 1,
+      function () {
+        hmFinishHydration(skeletonEl);
+        startNoonBadgeRotator();
+        resolve();
+      },
+    );
+  });
+}
 
 // ========== HERO CAROUSEL (Noon-style, Swiper-like) ==========
 HM.heroIndex = 0;
 HM.heroSlideCount = 0;
 HM.heroTimer = null;
 HM.heroProgressTimer = null;
+HM.heroSliderInited = false;
 HM.initHeroSlider = function () {
+  if (HM.heroSliderInited) return;
   var hero = document.getElementById("hm-hero");
   var track = document.getElementById("hm-hero-track");
   if (!hero || !track) return;
+  HM.heroSliderInited = true;
   var realSlides = Array.from(track.querySelectorAll(".hm-hero-slide"));
   var bars = hero.querySelectorAll(".hm-hero-bar");
   HM.heroSlideCount = realSlides.length;
@@ -3458,18 +3587,45 @@ HM.init = async function () {
     deliverTo.textContent = selected || "اختر عنوان التوصيل";
   }
 
-  // Load dynamic home config from Supabase
-  await HM.loadDynamicConfig();
+  // Start data loading in PARALLEL so rendering never waits on a
+  // sequential config → products chain.
+  var configPromise = HM.loadDynamicConfig();
+  var productsPromise = getHomeSourceProducts();
+  var skeletonEl = hmPrepareSkeleton();
 
-  // Load products
-  var source = await getHomeSourceProducts();
+  // PHASE 1 — top-of-page (banner, hero, categories, features) renders as
+  // soon as the lightweight dynamic config is ready, before products arrive.
+  if (configPromise) await configPromise;
+  if (skeletonEl) {
+    await hmRenderStaticSkeleton(skeletonEl);
+  }
+  HM.initHeroSlider();
+
+  // PHASE 2 — product sections render once the products feed resolves.
+  var source = [];
+  try {
+    source = await productsPromise;
+  } catch (_e) {
+    console.warn("home products fetch failed:", _e);
+    source = getLocalProducts();
+  }
   HM.allProducts = normalizeProducts(source);
   HM.taagerOnly = HM.allProducts.filter(function (p) {
     return p.source === "taager";
   });
 
-  // Render skeleton -> content progressively, preserving section order and data behavior.
-  await HM.renderInitialProgressively();
+  if (skeletonEl) {
+    await hmRenderProductSkeleton(skeletonEl);
+  } else {
+    HM.contentEl.innerHTML = "";
+    HOME_CONFIG.sections.forEach(function (section) {
+      HM.renderSection(section);
+    });
+    HM.initHeroSlider();
+    startNoonBadgeRotator();
+    document.body.classList.remove("home-hydrating");
+    document.body.classList.add("home-loaded");
+  }
   renderSummerSection();
 
   // Render dynamic sections from Supabase
