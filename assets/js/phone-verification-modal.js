@@ -508,7 +508,14 @@ function _getClient() {
 
     try {
       const client = await _getClient();
-      
+
+      // Force backup2 project (where phone-verification function is deployed)
+      var activeBackend = window.getActiveBodaSupabaseBackend?.();
+      if (activeBackend && activeBackend.name !== "backup") {
+        console.warn("[phone-verification] Switching from " + activeBackend.name + " to backup for phone-verification function");
+        await window.activateBodaSupabaseBackend("backup", "phone-verification-function");
+      }
+
       const { data, error } = await client.functions.invoke("phone-verification", {
         body: {
           action: "send-otp",
@@ -607,6 +614,13 @@ function _getClient() {
 
     try {
       const client = await _getClient();
+
+      // Force backup2 project (where phone-verification function is deployed)
+      var activeBackend = window.getActiveBodaSupabaseBackend?.();
+      if (activeBackend && activeBackend.name !== "backup") {
+        console.warn("[phone-verification] Switching from " + activeBackend.name + " to backup for phone-verification function");
+        await window.activateBodaSupabaseBackend("backup", "phone-verification-function");
+      }
 
       var { data, error } = await client.functions.invoke("phone-verification", {
         body: {
