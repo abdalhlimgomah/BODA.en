@@ -40,6 +40,33 @@ function getDeviceType(userAgent: string): string {
   return "Desktop";
 }
 
+// Temporary kill-switch for phone verification.
+// Reads public.phone_verify_flags -> 'bypass_otp'.
+// 'on'  => the phone number is marked verified immediately, no code is sent.
+// 'off' => normal WhatsApp/SMS OTP flow (default).
+// The table has no anon/authenticated policies, so only the service-role
+// edge function can read it — the browser never sees this flag.
+const BYPASS_FLAG_KEY = "bypass_otp";
+
+async function isOtpBypassOn(sb: { from: (t: string) => any }): Promise<boolean> {
+  try {
+    const { data, error } = await sb
+      .from("phone_verify_flags")
+      .select("value")
+      .eq("key", BYPASS_FLAG_KEY)
+      .maybeSingle();
+    if (error) {
+      console.error("Bypass flag read error:", error);
+      return false;
+    }
+    const row = data as { value?: string | null } | null;
+    return String(row?.value || "").toLowerCase() === "on";
+  } catch (e) {
+    console.error("Bypass flag read exception:", e);
+    return false;
+  }
+}
+
 // Phone formatter helper (EG & SA)
 function formatPhoneNumber(phone: string, countryCode: string): string {
   const cleaned = phone.replace(/\D/g, "");
@@ -172,8 +199,69 @@ serve(async (req) => {
         });
       }
 
-      // Duplicate Check: is phone already verified by another profile?
       const targetEmail = String(email || "").trim().toLowerCase();
+
+      // Fetch user profile ID if email exists
+      let userId: string | null = null;
+      if (targetEmail) {
+        const { data: pData } = await supabase.from("profiles").select("id").eq("email", targetEmail).limit(1);
+        if (pData && pData.length) {
+          userId = pData[0].id;
+        }
+      }
+
+      // ============================================================
+      // BYPASS MODE — temporary.
+      // When the 'bypass_otp' flag is 'on', the number is marked verified
+      // straight away and nothing is sent. Returning from here skips:
+      //   - the duplicate-number check
+      //   - the 60s / hourly / lockout rate limits
+      //   - the phone_verifications OTP row insert
+      //   - every Twilio API call
+      // Set the flag back to 'off' to restore the normal WhatsApp OTP flow.
+      // ============================================================
+      if (await isOtpBypassOn(supabase)) {
+        const { error: bypassErr } = await supabase
+          .from("profiles")
+          .update({
+            phone: formattedPhone,
+            phone_number: formattedPhone,
+            phone_country: country_code,
+            phone_verified: true,
+            verified_at: new Date().toISOString(),
+          })
+          .eq("email", targetEmail);
+
+        if (bypassErr) {
+          console.error("Bypass profile update error:", bypassErr);
+          return new Response(JSON.stringify({ error: "فشل حفظ رقم الهاتف في الحساب" }), {
+            status: 500,
+            headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+          });
+        }
+
+        await supabase.from("phone_verification_logs").insert({
+          user_id: userId,
+          phone_number: formattedPhone,
+          action: "bypass_auto_verify",
+          channel: "bypass",
+          ip_address: clientIp,
+          device_type: deviceType,
+          user_agent: userAgent,
+        });
+
+        return new Response(
+          JSON.stringify({
+            success: true,
+            channel: "bypass",
+            bypassed: true,
+            message: "تم تأكيد رقم الهاتف",
+          }),
+          { headers: { ...CORS_HEADERS, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Duplicate Check: is phone already verified by another profile?
       const { data: duplicateUser, error: dupError } = await supabase
         .from("profiles")
         .select("email")
@@ -188,15 +276,6 @@ serve(async (req) => {
           status: 400,
           headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
         });
-      }
-
-      // Fetch user profile ID if email exists
-      let userId: string | null = null;
-      if (targetEmail) {
-        const { data: pData } = await supabase.from("profiles").select("id").eq("email", targetEmail).limit(1);
-        if (pData && pData.length) {
-          userId = pData[0].id;
-        }
       }
 
       // Rate limit check: wait 60 seconds between resends
