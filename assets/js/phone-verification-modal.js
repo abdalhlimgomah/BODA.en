@@ -528,6 +528,33 @@ function _getClient() {
 
       if (error) throw error;
 
+      // Server-side bypass: the phone was verified without any code being
+      // sent. Skip the OTP panel entirely and go straight to success.
+      if (data && data.bypassed) {
+        var bypassRaw = phoneVal.replace(/\D/g, "");
+        if (bypassRaw.startsWith("0")) bypassRaw = bypassRaw.slice(1);
+        var bypassPrefix = countryVal === "EG" ? "+20" : "+966";
+        var bypassPhone = bypassPrefix + bypassRaw;
+
+        currentVerifyTargetPhone = phoneVal;
+        currentVerifyTargetCountry = countryVal;
+
+        localStorage.setItem("userPhone", bypassPhone);
+        localStorage.setItem("userPhoneVerified", "true");
+        localStorage.setItem("userPhoneCountry", countryVal);
+
+        showPanel("success");
+
+        setTimeout(() => {
+          closeVerificationModal();
+          showToast("تم تأكيد رقم الهاتف بنجاح!");
+          if (successCallback) {
+            successCallback(bypassPhone, countryVal);
+          }
+        }, 1300);
+        return;
+      }
+
       if (data && data.success) {
         showToast(data.fallback ? "تم التحويل إلى SMS تلقائياً لعدم توفر واتساب" : "تم إرسال رمز التحقق بنجاح!");
         
