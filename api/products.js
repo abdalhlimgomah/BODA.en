@@ -9,7 +9,13 @@ const SUPABASE_BACKENDS = [
     url: "https://wwlwwgqfjhmchrijaojr.supabase.co",
     key: "sb_publishable_wIxpA7t3a2hII8asqYZ1Bg__NoMLLUU",
   },
+  {
+    name: "backup3",
+    url: "https://qhqkgrpezoaugyhzrgyc.supabase.co",
+    key: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocWtncnBlem9hdWd5aHpyZ3ljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk4OTM2ODYsImV4cCI6MjEwNTQ2OTY4Nn0.1ANBV4Bm4JyZWMnXb1CTxkf36eRDGZOIOShK_j3Ynt8",
+  },
 ];
+
 
 function canFailOver(status) {
   return status === 402 || status === 500 || status === 502 || status === 503 || status === 504;
@@ -39,6 +45,8 @@ const LEAN_COLUMNS = [
   "qty", "stock", "available_qty", "quantity"
 ];
 
+const SUPPORTED_COUNTRIES = new Set(["EG", "SA"]);
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
@@ -47,11 +55,19 @@ export default async function handler(req, res) {
   const filter = req.query.filter || "";
   const lean = req.query.lean === "1";
   const select = lean ? LEAN_COLUMNS.join(",") : "*";
+  const country = String(req.query.country || "").toUpperCase().trim();
+  // Only filter when the caller states a market we actually ship to, so an
+  // unknown or missing code can never widen the result set.
+  const countryFilter = SUPPORTED_COUNTRIES.has(country) ? country : "";
   let lastError = null;
   for (let index = 0; index < SUPABASE_BACKENDS.length; index += 1) {
     const backend = SUPABASE_BACKENDS[index];
     let url = `${backend.url}/rest/v1/products?select=${encodeURIComponent(select)}&order=created_at.desc`;
     if (filter) url += `&category=eq.${encodeURIComponent(filter)}`;
+    // Server-side country scoping: this endpoint used to return every market's
+    // rows and relied on the browser to filter, which is how one country's
+    // products ended up on another country's pages.
+    if (countryFilter) url += `&country=eq.${encodeURIComponent(countryFilter)}`;
 
 try {
       const response = await fetchWithTimeout(url, { headers: { apikey: backend.key } });
@@ -78,3 +94,4 @@ try {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.status(200).json([]);
 }
+
