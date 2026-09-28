@@ -1286,6 +1286,24 @@ const addToCart = (product, quantity = 1, options = {}) => {
     return;
   }
 
+  // Prevent adding out-of-stock products to cart
+  var stockStatus = String(product.stockStatus || product.stock_status || "").toLowerCase();
+  var stockQty = Number(product.stock || product.quantity || 0);
+  if (Array.isArray(product.sizes) && product.sizes.length) {
+    stockQty = 0;
+    for (var si = 0; si < product.sizes.length; si++) {
+      stockQty += Math.max(0, Number(product.sizes[si] && product.sizes[si].stock) || 0);
+    }
+  }
+  if (stockStatus && (stockStatus === "out_of_stock" || stockStatus === "out" || stockStatus === "oos" || stockStatus === "unavailable")) {
+    if (window.BudaUI?.notify) window.BudaUI.notify("هذا المنتج غير متاح حالياً", "error");
+    return;
+  }
+  if (stockQty === 0) {
+    if (window.BudaUI?.notify) window.BudaUI.notify("نفد المخزون لهذا المنتج", "error");
+    return;
+  }
+
   const cart = getCart();
   var selectedSize = options.selectedSize || null;
   var selectedColor = options.selectedColor || null;

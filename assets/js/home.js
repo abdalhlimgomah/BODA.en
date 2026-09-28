@@ -609,6 +609,104 @@ function resolveRating(product) {
   }
   return { rating: 0, reviews: 0 };
 }
+// ========== RATINGS FOR DISPLAYED PRODUCTS ONLY ==========
+// First visits no longer annotate the whole catalog (that fired dozens of
+// RPCs before any section painted). Cards render instantly using whatever
+// the rating cache holds; a single small fetch then covers only the ids
+// actually shown and patches the pills/rows in place.
+var _hmRatingsCacheMem = null;
+function hmRatingsCacheData() {
+  try {
+    if (!_hmRatingsCacheMem) {
+      var p = JSON.parse(localStorage.getItem("hm_ratings_cache_v2") || "{}");
+      _hmRatingsCacheMem = p && p.data ? { at: p.at, data: p.data } : { data: {} };
+    }
+    return _hmRatingsCacheMem.data;
+  } catch (_e) { return {}; }
+}
+function applyRatingsFromCache(product) {
+  if (!product || typeof product.id === "undefined" || product.hasSupabaseRatings) return;
+  var r = hmRatingsCacheData()[String(product.id)];
+  if (!r) return;
+  if (r.total) {
+    product.rating = Number((r.sum / r.total).toFixed(1));
+    product.reviewCount = r.total;
+  }
+  product.ratingSource = "ratings";
+  product.rating_source = "ratings";
+  product.hasSupabaseRatings = true;
+}
+function _hmProductById(pid) {
+  return window.BudaStore && window.BudaStore.getProductById ? window.BudaStore.getProductById(pid) : null;
+}
+function hmPatchRatingsDom(container, enrichedById) {
+  if (!container) return;
+  container.querySelectorAll(".noon-product-card").forEach(function (card) {
+    var btn = card.querySelector("[data-view-product]");
+    var pid = btn ? btn.getAttribute("data-view-product") : null;
+    if (!pid) return;
+    var p = (enrichedById && enrichedById[pid]) || _hmProductById(pid);
+    if (!p) return;
+    var pill = card.querySelector(".noon-rating-pill");
+    if ((p.reviewCount || 0) > 0) {
+      var html = '<span class="noon-rating-stars">\u2605</span> <span>' + Number(p.rating || 0).toFixed(1) + '</span> <span class="noon-rating-count">(' + p.reviewCount + ')</span>';
+      if (pill) pill.innerHTML = html;
+      else {
+        var title = card.querySelector(".noon-title");
+        if (title) {
+          var np = document.createElement("div");
+          np.className = "noon-rating-pill";
+          np.innerHTML = html;
+          title.insertAdjacentElement("afterend", np);
+        }
+      }
+    } else if (pill) {
+      pill.remove();
+    }
+  });
+  container.querySelectorAll(".hm-shein-card").forEach(function (card) {
+    var pid = card.getAttribute("data-view-product");
+    if (!pid) return;
+    var p = (enrichedById && enrichedById[pid]) || _hmProductById(pid);
+    if (!p) return;
+    var rEl = card.querySelector(".hm-shein-rating");
+    if ((p.reviewCount || 0) > 0) {
+      var html = '\u2605 ' + Number(p.rating || 0).toFixed(1) + ' <small>(' + p.reviewCount + ')</small>';
+      if (rEl) rEl.innerHTML = html;
+      else {
+        var np = document.createElement("div");
+        np.className = "hm-shein-rating";
+        np.innerHTML = html;
+        var info = card.querySelector(".hm-shein-card-info");
+        if (info) {
+          var price = card.querySelector(".hm-shein-price");
+          if (price) price.insertAdjacentElement("afterend", np);
+          else info.appendChild(np);
+        }
+      }
+    } else if (rEl) {
+      rEl.remove();
+    }
+  });
+}
+function hmEnsureDisplayedRatings(list, container) {
+  if (!Array.isArray(list) || !list.length) return;
+  var cache = hmRatingsCacheData();
+  var missing = [];
+  (list || []).forEach(function (p) {
+    if (!p || typeof p.id === "undefined") return;
+    if (p.hasSupabaseRatings) return;
+    var r = cache[String(p.id)];
+    if (!r || (!r.total && !r.checked)) missing.push(String(p.id));
+  });
+  if (!missing.length) return;
+  annotateProductsWithSupabaseRatings(list).then(function (enriched) {
+    _hmRatingsCacheMem = null;
+    var byId = {};
+    (enriched || []).forEach(function (p) { if (p && typeof p.id !== "undefined") byId[String(p.id)] = p; });
+    hmPatchRatingsDom(container, byId);
+  }).catch(function () {});
+}
 function shuffleProducts(products) {
   var items = [].concat(products);
   for (var i = items.length - 1; i > 0; i--) {
@@ -836,6 +934,7 @@ async function fetchSupabaseProducts(filter) {
   var isLocalDev =
     location.hostname === "localhost" || location.hostname === "127.0.0.1";
   var proxyLoaded = false;
+  var leanSourced = false;
 
   // Warm-cache fast path: reuse the shared IndexedDB product cache
   // (10-minute TTL) so repeat visits render without a catalog download.
@@ -860,10 +959,12 @@ async function fetchSupabaseProducts(filter) {
     try {
       var url = "/api/products";
       if (mapped) url += "?filter=" + encodeURIComponent(mapped);
+      else url += "?lean=1";
       var res = await fetch(url);
       if (res.ok) {
         data = await res.json();
         proxyLoaded = true;
+        leanSourced = true;
       } else window.__productsProxyUnavailable = true;
     } catch (e) {
       window.__productsProxyUnavailable = true;
@@ -874,29 +975,45 @@ async function fetchSupabaseProducts(filter) {
     var client = getSupabaseProductsClient();
     if (!client || typeof client.from !== "function") return [];
     try {
-      if (typeof window.supabaseClient?.fetchAllProducts === "function") {
-        data = await window.supabaseClient.fetchAllProducts();
-      } else {
-        var query = client.from("products").select("*");
-        if (mapped) query = query.eq("category", mapped);
-        var result = await query.order("created_at", { ascending: false });
-        if (result.error) {
-          if (isNetworkResolutionError(result.error)) markHomeSupabaseBackoff();
-          console.warn("fetch error:", result.error);
-          return [];
-        }
-        data = result.data;
+      if (
+        !mapped &&
+        typeof window.supabaseClient?.fetchAllProductsLean === "function"
+      ) {
+        data = await window.supabaseClient.fetchAllProductsLean();
+        leanSourced = true;
       }
     } catch (e) {
-      if (isNetworkResolutionError(e)) markHomeSupabaseBackoff();
-      console.warn("fetch failed:", e);
-      return [];
+      data = null;
+    }
+    if (!data) {
+      try {
+        if (typeof window.supabaseClient?.fetchAllProducts === "function") {
+          data = await window.supabaseClient.fetchAllProducts();
+        } else {
+          var query = client.from("products").select("*");
+          if (mapped) query = query.eq("category", mapped);
+          var result = await query.order("created_at", { ascending: false });
+          if (result.error) {
+            if (isNetworkResolutionError(result.error)) markHomeSupabaseBackoff();
+            console.warn("fetch error:", result.error);
+            return [];
+          }
+          data = result.data;
+        }
+      } catch (e) {
+        if (isNetworkResolutionError(e)) markHomeSupabaseBackoff();
+        console.warn("fetch failed:", e);
+        return [];
+      }
     }
   }
   var matched = normalizeProducts(data);
   var needsRatings = !matched.length || !matched.some(function (p) { return p.hasSupabaseRatings; });
-  var enriched = needsRatings ? await annotateProductsWithSupabaseRatings(matched) : matched;
-  if (proxyLoaded && !q && enriched.length) {
+  // Lean rows carry no ratings yet; the renderers fetch them only for the
+  // products actually displayed, so a brand-new visitor never waits for
+  // (or fires) dozens of whole-catalog rating RPCs.
+  var enriched = needsRatings && !leanSourced ? await annotateProductsWithSupabaseRatings(matched) : matched;
+  if (proxyLoaded && !leanSourced && !q && enriched.length) {
     writeHomeProductsIdbCache([].concat(enriched)).catch(function () {});
   }
   if (window.addProductToStore)
@@ -1614,6 +1731,7 @@ HM.renderProductCarousel = function (section, products) {
     sectionEl.style.display = "none";
     return null;
   }
+  list.forEach(applyRatingsFromCache);
   container.innerHTML = list
     .map(function (p) {
       return buildProductCard(p);
@@ -1621,6 +1739,7 @@ HM.renderProductCarousel = function (section, products) {
     .join("");
   attachProductCardEvents(container);
   HM.enableCarouselDrag(container);
+  hmEnsureDisplayedRatings(list, sectionEl);
   return container;
 };
 
@@ -2084,6 +2203,7 @@ function initSheinCarousel(sectionEl, gridSel, wrapSel) {
 HM.renderSheinTrend = function (section) {
   if (!HM.allProducts.length) return null;
   var pool = shuffleProducts([].concat(HM.allProducts)).slice(0, 10);
+  pool.forEach(applyRatingsFromCache);
   var palettes = [
     ["#ff6b9d", "#c44dff"],
     ["#00d2ff", "#3a7bd5"],
@@ -2181,12 +2301,14 @@ HM.renderSheinTrend = function (section) {
   HM.contentEl.appendChild(sectionEl);
   attachProductCardEvents(sectionEl);
   initSheinCarousel(sectionEl, '.hm-shein-grid', '.hm-shein-grid-wrap');
+  hmEnsureDisplayedRatings(pool, sectionEl);
   return sectionEl;
 };
 
 HM.renderSheinStyle = function (section) {
   if (!HM.allProducts.length) return null;
   var pool = shuffleProducts([].concat(HM.allProducts)).slice(0, 10);
+  pool.forEach(applyRatingsFromCache);
   var hero = pool[0];
   var rest = pool.slice(1, 10);
   if (!hero) return null;
@@ -2272,6 +2394,7 @@ HM.renderSheinStyle = function (section) {
   HM.contentEl.appendChild(sectionEl);
   attachProductCardEvents(sectionEl);
   initSheinCarousel(sectionEl, '.hm-shein-side', '.hm-shein-side-wrap');
+  hmEnsureDisplayedRatings(pool, sectionEl);
   return sectionEl;
 };
 
@@ -2289,6 +2412,7 @@ HM.renderSheinDeal = function (section) {
     return resolvePrice(b).discountPercent - resolvePrice(a).discountPercent;
   });
   var picks = pool.slice(0, 10);
+  picks.forEach(applyRatingsFromCache);
   var hero = picks[0];
   var rest = picks.slice(1, 10);
   if (!hero) return null;
@@ -2365,6 +2489,7 @@ HM.renderSheinDeal = function (section) {
   HM.contentEl.appendChild(sectionEl);
   attachProductCardEvents(sectionEl);
   initSheinCarousel(sectionEl, '.hm-shein-deal-row', '.hm-shein-deal-row-wrap');
+  hmEnsureDisplayedRatings([].concat(hero).concat(rest), sectionEl);
   return sectionEl;
 };
 
@@ -2380,6 +2505,7 @@ HM.renderSheinNew = function (section) {
     );
   });
   var picks = pool.slice(0, 10);
+  picks.forEach(applyRatingsFromCache);
   var palettes = [
     ["#ff6b9d", "#c44dff"],
     ["#00d2ff", "#3a7bd5"],
@@ -2472,6 +2598,7 @@ HM.renderSheinNew = function (section) {
   HM.contentEl.appendChild(sectionEl);
   attachProductCardEvents(sectionEl);
   initSheinCarousel(sectionEl, '.hm-shein-grid', '.hm-shein-grid-wrap');
+  hmEnsureDisplayedRatings(picks, sectionEl);
   return sectionEl;
 };
 

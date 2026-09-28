@@ -1949,6 +1949,93 @@ async function fetchAllProducts() {
   }
 }
 
+/* ------------------------------------------------------------------ *
+ * fetchAllProductsLean — lightweight catalog used by the home page.   *
+ * Downloads only the columns the cards render (no raw_data JSONB),    *
+ * so a first visit is much lighter than the full select("*") fetch.   *
+ * Kept fully separate from the full cache (PRODUCTS:ALL) so pages     *
+ * that need raw_data never receive lean rows. Ratings are NOT fetched  *
+ * here — the home page annotates only the products it actually shows. *
+ * ------------------------------------------------------------------ */
+const PRODUCTS_LEAN_IDB_KEY = "PRODUCTS:LEAN:ALL";
+const _productsLeanMemoryCache = {};
+const PRODUCTS_LEAN_COLUMNS = [
+  "id", "product_id", "sku", "name", "title",
+  "price", "original_price", "old_price", "price_before_discount",
+  "image", "image1", "image_url", "images",
+  "category", "keywords", "tags", "description", "brand", "seller", "source",
+  "country", "country_code",
+  "created_at", "createdAt", "updated_at",
+  "colors", "color_options", "variants", "options", "variant_options",
+  "warranty", "free_shipping", "freeShipping", "return_allowed",
+  "installment_months", "official_store", "is_official",
+  "rating", "rate", "review_count", "reviews_count",
+  "qty", "stock", "available_qty", "quantity"
+];
+
+function productsIdbGetKey(key) {
+  return getProductsIDB().then(function (db) {
+    if (!db) return null;
+    return new Promise(function (resolve) {
+      try {
+        var tx = db.transaction(PRODUCTS_IDB_STORE, "readonly");
+        var getReq = tx.objectStore(PRODUCTS_IDB_STORE).get(key);
+        getReq.onsuccess = function () { resolve(getReq.result || null); };
+        getReq.onerror = function () { resolve(null); };
+      } catch (_e) { resolve(null); }
+    });
+  });
+}
+
+function productsIdbPutKey(key, entry) {
+  return getProductsIDB().then(function (db) {
+    if (!db) return;
+    return new Promise(function (resolve) {
+      try {
+        var tx = db.transaction(PRODUCTS_IDB_STORE, "readwrite");
+        tx.objectStore(PRODUCTS_IDB_STORE).put(entry, key);
+        tx.oncomplete = resolve;
+        tx.onerror = function () { resolve(); };
+        tx.onabort = function () { resolve(); };
+      } catch (_e) { resolve(); }
+    });
+  });
+}
+
+async function fetchAllProductsLean(cacheMs) {
+  const client = getSupabaseClient();
+  const ttl = cacheMs || PRODUCTS_LIST_CACHE_TTL;
+  const memHit = _productsLeanMemoryCache["PRODUCTS:LEAN"];
+  if (memHit && Date.now() - memHit.t < ttl) {
+    return memHit.products;
+  }
+  try {
+    const idbEntry = await productsIdbGetKey(PRODUCTS_LEAN_IDB_KEY);
+    if (
+      idbEntry && idbEntry.t && Array.isArray(idbEntry.products) &&
+      Date.now() - idbEntry.t < ttl
+    ) {
+      _productsLeanMemoryCache["PRODUCTS:LEAN"] = { t: idbEntry.t, products: idbEntry.products };
+      return idbEntry.products;
+    }
+  } catch (_e) {}
+  const allRows = [];
+  const pageSize = 1000;
+  for (let offset = 0; offset < 100000; offset += pageSize) {
+    const { data, error } = await client
+      .from("products")
+      .select(PRODUCTS_LEAN_COLUMNS.join(","))
+      .range(offset, offset + pageSize - 1);
+    if (error) throw error;
+    const batch = Array.isArray(data) ? data : [];
+    allRows.push.apply(allRows, batch);
+    if (batch.length < pageSize) break;
+  }
+  _productsLeanMemoryCache["PRODUCTS:LEAN"] = { t: Date.now(), products: allRows };
+  productsIdbPutKey(PRODUCTS_LEAN_IDB_KEY, { t: Date.now(), products: allRows }).catch(function () {});
+  return allRows;
+}
+
 async function createOrder(order, items) {
   const client = getSupabaseClient();
   const sellerIdentity = await resolveSellerIdentityForOrder(client, items);
@@ -2290,6 +2377,7 @@ window.supabaseClient = {
   from: (table) => getSupabaseClient().from(table),
   raw: getSupabaseClient,
   fetchAllProducts,
+  fetchAllProductsLean,
   fetchTaagerProducts,
   fetchAllProductsWithTaager,
   createOrder,

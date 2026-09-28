@@ -338,8 +338,9 @@ function resolveCartStockStatus(item, linkedProduct) {
 
 function resolveCartItemView(item = {}) {
   const itemId = String(item.id ?? item.product_id ?? "");
-  const linkedProduct = itemId && window.BudaStore?.getProductById
-    ? window.BudaStore.getProductById(itemId)
+  const baseProductId = String(item.product_id ?? item.id ?? "");
+  const linkedProduct = baseProductId && window.BudaStore?.getProductById
+    ? window.BudaStore.getProductById(baseProductId)
     : null;
 
   const quantity = Math.max(1, Number(item.quantity) || 1);
@@ -1693,12 +1694,18 @@ function renderCart() {
 
   var viewItems = cart.map(function (item) { return resolveCartItemView(item); }).filter(Boolean);
 
+  var validItems = viewItems.filter(function (item) { return item.stockStatus !== "out"; });
+  var outOfStockItems = viewItems.filter(function (item) { return item.stockStatus === "out"; });
+
   if (cartItems) {
-    cartItems.innerHTML = viewItems.map(function (item) { return renderCartItem(item); }).join("");
+    var validHtml = validItems.map(function (item) { return renderCartItem(item); }).join("");
+    var outHtml = outOfStockItems.map(function (item) { return renderCartItem(item); }).join("");
+    var separatorHtml = (validItems.length && outOfStockItems.length) ? '<div class="cart-out-divider cart-out-section-divider"></div>' : '';
+    cartItems.innerHTML = validHtml + separatorHtml + outHtml;
   }
 
-  var totalUnits = viewItems.reduce(function (c, i) { return c + (Number(i.quantity) || 0); }, 0);
-  var subtotal = viewItems.reduce(function (t, i) { return t + (Number(i.lineTotal) || 0); }, 0);
+  var totalUnits = validItems.reduce(function (c, i) { return c + (Number(i.quantity) || 0); }, 0);
+  var subtotal = validItems.reduce(function (t, i) { return t + (Number(i.lineTotal) || 0); }, 0);
   var minAmount = Number(activeCoupon?.minimum_amount) || 0;
   var couponDiscount;
   if (minAmount > 0 && subtotal < minAmount) {
@@ -1708,7 +1715,7 @@ function renderCart() {
     if (activeCoupon) setCouponStatus("");
     couponDiscount = calculateCouponDiscount(subtotal, activeCoupon);
   }
-  var totalItemSavings = viewItems.reduce(function (t, i) { return t + (Number(i.totalSavings) || 0); }, 0);
+  var totalItemSavings = validItems.reduce(function (t, i) { return t + (Number(i.totalSavings) || 0); }, 0);
   var grandTotal = Math.max(subtotal + getCartCodFee() - couponDiscount, 0);
   var fmt = formatEgp;
 
@@ -1756,6 +1763,20 @@ function renderCart() {
   if (dTax) dTax.innerHTML = fmt(getCartCodFee());
   if (dGrandTotal) dGrandTotal.innerHTML = fmt(grandTotal);
   if (dSummary) dSummary.classList.remove("hidden");
+
+  var hasValidItems = validItems.length > 0;
+  var checkoutBtn = document.getElementById("checkout-btn");
+  var checkoutBtnMobile = document.getElementById("checkout-btn-mobile");
+  if (checkoutBtn) {
+    checkoutBtn.disabled = !hasValidItems;
+    checkoutBtn.style.opacity = hasValidItems ? "1" : "0.5";
+    checkoutBtn.style.cursor = hasValidItems ? "pointer" : "not-allowed";
+  }
+  if (checkoutBtnMobile) {
+    checkoutBtnMobile.disabled = !hasValidItems;
+    checkoutBtnMobile.style.opacity = hasValidItems ? "1" : "0.5";
+    checkoutBtnMobile.style.cursor = hasValidItems ? "pointer" : "not-allowed";
+  }
 
   if (cartItems) {
     cartItems.querySelectorAll("[data-remove]").forEach(function (button) {
@@ -1821,6 +1842,13 @@ function bindCartPageActions() {
     var button = document.getElementById(id);
     if (!button) return;
     button.addEventListener("click", function (e) {
+      var cartItemsEl = document.getElementById("cart-items");
+      var hasValidItems = cartItemsEl && cartItemsEl.querySelector(".cart-product-card:not(.out-of-stock)");
+      if (!hasValidItems) {
+        e.preventDefault();
+        cartNotify("لا توجد منتجات صالحة للدفع. يرجى إزالة المنتجات منتهية الصلاحية أو إضافة منتجات جديدة.", "error");
+        return;
+      }
       if (typeof window.handleCheckoutClick === "function") {
         window.handleCheckoutClick(e);
         return;

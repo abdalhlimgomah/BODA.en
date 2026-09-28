@@ -48,9 +48,42 @@ function checkoutNotify(message, type = "info") {
   status.classList.add(type === "error" ? "error" : type === "success" ? "success" : "info");
 }
 
+function resolveCheckoutStockStatus(item) {
+  var declared = String(
+    item.stockStatus ||
+      item.stock_status ||
+      ""
+  ).toLowerCase();
+  var stockQty = -1;
+  var baseProductId = String(item.product_id ?? item.id ?? "");
+  var linkedProduct = baseProductId && window.BudaStore?.getProductById
+    ? window.BudaStore.getProductById(baseProductId)
+    : null;
+  if (linkedProduct) {
+    if (Array.isArray(linkedProduct.sizes) && linkedProduct.sizes.length) {
+      stockQty = 0;
+      for (var si = 0; si < linkedProduct.sizes.length; si += 1) {
+        stockQty += Math.max(0, Number(linkedProduct.sizes[si] && linkedProduct.sizes[si].stock) || 0);
+      }
+    } else {
+      stockQty = Math.max(0, Number(linkedProduct.stock) || 0);
+    }
+  }
+  if (declared === "out_of_stock" || declared === "out" || declared === "oos" || declared === "unavailable" || stockQty === 0) {
+    return "out";
+  }
+  if (declared === "low_stock" || declared === "low" || declared === "limited") {
+    return "low";
+  }
+  return "";
+}
+
 function getCheckoutCart() {
   if (!window.BudaStore || typeof window.BudaStore.getCart !== "function") return [];
-  return window.BudaStore.getCart();
+  var cart = window.BudaStore.getCart();
+  return cart.filter(function (item) {
+    return resolveCheckoutStockStatus(item) !== "out";
+  });
 }
 
 const CUSTOMS_FEE = 25;
@@ -1514,3 +1547,4 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 window.selectPayment = selectPayment;
+window.getCheckoutCart = getCheckoutCart;
