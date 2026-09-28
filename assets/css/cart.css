@@ -162,6 +162,32 @@ body.cart-page {
 
 .cart-product-card.out-of-stock {
   opacity: 0.6;
+  position: relative;
+}
+.cart-product-card.out-of-stock::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.85);
+  border-radius: var(--radius-xs);
+  z-index: 1;
+  pointer-events: none;
+}
+.cart-product-card.out-of-stock::after {
+  content: "نفد المخزون";
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+  z-index: 2;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  background: var(--color-danger);
+  color: #fff;
+  font-size: var(--text-caption);
+  font-weight: var(--weight-bold);
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  pointer-events: none;
 }
 .cart-product-card.out-of-stock:hover {
   background: transparent;
@@ -169,6 +195,21 @@ body.cart-page {
 .cart-product-card.out-of-stock .cart-product-img-wrap img {
   filter: grayscale(1) blur(1px);
   opacity: 0.85;
+}
+.cart-product-card.out-of-stock .cart-product-name,
+.cart-product-card.out-of-stock .cart-product-seller,
+.cart-product-card.out-of-stock .cart-product-rating,
+.cart-product-card.out-of-stock .cart-product-variant,
+.cart-product-card.out-of-stock .cart-product-current,
+.cart-product-card.out-of-stock .cart-product-old,
+.cart-product-card.out-of-stock .cart-product-discount,
+.cart-product-card.out-of-stock .cart-product-delivery,
+.cart-product-card.out-of-stock .cart-product-line-total {
+  text-decoration: line-through;
+  color: var(--color-text-secondary) !important;
+}
+.cart-product-card.out-of-stock .cart-product-old {
+  text-decoration: line-through;
 }
 .cart-stock-out-msg {
   display: inline-flex;
@@ -193,6 +234,13 @@ body.cart-page {
 }
 .cart-product-card:last-child + .cart-out-divider {
   margin-bottom: var(--pad-md);
+}
+.cart-out-section-divider {
+  height: 2px;
+  margin: var(--pad-md) var(--pad-card);
+  background: linear-gradient(90deg, transparent, var(--color-danger), transparent);
+  opacity: 0.5;
+  border-radius: 1px;
 }
 
 .cart-product-img-wrap {

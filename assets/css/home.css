@@ -1508,6 +1508,24 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
 }
 
 /* ============================================
+   هيدر السكلتون على الموبايل والتابلت (<1200px)
+   ============================================ */
+@media (max-width: 1199px) {
+  /* الهيدر الحقيقي صف واحد (55px موبايل / 61px تابلت)، لكن نسخة السكلتون
+     كانت تضيف صف بحث كامل (+68px) فوق صف أيقونات 72px، فالـ overlay Fixed
+     وصل 140px وقسّم أول 85px من السكلتون. نخلي الشكل يطابق الهيدر الحقيقي. */
+  .sk-header-overlay .sk-search-mobile { display: none !important; }
+  .sk-header-overlay .buda-header__inner { align-items: center; height: 61px; min-height: 61px; }
+  .sk-header-overlay .buda-header__brand { position: static; transform: none; }
+  .sk-header-overlay .buda-header__nav-group { align-items: center; }
+}
+@media (max-width: 767px) {
+  .sk-header-overlay .buda-header__inner { height: 55px; min-height: 55px; }
+  /* الهيدر الحقيقي على الموبايل بيعرض بحث 38px جوّه الصف نفسه، مش 5 أيقونات */
+  .sk-header-overlay .buda-header__nav-group { display: none; }
+}
+
+/* ============================================
    DESKTOP SKELETON (≥1200px) — نسخة مستقلة تماماً (تحل محل نسخة الموبايل)
    ============================================ */
 @media (min-width: 1200px) {
@@ -1534,7 +1552,7 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
   .sk-search-mobile { display: none !important; }
 
   /* شريط الإعلان العلوي — بعرض كامل (يمطّد على كل الشاشة مثل الحقيقي) */
-  .skd-banner-top-wrap { width: 100vw; margin: 0 -48px 0; padding: 0 0 16px; max-width: none; }
+  .skd-banner-top-wrap { width: calc(100% + 96px); margin: 0 -48px 0; padding: 0 0 16px; max-width: none; }
   .skd-banner-top { min-height: 91px; padding: 16px 24px; display: flex; align-items: center; gap: 14px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: 18px; }
   .skd-banner-top-icon { width: 42px; height: 42px; border-radius: 14px; flex: 0 0 auto; }
   .skd-banner-top-copy { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
@@ -1544,14 +1562,14 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
   .skd-banner-top-arrow { width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto; }
 
   /* البانر الرئيسي الكبير — يطابق hm-hero بحواف ممتدة (full-bleed) */
-  .skd-hero-wrap { width: 100vw; padding: 0; margin: -16.5px -48px -3.5px; }
+  .skd-hero-wrap { width: calc(100% + 96px); padding: 0; margin: -16.5px -48px -3.5px; }
   .skd-hero { width: 100%; aspect-ratio: 5 / 1; max-height: 300px; border-radius: 0; }
 
   /* Ad strip — مخفي على الديسكتوب مثل الحقيقي */
   .skd-ad-hero-wrap { display: none; }
 
   /* التصنيفات: شريط صور أفقي بحواف ممتدة (مثل hm-cats الديسكتوب full-bleed) */
-  .skd-cats-wrap { width: 100vw; margin: -5px -48px 18px; padding: 0; max-width: none; }
+  .skd-cats-wrap { width: calc(100% + 96px); margin: -5px -48px 18px; padding: 0; max-width: none; }
   .skd-cats-section { background: #FFFFFF; border-radius: 0; box-shadow: none; overflow: hidden; }
   .skd-cats-body { padding: 24px 0 36px 20px; }
   .skd-cats-row { display: flex; align-items: center; gap: 20px; overflow: hidden; }
@@ -1601,7 +1619,7 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
     flex: 0 0 auto;
     flex-shrink: 0;
     order: 0;
-    width: 100vw;
+    width: calc(100% + 96px);
     margin: -16.5px -48px -3.5px;
     padding: 0;
     max-width: none;
@@ -1651,7 +1669,7 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
   .hm-cats-wrap {
     flex: 0 0 auto;
     flex-shrink: 0;
-    width: 100vw;
+    width: calc(100% + 96px);
     margin: -5px -48px 18px;
     padding: 0;
     max-width: none;

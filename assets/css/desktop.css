@@ -534,7 +534,7 @@
 }
 @media (min-width: 1200px) {
   .hm-content > .hm-banner-top-wrap {
-    width: 100vw;
+    width: calc(100% + (2 * var(--space-6)));
     margin-inline: calc(-1 * var(--space-6));
     flex: 0 0 auto;
     flex-shrink: 0;
