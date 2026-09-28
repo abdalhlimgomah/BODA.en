@@ -301,6 +301,18 @@
       }
       if (total > 0) qty = total;
     }
+    // Also check if sizes array (from buildSizes) has any available stock
+    // This handles cases where raw product.sizes doesn't have stock but processed sizes do
+    if (qty === 0 && Array.isArray(product.sizes) && product.sizes.length) {
+      var hasAvailableSize = false;
+      for (var vi = 0; vi < product.sizes.length; vi++) {
+        var s = product.sizes[vi];
+        var sStock = Math.max(0, Number(s && (s.stock || s.quantity)) || 0);
+        var sAvailable = s.is_available !== false && sStock > 0;
+        if (sAvailable) { hasAvailableSize = true; break; }
+      }
+      if (!hasAvailableSize) qty = 0;
+    }
     var declaredStatus = String((product && (product.stockStatus || product.stock_status)) || "").toLowerCase();
     var status = "in_stock";
     if (declaredStatus === "out_of_stock" || qty === 0) status = "out_of_stock";
