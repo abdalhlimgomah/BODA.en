@@ -23,16 +23,34 @@ function fetchWithTimeout(url, options) {
   return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timer));
 }
 
+const FILTER_PAGE_SIZE = 1000;
+
+const LEAN_COLUMNS = [
+  "id", "product_id", "sku", "name", "title",
+  "price", "original_price", "old_price", "price_before_discount",
+  "image", "image1", "image_url", "images",
+  "category", "keywords", "tags", "description", "brand", "seller", "source",
+  "country", "country_code",
+  "created_at", "createdAt", "updated_at",
+  "colors", "color_options", "variants", "options", "variant_options",
+  "warranty", "free_shipping", "freeShipping", "return_allowed",
+  "installment_months", "official_store", "is_official",
+  "rating", "rate", "review_count", "reviews_count",
+  "qty", "stock", "available_qty", "quantity"
+];
+
 export default async function handler(req, res) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
   }
 
   const filter = req.query.filter || "";
+  const lean = req.query.lean === "1";
+  const select = lean ? LEAN_COLUMNS.join(",") : "*";
   let lastError = null;
   for (let index = 0; index < SUPABASE_BACKENDS.length; index += 1) {
     const backend = SUPABASE_BACKENDS[index];
-    let url = `${backend.url}/rest/v1/products?select=*&order=created_at.desc`;
+    let url = `${backend.url}/rest/v1/products?select=${encodeURIComponent(select)}&order=created_at.desc`;
     if (filter) url += `&category=eq.${encodeURIComponent(filter)}`;
 
 try {

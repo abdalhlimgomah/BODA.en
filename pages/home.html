@@ -85,9 +85,29 @@
                 body.home-loaded .nsq-footer { display: block; }
             }
             @media (min-width: 1200px) { .sk-bottomnav-overlay { display: none !important; } }
-                      body {
+            /* Reserve the scrollbar slot permanently so the layout width never
+               changes mid-load, and clip any stray horizontal overflow.
+               100vw includes the scrollbar width, which is what caused the
+               horizontal slide during skeleton loading. */
+            html {
+                scrollbar-gutter: stable;
+            }
+            body {
                 overflow-x: clip;
                 width: 100%;
+            }
+            /* The header is built by JS, so it has no height while loading and
+               pushes the page down 55-59px once it hydrates. Reserve its height
+               up front so nothing moves. */
+            body.home-loading .app-header,
+            body.home-hydrating .app-header { min-height: 59px; }
+            @media (min-width: 768px) and (max-width: 1199px) {
+                body.home-loading .app-header,
+                body.home-hydrating .app-header { min-height: 61px; }
+            }
+            @media (max-width: 767px) {
+                body.home-loading .app-header,
+                body.home-hydrating .app-header { min-height: 55px; }
             }
             .sk-product-section {
                 margin: 0 12px;
@@ -148,8 +168,7 @@
 </head>
     <body class="app-shell home-loading">
         <!-- ========== HEADER ========== -->
-        <header class="app-header buda-header">
-  <meta name="google-site-verification" content="q1MFwOEAkO9NfCPAxkndikzVKwlsOjKWBSmPafSFQXw" /></header>
+        <header class="app-header buda-header"></header>
         <div class="sk-header-overlay" id="sk-header-overlay">
             <div class="buda-header__inner">
                 <a class="buda-header__brand">

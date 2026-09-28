@@ -458,13 +458,13 @@
   <script src="../assets/js/checkout.js?v=20260818"></script>
   <script src="../assets/js/phone-verification-modal.js?v=20260818"></script>
   <script src="../assets/js/noon-shell.js?v=20260913f"></script>
-  <script>
+<script>
   (function() {
     function renderSummaryImages() {
       var container = document.getElementById("ch-summary-imgs");
       if (!container) return;
       var items = [];
-      try { if (window.BudaStore && typeof window.BudaStore.getCart === "function") items = window.BudaStore.getCart() || []; } catch(e) {}
+      try { if (window.getCheckoutCart) items = window.getCheckoutCart() || []; } catch(e) {}
       if (!items.length) { container.innerHTML = ""; return; }
       var show = items.slice(0, 3);
       var extra = items.length - 3;
@@ -472,7 +472,7 @@
       for (var i = 0; i < show.length; i++) {
         var img = show[i].image || show[i].image_url || show[i].thumbnail || "";
         html += '<div class="ch-summary-img-box">';
-        html += '<img src="' + img.replace(/"/g, "&quot;") + '" alt="" loading="lazy" onerror="this.parentElement.style.display=\'none\'" />';
+        html += '<img src="' + img.replace(/"/g, """) + '" alt="" loading="lazy" onerror="this.parentElement.style.display=\'none\'" />';
         if (i === show.length - 1 && extra > 0) {
           html += '<div class="ch-summary-img-more">+' + extra + '</div>';
         }
@@ -486,7 +486,7 @@
       var container = document.getElementById("ch-summary-items");
       if (!container) return;
       var items = [];
-      try { if (window.BudaStore && typeof window.BudaStore.getCart === "function") items = window.BudaStore.getCart() || []; } catch(e) {}
+      try { if (window.getCheckoutCart) items = window.getCheckoutCart() || []; } catch(e) {}
       if (!items.length) { container.innerHTML = ""; return; }
       var html = "";
       for (var i = 0; i < items.length; i++) {
@@ -497,9 +497,9 @@
         var price = item.price || item.total || 0;
         var currency = item.currency || (typeof window.getCheckoutCurrency === "function" ? window.getCheckoutCurrency() : "ج.م");
         html += '<div class="ch-summary-detail-item">';
-        html += '<div class="ch-summary-detail-img"><img src="' + img.replace(/"/g, "&quot;") + '" alt="" loading="lazy" onerror="this.style.display=\'none\'" /></div>';
+        html += '<div class="ch-summary-detail-img"><img src="' + img.replace(/"/g, """) + '" alt="" loading="lazy" onerror="this.style.display=\'none\'" /></div>';
         html += '<div class="ch-summary-detail-body">';
-        html += '<div class="ch-summary-detail-name">' + name.replace(/"/g, "&quot;") + '</div>';
+        html += '<div class="ch-summary-detail-name">' + name.replace(/"/g, """) + '</div>';
         html += '<div class="ch-summary-detail-meta">الكمية: ' + qty + '</div>';
         html += '</div>';
         html += '<div class="ch-summary-detail-price">' + Number(price).toFixed(2) + ' ' + currency + '</div>';
