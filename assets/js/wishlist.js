@@ -93,8 +93,8 @@ function wishlistItemMatchesCountry(item, countryCode) {
     return window.TaagerIntegration.matchesCountry(item, countryCode);
   }
   var pCountry = String(item.country || item.country_code || "").toUpperCase();
-  if (!pCountry) return true;
-  return pCountry === String(countryCode || "EG").toUpperCase();
+  if (!pCountry) return false;
+  return pCountry === String(countryCode || "").toUpperCase();
 }
 
 function renderWishlist() {

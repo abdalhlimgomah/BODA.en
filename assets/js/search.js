@@ -578,15 +578,15 @@ function hideSearchSkeleton() {
 // Preload all products (local store + Supabase/Taager)
 async function loadAllSearchProducts() {
   try {
+    const selectedCountry = window.TaagerIntegration ? window.TaagerIntegration.getSelectedCountry() : null;
+    const countryCode = (selectedCountry && selectedCountry.code) || "";
+
     // 1. Start with local store products as fast offline fallback
     if (window.BudaStore && typeof window.BudaStore.getAllProducts === "function") {
       _allSearchProducts = Object.values(window.BudaStore.getAllProducts()).filter(Boolean);
     }
-    
-    // 2. Fetch from Supabase + Taager if online
-    const selectedCountry = window.TaagerIntegration ? window.TaagerIntegration.getSelectedCountry() : null;
-    const countryCode = selectedCountry ? selectedCountry.code : null;
 
+    // 2. Fetch from Supabase + Taager if online
     if (window.supabaseClient && typeof window.supabaseClient.fetchAllProductsWithTaager === "function") {
       const remote = await window.supabaseClient.fetchAllProductsWithTaager(countryCode);
       if (remote && remote.length) {
@@ -597,6 +597,12 @@ async function loadAllSearchProducts() {
       if (remote && remote.length) {
         _allSearchProducts = remote;
       }
+    }
+
+    // The store holds every market, so scope the index before searching —
+    // otherwise Saudi queries answer with Egyptian products.
+    if (window.TaagerIntegration && typeof window.TaagerIntegration.filterByCountry === "function") {
+      _allSearchProducts = window.TaagerIntegration.filterByCountry(_allSearchProducts, countryCode);
     }
 
     // Extract search keywords index on startup

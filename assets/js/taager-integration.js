@@ -9,6 +9,11 @@
 
   var COUNTRY_STORAGE_KEY = "boda_selected_country";
   var LEGACY_COUNTRY_STORAGE_KEY = "userCountry";
+  // Set only when the visitor picks a country themselves, so the geo bootstrap
+  // never overrides a real choice.
+  var COUNTRY_EXPLICIT_KEY = "boda_country_explicit";
+  var COUNTRY_GEO_ENDPOINT = "/api/country";
+  var COUNTRY_GEO_TIMEOUT_MS = 4000;
   var DEFAULT_COUNTRY = { code: "EG", name: "مصر", flag: "🇪🇬", slug: "egypt" };
   var CACHE_KEY = "boda_taager_products_cache_v2";
   var CACHE_TTL_MS = 10 * 60 * 1000;
@@ -16,6 +21,7 @@
   var TAAGER_PRODUCTS_PAGE_SIZE = 100;
   var TAAGER_MAX_PAGES = 50;
   var inFlightProductsRequests = {};
+  var countryReadyPromise = null;
 
   var authFailureUntil = 0;
   var authFailedCountries = {};
@@ -251,6 +257,25 @@
     return null;
   }
 
+  function isCountryExplicit() {
+    try {
+      return localStorage.getItem(COUNTRY_EXPLICIT_KEY) === "1";
+    } catch (_a) {
+      return false;
+    }
+  }
+
+  function markCountryExplicit() {
+    try {
+      localStorage.setItem(COUNTRY_EXPLICIT_KEY, "1");
+    } catch (_a) {}
+  }
+
+  // Synchronous by contract: every consumer (cart, checkout, addresses, phone
+  // prefixes) reads the country during its own init, so this must never await.
+  // It returns the stored selection when there is one and otherwise reports the
+  // Egypt default WITHOUT persisting it, which leaves room for detectCountry()
+  // to replace that guess with the visitor's real country.
   function getSelectedCountry() {
     try {
       var raw = localStorage.getItem(COUNTRY_STORAGE_KEY);
@@ -269,30 +294,80 @@
       var legacy = findCountryByCode(localStorage.getItem(LEGACY_COUNTRY_STORAGE_KEY));
       if (legacy) {
         localStorage.setItem(COUNTRY_STORAGE_KEY, JSON.stringify(legacy));
-        localStorage.setItem(LEGACY_COUNTRY_STORAGE_KEY, legacy.code);
         return legacy;
       }
     } catch (_a) {}
 
-    // Country must never be undefined — fall back to Egypt (the base country)
-    // and persist it so every consumer sees Egypt until the user changes it.
-    try {
-      localStorage.setItem(COUNTRY_STORAGE_KEY, JSON.stringify(DEFAULT_COUNTRY));
-      localStorage.setItem(LEGACY_COUNTRY_STORAGE_KEY, DEFAULT_COUNTRY.code);
-    } catch (_a) {}
     return DEFAULT_COUNTRY;
   }
 
-  function setSelectedCountry(country) {
+  function persistCountry(country) {
     var valid = findCountryByCode(country && country.code);
-    if (!valid) valid = DEFAULT_COUNTRY;
+    if (!valid) return null;
     try {
       localStorage.setItem(COUNTRY_STORAGE_KEY, JSON.stringify(valid));
       localStorage.setItem(LEGACY_COUNTRY_STORAGE_KEY, valid.code);
+    } catch (_a) {}
+    return valid;
+  }
+
+  function setSelectedCountry(country) {
+    var valid = persistCountry(country);
+    if (!valid) valid = DEFAULT_COUNTRY;
+    markCountryExplicit();
+    try {
       document.dispatchEvent(
         new CustomEvent("boda:country-changed", { detail: valid })
       );
     } catch (_a) {}
+  }
+
+  // Asks the edge for the visitor's country. Runs at most once per browser and
+  // only while the visitor has never picked a country themselves, so a real
+  // choice always wins. Resolves to the country that ended up selected.
+  function detectCountry() {
+    if (countryReadyPromise) return countryReadyPromise;
+
+    countryReadyPromise = (async function () {
+      if (isCountryExplicit()) return getSelectedCountry();
+
+      var current = getSelectedCountry();
+      var requested = current && current.code ? current.code : DEFAULT_COUNTRY.code;
+
+      if (typeof fetch !== "function") return current;
+      if (location && location.protocol === "file:") return current;
+
+      var controller = typeof AbortController === "function" ? new AbortController() : null;
+      var timer = controller ? setTimeout(function () { controller.abort(); }, COUNTRY_GEO_TIMEOUT_MS) : null;
+
+      try {
+        var response = await fetch(
+          COUNTRY_GEO_ENDPOINT + "?default=" + encodeURIComponent(requested),
+          controller ? { signal: controller.signal } : undefined
+        );
+        if (!response.ok) return current;
+        var payload = await response.json();
+        var detected = findCountryByCode(payload && payload.country);
+        if (!detected || !payload.detected) return current;
+        if (detected.code === current.code) return current;
+        // Not an explicit choice, so adopt the detected country silently. Going
+        // through persistCountry (not setSelectedCountry) keeps the "explicit"
+        // flag clear so a later visit can re-detect if the visitor travels.
+        persistCountry(detected);
+        try {
+          document.dispatchEvent(
+            new CustomEvent("boda:country-detected", { detail: detected })
+          );
+        } catch (_a) {}
+        return detected;
+      } catch (_e) {
+        return current;
+      } finally {
+        if (timer) clearTimeout(timer);
+      }
+    })();
+
+    return countryReadyPromise;
   }
 
   function getAvailableCountries() {
@@ -768,17 +843,21 @@
     var selected = getSelectedCountry();
     if (selected && selected.code) selectedCode = selected.code;
 
-    var cached = await getCachedProducts(selectedCode);
-    if (!cached) cached = await getCachedProducts("");
-    if (cached) {
-      var found = null;
-      for (var i = 0; i < cached.length; i++) {
-        if (cached[i].id === productId || cached[i].taager_product_id === productId) {
-          found = cached[i];
-          break;
+    // Only the selected country's bucket may satisfy a product detail lookup.
+    // The shared "ALL" bucket holds every market, so reading it here let a
+    // Saudi page resolve an Egyptian product.
+    if (selectedCode) {
+      var cached = await getCachedProducts(selectedCode);
+      if (cached) {
+        var found = null;
+        for (var i = 0; i < cached.length; i++) {
+          if (cached[i].id === productId || cached[i].taager_product_id === productId) {
+            found = cached[i];
+            break;
+          }
         }
+        if (found) return found;
       }
-      if (found) return found;
     }
 
     var allProducts = await fetchTaagerProducts(selectedCode);
@@ -791,7 +870,10 @@
   }
 
   function filterByCountry(products, countryCode) {
-    if (!countryCode) return products;
+    if (!Array.isArray(products)) return [];
+    // No country resolved yet means we cannot prove a product belongs to the
+    // visitor's market, so show nothing rather than another country's catalog.
+    if (!countryCode) return [];
     return products.filter(function (product) {
       return matchesCountry(product, countryCode);
     });
@@ -827,7 +909,8 @@
 
   function matchesCountry(product, countryCode) {
     if (!product) return false;
-    var upper = String(countryCode || "EG").toUpperCase().trim();
+    var upper = String(countryCode || "").toUpperCase().trim();
+    if (!upper) return false;
     var countryField = String(product.country || product.country_code || "").toUpperCase().trim();
     var countries = Array.isArray(product.available_countries) ? product.available_countries : [];
     if (countries.length) {
@@ -837,12 +920,15 @@
       return false;
     }
     if (countryField) return countryKeyMatches(countryField, upper);
-    return true;
+    // A product with no country metadata is not evidence that it ships to this
+    // country. Treating it as a match leaked one country's catalog into another.
+    return false;
   }
 
   function filterProductsByCountry(products, countryCode) {
     if (!Array.isArray(products)) return [];
-    var upper = String(countryCode || "EG").toUpperCase().trim();
+    var upper = String(countryCode || "").toUpperCase().trim();
+    if (!upper) return [];
     return products.filter(function (product) {
       return matchesCountry(product, upper);
     });
@@ -931,6 +1017,8 @@
     COUNTRY_STORAGE_KEY: COUNTRY_STORAGE_KEY,
     getSelectedCountry: getSelectedCountry,
     setSelectedCountry: setSelectedCountry,
+    detectCountry: detectCountry,
+    countryReady: detectCountry,
     getAvailableCountries: getAvailableCountries,
     fetchTaagerProducts: fetchTaagerProducts,
     fetchTaagerProductDetail: fetchTaagerProductDetail,

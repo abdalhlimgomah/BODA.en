@@ -239,7 +239,14 @@ async function fetchBrandProducts(brandName) {
     } catch (e) {}
   }
   if (!all.length && window.TaagerIntegration && typeof window.TaagerIntegration.getCachedProducts === "function") {
-    all = window.TaagerIntegration.getCachedProducts() || [];
+    // Read the selected country's bucket; the argument-less form returns the
+    // shared all-markets cache, which mixes another country's products in.
+    var blCode = (window.TaagerIntegration.getSelectedCountry() || {}).code;
+    all = window.TaagerIntegration.getCachedProducts(blCode) || [];
+  }
+  if (all.length && window.TaagerIntegration && typeof window.TaagerIntegration.filterByCountry === "function") {
+    var blFilterCode = (window.TaagerIntegration.getSelectedCountry() || {}).code;
+    all = window.TaagerIntegration.filterByCountry(all, blFilterCode);
   }
   var term = String(brandName || '').trim().toLowerCase();
   if (!term) return all.slice(0, 50);
@@ -626,7 +633,14 @@ BL.init = async function () {
     } catch (e) {}
   }
   if (!allProducts.length && window.TaagerIntegration && typeof window.TaagerIntegration.getCachedProducts === "function") {
-    allProducts = window.TaagerIntegration.getCachedProducts() || [];
+    // Read the selected country's bucket; the argument-less form returns the
+    // shared all-markets cache, which mixes another country's products in.
+    var blCode = (window.TaagerIntegration.getSelectedCountry() || {}).code;
+    allProducts = window.TaagerIntegration.getCachedProducts(blCode) || [];
+  }
+  if (allProducts.length && window.TaagerIntegration && typeof window.TaagerIntegration.filterByCountry === "function") {
+    var blFilterCode = (window.TaagerIntegration.getSelectedCountry() || {}).code;
+    allProducts = window.TaagerIntegration.filterByCountry(allProducts, blFilterCode);
   }
   BL.allProducts = allProducts;
 

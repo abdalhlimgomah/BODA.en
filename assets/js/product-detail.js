@@ -766,9 +766,13 @@ async function getAllProductsPool() {
   const allLocal = window.BudaStore ? Object.values(window.BudaStore.getAllProducts()) : [];
   if (!window.supabaseClient?.fetchAllProducts && !window.supabaseClient?.fetchTaagerProducts) return allLocal;
 
+  // fetchTaagerProducts is strictly per-country now, so it needs the resolved
+  // selection. Calling it bare returned nothing.
+  const countryCode = window.TaagerIntegration?.getSelectedCountry?.()?.code || "";
+
   try {
     const remote = window.supabaseClient?.fetchTaagerProducts && window.TAAGER_PRODUCTS_FEED_URL
-      ? (await window.supabaseClient.fetchTaagerProducts()) || []
+      ? (await window.supabaseClient.fetchTaagerProducts(countryCode)) || []
       : (await window.supabaseClient.fetchAllProducts()) || [];
     const map = new Map();
 
@@ -777,7 +781,11 @@ async function getAllProductsPool() {
       map.set(String(product.id), product);
     });
 
-    return [...map.values()];
+    const merged = [...map.values()];
+    if (window.TaagerIntegration && typeof window.TaagerIntegration.filterByCountry === "function") {
+      return window.TaagerIntegration.filterByCountry(merged, countryCode);
+    }
+    return merged;
   } catch {
     return allLocal;
   }

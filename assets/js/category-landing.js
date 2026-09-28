@@ -35,20 +35,24 @@ function clGetSupabase() {
 
 function clGetCountryCode() {
   try {
-    var cc = localStorage.getItem('userCountry');
-    if (cc) return cc.toUpperCase();
+    // Prefer the resolved selection so a geo-detected country is honoured.
     if (window.TaagerIntegration && typeof window.TaagerIntegration.getSelectedCountry === 'function') {
       var sel = window.TaagerIntegration.getSelectedCountry();
       if (sel && sel.code) return sel.code.toUpperCase();
     }
+    var cc = localStorage.getItem('userCountry');
+    if (cc) return cc.toUpperCase();
   } catch (e) {}
   return 'EG';
 }
 
 function clGetAllProducts() {
+  var country = clGetCountryCode();
   var taager = [];
   if (window.TaagerIntegration && typeof window.TaagerIntegration.getCachedProducts === "function") {
-    var cached = window.TaagerIntegration.getCachedProducts();
+    // Pass the country: the argument-less form reads the shared all-markets
+    // bucket, so an Egyptian cache entry was served on Saudi category pages.
+    var cached = window.TaagerIntegration.getCachedProducts(country);
     if (cached && Array.isArray(cached) && cached.length >= 4) taager = cached;
   }
   var merged = [].concat(taager);
@@ -61,12 +65,15 @@ function clGetAllProducts() {
       var list = Array.isArray(all) ? all : Object.values(all).filter(Boolean);
       for (var si = 0; si < list.length; si++) {
         var sp = list[si];
-        if (sp && !seen[sp.id]) {
-          if (!sp.available_countries) sp.available_countries = ["EG", "SA"];
-          merged.push(sp);
-        }
+        if (sp && !seen[sp.id]) merged.push(sp);
       }
     }
+  }
+  // Previously every store product was stamped available_countries=["EG","SA"]
+  // when untagged, which published the whole catalog in both markets. Filter
+  // against the real country tags instead.
+  if (window.TaagerIntegration && typeof window.TaagerIntegration.filterByCountry === "function") {
+    merged = window.TaagerIntegration.filterByCountry(merged, country);
   }
   return merged;
 }

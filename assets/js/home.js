@@ -350,6 +350,7 @@ let taagerExtraRotationOffset = 0;
 let taagerExtraRotationTimer = null;
 let homeSourceCache = [];
 let homeSourceCacheTimestamp = 0;
+let homeSourceCacheCountry = "";
 
 // ========== UTILITY FUNCTIONS (unchanged from original) ==========
 function isNetworkResolutionError(error) {
@@ -856,12 +857,21 @@ function syncWishlistButtons(container) {
 // so the home page reuses the cross-page product cache instead of re-downloading
 // the whole catalog on every visit.
 const HOME_PRODUCTS_IDB_TTL_MS = 10 * 60 * 1000;
+const HOME_PRODUCTS_IDB_DB = "buda_products_cache";
+const HOME_PRODUCTS_IDB_STORE = "products";
+// One bucket per country. A single shared key served the whole catalog to every
+// market, so a Saudi visitor was handed the Egyptian cache entry.
+function homeProductsIdbKey() {
+  var cc = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "";
+  return "PRODUCTS:" + (String(cc).toUpperCase() || "NONE");
+}
 function readHomeProductsIdbCache() {
   if (!window.indexedDB) return Promise.resolve(null);
+  var key = homeProductsIdbKey();
   return new Promise(function (resolve) {
     var req;
     try {
-      req = window.indexedDB.open("buda_products_cache", 1);
+      req = window.indexedDB.open(HOME_PRODUCTS_IDB_DB, 1);
     } catch (_e) {
       resolve(null);
       return;
@@ -869,8 +879,8 @@ function readHomeProductsIdbCache() {
     req.onsuccess = function () {
       var db = req.result;
       try {
-        var tx = db.transaction("products", "readonly");
-        var g = tx.objectStore("products").get("PRODUCTS:ALL");
+        var tx = db.transaction(HOME_PRODUCTS_IDB_STORE, "readonly");
+        var g = tx.objectStore(HOME_PRODUCTS_IDB_STORE).get(key);
         g.onsuccess = function () {
           var entry = g.result;
           if (db && db.close) { try { db.close(); } catch (_c) {} }
@@ -893,25 +903,26 @@ function readHomeProductsIdbCache() {
 function writeHomeProductsIdbCache(products) {
   if (!window.indexedDB || !Array.isArray(products) || !products.length)
     return Promise.resolve();
+  var key = homeProductsIdbKey();
   return new Promise(function (resolve) {
     var req;
     try {
-      req = window.indexedDB.open("buda_products_cache", 1);
+      req = window.indexedDB.open(HOME_PRODUCTS_IDB_DB, 1);
     } catch (_e) {
       resolve();
       return;
     }
     req.onupgradeneeded = function () {
       var db = req.result;
-      if (!db.objectStoreNames.contains("products"))
-        db.createObjectStore("products");
+      if (!db.objectStoreNames.contains(HOME_PRODUCTS_IDB_STORE))
+        db.createObjectStore(HOME_PRODUCTS_IDB_STORE);
     };
     req.onsuccess = function () {
       var db = req.result;
       try {
-        var tx = db.transaction("products", "readwrite");
-        tx.objectStore("products")
-          .put({ t: Date.now(), products: products }, "PRODUCTS:ALL");
+        var tx = db.transaction(HOME_PRODUCTS_IDB_STORE, "readwrite");
+        tx.objectStore(HOME_PRODUCTS_IDB_STORE)
+          .put({ t: Date.now(), products: products }, key);
         tx.oncomplete = function () { if (db && db.close) { try { db.close(); } catch (_c) {} } resolve(); };
         tx.onerror = function () { if (db && db.close) { try { db.close(); } catch (_c) {} } resolve(); };
         tx.onabort = function () { if (db && db.close) { try { db.close(); } catch (_c) {} } resolve(); };
@@ -958,11 +969,18 @@ async function fetchSupabaseProducts(filter) {
   if (!data && !window.__productsProxyUnavailable && !isLocalDev) {
     try {
       var url = "/api/products";
-      if (mapped) url += "?filter=" + encodeURIComponent(mapped);
-      else url += "?lean=1";
+      var params = [];
+      if (mapped) params.push("filter=" + encodeURIComponent(mapped));
+      else params.push("lean=1");
+      var activeCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code;
+      if (activeCountry) params.push("country=" + encodeURIComponent(activeCountry));
+      url += "?" + params.join("&");
       var res = await fetch(url);
       if (res.ok) {
-        data = await res.json();
+        var payload = await res.json();
+        // An empty array is truthy, so assigning it straight to `data` used to
+        // skip the Supabase fallback below and blank the whole home page.
+        data = Array.isArray(payload) && payload.length ? payload : null;
         proxyLoaded = true;
         leanSourced = true;
       } else window.__productsProxyUnavailable = true;
@@ -1025,10 +1043,12 @@ async function fetchSupabaseProducts(filter) {
     var tp = await window.TaagerIntegration.fetchTaagerProducts(cc);
     window.TaagerIntegration.mergeTaagerIntoStore(tp);
     enriched.push.apply(enriched, tp);
-    var filtered = window.TaagerIntegration.filterByCountry(enriched, cc);
-    if (filtered.length) enriched = filtered;
+    // No "keep the unfiltered list when the filter comes up empty" escape
+    // hatch: that fallback is what repopulated a Saudi page with the Egyptian
+    // catalog. Strict filtering means a thin market simply renders thin.
+    enriched = window.TaagerIntegration.filterByCountry(enriched, cc);
   }
-  var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "EG";
+  var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code;
   enriched = filterProductsByCountry(enriched, currentCountry);
   if (q) return filterProductsBySearchTerm(enriched, q);
   return enriched;
@@ -1037,49 +1057,58 @@ async function fetchSupabaseProducts(filter) {
 // Filter products by country code (EG/SA)
 function filterProductsByCountry(products, countryCode) {
   if (!Array.isArray(products)) return [];
-  var cc = (countryCode || "EG").toUpperCase();
+  var cc = String(countryCode || "").toUpperCase();
+  if (!cc) return [];
   if (window.TaagerIntegration && typeof window.TaagerIntegration.filterProductsByCountry === "function") {
     return window.TaagerIntegration.filterProductsByCountry(products, cc);
   }
   return products.filter(function(p) {
     var pCountry = (p?.country || p?.country_code || "").toUpperCase();
-    if (!pCountry) return true;
+    var list = Array.isArray(p?.available_countries) ? p.available_countries : [];
+    if (list.length) {
+      return list.some(function (entry) {
+        return String(entry || "").toUpperCase() === cc;
+      });
+    }
+    if (!pCountry) return false;
     return pCountry === cc;
   });
 }
 function getLocalProducts() {
-  var cc = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "EG";
+  var cc = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code;
   return window.BudaStore?.getAllProducts
     ? normalizeProducts(
         Object.values(window.BudaStore.getAllProducts()).filter(Boolean).filter(function(p) {
           if (window.TaagerIntegration && typeof window.TaagerIntegration.matchesCountry === "function") {
             return window.TaagerIntegration.matchesCountry(p, cc);
           }
-          var pCountry = (p?.country || p?.country_code || "").toUpperCase();
-          if (!pCountry) return true;
-          return pCountry === cc.toUpperCase();
+          return filterProductsByCountry([p], cc).length > 0;
         })
       )
     : [];
 }
 function invalidateHomeProductsSourceCache() {
   homeSourceCache = [];
+  homeSourceCacheCountry = "";
   homeSourceCacheTimestamp = 0;
 }
 async function getHomeSourceProducts(options) {
   var forceRefresh = Boolean(options?.forceRefresh);
   var now = Date.now();
+  var country = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "";
+  // The memo below is only valid for the country it was built from; switching
+  // markets has to force a rebuild or the previous country's products return.
   if (
     !forceRefresh &&
     homeSourceCache.length &&
+    homeSourceCacheCountry === country &&
     now - homeSourceCacheTimestamp < HOME_PRODUCTS_SOURCE_CACHE_MS
   )
     return [].concat(homeSourceCache);
   var products = await fetchSupabaseProducts("");
   if (!products.length) products = getLocalProducts();
   // Filter products by current country
-  var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "EG";
-  products = filterProductsByCountry(products, currentCountry);
+  products = filterProductsByCountry(products, country);
   // Enrich products with originalPrice from store database
   var _storeAll = window.BudaStore?.getAllProducts ? window.BudaStore.getAllProducts() : {};
   products = products.map(function(p) {
@@ -1092,6 +1121,7 @@ async function getHomeSourceProducts(options) {
     return p;
   });
   homeSourceCache = normalizeProducts(products);
+  homeSourceCacheCountry = country;
   homeSourceCacheTimestamp = now;
   return [].concat(homeSourceCache);
 }
@@ -3379,8 +3409,14 @@ HM.renderSection = function (section) {
 //   2. /api/home-config (CDN-cached)   — one fast edge request
 //   3. direct parallel Supabase reads  — fallback (local dev / API outage)
 
-var HM_CONFIG_CACHE_KEY = "hm_config_cache_v1";
+var HM_CONFIG_CACHE_KEY_PREFIX = "hm_config_cache_v2_";
 var HM_CONFIG_CACHE_TTL_MS = 10 * 60 * 1000;
+// Hero slides, banners and category tiles are stored per country, so the local
+// cache has to be per country too — one shared key replayed the previous
+// market's artwork right after a country switch.
+function hmConfigCacheKey(country) {
+  return HM_CONFIG_CACHE_KEY_PREFIX + (String(country || "NONE").toUpperCase());
+}
 
 function _hmCurrentDevice() { return window.innerWidth >= 1024 ? 'desktop' : 'mobile'; }
 function _hmPickDeviceRows(rows, device) {
@@ -3391,9 +3427,9 @@ function _hmPickDeviceRows(rows, device) {
   return fallback.length ? fallback : rows;
 }
 
-function hmReadConfigCache() {
+function hmReadConfigCache(country) {
   try {
-    var raw = localStorage.getItem(HM_CONFIG_CACHE_KEY);
+    var raw = localStorage.getItem(hmConfigCacheKey(country));
     if (!raw) return null;
     var parsed = JSON.parse(raw);
     if (!parsed || !parsed.data || Number(parsed.at) + HM_CONFIG_CACHE_TTL_MS < Date.now()) return null;
@@ -3401,9 +3437,9 @@ function hmReadConfigCache() {
   } catch (_e) { return null; }
 }
 
-function hmWriteConfigCache(data) {
+function hmWriteConfigCache(data, country) {
   try {
-    localStorage.setItem(HM_CONFIG_CACHE_KEY, JSON.stringify({ at: Date.now(), data: data }));
+    localStorage.setItem(hmConfigCacheKey(country), JSON.stringify({ at: Date.now(), data: data }));
   } catch (_e) {}
 }
 
@@ -3501,17 +3537,21 @@ async function hmFetchConfigViaApi(country) {
 
 HM.loadDynamicConfig = async function () {
   try {
-    var country = localStorage.getItem('userCountry') || 'EG';
+    // Read the resolved selection, not the raw legacy mirror key, so a
+    // geo-detected country is honoured.
+    var country = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code
+      || localStorage.getItem('userCountry')
+      || 'EG';
 
     // Tier 1 — instant local cache, no network at all
-    var cached = hmReadConfigCache();
+    var cached = hmReadConfigCache(country);
     if (cached) { hmApplyDynamicData(cached); return; }
 
     // Tier 2 — single CDN-cached edge request
     var viaApi = await hmFetchConfigViaApi(country);
     if (viaApi) {
       hmApplyDynamicData(viaApi);
-      hmWriteConfigCache(viaApi);
+      hmWriteConfigCache(viaApi, country);
       return;
     }
 
@@ -3519,7 +3559,7 @@ HM.loadDynamicConfig = async function () {
     var raw = await hmLoadConfigFromSupabase(country);
     if (!raw) return;
     hmApplyDynamicData(raw);
-    hmWriteConfigCache(raw);
+    hmWriteConfigCache(raw, country);
   } catch (e) {
     console.warn('[HM] Failed to load dynamic config:', e);
   }
@@ -3854,6 +3894,17 @@ HM.init = async function () {
     deliverTo.textContent = selected || "اختر عنوان التوصيل";
   }
 
+  // Resolve the visitor's country before anything reads a catalog, so a Saudi
+  // visitor never sees an Egyptian first paint. This resolves instantly when a
+  // country is already stored and is bounded by the geo endpoint's own timeout.
+  if (window.TaagerIntegration && typeof window.TaagerIntegration.detectCountry === "function") {
+    try {
+      await window.TaagerIntegration.detectCountry();
+    } catch (_e) {
+      console.warn("[HM] country detection failed, using stored selection");
+    }
+  }
+
   // Start data loading in PARALLEL so rendering never waits on a
   // sequential config → products chain.
   var configPromise = HM.loadDynamicConfig();
@@ -3933,6 +3984,25 @@ HM.init = async function () {
 
   // Country changed
   document.addEventListener("boda:country-changed", async function () {
+    invalidateHomeProductsSourceCache();
+    lastRandomProductIds = [];
+    taagerExtraRotationOffset = 0;
+    await HM.loadDynamicConfig();
+    var source = await getHomeSourceProducts({ forceRefresh: true });
+    HM.allProducts = normalizeProducts(source);
+    HM.taagerOnly = HM.allProducts.filter(function (p) {
+      return p.source === "taager";
+    });
+    HM.contentEl.innerHTML = "";
+    HM.renderAll();
+    renderSummerSection();
+  });
+
+  // Geo detection that lands after the first render (e.g. the shell resolved it
+  // on its own) still has to repaint the catalog for the detected market.
+  document.addEventListener("boda:country-detected", async function (e) {
+    var detected = e && e.detail;
+    if (!detected || !detected.code) return;
     invalidateHomeProductsSourceCache();
     lastRandomProductIds = [];
     taagerExtraRotationOffset = 0;

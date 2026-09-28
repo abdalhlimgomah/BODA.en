@@ -1283,28 +1283,32 @@ async function fetchSuggestionsPoolFromSupabase(terms) {
     }
 
     // Merge Taager products into suggestions pool
+    let scopedPool = normalizedPool;
     if (window.TaagerIntegration) {
       try {
         var selectedCountry = window.TaagerIntegration.getSelectedCountry();
-        var taagerPool = await window.TaagerIntegration.fetchTaagerProducts(
-          selectedCountry ? selectedCountry.code : null
-        );
+        var selectedCode = (selectedCountry && selectedCountry.code) || "";
+        var taagerPool = await window.TaagerIntegration.fetchTaagerProducts(selectedCode);
         window.TaagerIntegration.mergeTaagerIntoStore(taagerPool);
         taagerPool.forEach(function (tp) {
-          if (!normalizedPool.some(function (np) { return String(np.id) === String(tp.id); })) {
-            normalizedPool.push(tp);
+          if (!scopedPool.some(function (np) { return String(np.id) === String(tp.id); })) {
+            scopedPool.push(tp);
           }
         });
+        // Keep the suggestions inside the selected market.
+        if (typeof window.TaagerIntegration.filterByCountry === "function") {
+          scopedPool = window.TaagerIntegration.filterByCountry(scopedPool, selectedCode);
+        }
       } catch (_a) {}
     }
 
     suggestionsCache.key = cacheKey;
     suggestionsCache.source = foundHistoryMatches ? "history" : "default";
     suggestionsCache.expiresAt = Date.now() + SUGGESTIONS_CACHE_TTL_MS;
-    suggestionsCache.products = normalizedPool;
+    suggestionsCache.products = scopedPool;
 
     return {
-      products: normalizedPool,
+      products: scopedPool,
       source: suggestionsCache.source,
     };
   } catch {
@@ -1505,13 +1509,18 @@ async function fetchSliderProducts(count) {
     if (window.TaagerIntegration) {
       try {
         var selCountry = window.TaagerIntegration.getSelectedCountry();
-        var taager = await window.TaagerIntegration.fetchTaagerProducts(selCountry ? selCountry.code : null);
+        var selCode = (selCountry && selCountry.code) || "";
+        var taager = await window.TaagerIntegration.fetchTaagerProducts(selCode);
         window.TaagerIntegration.mergeTaagerIntoStore(taager);
         taager.forEach(function (tp) {
           if (!rated.some(function (r) { return String(r.id) === String(tp.id); })) {
             rated.push(tp);
           }
         });
+        // Keep the slider inside the selected market.
+        if (typeof window.TaagerIntegration.filterByCountry === "function") {
+          rated = window.TaagerIntegration.filterByCountry(rated, selCode);
+        }
       } catch (_a) {}
     }
     return rated;

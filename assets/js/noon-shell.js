@@ -1347,6 +1347,23 @@ function hideBottomNavOnDesktop() {
     } catch (_e) {}
   }
 
+  // First-time visitors have no stored country, so resolve it from the request
+  // IP before the shell renders its label. Resolves immediately when the
+  // visitor already chose or a profile supplied a country.
+  function bootstrapCountry() {
+    if (!window.TaagerIntegration || typeof window.TaagerIntegration.detectCountry !== "function") return;
+    var rendered = false;
+    Promise.resolve(window.TaagerIntegration.detectCountry()).then(function (country) {
+      if (!country || !country.code || rendered) return;
+      rendered = true;
+      renderCountryStrip();
+      var flagEl = document.getElementById("budaCountryFlag");
+      var nameEl = document.getElementById("budaCountryName");
+      if (flagEl) flagEl.textContent = getCountryFlagEmoji(country) || country.flag || "";
+      if (nameEl) nameEl.textContent = country.name || country.code;
+    }).catch(function () {});
+  }
+
   function init() {
     hydrateAuthSession();
     enforceArabicRtl();
@@ -1354,6 +1371,7 @@ function hideBottomNavOnDesktop() {
     initSearchRedirect();
     syncCartBadge();
     loadUserCountryOnStartup();
+    bootstrapCountry();
     initCountryStrip();
   }
 

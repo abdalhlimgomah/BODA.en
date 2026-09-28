@@ -705,22 +705,22 @@ PL.fetchProducts = async function () {
       var tp = await window.TaagerIntegration.fetchTaagerProducts(cc);
       window.TaagerIntegration.mergeTaagerIntoStore(tp);
       source = source.concat(tp);
-      var filtered = window.TaagerIntegration.filterByCountry(source, cc);
-      if (filtered.length) source = filtered;
+      // Strict: no "keep the unfiltered list when nothing matched" fallback.
+      source = window.TaagerIntegration.filterByCountry(source, cc);
     } catch (e) {
       console.warn("Taager error:", e);
     }
   }
 
   // Filter by current country
-  var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "EG";
+  var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code;
   source = (source || []).filter(function (p) {
     if (window.TaagerIntegration && typeof window.TaagerIntegration.matchesCountry === "function") {
       return window.TaagerIntegration.matchesCountry(p, currentCountry);
     }
     var pCountry = (p?.country || p?.country_code || "").toUpperCase();
-    if (!pCountry) return true;
-    return pCountry === currentCountry.toUpperCase();
+    if (!pCountry) return false;
+    return pCountry === String(currentCountry || "").toUpperCase();
   });
 
   PL.state.allProducts = source || [];

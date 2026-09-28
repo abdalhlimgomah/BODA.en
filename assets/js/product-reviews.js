@@ -167,7 +167,10 @@ async function loadProductFromSupabase(productId) {
     }
 
     if (typeof window.supabaseClient.fetchTaagerProducts === "function" && window.TAAGER_PRODUCTS_FEED_URL) {
-      const all = (await window.supabaseClient.fetchTaagerProducts()) || [];
+      // Strictly per-country: resolve the selection before asking, otherwise the
+      // call returns nothing and reviews fall back to a stub product.
+      const countryCode = window.TaagerIntegration?.getSelectedCountry?.()?.code || "";
+      const all = (await window.supabaseClient.fetchTaagerProducts(countryCode)) || [];
       return all.find((item) => String(item?.id || "").trim() === String(productId).trim()) || null;
     }
 

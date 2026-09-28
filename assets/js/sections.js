@@ -53,16 +53,27 @@
     } catch (_) {}
   }
 
+  function getSectionsCountryCode() {
+    try {
+      if (window.TaagerIntegration && typeof window.TaagerIntegration.getSelectedCountry === 'function') {
+        var sel = window.TaagerIntegration.getSelectedCountry();
+        if (sel && sel.code) return String(sel.code).toUpperCase();
+      }
+      var cc = localStorage.getItem('userCountry');
+      if (cc) return String(cc).toUpperCase();
+    } catch (_) {}
+    return 'EG';
+  }
+
   async function fetchTaagerProducts() {
+    var countryCode = getSectionsCountryCode();
     if (window.supabaseClient && typeof window.supabaseClient.fetchAllProductsWithTaager === 'function') {
       try {
-        var countryCode = localStorage.getItem('userCountry') || 'EG';
         return (await window.supabaseClient.fetchAllProductsWithTaager(countryCode)) || [];
       } catch (_) {}
     }
     if (window.supabaseClient && typeof window.supabaseClient.fetchTaagerProducts === 'function') {
       try {
-        var countryCode = localStorage.getItem('userCountry') || 'EG';
         return (await window.supabaseClient.fetchTaagerProducts(countryCode)) || [];
       } catch (_) {}
     }
@@ -270,6 +281,10 @@
 
     if (!allProducts.length) {
       allProducts = (await fetchTaagerProducts()) || allProducts;
+    }
+    // The store holds every market; scope the index to the selected country.
+    if (allProducts.length && window.TaagerIntegration && typeof window.TaagerIntegration.filterByCountry === 'function') {
+      allProducts = window.TaagerIntegration.filterByCountry(allProducts, getSectionsCountryCode());
     }
     _productIndex = null;
 

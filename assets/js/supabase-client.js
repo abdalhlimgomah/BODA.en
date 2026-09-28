@@ -650,7 +650,8 @@ function countryKeyMatches(value, code) {
 
 function matchesCountry(product, countryCode) {
   if (!product) return false;
-  const upper = String(countryCode || "EG").toUpperCase().trim();
+  const upper = String(countryCode || "").toUpperCase().trim();
+  if (!upper) return false;
   const countryField = String(product.country || product.country_code || "").toUpperCase().trim();
   const countries = Array.isArray(product.available_countries) ? product.available_countries : [];
   if (countries.length) {
@@ -660,12 +661,15 @@ function matchesCountry(product, countryCode) {
     return false;
   }
   if (countryField) return countryKeyMatches(countryField, upper);
-  return true;
+  // Untagged products are not assumed to ship everywhere; assuming so leaked
+  // one country's catalog into another.
+  return false;
 }
 
 function filterTaagerProductsByCountry(products = [], countryCode = "") {
-  if (!countryCode) return [...products];
-  return products.filter((product) => matchesCountry(product, countryCode));
+  const code = String(countryCode || "").toUpperCase().trim();
+  if (!code) return [];
+  return products.filter((product) => matchesCountry(product, code));
 }
 
 const TAAGER_LIST_COLUMNS =
@@ -744,8 +748,12 @@ function taagerIdbPut(key, entry) {
 }
 
 async function fetchTaagerProducts(countryCode = "") {
+  const code = String(countryCode || "").toUpperCase().trim();
+  if (!code) return [];
   const client = getSupabaseClient();
-  const cacheKey = "TAAGER:" + String(countryCode || "EG").toUpperCase();
+  // Keyed strictly by country: defaulting an empty code to "EG" made an
+  // unresolved request read and overwrite the real Egypt bucket.
+  const cacheKey = "TAAGER:" + code;
   const memHit = _taagerListMemoryCache[cacheKey];
   if (memHit && Date.now() - memHit.t < TAAGER_LIST_CACHE_TTL) {
     return memHit.products;
@@ -2283,35 +2291,14 @@ async function fetchAllProductsWithTaager(countryCode) {
     }
   });
 
-  // Filter ALL products by country (not just Taager products)
+  // Filter ALL products by country (not just Taager products). Strict: an empty
+  // result is a real answer, so there is no "show everything if the filter
+  // matched nothing" fallback — that path repopulated a Saudi view with the
+  // Egyptian catalog.
   if (countryCode) {
-    var iso2to3 = { EG: "EGY", SA: "SAU", AE: "ARE", IQ: "IRQ", OM: "OMN" };
-    var upperCode = countryCode.toUpperCase();
-    var iso3Code = iso2to3[upperCode] || upperCode;
-
-    // Helper to get country slug
-    function getCountrySlug(code) {
-      var countries = {
-        EG: "egypt",
-        SA: "saudi-arabia",
-        AE: "united-arab-emirates",
-        IQ: "iraq",
-        OM: "oman"
-      };
-      return countries[code] || code;
-    }
-    var slugMatch = getCountrySlug(upperCode);
-
-    // Check if any product matches this country before filtering
-    var hasCountryMatch = merged.some(function (product) {
-      return matchesCountry(product, upperCode);
+    return merged.filter(function (product) {
+      return matchesCountry(product, countryCode);
     });
-
-    if (hasCountryMatch) {
-      return merged.filter(function (product) {
-        return matchesCountry(product, upperCode);
-      });
-    }
   }
 
   return merged;
