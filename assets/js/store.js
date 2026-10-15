@@ -730,7 +730,7 @@ const getImagePath = (path) => {
     }
     // Resize remote images through our own Vercel optimizer (CDN-cached),
     // except when serving from a local dev server (no /api there).
-    const isRemoteImage = /^https?:\/\/(media\.taager\.com|aff\.ven-door\.com|iili\.io|a\.nooncdn\.com|f\.nooncdn\.com|msgqzgzoslearaprgiqq\.supabase\.co|wwlwwgqfjhmchrijaojr\.supabase\.co)\//i.test(source);
+    const isRemoteImage = /^https?:\/\/(media\.taager\.com|aff\.ven-door\.com|iili\.io|a\.nooncdn\.com|f\.nooncdn\.com|[\w-]+\.supabase\.co)\//i.test(source);
     if (isRemoteImage) {
       const host = String(window.location && window.location.hostname || "");
       if (!/^127\.0\.0\.1$|^localhost$/i.test(host)) {
