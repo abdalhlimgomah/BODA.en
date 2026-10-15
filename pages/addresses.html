@@ -11,7 +11,9 @@
   <link href="../assets/css/noon-theme.css" rel="stylesheet" />
   <link href="../assets/css/desktop.css?v=20260828b" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.css" />
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" />
+  <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
@@ -20,8 +22,9 @@
       --primary-dark: #B71C1C;
       --secondary: #232F3E;
       --secondary-light: #3A4552;
-      --blue: #4A90D9;
-      --blue-light: #E8F0FE;
+      --blue: #7C3AED;
+      --blue-light: #F3EEFF;
+      --blue-dark: #5B21B6;
       --bg: #F5F5F5;
       --white: #FFFFFF;
       --text: #1A1A1A;
@@ -149,7 +152,7 @@
 
     .add-address-btn:hover {
       background: var(--blue-light);
-      border-color: #3B82D2;
+      border-color: var(--blue-dark);
     }
 
     .address-list {
@@ -316,7 +319,7 @@
     }
 
     .action-btn.default-btn:hover {
-      color: #3575C0;
+      color: var(--blue-dark);
     }
 
     .action-btn.delete-btn {
@@ -431,6 +434,90 @@
     #map {
       height: 100%;
       width: 100%;
+      background: #E9ECEF;
+    }
+
+    /* === Map Search Bar === */
+    .map-search-bar {
+      position: absolute;
+      top: 68px;
+      left: 16px;
+      right: 16px;
+      z-index: 600;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 18px rgba(17,24,39,0.14);
+      display: flex;
+      align-items: center;
+      padding: 0 14px;
+      min-height: 52px;
+    }
+    .map-search-icon {
+      font-size: 21px;
+      color: var(--blue);
+      flex-shrink: 0;
+    }
+    #map-search-input {
+      flex: 1;
+      border: none;
+      outline: none;
+      padding: 15px 10px;
+      font-family: inherit;
+      font-size: 0.9rem;
+      background: transparent;
+      color: var(--text);
+    }
+    #map-search-input::placeholder { color: #9CA3AF; }
+    .map-search-clear {
+      border: none;
+      background: none;
+      padding: 4px;
+      cursor: pointer;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      color: #9CA3AF;
+    }
+    .map-search-clear.show { display: flex; }
+    .map-search-clear .material-icons-outlined { font-size: 18px; }
+    .map-search-results {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      right: 0;
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(17,24,39,0.18);
+      overflow: hidden;
+      display: none;
+      max-height: 280px;
+      overflow-y: auto;
+    }
+    .map-search-results.show { display: block; }
+    .map-search-item {
+      padding: 13px 14px;
+      font-size: 0.84rem;
+      line-height: 1.4;
+      cursor: pointer;
+      border-bottom: 1px solid #F3F4F6;
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      color: var(--text);
+      transition: background 0.15s;
+    }
+    .map-search-item:hover { background: var(--blue-light); }
+    .map-search-item:last-child { border-bottom: none; }
+    .map-search-item .material-icons-outlined { font-size: 18px; color: var(--blue); flex-shrink: 0; margin-top: 1px; }
+    .map-search-empty { padding: 16px; text-align: center; color: #9CA3AF; font-size: 0.82rem; }
+
+    /* === Pin invalid (outside country) === */
+    .map-center-pin.invalid .pin-label { background: #B91C1C; }
+    .map-center-pin.invalid .pin-icon { animation: pinShake 0.4s ease; }
+    @keyframes pinShake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-4px); }
+      75% { transform: translateX(4px); }
     }
 
     /* === Fixed Center Pin === */
@@ -521,7 +608,7 @@
 
     .map-bottom-icon {
       font-size: 28px;
-      color: var(--primary);
+      color: var(--blue);
       flex-shrink: 0;
     }
 
@@ -572,7 +659,7 @@
       gap: 8px;
       width: 100%;
       padding: 15px;
-      background: var(--secondary);
+      background: linear-gradient(135deg, #7C3AED 0%, #5B21B6 100%);
       color: #fff;
       border: none;
       border-radius: var(--radius-input);
@@ -581,10 +668,19 @@
       font-family: 'Cairo', sans-serif;
       cursor: pointer;
       transition: all var(--transition);
+      box-shadow: 0 4px 14px rgba(124,58,237,0.35);
     }
-    .confirm-location-btn:hover { background: #1A2533; }
+    .confirm-location-btn:hover { background: linear-gradient(135deg, #6D28D9 0%, #4C1D95 100%); }
     .confirm-location-btn:active { transform: scale(0.98); }
     .confirm-location-btn .material-icons-outlined { font-size: 20px; }
+
+    .map-attribution {
+      text-align: center;
+      font-size: 0.62rem;
+      color: #9CA3AF;
+      margin-top: 10px;
+      letter-spacing: 0.2px;
+    }
 
 
 
@@ -703,7 +799,7 @@
     .form-group textarea:focus {
       outline: none;
       border-color: var(--blue);
-      box-shadow: 0 0 0 3px rgba(74,144,217,0.1);
+      box-shadow: 0 0 0 3px rgba(124,58,237,0.12);
     }
 
     .form-group textarea {
@@ -842,7 +938,7 @@
     <div class="screen-header">
       <div class="header-content">
         <button class="back-btn" onclick="window.location.href='ahsab.html'">
-          <span class="material-icons-outlined"></span>
+          <span class="material-icons-outlined">arrow_forward</span>
         </button>
         <div class="brand-badge">BudoQ</div>
       </div>
@@ -875,11 +971,11 @@
     <!-- Header -->
     <div class="map-top-bar">
       <button id="map-back-btn" class="map-back-btn" onclick="showAddressListScreen()">
-        <span class="material-icons-outlined"></span>
+        <span class="material-icons-outlined">arrow_forward</span>
       </button>
       <div class="map-top-title">اختر موقعك</div>
       <button class="map-locate-btn" onclick="window.locateMe && locateMe()" title="موقعي الحالي">
-        <span class="material-icons-outlined"></span>
+        <span class="material-icons-outlined">my_location</span>
       </button>
     </div>
 
@@ -887,20 +983,30 @@
     <div class="map-container-wrapper">
       <div id="map"></div>
 
+      <!-- Search bar -->
+      <div class="map-search-bar" id="map-search-bar">
+        <span class="material-icons-outlined map-search-icon">search</span>
+        <input id="map-search-input" type="text" placeholder="ابحث عن المنطقة أو الشارع..." autocomplete="off" />
+        <button type="button" class="map-search-clear" id="map-search-clear">
+          <span class="material-icons-outlined">close</span>
+        </button>
+        <div class="map-search-results" id="map-search-results"></div>
+      </div>
+
       <!-- Fixed center pin (stays still, map moves under it) -->
       <div class="map-center-pin" id="map-center-pin">
         <!-- Bubble showing location name above the pin -->
         <div class="pin-label" id="pin-label">
-          <span class="material-icons-outlined pin-label-icon"></span>
+          <span class="material-icons-outlined pin-label-icon">place</span>
           <span id="pin-label-text">اسحب الخريطة لتحديد موقعك</span>
         </div>
         <!-- The actual pin SVG -->
         <div class="pin-icon" id="pin-icon">
-          <svg width="36" height="44" viewBox="0 0 36 44" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M18 1C8.06 1 1 8.06 1 18C1 28.5 18 43 18 43C18 43 35 28.5 35 18C35 8.06 27.94 1 18 1Z"
-              fill="#E53935" stroke="#B71C1C" stroke-width="1.5"/>
-            <circle cx="18" cy="18" r="7" fill="white"/>
-            <circle cx="18" cy="18" r="4" fill="#E53935"/>
+          <svg width="30" height="44" viewBox="0 0 30 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 1.2C7.85 1.2 2.1 6.95 2.1 14.1C2.1 22.4 15 42.8 15 42.8C15 42.8 27.9 22.4 27.9 14.1C27.9 6.95 22.15 1.2 15 1.2Z"
+              fill="#7C3AED" stroke="#5B21B6" stroke-width="1.4"/>
+            <circle cx="15" cy="14.1" r="5.6" fill="white"/>
+            <circle cx="15" cy="14.1" r="2.6" fill="#7C3AED"/>
           </svg>
           <!-- Shadow under pin -->
           <div class="pin-shadow"></div>
@@ -911,7 +1017,7 @@
     <!-- Bottom panel - location info and confirm button -->
     <div class="map-bottom-panel">
       <div class="map-bottom-header">
-        <span class="material-icons-outlined map-bottom-icon"></span>
+        <span class="material-icons-outlined map-bottom-icon">location_on</span>
         <div class="map-bottom-texts">
           <div class="map-bottom-title">الموقع المحدد</div>
           <div class="map-bottom-address" id="location-display">حرّك الخريطة لتحديد موقعك</div>
@@ -919,9 +1025,10 @@
         <div class="map-loading-dot" id="map-loading-dot"></div>
       </div>
       <button class="confirm-location-btn" id="confirm-location-btn" onclick="confirmLocation()">
-        <span class="material-icons-outlined"></span>
+        <span class="material-icons-outlined">check_circle</span>
         <span>تأكيد هذا الموقع</span>
       </button>
+      <div class="map-attribution">© OpenStreetMap · OpenFreeMap</div>
     </div>
 
   </div>
@@ -930,8 +1037,8 @@
   <div id="address-form-screen" class="screen form-screen">
     <div class="screen-header">
       <div class="header-content">
-        <button id="form-back-btn" class="back-btn" onclick="showMapScreen()">
-          <span class="material-icons-outlined"></span>
+        <button id="form-back-btn" class="back-btn" type="button">
+          <span class="material-icons-outlined">arrow_forward</span>
         </button>
         <div class="brand-badge">BudoQ</div>
       </div>
@@ -944,7 +1051,7 @@
       </div>
       <form id="address-form" class="form-section">
         <h2 class="section-title">
-          <span class="material-icons-outlined"></span>
+          <span class="material-icons-outlined">location_on</span>
           تفاصيل العنوان
         </h2>
 
@@ -1013,8 +1120,10 @@
   <script src="../assets/vendor/supabase/supabase-js.js?v=20260810"></script>
   <script src="../assets/js/supabase-client.js?v=20261014-limit"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/maplibre-gl/4.7.1/maplibre-gl.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@maplibre/maplibre-gl-leaflet@0.0.22/leaflet-maplibre-gl.js"></script>
   <script src="../assets/js/store.js?v=20260922-cartfix"></script>
-  <script src="../assets/js/addresses.js"></script>
+  <script src="../assets/js/addresses.js?v=20261015-service3"></script>
 </body>
 </html>
 
