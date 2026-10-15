@@ -734,13 +734,20 @@ const AddressesModule = (function() {
         esriStreet.addTo(state.map);
       };
 
-      var vectorBasemapReady = false;
-      if (typeof L.maplibreGL === 'function' && typeof maplibregl !== 'undefined') {
+      // Robust WebGL capability check (maplibregl.supported() is missing in 4.x)
+      function supportsWebGL() {
         try {
-          if (typeof maplibregl.supported === 'function' && !maplibregl.supported()) {
-            throw new Error('WebGL not supported');
-          }
-          L.maplibreGL({
+          var c = document.createElement('canvas');
+          return !!(window.WebGLRenderingContext &&
+            (c.getContext('webgl') || c.getContext('experimental-webgl')));
+        } catch (e) { return false; }
+      }
+
+      var vectorBasemapReady = false;
+      var vectorLayer = null;
+      if (typeof L.maplibreGL === 'function' && typeof maplibregl !== 'undefined' && supportsWebGL()) {
+        try {
+          vectorLayer = L.maplibreGL({
             style: 'https://tiles.openfreemap.org/styles/bright',
             attribution: '© OpenStreetMap · OpenFreeMap',
           }).addTo(state.map);
@@ -751,6 +758,30 @@ const AddressesModule = (function() {
       }
       if (!vectorBasemapReady) {
         addRasterBasemap();
+      } else {
+        // Safety net: if the vector map never actually renders (WebGL context
+        // lost, style/tiles blocked on mobile or in-app browsers), swap to raster.
+        var glMap = null;
+        try { glMap = vectorLayer && vectorLayer._glMap; } catch (e) {}
+        if (glMap && typeof glMap.on === 'function') {
+          var vectorRendered = (typeof glMap.loaded === 'function' && glMap.loaded());
+          glMap.on('load', function () { vectorRendered = true; });
+          glMap.on('idle', function () { vectorRendered = true; });
+          glMap.on('error', function (ev) {
+            console.warn('[map] maplibre error:', ev && ev.error && ev.error.message);
+          });
+          setTimeout(function () {
+            var ok = vectorRendered;
+            try {
+              if (ok && typeof glMap.areTilesLoaded === 'function' && !glMap.areTilesLoaded()) ok = false;
+            } catch (e) {}
+            if (!ok) {
+              console.warn('[map] vector basemap did not render — switching to raster fallback');
+              try { if (vectorLayer) state.map.removeLayer(vectorLayer); } catch (e) {}
+              addRasterBasemap();
+            }
+          }, 5000);
+        }
       }
 
       // Draw country boundary, dim the area outside, and fit the whole country
