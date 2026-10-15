@@ -316,6 +316,18 @@
 
     var urlId = U.getQueryParam("id");
 
+    // Resolve the visitor's market before any product lookup, so the market
+    // gate never runs against a not-yet-detected default country. Bounded wait
+    // so a slow/failed geo lookup can't block the page.
+    try {
+      if (global.TaagerIntegration && typeof global.TaagerIntegration.countryReady === "function") {
+        await Promise.race([
+          Promise.resolve(global.TaagerIntegration.countryReady()),
+          new Promise(function (resolve) { setTimeout(resolve, 1500); }),
+        ]);
+      }
+    } catch (e) { /* fall back to stored/default country */ }
+
     // Fire every id-independent query immediately. They used to run strictly
     // AFTER resolveProduct() even though they only need the URL id.
     var ratingsPromise = D.fetchRatings(urlId);
@@ -337,6 +349,26 @@
       }
       return;
     }
+    // MARKET ENFORCEMENT: the visitor's selected country governs what is shown.
+    // A product whose own market metadata excludes that country is treated as
+    // not available (410) - never silently shown or swapped for another market.
+    var activeMarket = (U.getRequestedMarket) ? U.getRequestedMarket() : "";
+    if (activeMarket && U.productMatchesMarket && !U.productMatchesMarket(product, activeMarket)) {
+      window.location.replace("../410.html");
+      return;
+    }
+    // Canonicalize the URL so a shared link carries the market it was viewed in.
+    try {
+      var prodM = (U.getProductMarket) ? U.getProductMarket(product) : "";
+      var canon = activeMarket || prodM;
+      if (canon) {
+        var urlObj = new URL(window.location.href);
+        if (urlObj.searchParams.get("country") !== canon) {
+          urlObj.searchParams.set("country", canon);
+          window.history.replaceState({}, "", urlObj.toString());
+        }
+      }
+    } catch (e) { /* canonicalization is best-effort */ }
     var reviews = await ratingsPromise;
     var seller = null;
     try {

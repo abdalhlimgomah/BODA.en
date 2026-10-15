@@ -75,7 +75,12 @@
       // Taager multi-variant: navigate to sibling product page
       if (group._taagerMulti) {
         if (option.value !== currentId) {
-          window.location.href = "product.html?id=" + encodeURIComponent(option.value);
+          var reqMarket = (U.getRequestedMarket) ? U.getRequestedMarket() : "";
+          var url = "product.html?id=" + encodeURIComponent(option.value);
+          if (reqMarket) {
+            url += "&country=" + encodeURIComponent(reqMarket);
+          }
+          window.location.href = url;
         }
         return;
       }

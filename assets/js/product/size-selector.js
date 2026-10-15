@@ -51,7 +51,12 @@
         var size = sizes[idx];
         if (!size) return;
         if (size._siblingId && size._siblingId !== U.getQueryParam("id")) {
-          window.location.href = "product.html?id=" + encodeURIComponent(size._siblingId);
+          var reqMarket = (U.getRequestedMarket) ? U.getRequestedMarket() : "";
+          var url = "product.html?id=" + encodeURIComponent(size._siblingId);
+          if (reqMarket) {
+            url += "&country=" + encodeURIComponent(reqMarket);
+          }
+          window.location.href = url;
           return;
         }
         selectSize(size, btn);

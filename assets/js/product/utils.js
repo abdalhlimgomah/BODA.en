@@ -24,6 +24,113 @@
     catch (e) { return null; }
   }
 
+  /** Get market/country from the URL only. Priority: country/market/cc/countryCode */
+  function getUrlMarket() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      var m = params.get("country") || params.get("market") || params.get("cc") || params.get("countryCode") || params.get("country_code") || "";
+      if (m) {
+        var canon = marketCodeFromValue(m);
+        return canon || String(m).toUpperCase().trim();
+      }
+    } catch (e) {}
+    return "";
+  }
+
+  /** The visitor's currently selected country (the market the site is showing). */
+  function getUserMarket() {
+    var code = "";
+    try {
+      var ti = global.TaagerIntegration;
+      if (ti && typeof ti.getSelectedCountry === "function") {
+        var c = ti.getSelectedCountry();
+        if (c && c.code) code = c.code;
+      }
+    } catch (e) {}
+    if (!code) {
+      try {
+        var ls = localStorage.getItem("boda_selected_country") || localStorage.getItem("userCountry");
+        if (ls) {
+          try { var o = JSON.parse(ls); if (o && o.code) code = o.code; else code = ls; }
+          catch (e2) { code = ls; }
+        }
+      } catch (e3) {}
+    }
+    return marketCodeFromValue(code) || String(code || "").toUpperCase().trim();
+  }
+
+  /**
+   * The market that governs what the visitor is allowed to see.
+   * The visitor's selected country is authoritative (this is what is shown
+   * "in front of them"); the URL's country param is only a fallback when the
+   * selected country cannot be resolved. This prevents a link carrying another
+   * country's code from exposing a product that is not sold in the visitor's market.
+   */
+  function getRequestedMarket() {
+    var user = getUserMarket();
+    if (user) return user;
+    return getUrlMarket();
+  }
+
+  /** Canonical market aliases: map any stored form (ISO2/ISO3/slug/name) to EG/SA/AE/IQ/OM */
+  var MARKET_ALIASES = {
+    EG: ["EG", "EGY", "EGYPT", "مصر"],
+    SA: ["SA", "SAU", "KSA", "SAUDI-ARABIA", "SAUDI ARABIA", "SAUDI", "السعودية", "المملكة العربية السعودية"],
+    AE: ["AE", "ARE", "UAE", "EMIRATES", "الإمارات"],
+    IQ: ["IQ", "IRQ", "IRAQ", "العراق"],
+    OM: ["OM", "OMN", "OMAN", "عمان"],
+  };
+
+  function marketCodeFromValue(value) {
+    var upp = String(value == null ? "" : value).toUpperCase().trim();
+    if (!upp) return "";
+    for (var code in MARKET_ALIASES) {
+      var list = MARKET_ALIASES[code];
+      for (var i = 0; i < list.length; i++) {
+        if (upp === list[i].toUpperCase()) return code;
+      }
+    }
+    return "";
+  }
+
+  /** All canonical market codes a product belongs to (handles available_countries arrays). */
+  function productMarketCodes(p) {
+    var out = [];
+    if (!p) return out;
+    var candidates = [];
+    if (Array.isArray(p.available_countries)) candidates = candidates.concat(p.available_countries);
+    if (p.country_code) candidates.push(p.country_code);
+    if (p.country) candidates.push(p.country);
+    if (p.countryCode) candidates.push(p.countryCode);
+    candidates.forEach(function (v) {
+      var code = marketCodeFromValue(v);
+      if (code && out.indexOf(code) === -1) out.push(code);
+    });
+    return out;
+  }
+
+  /** Primary canonical market code for a product ("" when unknown). */
+  function getProductMarket(p) {
+    var codes = productMarketCodes(p);
+    return codes.length ? codes[0] : "";
+  }
+
+  /**
+   * Check if a product may be shown in the given market.
+   * Returns false ONLY when the product carries market metadata that excludes
+   * the requested market (this is what stops a cross-market product from being
+   * shown). Products with no market metadata cannot be proven foreign, so they
+   * are allowed (keeps internal/legacy products working).
+   */
+  function productMatchesMarket(p, requestedMarket) {
+    if (!p) return false;
+    if (!requestedMarket) return true;
+    var req = marketCodeFromValue(requestedMarket) || String(requestedMarket).toUpperCase().trim();
+    var codes = productMarketCodes(p);
+    if (!codes.length) return true; // no metadata -> cannot prove it's foreign
+    return codes.indexOf(req) !== -1;
+  }
+
   /** Convert a Western-digit string to Arabic-Indic digits with ٫ decimal separator. */
   function arabicNumeral(text) {
     var digits = { "0": "٠", "1": "١", "2": "٢", "3": "٣", "4": "٤", "5": "٥", "6": "٦", "7": "٧", "8": "٨", "9": "٩" };
@@ -195,6 +302,11 @@
     qsa: qsa,
     escapeHtml: escapeHtml,
     getQueryParam: getQueryParam,
+    getRequestedMarket: getRequestedMarket,
+    getProductMarket: getProductMarket,
+    productMarketCodes: productMarketCodes,
+    marketCodeFromValue: marketCodeFromValue,
+    productMatchesMarket: productMatchesMarket,
     arabicNumeral: arabicNumeral,
     money: money,
     getImagePath: getImagePath,

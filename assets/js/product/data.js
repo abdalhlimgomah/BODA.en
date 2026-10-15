@@ -49,9 +49,15 @@
 
   async function loadRemoteProduct(id) {
     if (!id) return null;
+    var requestedMarket = utils().getRequestedMarket ? utils().getRequestedMarket() : "";
     if (String(id).indexOf("taager_") === 0) {
       var local = global.BudaStore && global.BudaStore.getProductById ? global.BudaStore.getProductById(id) : null;
-      if (local) return local;
+      if (local) {
+        if (utils().productMatchesMarket && !utils().productMatchesMarket(local, requestedMarket)) {
+          return null;
+        }
+        return local;
+      }
       try {
         var base = global.TAAGER_EDGE_FUNCTION_URL || "";
         if (base) {
@@ -60,6 +66,9 @@
             var data = await res.json();
             if (data && data.id) {
               if (global.addProductToStore) global.addProductToStore(data);
+              if (utils().productMatchesMarket && !utils().productMatchesMarket(data, requestedMarket)) {
+                return null;
+              }
               return data;
             }
           }
@@ -106,9 +115,16 @@
       }
     } catch (e) { console.warn("[PDP] supabase lookup failed", e); }
     if (!record) return null;
+    // Market gate: reject only when the product's own market metadata excludes ours.
+    if (utils().productMatchesMarket && !utils().productMatchesMarket(record, requestedMarket)) {
+      return null;
+    }
     if (global.addProductToStore) global.addProductToStore(record);
     var normId = record.id || record.product_id;
     var norm = normId && global.BudaStore && global.BudaStore.getProductById ? global.BudaStore.getProductById(normId) : null;
+    if (norm && utils().productMatchesMarket && !utils().productMatchesMarket(norm, requestedMarket)) {
+      return null;
+    }
     return norm ? Object.assign({}, record, norm) : record;
   }
 
@@ -136,12 +152,23 @@
 
   async function resolveProduct() {
     var id = utils().getQueryParam("id");
+    var requestedMarket = utils().getRequestedMarket ? utils().getRequestedMarket() : "";
     var product = null;
     if (id && global.BudaStore && global.BudaStore.getProductById) product = global.BudaStore.getProductById(id) || null;
+    // Check market for cached product
+    if (product && utils().productMatchesMarket && !utils().productMatchesMarket(product, requestedMarket)) {
+      product = null;
+    }
     var stored = readStoredProduct(id);
-    if (stored) product = product ? Object.assign({}, product, stored) : stored;
+    if (stored) {
+      if (utils().productMatchesMarket && !utils().productMatchesMarket(stored, requestedMarket)) {
+        product = null;
+      } else {
+        product = product ? Object.assign({}, product, stored) : stored;
+      }
+    }
     if (id && String(id).indexOf("taager_") === 0) {
-      if (looksComplete(product)) {
+      if (product && looksComplete(product)) {
         // Stale-while-revalidate: paint instantly from the copy the visitor
         // just clicked in the listing; refresh the store cache in background.
         refreshProductInBackground(id);
@@ -163,11 +190,24 @@
       var all = Object.values(global.BudaStore.getAllProducts() || {});
       product = all[0] || null;
     }
+    if (product && utils().productMatchesMarket && !utils().productMatchesMarket(product, requestedMarket)) {
+      product = null;
+    }
     if (product && global.BudaStore && global.BudaStore.normalizeProductRecord) {
       try { var n = global.BudaStore.normalizeProductRecord(product); } catch (e) { var n = null; }
-      if (n) product = Object.assign({}, product, n);
+      if (n) {
+        if (!(utils().productMatchesMarket && !utils().productMatchesMarket(n, requestedMarket))) {
+          product = Object.assign({}, product, n);
+        } else {
+          product = null;
+        }
+      }
     }
-    persistProduct(product);
+    // Final market gate
+    if (product && utils().productMatchesMarket && !utils().productMatchesMarket(product, requestedMarket)) {
+      product = null;
+    }
+    if (product) persistProduct(product);
     return product;
   }
 
