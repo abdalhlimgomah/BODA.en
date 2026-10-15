@@ -8,6 +8,8 @@ const ALLOWED_HOSTS = new Set([
   "f.nooncdn.com",
   "msgqzgzoslearaprgiqq.supabase.co",
   "wwlwwgqfjhmchrijaojr.supabase.co",
+  "qhqkgrpezoaugyhzrgyc.supabase.co",
+  "sszolgwwulnsufexpcql.supabase.co",
 ]);
 
 const PRIMARY_SUPABASE_HOST = "msgqzgzoslearaprgiqq.supabase.co";
