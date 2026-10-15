@@ -1,8 +1,6 @@
 /* Design System — New tokens (ch-*, cart-*, pl-*, pd-*, etc.) */
-@import url('../design-system/index.css?v=20260909d');
-
-/* Design System */
-@import url('design-system.css');
+/* Bundled: tokens/components/layouts inlined to avoid the @import waterfall */
+@import url('../design-system/index.bundle.css?v=20261014a');
 
 /* ============================================
    Buda Design System v2.0 — Single Source of Truth
