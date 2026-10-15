@@ -2823,6 +2823,28 @@ function hmRenderRange(skeletonEl, startIndex, endIndex, onDone) {
 function hmFinishHydration(skeletonEl) {
   if (!skeletonEl) return;
   HM.promoteHydratedSkeleton(skeletonEl);
+  hmRevealHome();
+}
+
+// The page CSS loads async (see the preload tracker in home.html), so wait for
+// it before dropping the skeleton. Revealing the real content earlier would
+// paint it unstyled. The timeout keeps hydration from ever stalling.
+function hmRevealHome() {
+  if (document.documentElement.classList.contains("css-ready")) {
+    hmApplyLoaded();
+    return;
+  }
+  var revealed = false;
+  function go() {
+    if (revealed) return;
+    revealed = true;
+    hmApplyLoaded();
+  }
+  document.addEventListener("css-ready", go, { once: true });
+  setTimeout(go, 2500);
+}
+
+function hmApplyLoaded() {
   document.body.classList.remove("home-hydrating");
   document.body.classList.add("home-loaded");
 }
@@ -3942,8 +3964,7 @@ HM.init = async function () {
     });
     HM.initHeroSlider();
     startNoonBadgeRotator();
-    document.body.classList.remove("home-hydrating");
-    document.body.classList.add("home-loaded");
+    hmApplyLoaded();
   }
   renderSummerSection();
 

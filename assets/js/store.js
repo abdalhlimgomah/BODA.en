@@ -689,7 +689,8 @@ const getResizedImageUrl = (source, width) => {
     const host = String(loc.hostname || "");
     if (loc.protocol === "file:") return s;
     if (!/^127\.0\.0\.1$|^localhost$|^0\.0\.0\.0$/i.test(host)) {
-      return "/api/img?u=" + encodeURIComponent(s) + "&w=" + w;
+      const gifBust = /\.gif(\?|$)/i.test(s) ? "&gv=2" : "";
+      return "/api/img?u=" + encodeURIComponent(s) + "&w=" + w + gifBust;
     }
     // Local dev servers have no /api route: use a public resizer so dev
     // behaves (and feels) like production instead of loading full-size files.
@@ -733,7 +734,8 @@ const getImagePath = (path) => {
     if (isRemoteImage) {
       const host = String(window.location && window.location.hostname || "");
       if (!/^127\.0\.0\.1$|^localhost$/i.test(host)) {
-        return "/api/img?u=" + encodeURIComponent(source) + "&w=800";
+        const gifBust = /\.gif(\?|$)/i.test(source) ? "&gv=2" : "";
+        return "/api/img?u=" + encodeURIComponent(source) + "&w=800" + gifBust;
       }
     }
     return source;
