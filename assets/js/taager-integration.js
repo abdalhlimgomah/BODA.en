@@ -106,7 +106,7 @@
   var MEMORY_CACHE_TTL_MS = 5 * 60 * 1000;
   var IDB_DB_NAME = "buda_store_cache";
   var IDB_STORE_NAME = "taager_products";
-  var IDB_KEY_PREFIX = "list_v3_";
+  var IDB_KEY_PREFIX = "list_v4_";
   var _taagerMemoryCache = {};
   var _idbDbPromise = null;
 
@@ -702,7 +702,58 @@
     return [];
   }
 
+  // How many stored products a single listing page pulls. The catalog holds
+  // thousands of rows (each with heavy description/content fields), so pulling
+  // all of them moved 9-35 MB and froze the main thread. A bounded slice keeps
+  // the payload small while still giving every home section enough to fill.
+  var TAAGER_STORED_LIMIT = 200;
+  var TAAGER_STORED_SELECT =
+    "id,taager_product_id,name,created_at,description,quick_details,content_ideas,how_to_use,videos,category,price,original_price,image,images,image1,image2,image3,image4,image5,image6,image7,image8,available_countries,stock,stock_status,brand,seller,source,is_active,updated_at,last_synced_at";
+
+  // Bounded, single-page PostgREST read. Country is filtered server-side (jsonb
+  // containment) and ordering is stable so the same slice is cached across
+  // reloads. Returns [] when no backend/key is available so callers can fall
+  // back to the edge function.
+  async function fetchStoredTaagerProductsFromRest(countryCode) {
+    var base = String(window.SUPABASE_URL || "").replace(/\/+$/, "");
+    if (!base && window.TAAGER_EDGE_FUNCTION_URL) {
+      base = String(window.TAAGER_EDGE_FUNCTION_URL).split("/functions/v1/")[0];
+    }
+    var key = String(window.SUPABASE_ANON_KEY || "");
+    var cc = String(countryCode || "").toUpperCase();
+    if (!base || !key || !cc || typeof fetch !== "function") return [];
+
+    var query = "select=" + encodeURIComponent(TAAGER_STORED_SELECT) +
+      "&is_active=eq.true" +
+      "&available_countries=cs." + encodeURIComponent('["' + cc + '"]') +
+      "&order=created_at.desc" +
+      "&limit=" + TAAGER_STORED_LIMIT;
+
+    var headers = { apikey: key, Accept: "application/json" };
+    // New sb_publishable keys belong on the apikey header only; legacy anon
+    // JWTs keep the bearer header (mirrors buildEdgeHeaders).
+    if (key.indexOf("sb_") !== 0) headers.Authorization = "Bearer " + key;
+
+    var response = await fetch(base + "/rest/v1/taager_products?" + query, { headers: headers });
+    if (!response.ok) {
+      throw createTaagerError("PostgREST returned " + response.status, response.status);
+    }
+    var data = await response.json();
+    var rows = Array.isArray(data) ? data : [];
+    return rows.map(normalizeStoredTaagerProduct).filter(Boolean);
+  }
+
   async function fetchStoredTaagerProducts(countryCode) {
+    try {
+      var viaRest = await fetchStoredTaagerProductsFromRest(countryCode);
+      if (Array.isArray(viaRest) && viaRest.length) {
+        log("info", "Loaded " + viaRest.length + " Taager products from REST (limit " + TAAGER_STORED_LIMIT + ")");
+        return viaRest;
+      }
+    } catch (error) {
+      log("warn", "Stored Taager products REST fetch failed:", error.message);
+    }
+
     try {
       var products = await fetchTaagerProductsFromEdge("stored-products", countryCode, normalizeStoredTaagerProduct);
       if (Array.isArray(products) && products.length) {

@@ -677,6 +677,10 @@ const TAAGER_LIST_COLUMNS =
 
 const _taagerListMemoryCache = {};
 const TAAGER_LIST_CACHE_TTL = 10 * 60 * 1000;
+// Bound the listing download: the table holds thousands of rows and pulling all
+// of them freezes the page. A slice this size fills every listing/cross-sell
+// view. Pass 0 to fetchTaagerProducts to opt back into the full catalog.
+const TAAGER_LIST_LIMIT = 200;
 
 // Cross-page cache for the taager_products table (reloads don't re-download)
 const TAAGER_IDB_DB = "buda_products_cache";
@@ -747,13 +751,14 @@ function taagerIdbPut(key, entry) {
   });
 }
 
-async function fetchTaagerProducts(countryCode = "") {
+async function fetchTaagerProducts(countryCode = "", requestedLimit = TAAGER_LIST_LIMIT) {
   const code = String(countryCode || "").toUpperCase().trim();
   if (!code) return [];
+  const limit = Math.max(0, Number(requestedLimit) || 0);
   const client = getSupabaseClient();
   // Keyed strictly by country: defaulting an empty code to "EG" made an
   // unresolved request read and overwrite the real Egypt bucket.
-  const cacheKey = "TAAGER:" + code;
+  const cacheKey = "TAAGER:" + (limit > 0 ? "L" + limit + ":" : "") + code;
   const memHit = _taagerListMemoryCache[cacheKey];
   if (memHit && Date.now() - memHit.t < TAAGER_LIST_CACHE_TTL) {
     return memHit.products;
@@ -779,37 +784,58 @@ async function fetchTaagerProducts(countryCode = "") {
     let useActiveFilter = true;
     let columnMode = "list";
 
-    for (let offset = 0; offset < 100000; offset += pageSize) {
-      let query = client
+    if (limit > 0) {
+      // One bounded, server-filtered page instead of the whole table. The jsonb
+      // containment value must be the raw JSON array string ("cs.[\"EG\"]").
+      const { data, error } = await client
         .from("taager_products")
-        .select(columnMode === "star" ? "*" : TAAGER_LIST_COLUMNS)
-        .range(offset, offset + pageSize - 1);
-
-      if (useActiveFilter) {
-        query = query.eq("is_active", true);
-      }
-
-      let { data, error } = await query;
+        .select(TAAGER_LIST_COLUMNS)
+        .eq("is_active", true)
+        .contains("available_countries", '["' + code + '"]')
+        .order("created_at", { ascending: false })
+        .limit(limit);
       if (error) {
-        if (columnMode === "list" && isMissingColumnError(error)) {
-          columnMode = "star";
-          offset -= pageSize;
-          continue;
-        }
-        if (useActiveFilter && isMissingColumnError(error)) {
-          useActiveFilter = false;
-          offset -= pageSize;
-          continue;
-        }
+        // Fall through to the paginated full fetch so a backend that lacks the
+        // jsonb column (or rejects containment) still yields a catalog.
+        console.warn("bounded taager_products fetch failed, falling back", error);
+      } else if (Array.isArray(data)) {
+        allRows.push.apply(allRows, data);
       }
-      if (error) {
-        console.warn("failed fetching taager_products from supabase", error);
-        break;
-      }
+    }
 
-      const batch = Array.isArray(data) ? data : [];
-      allRows.push.apply(allRows, batch);
-      if (batch.length < pageSize) break;
+    if (!allRows.length) {
+      for (let offset = 0; offset < 100000; offset += pageSize) {
+        let query = client
+          .from("taager_products")
+          .select(columnMode === "star" ? "*" : TAAGER_LIST_COLUMNS)
+          .range(offset, offset + pageSize - 1);
+
+        if (useActiveFilter) {
+          query = query.eq("is_active", true);
+        }
+
+        let { data, error } = await query;
+        if (error) {
+          if (columnMode === "list" && isMissingColumnError(error)) {
+            columnMode = "star";
+            offset -= pageSize;
+            continue;
+          }
+          if (useActiveFilter && isMissingColumnError(error)) {
+            useActiveFilter = false;
+            offset -= pageSize;
+            continue;
+          }
+        }
+        if (error) {
+          console.warn("failed fetching taager_products from supabase", error);
+          break;
+        }
+
+        const batch = Array.isArray(data) ? data : [];
+        allRows.push.apply(allRows, batch);
+        if (batch.length < pageSize) break;
+      }
     }
 
     if (allRows.length) {
