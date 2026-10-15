@@ -625,13 +625,19 @@ async function readStoredProducts(countryCode = "") {
     if (batch.length < pageSize) break;
   }
 
-  if (!countryCode) return rows;
+  if (!countryCode) return [];
   const upperCountry = sanitizeText(countryCode).toUpperCase();
   const iso3 = mapCountry(upperCountry);
   return rows.filter((row) => {
-    const countries = uniqueStrings(parseStringArray(row.available_countries));
-    if (!countries.length) return true;
-    return countries.includes(upperCountry) || countries.includes(iso3);
+    const countries = uniqueStrings(parseStringArray(row.available_countries))
+      .map((entry) => sanitizeText(entry).toUpperCase())
+      .filter(Boolean);
+    if (countries.length) {
+      return countries.includes(upperCountry) || countries.includes(iso3);
+    }
+    // Rows with no country metadata at all are not served rather than assumed
+    // to belong to the requested market.
+    return false;
   });
 }
 

@@ -96,9 +96,25 @@ module.exports = async function handler(req, res) {
       return res.status(413).json({ error: "Image too large" });
     }
 
-    // Animated GIFs: serve the original bytes unchanged to preserve motion.
-    // The edge cache still caches it, so repeat visits are fast.
+    // Animated GIFs: transcode to animated WebP to preserve motion while
+    // cutting bytes dramatically (Taager product GIFs ship at ~2400px/100KB+).
+    // Falls back to the original bytes if transcoding fails or grows the file;
+    // the year-long edge cache amortises the one-off CPU cost.
     if (GIF_EXT_RE.test(target)) {
+      try {
+        const gifWebp = await sharp(input, { animated: true, failOn: "none" })
+          .resize({ width: Math.min(width, 800), withoutEnlargement: true })
+          .webp({ quality, effort: 3, loop: 0 })
+          .toBuffer();
+        if (gifWebp && gifWebp.length && gifWebp.length < input.length) {
+          res.setHeader("Content-Type", "image/webp");
+          res.setHeader("Cache-Control", "public, max-age=31536000, s-maxage=31536000, immutable");
+          res.setHeader("X-Content-Type-Options", "nosniff");
+          return res.status(200).send(gifWebp);
+        }
+      } catch (err) {
+        if (q.debug) return res.status(500).json({ error: "gif webp failed: " + String(err && err.message || err) });
+      }
       res.setHeader("Content-Type", "image/gif");
       res.setHeader("Cache-Control", "public, max-age=31536000, s-maxage=31536000, immutable");
       res.setHeader("X-Content-Type-Options", "nosniff");

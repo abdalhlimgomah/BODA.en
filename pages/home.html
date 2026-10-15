@@ -36,11 +36,41 @@
         <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Manrope:wght@300;400;500;600;700;800&display=swap" /></noscript>
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet" media="print" onload="this.media='all'" />
         <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" /></noscript>
-        <link href="../assets/css/noon-shell.css" rel="stylesheet" />
-        <link href="../assets/css/desktop.css?v=20260828b" rel="stylesheet" media="screen and (min-width: 768px)" />
-        <link href="../assets/css/desktop-animations.css?v=20260723" rel="stylesheet" media="screen and (min-width: 768px)" />
-        <link href="../assets/css/design-system.css?v=20260909d" rel="stylesheet" />
-        <link href="../assets/css/home.css?v=20260922l" rel="stylesheet" />
+        <link href="../assets/css/noon-shell.css" rel="preload" as="style" data-async-css />
+        <link href="../assets/css/desktop.css?v=20260828b" rel="preload" as="style" media="screen and (min-width: 768px)" data-async-css />
+        <link href="../assets/css/desktop-animations.css?v=20260723" rel="preload" as="style" media="screen and (min-width: 768px)" data-async-css />
+        <link href="../assets/css/design-system.css?v=20261014a" rel="preload" as="style" data-async-css />
+        <link href="../assets/css/home.css?v=20260922l" rel="preload" as="style" data-async-css />
+        <script>
+            /* Stylesheets load async so the inline critical CSS can paint the
+               skeleton immediately. Each preload is swapped to a real
+               stylesheet on load, then css-ready is flagged so hydration never
+               reveals the real content before the page CSS is applied.
+
+               Readiness deliberately watches home.css only: the media-gated
+               desktop sheets never load below 768px, so counting every link
+               would stall the flag until the timeout on phones. */
+            (function () {
+                [].slice.call(document.querySelectorAll('link[data-async-css]')).forEach(function (link) {
+                    function apply() { link.rel = 'stylesheet'; }
+                    link.addEventListener('load', apply);
+                    link.addEventListener('error', apply);
+                });
+                function markReady() {
+                    if (document.documentElement.classList.contains('css-ready')) return;
+                    document.documentElement.classList.add('css-ready');
+                    document.dispatchEvent(new Event('css-ready'));
+                }
+                var deadline = Date.now() + 2000;
+                (function check() {
+                    var applied = [].slice.call(document.styleSheets).some(function (sheet) {
+                        return sheet.href && sheet.href.indexOf('home.css') > -1;
+                    });
+                    if (applied || Date.now() > deadline) { markReady(); return; }
+                    setTimeout(check, 50);
+                })();
+            })();
+        </script>
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link rel="preconnect" href="https://media.taager.com" />
@@ -112,6 +142,73 @@
             .sk-product-section {
                 margin: 0 12px;
                 width: auto;
+            }
+            /* ============================================
+               CRITICAL: skeleton above-the-fold
+               The page blocked first paint on ~130 CSS requests (a 3-level
+               @import waterfall through design-system/index.css), so the
+               browser drew nothing for seconds, then popped the whole
+               skeleton in at once. These rules are a verbatim geometry copy of
+               the matching home.css rules, with literal fallbacks, so the
+               skeleton paints on the first frame with zero external CSS and
+               nothing moves when the real sheets land.
+               ============================================ */
+            .hm-page { display: flex; flex-direction: column; background: var(--color-bg, #FFFFFF); min-height: 100vh; }
+            .hm-content { display: flex; flex-direction: column; gap: 0; padding: 0; max-width: 100%; }
+            .hm-skeleton { display: none; flex-direction: column; gap: 0; width: 100%; max-width: 100%; padding: 0; }
+            .hm-skeleton-block { width: 100%; flex: 0 0 auto; }
+            body.home-loading .hm-content, body.home-hydrating .hm-content { display: flex; }
+            body.home-loading .hm-skeleton, body.home-hydrating .hm-skeleton { display: flex; }
+            .sk-desk { display: none; }
+            .sk-shimmer {
+                background-color: var(--color-skeleton, #F3F4F6);
+                background-image: linear-gradient(90deg, var(--color-skeleton, #F3F4F6) 0%, var(--color-skeleton, #F3F4F6) 38%, var(--color-divider, #F9FAFB) 50%, var(--color-skeleton, #F3F4F6) 62%, var(--color-skeleton, #F3F4F6) 100%);
+                background-size: 220% 100%;
+                animation: sk-shimmer-rtl 1.35s linear infinite;
+                border-radius: var(--radius-sm, 12px);
+                overflow: hidden;
+            }
+            @keyframes sk-shimmer-rtl { from { background-position: -120% 0; } to { background-position: 120% 0; } }
+            .sk-banner-top-wrap { padding: 0 16px 2px; }
+            .sk-banner-top { min-height: 39px; padding: 6px 10px; display: flex; align-items: center; gap: 10px; background: var(--color-surface, #FFFFFF); border: 1px solid var(--color-border, #E5E7EB); border-radius: var(--radius-lg, 18px); }
+            .sk-banner-top-icon { width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto; }
+            .sk-banner-top-copy { flex: 1; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+            .sk-banner-top-copy .sk-banner-top-line { height: 9px; border-radius: 999px; width: 62%; }
+            .sk-banner-top-arrow { width: 20px; height: 20px; border-radius: 50%; flex: 0 0 auto; }
+            .sk-hero-wrap { padding: 0 16px; margin: 8px 0 4px; }
+            .sk-hero { width: 100%; aspect-ratio: 20/9; border-radius: var(--radius-lg, 18px); }
+            .sk-ad-hero-wrap { padding: 0 16px; margin: 4px 0 0; }
+            .sk-ad-hero { width: 100%; aspect-ratio: 16/5; border-radius: var(--radius-lg, 18px); }
+            .sk-cats-wrap { padding: 0 16px 6px; margin: 8px 0 16px; }
+            .sk-cats-section { background: var(--color-card, #FFFFFF); border-radius: var(--radius-lg, 18px); overflow: hidden; box-shadow: var(--shadow-sm, 0 2px 8px rgba(109, 40, 217, 0.06)); }
+            .sk-cats-head { display: flex; align-items: center; padding: 16px 14px 10px; }
+            .sk-cats-title { width: 132px; height: 18px; border-radius: 999px; }
+            .sk-cats-body { padding: 0 12px 20px; }
+            .sk-cats-row { display: flex; align-items: flex-start; gap: 16px; overflow: hidden; }
+            .sk-cats-pair { display: flex; flex-direction: column; gap: 10px; flex: 0 0 auto; }
+            .sk-cat-thumb { flex: 0 0 auto; width: 60px; aspect-ratio: 60 / 83; border-radius: var(--radius-md, 16px); background: var(--color-skeleton, #F3F4F6); border: 1px solid var(--color-border, #E5E7EB); }
+            .sk-features { height: 0; overflow: hidden; }
+            @media (min-width: 1200px) {
+                .sk-mob { display: none; }
+                .sk-desk { display: block; }
+                .hm-skeleton { max-width: 1440px; margin: 0 auto; padding: 4px 0 0; gap: 26px; }
+                .skd-banner-top-wrap { width: calc(100% + 96px); margin: 0 -48px 0; padding: 0 0 16px; max-width: none; }
+                .skd-banner-top { min-height: 91px; padding: 16px 24px; display: flex; align-items: center; gap: 14px; background: var(--color-surface, #FFFFFF); border: 1px solid var(--color-border, #E5E7EB); border-radius: 18px; }
+                .skd-banner-top-icon { width: 42px; height: 42px; border-radius: 14px; flex: 0 0 auto; }
+                .skd-banner-top-copy { flex: 1; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+                .skd-line { display: block; border-radius: 999px; }
+                .skd-line-lg { width: 280px; height: 14px; }
+                .skd-line-sm { width: 190px; height: 10px; }
+                .skd-banner-top-arrow { width: 24px; height: 24px; border-radius: 50%; flex: 0 0 auto; }
+                .skd-hero-wrap { width: calc(100% + 96px); padding: 0; margin: -16.5px -48px -3.5px; }
+                .skd-hero { width: 100%; aspect-ratio: 5 / 1; max-height: 300px; border-radius: 0; }
+                .skd-ad-hero-wrap { display: none; }
+                .skd-cats-wrap { width: calc(100% + 96px); margin: -5px -48px 18px; padding: 0; max-width: none; }
+                .skd-cats-section { background: #FFFFFF; border-radius: 0; box-shadow: none; overflow: hidden; }
+                .skd-cats-body { padding: 24px 0 36px 20px; }
+                .skd-cats-row { display: flex; align-items: center; gap: 20px; overflow: hidden; }
+                .skd-cat-thumb { flex: 0 0 auto; width: 87px; aspect-ratio: 87 / 121; border-radius: 14px; background: var(--color-skeleton, #F3F4F6); border: 1px solid var(--color-border, #E5E7EB); }
+                .skd-features { height: 0; overflow: hidden; }
             }
         </style>
 <link rel="canonical" href="https://budoq.com/pages/home.html" />
