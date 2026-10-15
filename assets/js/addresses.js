@@ -12,8 +12,20 @@ const AddressesModule = (function() {
       defaultCenter: { lat: 30.0444, lng: 31.2357 },
       saudiCenter: { lat: 24.7136, lng: 46.6753 },
       defaultZoom: 13,
-      minZoom: 8,
+      minZoom: 5,
       maxZoom: 18,
+      // Country boundary GeoJSON files (full country outline)
+      geo: {
+        EG: '../assets/geo/eg.geojson',
+        SA: '../assets/geo/sa.geojson',
+      },
+      // Populated-place datasets used for delivery serviceability checks
+      placesGeo: {
+        EG: '../assets/geo/places-eg.json',
+        SA: '../assets/geo/places-sa.json',
+      },
+      // Max distance (km) from the nearest populated place to be serviceable
+      serviceableRadiusKm: 15,
     },
     form: {
       minApartment: 'يرجى إدخال رقم الشقة',
@@ -42,6 +54,16 @@ const AddressesModule = (function() {
     isGpsMismatched: false,
     isVpnDetected: false,
     toastTimeout: null,
+    countryGeo: null,
+    countryRings: null,
+    lastValidCenter: null,
+    isReverting: false,
+    outsideNoticeAt: 0,
+    places: null,
+    placesCode: null,
+    isServiceabilityBlocked: false,
+    serviceNoticeAt: 0,
+    searchDebounce: null,
   };
 
   // ===== Active Email Helper =====
@@ -64,10 +86,210 @@ const AddressesModule = (function() {
 
   function getCountryBounds(countryCode) {
     var bounds = {
-      EG: [[22.0, 24.0], [32.0, 37.0]],
-      SA: [[16.0, 35.0], [32.0, 56.0]],
+      // Egypt: cover full territory including Sinai and Red Sea coast
+      EG: [[21.5, 24.0], [31.9, 37.1]],
+      // Saudi Arabia: cover full Kingdom
+      SA: [[15.5, 34.0], [32.5, 56.0]],
     };
     return bounds[countryCode] || bounds.EG;
+  }
+
+  // ===== Country Boundary GeoJSON =====
+  // Cache loaded GeoJSON per country so we fetch only once
+  var _countryGeoCache = {};
+
+  // Load the full-country boundary GeoJSON and compute its bounds.
+  // Resolves with { geojson, bounds } or null on failure.
+  function loadCountryGeo(countryCode) {
+    if (_countryGeoCache[countryCode]) {
+      return Promise.resolve(_countryGeoCache[countryCode]);
+    }
+    var url = CONFIG.map.geo && CONFIG.map.geo[countryCode];
+    if (!url || typeof L === 'undefined') {
+      return Promise.resolve(null);
+    }
+    return fetch(url)
+      .then(function (res) { return res.json(); })
+      .then(function (geojson) {
+        var bounds = null;
+        try {
+          bounds = L.geoJSON(geojson).getBounds();
+        } catch (e) {
+          console.warn('خطأ في حساب حدود الدولة:', e);
+        }
+        var result = { geojson: geojson, bounds: bounds };
+        _countryGeoCache[countryCode] = result;
+        return result;
+      })
+      .catch(function (err) {
+        console.warn('تعذر تحميل حدود الدولة:', countryCode, err);
+        return null;
+      });
+  }
+
+  // Convert a country GeoJSON to an array of [lat, lng] rings (one per polygon)
+  function geojsonToLatLngRings(geojson) {
+    var rings = [];
+    if (!geojson) return rings;
+    var feats = geojson.type === 'FeatureCollection' ? (geojson.features || []) : [geojson];
+    feats.forEach(function (f) {
+      var geom = f.geometry || f;
+      if (!geom || !geom.coordinates) return;
+      if (geom.type === 'Polygon') {
+        if (geom.coordinates[0]) {
+          rings.push(geom.coordinates[0].map(function (c) { return [c[1], c[0]]; }));
+        }
+      } else if (geom.type === 'MultiPolygon') {
+        geom.coordinates.forEach(function (poly) {
+          if (poly[0]) rings.push(poly[0].map(function (c) { return [c[1], c[0]]; }));
+        });
+      }
+    });
+    return rings;
+  }
+
+  // Ray-casting point-in-polygon test (ring is an array of [lat, lng])
+  function pointInRing(lat, lng, ring) {
+    var inside = false;
+    for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      var yi = ring[i][0], xi = ring[i][1];
+      var yj = ring[j][0], xj = ring[j][1];
+      var intersect = ((yi > lat) !== (yj > lat)) &&
+        (lng < (xj - xi) * (lat - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  // True if the given point is inside any country ring
+  function isPointInsideCountry(lat, lng) {
+    var rings = state.countryRings;
+    if (!rings || !rings.length) return true;
+    for (var r = 0; r < rings.length; r++) {
+      if (pointInRing(lat, lng, rings[r])) return true;
+    }
+    return false;
+  }
+
+  // Great-circle distance in kilometers between two lat/lng points
+  function haversineKm(lat1, lng1, lat2, lng2) {
+    var R = 6371;
+    var p = Math.PI / 180;
+    var dLat = (lat2 - lat1) * p;
+    var dLng = (lng2 - lng1) * p;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * p) * Math.cos(lat2 * p) * Math.sin(dLng / 2) * Math.sin(dLng / 2);
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  // Load the populated-place dataset for a country (lazy, cached in state)
+  function loadServiceablePlaces(countryCode) {
+    if (state.places && state.placesCode === countryCode) {
+      return Promise.resolve(state.places);
+    }
+    var url = CONFIG.map.placesGeo && CONFIG.map.placesGeo[countryCode];
+    if (!url) return Promise.resolve(null);
+    return fetch(url)
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        state.places = (data && data.p) || [];
+        state.placesCode = countryCode;
+        return state.places;
+      })
+      .catch(function (err) {
+        console.warn('تعذر تحميل بيانات أماكن التوصيل:', err);
+        state.places = null;
+        state.placesCode = null;
+        return null;
+      });
+  }
+
+  // Distance (km) from a point to the nearest populated place, or null if unknown
+  function nearestPlaceDistanceKm(lat, lng) {
+    var places = state.places;
+    if (!places || !places.length) return null;
+    var best = Infinity;
+    for (var i = 0; i < places.length; i++) {
+      var d = haversineKm(lat, lng, places[i][1], places[i][0]);
+      if (d < best) best = d;
+    }
+    return best;
+  }
+
+  // Serviceability result: { known, serviceable, distanceKm }
+  function isServiceable(lat, lng) {
+    var d = nearestPlaceDistanceKm(lat, lng);
+    if (d === null) return { known: false, serviceable: true, distanceKm: null };
+    return { known: true, serviceable: d <= CONFIG.map.serviceableRadiusKm, distanceKm: d };
+  }
+
+  // Update pin / label / confirm button to reflect the current serviceability
+  function refreshServiceabilityUI() {
+    var loc = state.currentLocation;
+    if (!loc) return;
+    var svc = isServiceable(loc.lat, loc.lng);
+    state.isServiceabilityBlocked = !!(svc.known && !svc.serviceable);
+    var pin = document.getElementById('map-center-pin');
+    var btn = document.getElementById('confirm-location-btn');
+    var labelText = document.getElementById('pin-label-text');
+    if (state.isServiceabilityBlocked) {
+      if (pin) pin.classList.add('invalid');
+      if (labelText) labelText.textContent = 'الموقع خارج نطاق العمل';
+      if (btn && !state.isGpsMismatched) { btn.disabled = true; btn.style.opacity = '0.45'; }
+      var now = Date.now();
+      if (now - state.serviceNoticeAt > 3000) {
+        state.serviceNoticeAt = now;
+        UI.showToast('هذا الموقع خارج نطاق العمل حالياً', 'error');
+      }
+    } else if (pin && !state.isReverting) {
+      pin.classList.remove('invalid');
+      if (btn && !state.isGpsMismatched) { btn.disabled = false; btn.style.opacity = ''; }
+    }
+  }
+
+  // Visual warning when the pin is dragged outside the country
+  function showOutsideBoundsNotice(mapScreen) {
+    var pin = document.getElementById('map-center-pin');
+    if (pin) pin.classList.add('invalid');
+    var labelText = document.getElementById('pin-label-text');
+    if (labelText) labelText.textContent = 'الموقع خارج نطاق الدولة';
+    var btn = document.getElementById('confirm-location-btn');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.45'; }
+
+    var now = Date.now();
+    if (now - state.outsideNoticeAt > 3000) {
+      state.outsideNoticeAt = now;
+      UI.showToast('لا يمكن تحديد موقع خارج حدود الدولة', 'error');
+    }
+  }
+
+  function hideOutsideBoundsNotice() {
+    var pin = document.getElementById('map-center-pin');
+    if (pin) pin.classList.remove('invalid');
+    var btn = document.getElementById('confirm-location-btn');
+    if (btn && !state.isGpsMismatched) { btn.disabled = false; btn.style.opacity = ''; }
+  }
+
+  // Persist a valid center and refresh the pin label / bottom panel
+  function applyValidCenter(lat, lng) {
+    state.lastValidCenter = { lat: lat, lng: lng };
+    state.currentLocation.lat = lat;
+    state.currentLocation.lng = lng;
+    state.isLocationConfirmed = true;
+    hideOutsideBoundsNotice();
+    UI.reverseGeocode(lat, lng, function (name) {
+      var label = document.getElementById('pin-label');
+      if (label) label.classList.remove('loading');
+      var labelText = document.getElementById('pin-label-text');
+      if (labelText) labelText.textContent = name;
+      var bottomAddr = document.getElementById('location-display');
+      if (bottomAddr) bottomAddr.textContent = name;
+      var dot = document.getElementById('map-loading-dot');
+      if (dot) dot.classList.remove('active');
+      var btn = document.getElementById('confirm-location-btn');
+      if (btn && !state.isGpsMismatched) btn.disabled = false;
+      refreshServiceabilityUI();
+    });
   }
 
   function getCountryName(code) {
@@ -438,7 +660,7 @@ const AddressesModule = (function() {
     },
 
     // Map Initialization
-    initMap: function() {
+    initMap: async function() {
       if (typeof L === 'undefined') {
         console.warn('Leaflet not loaded');
         return;
@@ -458,19 +680,26 @@ const AddressesModule = (function() {
       var userCountryCode = getUserCountryCode();
       var defaultCenter = getCountryCenter(userCountryCode);
       var countryBounds = getCountryBounds(userCountryCode);
+
+      // Load the real full-country boundary so the map covers the whole country
+      var countryGeo = await loadCountryGeo(userCountryCode);
+      var realBounds = countryGeo && countryGeo.bounds ? countryGeo.bounds : null;
+
       state.currentLocation.lat = defaultCenter.lat;
       state.currentLocation.lng = defaultCenter.lng;
-      console.log("[map] userCountry =", userCountryCode, "| center =", defaultCenter, "| bounds =", countryBounds);
+      console.log("[map] userCountry =", userCountryCode, "| center =", defaultCenter, "| bounds =", realBounds || countryBounds);
       console.log("[map] localStorage.userCountry =", localStorage.getItem("userCountry"));
       if (window.TaagerIntegration) {
         var sel = window.TaagerIntegration.getSelectedCountry();
         console.log("[map] TaagerIntegration country =", sel ? sel.code : "null");
       }
 
-      // Initialize map — restricted to country bounds
+      // Initialize map — free panning (country bounds are validated by polygon, not hard-locked)
       state.map = L.map(mapEl, {
         center: [state.currentLocation.lat, state.currentLocation.lng],
         zoom: CONFIG.map.defaultZoom,
+        minZoom: CONFIG.map.minZoom,
+        maxZoom: CONFIG.map.maxZoom,
         zoomControl: false,
         attributionControl: false,
         scrollWheelZoom: true,
@@ -478,14 +707,88 @@ const AddressesModule = (function() {
         dragging: true,
         touchZoom: true,
         zoomAnimation: true,
-        maxBounds: countryBounds,
-        maxBoundsViscosity: 1.0,
       });
 
-      // Tile layer
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: CONFIG.map.maxZoom,
-      }).addTo(state.map);
+      // Basemap
+      // Primary: OpenFreeMap "bright" — a free, keyless vector basemap that looks
+      // like Google Maps (colorful: green parks, blue water, colored roads + labels).
+      // Rendered by MapLibre GL.
+      // Fallback: Esri World street raster tiles, then OpenStreetMap, if WebGL/vector fails.
+      var addRasterBasemap = function () {
+        var esriStreet = L.tileLayer(
+          'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}',
+          { maxZoom: CONFIG.map.maxZoom, maxNativeZoom: 19 }
+        );
+        var osmFallback = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: CONFIG.map.maxZoom,
+          maxNativeZoom: 19,
+        });
+        var done = false;
+        esriStreet.on('tileerror', function () {
+          if (done) return;
+          done = true;
+          state.map.removeLayer(esriStreet);
+          osmFallback.addTo(state.map);
+          console.warn('[map] Esri tiles failed — switched to OpenStreetMap');
+        });
+        esriStreet.addTo(state.map);
+      };
+
+      var vectorBasemapReady = false;
+      if (typeof L.maplibreGL === 'function' && typeof maplibregl !== 'undefined') {
+        try {
+          if (typeof maplibregl.supported === 'function' && !maplibregl.supported()) {
+            throw new Error('WebGL not supported');
+          }
+          L.maplibreGL({
+            style: 'https://tiles.openfreemap.org/styles/bright',
+            attribution: '© OpenStreetMap · OpenFreeMap',
+          }).addTo(state.map);
+          vectorBasemapReady = true;
+        } catch (e) {
+          console.warn('[map] vector basemap failed, using raster fallback:', e && e.message);
+        }
+      }
+      if (!vectorBasemapReady) {
+        addRasterBasemap();
+      }
+
+      // Draw country boundary, dim the area outside, and fit the whole country
+      if (realBounds) {
+        var rings = geojsonToLatLngRings(countryGeo.geojson);
+        state.countryGeo = countryGeo.geojson;
+        state.countryRings = rings;
+
+        if (rings.length) {
+          // Dim everything outside the country
+          var worldRing = [[85, -180], [85, 180], [-85, 180], [-85, -180]];
+          L.polygon([worldRing].concat(rings), {
+            stroke: false,
+            fillColor: '#111827',
+            fillOpacity: 0.18,
+            interactive: false,
+          }).addTo(state.map);
+
+          // Country boundary outline (purple) + faint valid-zone fill
+          L.polygon(rings, {
+            color: '#7C3AED',
+            weight: 2,
+            opacity: 0.85,
+            fillColor: '#7C3AED',
+            fillOpacity: 0.04,
+            interactive: false,
+          }).addTo(state.map);
+        }
+
+        // Start centered on the account's default city (Cairo/Riyadh) so the pin
+        // begins at a real, serviceable location. The country outline is still drawn.
+        state.map.setView([defaultCenter.lat, defaultCenter.lng], CONFIG.map.defaultZoom);
+        state.currentLocation.lat = defaultCenter.lat;
+        state.currentLocation.lng = defaultCenter.lng;
+        state.lastValidCenter = { lat: defaultCenter.lat, lng: defaultCenter.lng };
+      } else {
+        state.lastValidCenter = { lat: state.currentLocation.lat, lng: state.currentLocation.lng };
+      }
 
       // Zoom control bottom-right
       L.control.zoom({ position: 'bottomright' }).addTo(state.map);
@@ -495,6 +798,9 @@ const AddressesModule = (function() {
       // When drag STARTS — add class to lift pin and squish shadow
       state.map.on('movestart', () => {
         if (mapScreen) mapScreen.classList.add('dragging');
+        // Hide search results while moving
+        var searchResults = DOM.get('#map-search-results');
+        if (searchResults) searchResults.classList.remove('show');
         // Show loading dot
         const dot = DOM.get('#map-loading-dot');
         if (dot) dot.classList.add('active');
@@ -505,31 +811,41 @@ const AddressesModule = (function() {
         if (labelText) labelText.textContent = 'جارٍ تحديد الموقع...';
       });
 
-      // When drag ENDS — remove class and geocode center
+      // When drag ENDS — validate bounds and geocode center
       state.map.on('moveend', () => {
         if (mapScreen) mapScreen.classList.remove('dragging');
         const center = state.map.getCenter();
-        state.currentLocation.lat = center.lat;
-        state.currentLocation.lng = center.lng;
-        state.isLocationConfirmed = true;
 
-        // Reverse geocode the center point
-        this.reverseGeocode(center.lat, center.lng, (name) => {
-          // Update pin label
-          const label = DOM.get('#pin-label');
-          if (label) label.classList.remove('loading');
-          const labelText = DOM.get('#pin-label-text');
-          if (labelText) labelText.textContent = name;
-          // Update bottom panel
-          const bottomAddr = DOM.get('#location-display');
-          if (bottomAddr) bottomAddr.textContent = name;
-          // Hide loading dot
-          const dot = DOM.get('#map-loading-dot');
-          if (dot) dot.classList.remove('active');
-          // Enable confirm button
-          const btn = DOM.get('#confirm-location-btn');
-          if (btn) btn.disabled = false;
-        });
+        // Guard against re-entrant moveend while snapping back
+        if (state.isReverting) return;
+
+        // Keep the pin inside the country boundary
+        if (state.countryRings && !isPointInsideCountry(center.lat, center.lng)) {
+          showOutsideBoundsNotice(mapScreen);
+          if (state.lastValidCenter &&
+              (Math.abs(state.lastValidCenter.lat - center.lat) > 1e-6 ||
+               Math.abs(state.lastValidCenter.lng - center.lng) > 1e-6)) {
+            state.isReverting = true;
+            state.map.setView(
+              [state.lastValidCenter.lat, state.lastValidCenter.lng],
+              state.map.getZoom(),
+              { animate: false }
+            );
+            state.isReverting = false;
+          }
+          // Restore the UI to the last valid position
+          if (state.lastValidCenter) {
+            applyValidCenter(state.lastValidCenter.lat, state.lastValidCenter.lng);
+          }
+          return;
+        }
+
+        applyValidCenter(center.lat, center.lng);
+      });
+
+      // Preload populated places for serviceability checks, then evaluate start point
+      loadServiceablePlaces(userCountryCode).then(function () {
+        refreshServiceabilityUI();
       });
 
       // Initial geocode for default center
@@ -1056,13 +1372,7 @@ const AddressesModule = (function() {
   const EventHandlers = {
     // Navigation
     setupNavigation: function() {
-      // List view navigation
-      DOM.get('#btn-add-new')?.addEventListener('click', () => UI.showView('map'));
-
-      // Map view navigation
-      DOM.get('#map-back-btn')?.addEventListener('click', () => UI.showView('address-list'));
-
-      // Form view navigation — if editing, go back to list; if new, go back to map
+      // Form view back — if editing, go back to list; if new, go back to map
       DOM.get('#form-back-btn')?.addEventListener('click', function () {
         if (state.editingAddressId) {
           state.editingAddressId = null;
@@ -1072,20 +1382,52 @@ const AddressesModule = (function() {
         }
       });
 
-      // Confirm location button
-      DOM.get('#confirm-location-btn')?.addEventListener('click', () => this.confirmLocation());
-
       // Form submission
       DOM.get('#address-form')?.addEventListener('submit', (e) => this.saveAddress(e));
 
-      // Map search input
-      DOM.get('#map-search-input')?.addEventListener('input', this.handleMapSearch);
+      // Map search input + clear button
+      var searchInput = DOM.get('#map-search-input');
+      if (searchInput) {
+        searchInput.addEventListener('input', this.handleMapSearch);
+        searchInput.addEventListener('focus', function () {
+          var r = DOM.get('#map-search-results');
+          if (r && r.innerHTML) r.classList.add('show');
+        });
+      }
+      var searchClear = DOM.get('#map-search-clear');
+      if (searchClear) {
+        searchClear.addEventListener('click', function () {
+          if (searchInput) { searchInput.value = ''; searchInput.focus(); }
+          var r = DOM.get('#map-search-results');
+          if (r) { r.classList.remove('show'); r.innerHTML = ''; }
+          searchClear.classList.remove('show');
+        });
+      }
     },
 
     // Map navigation — always confirm (pin always has a location)
     confirmLocation: function() {
       var self = this;
       var userCountryCode = getUserCountryCode();
+      var confirmBtn = DOM.get('#confirm-location-btn');
+      function restoreConfirmBtn() {
+        if (confirmBtn) {
+          confirmBtn.innerHTML = '<span class="material-icons-outlined">check_circle</span><span>تأكيد هذا الموقع</span>';
+        }
+      }
+
+      // Block if the pin sits outside the country boundary
+      if (state.countryRings && !isPointInsideCountry(state.currentLocation.lat, state.currentLocation.lng)) {
+        UI.showToast('الموقع المحدد خارج حدود الدولة', 'error');
+        return;
+      }
+
+      // Block if the location is outside the delivery service area
+      var svcCheck = isServiceable(state.currentLocation.lat, state.currentLocation.lng);
+      if (svcCheck.known && !svcCheck.serviceable) {
+        UI.showToast('عذرًا، هذا الموقع خارج نطاق العمل حالياً', 'error');
+        return;
+      }
 
       // Fast pre-check: if GPS mismatch was detected, block immediately
       if (state.isGpsMismatched) {
@@ -1103,8 +1445,10 @@ const AddressesModule = (function() {
       var pinLat = state.currentLocation.lat;
       var pinLng = state.currentLocation.lng;
       var url = "https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=" + pinLat + "&longitude=" + pinLng + "&localityLanguage=en";
-      DOM.get('#confirm-location-btn').disabled = true;
-      DOM.get('#confirm-location-btn').textContent = 'جارٍ التحقق من الموقع...';
+      if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<span class="material-icons-outlined">hourglass_top</span><span>جارٍ التحقق من الموقع...</span>';
+      }
 
       fetch(url)
         .then(function(res) { return res.json(); })
@@ -1119,15 +1463,14 @@ const AddressesModule = (function() {
             }
           }
 
-          DOM.get('#confirm-location-btn').disabled = false;
-          DOM.get('#confirm-location-btn').textContent = CONFIG.ui.confirmButtonText;
+          if (confirmBtn) confirmBtn.disabled = false;
+          restoreConfirmBtn();
 
           if (pinCountry !== userCountryCode) {
             var pinCountryName = data.countryName || getCountryName(pinCountry);
             if (pinCountry === "SA") pinCountryName = "السعودية";
-            DOM.get('#confirm-location-btn').disabled = true;
-            DOM.get('#confirm-location-btn').style.opacity = '0.4';
-            DOM.get('#confirm-location-btn').textContent = CONFIG.ui.confirmButtonText;
+            if (confirmBtn) { confirmBtn.disabled = true; confirmBtn.style.opacity = '0.4'; }
+            restoreConfirmBtn();
             state.isGpsMismatched = true;
             UI.showCountryBlockBanner(pinCountryName, getCountryName(userCountryCode));
             return;
@@ -1151,8 +1494,8 @@ const AddressesModule = (function() {
         })
         .catch(function() {
           // If geocode fails, allow proceeding
-          DOM.get('#confirm-location-btn').disabled = false;
-          DOM.get('#confirm-location-btn').textContent = CONFIG.ui.confirmButtonText;
+          if (confirmBtn) confirmBtn.disabled = false;
+          restoreConfirmBtn();
 
           const locationDisplay = DOM.get('#location-display');
           state.lastLocationName = locationDisplay ? locationDisplay.textContent : '';
@@ -1171,8 +1514,63 @@ const AddressesModule = (function() {
     },
 
     handleMapSearch: function(event) {
-      const searchTerm = event.target.value.toLowerCase();
-      console.log('بحث في الخريطة:', searchTerm);
+      var input = event.target;
+      var q = (input.value || '').trim();
+      var resultsEl = DOM.get('#map-search-results');
+      var clearBtn = DOM.get('#map-search-clear');
+      if (clearBtn) clearBtn.classList.toggle('show', q.length > 0);
+      if (!resultsEl) return;
+
+      clearTimeout(state.searchDebounce);
+      if (q.length < 3) {
+        resultsEl.classList.remove('show');
+        resultsEl.innerHTML = '';
+        return;
+      }
+
+      state.searchDebounce = setTimeout(function () {
+        var cc = getUserCountryCode() === 'SA' ? 'sa' : 'eg';
+        var url = 'https://nominatim.openstreetmap.org/search?format=jsonv2&limit=6' +
+          '&accept-language=ar&countrycodes=' + cc + '&q=' + encodeURIComponent(q);
+        fetch(url, { headers: { 'Accept-Language': 'ar' } })
+          .then(function (r) { return r.json(); })
+          .then(function (list) {
+            if (!Array.isArray(list) || !list.length) {
+              resultsEl.innerHTML = '<div class="map-search-empty">لا توجد نتائج مطابقة</div>';
+              resultsEl.classList.add('show');
+              return;
+            }
+            resultsEl.innerHTML = list.map(function (it, idx) {
+              var name = String(it.display_name || '').replace(/</g, '&lt;');
+              return '<div class="map-search-item" data-idx="' + idx + '">' +
+                '<span class="material-icons-outlined">place</span><span>' + name + '</span></div>';
+            }).join('');
+            resultsEl.classList.add('show');
+
+            Array.prototype.forEach.call(resultsEl.querySelectorAll('.map-search-item'), function (el) {
+              el.addEventListener('click', function () {
+                var it = list[parseInt(el.getAttribute('data-idx'), 10)];
+                if (!it) return;
+                var lat = parseFloat(it.lat);
+                var lon = parseFloat(it.lon);
+                resultsEl.classList.remove('show');
+                if (input) {
+                  input.value = String(it.display_name || q).split(',')[0];
+                  input.blur();
+                }
+                if (clearBtn) clearBtn.classList.add('show');
+                if (state.map) {
+                  state.lastValidCenter = { lat: lat, lng: lon };
+                  state.map.flyTo([lat, lon], 16, { duration: 1.1 });
+                }
+              });
+            });
+          })
+          .catch(function () {
+            resultsEl.innerHTML = '<div class="map-search-empty">تعذر تنفيذ البحث، حاول مرة أخرى</div>';
+            resultsEl.classList.add('show');
+          });
+      }, 500);
     },
 
     // Form handling
@@ -1421,6 +1819,12 @@ const AddressesModule = (function() {
         addresses: state.addresses,
         selectedAddress: state.selectedAddress,
         currentLocation: state.currentLocation,
+        isGpsMismatched: state.isGpsMismatched,
+        isVpnDetected: state.isVpnDetected,
+        isServiceabilityBlocked: state.isServiceabilityBlocked,
+        placesLoaded: !!(state.places && state.places.length),
+        placesCount: state.places ? state.places.length : 0,
+        countryRingsCount: state.countryRings ? state.countryRings.length : 0,
       };
     }
   };
