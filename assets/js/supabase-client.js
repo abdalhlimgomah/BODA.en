@@ -2058,7 +2058,7 @@ async function fetchAllProductsLean(cacheMs) {
   for (let offset = 0; offset < 100000; offset += pageSize) {
     const { data, error } = await client
       .from("products")
-      .select(PRODUCTS_LEAN_COLUMNS.join(","))
+      .select("*")
       .range(offset, offset + pageSize - 1);
     if (error) throw error;
     const batch = Array.isArray(data) ? data : [];
