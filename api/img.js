@@ -3,9 +3,12 @@ const sharp = require("sharp");
 const ALLOWED_HOSTS = new Set([
   "media.taager.com",
   "aff.ven-door.com",
+  "jammaleg.com",
   "iili.io",
   "a.nooncdn.com",
   "f.nooncdn.com",
+  "m.media-amazon.com",
+  "tager-uploads.s3.eu-central-1.amazonaws.com",
   "msgqzgzoslearaprgiqq.supabase.co",
   "wwlwwgqfjhmchrijaojr.supabase.co",
   "qhqkgrpezoaugyhzrgyc.supabase.co",
