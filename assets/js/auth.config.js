@@ -15,17 +15,9 @@ window.TAAGER_EDGE_FUNCTION_URL =
   String(window.SUPABASE_URL || "https://msgqzgzoslearaprgiqq.supabase.co") + "/functions/v1/taager-proxy";
 window.TAAGER_API_KEY = "";
 
-// Load cached credentials from localStorage (set by supabase-client.js loadTaagerCredentials)
-try {
-  var _tcr = localStorage.getItem("_taagerCredentials");
-  if (_tcr) {
-    var _tcp = JSON.parse(_tcr);
-    if (_tcp.taager_api_key) window.TAAGER_API_KEY = _tcp.taager_api_key;
-    if (_tcp.taager_taager_id) window.TAAGER_TAAGER_ID = _tcp.taager_taager_id;
-    if (_tcp.taager_session_key) window.TAAGER_SESSION_KEY = _tcp.taager_session_key;
-    if (_tcp.taager_merchant_api) window.TAAGER_MERCHANT_API = _tcp.taager_merchant_api;
-    // The function belongs to the currently active Supabase project.
-    window.TAAGER_EDGE_FUNCTION_URL =
-      String(window.SUPABASE_URL || "https://msgqzgzoslearaprgiqq.supabase.co") + "/functions/v1/taager-proxy";
-  }
-} catch (_e) {}
+// Secrets stay server-side only. Purge any legacy cached credentials so no
+// secret value is ever read back into the browser again.
+try { localStorage.removeItem("_taagerCredentials"); } catch (_e) {}
+// The function belongs to the currently active Supabase project.
+window.TAAGER_EDGE_FUNCTION_URL =
+  String(window.SUPABASE_URL || "https://msgqzgzoslearaprgiqq.supabase.co") + "/functions/v1/taager-proxy";

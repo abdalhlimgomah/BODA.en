@@ -2362,26 +2362,14 @@ async function getTaagerOrders(filter = {}) {
 }
 
 async function loadTaagerCredentials() {
-  try {
-    const client = getSupabaseClient();
-    const { data, error } = await client.from("app_settings").select("key, value");
-    if (error) throw error;
-    if (!Array.isArray(data)) return;
-    var map = {};
-    data.forEach(function (row) { if (row && row.key) map[row.key] = row.value; });
-    if (map.taager_api_key) window.TAAGER_API_KEY = map.taager_api_key;
-    if (map.taager_taager_id) window.TAAGER_TAAGER_ID = map.taager_taager_id;
-    if (map.taager_session_key) window.TAAGER_SESSION_KEY = map.taager_session_key;
-    if (map.taager_merchant_api) window.TAAGER_MERCHANT_API = map.taager_merchant_api;
-    // Never let a cached setting send a backup session back to primary.
-    window.TAAGER_EDGE_FUNCTION_URL =
-      getActiveBodaSupabaseBackend().url + "/functions/v1/taager-proxy";
-    try { localStorage.setItem("_taagerCredentials", JSON.stringify(map)); } catch (_e) {}
-  } catch (e) {
-    if (!(typeof isNetworkResolutionError === "function" && isNetworkResolutionError(e))) console.warn("[Supabase] loadTaagerCredentials error:", e);
-  }
+  // Secrets now live only server-side (Edge Function environment). No secret
+  // value is fetched from the database or stored in the browser anymore.
+  try { localStorage.removeItem("_taagerCredentials"); } catch (_e) {}
+  // Never let a cached setting send a backup session back to primary.
+  window.TAAGER_EDGE_FUNCTION_URL =
+    getActiveBodaSupabaseBackend().url + "/functions/v1/taager-proxy";
 }
-// Load credentials from Supabase table in background
+// Purge any legacy cached credentials left in this browser.
 if (typeof window !== "undefined") {
   loadTaagerCredentials();
 }
