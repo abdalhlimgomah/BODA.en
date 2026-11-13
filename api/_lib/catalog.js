@@ -586,33 +586,42 @@ function tokenVariants(token) {
 
 // Short Arabic stems are dangerous as raw substrings: "ابل" (Apple) appears
 // inside "قابل" and "ايف" inside "ايفا". Require a full word for those, while
-// longer variants keep the faster substring match.
-function containsVariant(haystack, variant) {
+// longer variants keep the faster substring match. When the strict pass finds
+// nothing, callers may allow a word-start prefix so typing "ساع" still finds
+// "ساعة"/"ساعات" without matching "قابل" for "ابل".
+function paddedWords(value) {
+  return " " + String(value || "").replace(/[^\u0600-\u06FFa-z0-9]+/gi, " ") + " ";
+}
+
+function containsVariant(haystack, variant, allowPrefix) {
   if (!haystack || !variant) return false;
   if (variant.length <= 3 && /[\u0600-\u06FF]/.test(variant)) {
-    return (" " + haystack + " ").includes(" " + variant + " ");
+    const padded = paddedWords(haystack);
+    return allowPrefix
+      ? padded.includes(" " + variant)
+      : padded.includes(" " + variant + " ");
   }
   return haystack.includes(variant);
 }
 
-function tokenScore(row, variants) {
+function tokenScore(row, variants, allowPrefix) {
   let best = 0;
   for (const variant of variants) {
     if (!variant) continue;
-    if (containsVariant(row._name, variant)) {
+    if (containsVariant(row._name, variant, allowPrefix)) {
       best = Math.max(best, 14);
-    } else if (containsVariant(row._latin, variant)) {
+    } else if (containsVariant(row._latin, variant, allowPrefix)) {
       best = Math.max(best, 11);
-    } else if (containsVariant(row._category, variant) || containsVariant(row._brand, variant)) {
+    } else if (containsVariant(row._category, variant, allowPrefix) || containsVariant(row._brand, variant, allowPrefix)) {
       best = Math.max(best, 6);
-    } else if (containsVariant(row._haystack, variant)) {
+    } else if (containsVariant(row._haystack, variant, allowPrefix)) {
       best = Math.max(best, 3);
     }
   }
   return best;
 }
 
-function scoreRow(row, phrase, tokens, variantsByToken) {
+function scoreRow(row, phrase, tokens, variantsByToken, allowPrefix) {
   let score = 0;
   let matched = 0;
 
@@ -622,7 +631,7 @@ function scoreRow(row, phrase, tokens, variantsByToken) {
   if (row._latin.includes(phrase)) score += 20;
 
   for (let index = 0; index < tokens.length; index += 1) {
-    const value = tokenScore(row, variantsByToken[index]);
+    const value = tokenScore(row, variantsByToken[index], allowPrefix);
     if (!value) continue;
     matched += 1;
     score += value;
@@ -630,6 +639,15 @@ function scoreRow(row, phrase, tokens, variantsByToken) {
 
   if (matched !== tokens.length) return { score: 0, matched };
   return { score, matched };
+}
+
+function canUsePrefixFallback(tokens) {
+  // Two- and three-letter Arabic stems benefit from word-start matching (عط →
+  // عطر، ساع → ساعة). A single letter would match far too much, and longer
+  // tokens already use substring matching.
+  return tokens.some(
+    (token) => token.length >= 2 && /[\u0600-\u06FF]/.test(token)
+  );
 }
 
 function dedupeKey(row) {
@@ -689,6 +707,15 @@ export function searchCatalog(rows, query, options = {}) {
   for (const row of pool) {
     const result = scoreRow(row, phrase, tokens, variantsByToken);
     if (result.score > 0) scored.push({ row, score: result.score, matched: result.matched });
+  }
+
+  // Strict matching missed (typical while the visitor is still typing), so
+  // retry with word-start prefixes before giving up on the server.
+  if (!scored.length && canUsePrefixFallback(tokens)) {
+    for (const row of pool) {
+      const result = scoreRow(row, phrase, tokens, variantsByToken, true);
+      if (result.score > 0) scored.push({ row, score: result.score, matched: result.matched });
+    }
   }
 
   // If no product matched every token, fall back to partial matches. The first
@@ -753,6 +780,14 @@ export function suggestCatalog(rows, query, options = {}) {
     const result = scoreRow(row, phrase, tokens, variantsByToken);
     if (!result.score) continue;
     scored.push({ row, score: result.score });
+  }
+
+  if (!scored.length && canUsePrefixFallback(tokens)) {
+    for (const row of pool) {
+      const result = scoreRow(row, phrase, tokens, variantsByToken, true);
+      if (!result.score) continue;
+      scored.push({ row, score: result.score });
+    }
   }
 
   scored.sort(sortScored);
