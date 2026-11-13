@@ -1092,6 +1092,26 @@ function invalidateHomeProductsSourceCache() {
   homeSourceCacheCountry = "";
   homeSourceCacheTimestamp = 0;
 }
+
+// The real external catalog lives behind /api/catalog. The legacy
+// /api/products route reads the empty `products` table, so home sections used
+// to fall back to a 200-row slice. Prefer the full, country-scoped catalog and
+// keep the legacy path only as a fallback.
+async function fetchHomeCatalog(countryCode) {
+  var code = String(countryCode || "").toUpperCase().trim();
+  var url = "/api/catalog?limit=8000";
+  if (code) url += "&country=" + encodeURIComponent(code);
+  try {
+    var response = await fetch(url, { headers: { Accept: "application/json" } });
+    if (!response.ok) return [];
+    var rows = await response.json();
+    return Array.isArray(rows) ? rows : [];
+  } catch (e) {
+    console.warn("home catalog API failed:", e);
+    return [];
+  }
+}
+
 async function getHomeSourceProducts(options) {
   var forceRefresh = Boolean(options?.forceRefresh);
   var now = Date.now();
@@ -1105,7 +1125,8 @@ async function getHomeSourceProducts(options) {
     now - homeSourceCacheTimestamp < HOME_PRODUCTS_SOURCE_CACHE_MS
   )
     return [].concat(homeSourceCache);
-  var products = await fetchSupabaseProducts("");
+  var products = await fetchHomeCatalog(country);
+  if (!products.length) products = await fetchSupabaseProducts("");
   if (!products.length) products = getLocalProducts();
   // Filter products by current country
   products = filterProductsByCountry(products, country);
@@ -3546,8 +3567,9 @@ function hmApplyDynamicData(data) {
 
 async function hmFetchConfigViaApi(country) {
   try {
-    var host = String(location.hostname || "");
-    if (location.protocol === "file:" || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(host)) return null;
+    if (location.protocol === "file:") return null;
+    // Try the edge endpoint everywhere, including local dev. If the dev server
+    // does not implement it the request simply 404s and tier 3 takes over.
     var url = "/api/home-config?country=" + encodeURIComponent(country || "EG");
     var resp = await fetch(url, { headers: { Accept: "application/json" } });
     if (!resp.ok) return null;

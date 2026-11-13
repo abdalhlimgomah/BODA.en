@@ -673,47 +673,67 @@ PL.closeMobileFilter = function () {
 
 // ========== FETCH PRODUCTS ==========
 PL.fetchProducts = async function () {
-  var source;
+  var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "EG";
+  var source = null;
 
-  // Try Supabase first
-  if (typeof getSupabaseClient === "function") {
-    var client = getSupabaseClient();
-    if (client) {
-      try {
-        var result = await client.from("products").select("*").order("created_at", { ascending: false });
-        if (!result.error && Array.isArray(result.data)) {
-          source = result.data.filter(function (r) { return r && typeof r.id !== "undefined"; });
-          if (window.addProductToStore) source.forEach(function (p) { window.addProductToStore(p); });
+  // 1. Full catalog from our serverless API. This is the path that replaces
+  //    the old 200-row client slice, so every category actually has products.
+  try {
+    var response = await fetch(
+      "/api/catalog?country=" + encodeURIComponent(currentCountry) + "&limit=8000",
+      { headers: { Accept: "application/json" } }
+    );
+    if (response.ok) {
+      var rows = await response.json();
+      if (Array.isArray(rows) && rows.length) {
+        source = rows;
+        if (window.addProductToStore) {
+          rows.forEach(function (p) { window.addProductToStore(p); });
         }
+      }
+    }
+  } catch (e) {
+    console.warn("Catalog API error:", e);
+  }
+
+  // 2. Fallback: direct Supabase/local store (kept for offline and old data).
+  if (!source || !source.length) {
+    if (typeof getSupabaseClient === "function") {
+      var client = getSupabaseClient();
+      if (client) {
+        try {
+          var result = await client.from("products").select("*").order("created_at", { ascending: false });
+          if (!result.error && Array.isArray(result.data)) {
+            source = result.data.filter(function (r) { return r && typeof r.id !== "undefined"; });
+            if (window.addProductToStore) source.forEach(function (p) { window.addProductToStore(p); });
+          }
+        } catch (e) {
+          console.warn("Supabase fetch error:", e);
+        }
+      }
+    }
+
+    if (!source || !source.length) {
+      source = window.BudaStore && typeof window.BudaStore.getAllProducts === "function"
+        ? Object.values(window.BudaStore.getAllProducts()).filter(Boolean)
+        : [];
+    }
+
+    if (window.TaagerIntegration) {
+      try {
+        var cc = (window.TaagerIntegration.getSelectedCountry() || {}).code;
+        var tp = await window.TaagerIntegration.fetchTaagerProducts(cc);
+        window.TaagerIntegration.mergeTaagerIntoStore(tp);
+        source = source.concat(tp);
+        source = window.TaagerIntegration.filterByCountry(source, cc);
       } catch (e) {
-        console.warn("Supabase fetch error:", e);
+        console.warn("Taager error:", e);
       }
     }
   }
 
-  // Fallback to local store
-  if (!source || !source.length) {
-    source = window.BudaStore && typeof window.BudaStore.getAllProducts === "function"
-      ? Object.values(window.BudaStore.getAllProducts()).filter(Boolean)
-      : [];
-  }
-
-  // Taager integration
-  if (window.TaagerIntegration) {
-    try {
-      var cc = (window.TaagerIntegration.getSelectedCountry() || {}).code;
-      var tp = await window.TaagerIntegration.fetchTaagerProducts(cc);
-      window.TaagerIntegration.mergeTaagerIntoStore(tp);
-      source = source.concat(tp);
-      // Strict: no "keep the unfiltered list when nothing matched" fallback.
-      source = window.TaagerIntegration.filterByCountry(source, cc);
-    } catch (e) {
-      console.warn("Taager error:", e);
-    }
-  }
-
-  // Filter by current country
-  var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code;
+  // Filter by current country. `/api/catalog` already scopes server-side, but
+  // this also protects the fallback path and products restored from cache.
   source = (source || []).filter(function (p) {
     if (window.TaagerIntegration && typeof window.TaagerIntegration.matchesCountry === "function") {
       return window.TaagerIntegration.matchesCountry(p, currentCountry);
