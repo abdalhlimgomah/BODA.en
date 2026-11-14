@@ -50,6 +50,26 @@
   async function loadRemoteProduct(id) {
     if (!id) return null;
     var requestedMarket = utils().getRequestedMarket ? utils().getRequestedMarket() : "";
+    if (String(id).indexOf("jumia_") === 0) {
+      // Jumia rows live in the merged server catalog, not in Supabase.
+      try {
+        var catalogRes = await fetch(
+          "/api/catalog?id=" + encodeURIComponent(id) + "&_v=2",
+        );
+        if (catalogRes.ok) {
+          var rows = await catalogRes.json();
+          var row = Array.isArray(rows) ? rows[0] : null;
+          if (row) {
+            if (global.addProductToStore) global.addProductToStore(row);
+            if (utils().productMatchesMarket && !utils().productMatchesMarket(row, requestedMarket)) {
+              return null;
+            }
+            return row;
+          }
+        }
+      } catch (e) { console.warn("[PDP] jumia catalog lookup failed", e); }
+      return null;
+    }
     if (String(id).indexOf("taager_") === 0) {
       var local = global.BudaStore && global.BudaStore.getProductById ? global.BudaStore.getProductById(id) : null;
       if (local) {
@@ -171,6 +191,8 @@
     var requestedMarket = utils().getRequestedMarket ? utils().getRequestedMarket() : "";
     var product = null;
     if (id && global.BudaStore && global.BudaStore.getProductById) product = global.BudaStore.getProductById(id) || null;
+    // Jumia rows render on the normal BudoQ PDP; the affiliate purchase
+    // button lives inside the page instead of replacing it.
     // Check market for cached product
     if (product && utils().productMatchesMarket && !utils().productMatchesMarket(product, requestedMarket)) {
       product = null;
@@ -304,7 +326,13 @@
     if (!product) return false;
     var src = String(product.source || "").toLowerCase();
     var pid = String(product.id || product.product_id || "");
-    return src === "vendor" || src === "taager" || pid.indexOf("vendor_") === 0 || pid.indexOf("taager_") === 0;
+    return src === "vendor" || src === "taager" || src === "jumia" ||
+      pid.indexOf("vendor_") === 0 || pid.indexOf("taager_") === 0 || pid.indexOf("jumia_") === 0;
+  }
+
+  /** Jumia rows are outbound marketplace items: no BudoQ stock/checkout. */
+  function isExternalProduct(product) {
+    return Boolean(product && (product.source === "jumia" || String(product.id || "").indexOf("jumia_") === 0));
   }
 
   function buildPrice(product) {
@@ -313,7 +341,9 @@
     if (global.BudaStore && global.BudaStore.resolveProductPrice) {
       var r = global.BudaStore.resolveProductPrice(product);
       current = r.currentPrice > 0 ? r.currentPrice : 0;
-      if (global.PricingEngine && global.PricingEngine.tiersLoaded) {
+      // Marketplace prices are final: the BudoQ markup belongs to products we
+      // fulfil ourselves. Never inflate a Jumia price away from Jumia's own.
+      if (!isExternalProduct(product) && global.PricingEngine && global.PricingEngine.tiersLoaded) {
         current = global.PricingEngine.calculate(current);
       }
       original = r.originalPrice > current ? r.originalPrice : current;
@@ -343,6 +373,10 @@
   }
 
   function buildStock(product) {
+    if (isExternalProduct(product)) {
+      // The marketplace owns availability; never show a fake "1 left" badge.
+      return { quantity: 99, status: "in_stock" };
+    }
     var qty = Math.max(0, Math.round(Number(product && (product.stock || product.quantity)) || 0));
     // Vendoor/Taager rows store `stock` = minimum variant stock, which reads as a fake
     // "1 left" scare while there may be plenty in hand. Use the real total for the
@@ -655,6 +689,12 @@
     });
     var qd = product && product.quick_details;
     if (qd && String(qd).trim()) rows.push({ label: "تفاصيل سريعة", value: String(qd).trim() });
+    if (isExternalProduct(product)) {
+      if (!rows.some(function (r) { return r.label === "يُباع عبر"; })) {
+        rows.push({ label: "يُباع عبر", value: "جوميا مصر" });
+      }
+      rows.push({ label: "طريقة الشراء", value: "من خلال صفحة المنتج على جوميا" });
+    }
     var generic = { product: true, products: true, category: true, general: true, عام: true, منتج: true };
     return rows.filter(function (r) {
       if (r.label === "الفئة" && generic[String(r.value).toLowerCase().trim()]) return false;
@@ -676,6 +716,18 @@
   }
 
   function buildSeller(product) {
+    if (isExternalProduct(product)) {
+      return {
+        name: "جوميا مصر",
+        yearsWithBuda: 0,
+        rating: 0,
+        positivePercent: 0,
+        salesCount: 0,
+        shippingSpeedText: "الشراء والتوصيل عبر جوميا",
+        isOfficial: true,
+        external: true,
+      };
+    }
     var sellerField = product && (product.seller || product.vendor);
     var hasSellerStats = product && (
       Number(product.seller_rating) > 0 ||
@@ -716,6 +768,7 @@
    */
   async function resolveSeller(product, presolved) {
     if (!product || !product.id) return buildSeller(product);
+    if (isExternalProduct(product)) return buildSeller(product);
     var sellerField = product.seller || product.vendor;
     var hasSellerStats = (
       Number(product.seller_rating) > 0 ||
@@ -878,6 +931,14 @@
     return {
       id: String(product.id),
       raw: product,
+      external: isExternalProduct(product)
+        ? {
+            isExternal: true,
+            source: "jumia",
+            label: "جوميا مصر",
+            url: String(product.external_url || ""),
+          }
+        : null,
       name: (product && product.name) || "منتج",
       brand: (product && (product.brand || product.brand_name || product.vendor)) || "",
       category: (product && product.category) || "",

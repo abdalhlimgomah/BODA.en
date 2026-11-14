@@ -24,5 +24,8 @@ BACKUP_SEO/
  #
 node_modules/
 
+# Crawler checkpoint
+.jumia-crawl-cache.json
+
  # Secrets
 gen-lang-client-*.json

@@ -816,6 +816,22 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
     background: var(--color-success); color: var(--color-text-inverse); font-size: 0.55rem; font-weight: var(--weight-extrabold);
     padding: 2px 8px; border-radius: 4px; line-height: 1.5;
 }
+.noon-product-media-wrap .buda-badge-jumia {
+    position: absolute; top: 8px; right: 8px; z-index: 3;
+    background: #F68B1E; color: #fff; font-size: 0.55rem; font-weight: var(--weight-extrabold);
+    padding: 2px 8px; border-radius: 4px; line-height: 1.5;
+}
+/* Jumia marketplace cards — details live on BudoQ, purchase on Jumia */
+.noon-external-card { cursor: pointer; }
+.noon-external-media { display: block; }
+.noon-jumia-cta {
+    display: flex; align-items: center; justify-content: center; gap: 5px;
+    width: 100%; min-height: 34px; margin-top: 2px; border: 0; border-radius: 10px;
+    background: #F68B1E; color: #fff; font-family: inherit; font-size: 0.78rem; font-weight: var(--weight-extrabold);
+    text-decoration: none; cursor: pointer; transition: background 0.2s ease;
+}
+.noon-jumia-cta:hover { background: #E07A12; color: #fff; }
+.noon-jumia-cta .material-icons-outlined { font-size: 15px; }
 .noon-product-body { display: grid; gap: 4px; padding: 10px; }
 .noon-rating-pill { display: flex; align-items: center; gap: 3px; justify-self: start; font-size: var(--text-caption); font-weight: var(--weight-bold); color: var(--color-text-secondary); }
 .noon-rating-stars { color: var(--color-success); font-size: var(--text-caption); line-height: 1; }

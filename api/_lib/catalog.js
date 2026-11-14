@@ -8,6 +8,8 @@
  * This module is intentionally dependency-free: it only needs global fetch.
  */
 
+import { getJumiaRawRows } from "./jumia.js";
+
 const SUPABASE_URL =
   process.env.SUPABASE_URL || "https://msgqzgzoslearaprgiqq.supabase.co";
 const SUPABASE_KEY =
@@ -33,6 +35,10 @@ const LEAN_COLUMNS = [
   "is_active",
   "created_at",
   "taager_product_id",
+  // `source` + `taager_code` let admin-saved marketplace rows stay fully
+  // functional: for source=jumia we store the affiliate URL in taager_code.
+  "source",
+  "taager_code",
 ].join(",");
 
 const GENERIC_CATEGORIES = new Set([
@@ -355,6 +361,19 @@ function prepareRow(row) {
   const category = deriveCategory(row.category, name);
   const brand = String(row.brand || "").trim();
   const image = pickImage(row);
+  const rawSource = String(row.source || "taager").trim().toLowerCase() || "taager";
+  // The public catalog has two provider lanes: Jumia marketplace items and
+  // everything BudoQ fulfils itself. Legacy rows carry labels such as vendor,
+  // gotager and jammaleg; normalizing them keeps cart/order logic intact.
+  const source = rawSource === "jumia" ? "jumia" : "taager";
+  // Marketplace rows have no `external_url` column of their own: the admin
+  // lab stores the affiliate destination in `taager_code`, which is already
+  // part of the lean catalog payload.
+  const externalUrl = String(
+    row.external_url ||
+      (source === "jumia" ? row.taager_code : "") ||
+      ""
+  ).trim();
   const normalizedName = normalizeArabic(name);
   const normalizedCategory = normalizeArabic(category);
   const normalizedBrand = normalizeArabic(brand);
@@ -369,6 +388,13 @@ function prepareRow(row) {
     price: Number(row.price) || 0,
     original_price: Number(row.original_price) || 0,
     image,
+    images: Array.isArray(row.images)
+      ? row.images.map((entry) => String(entry || "").trim()).filter(Boolean)
+      : [],
+    description: String(row.description || "").trim(),
+    highlights: Array.isArray(row.highlights)
+      ? row.highlights.map((entry) => String(entry || "").trim()).filter(Boolean)
+      : [],
     available_countries: Array.isArray(row.available_countries)
       ? row.available_countries
       : [],
@@ -376,7 +402,14 @@ function prepareRow(row) {
     stock_status: String(row.stock_status || "").trim() || "in_stock",
     taager_product_id: String(row.taager_product_id || "").trim(),
     created_at: row.created_at || "",
-    source: "taager",
+    taager_code: String(row.taager_code || "").trim(),
+    source,
+    external_url: externalUrl,
+    affiliate_source: String(
+      row.affiliate_source || (externalUrl && source === "jumia" ? "jforce" : "")
+    ).trim(),
+    rating: Number(row.rating) || 0,
+    reviewCount: Number(row.reviewCount || row.reviews) || 0,
     _name: normalizedName,
     _category: normalizedCategory,
     _brand: normalizedBrand,
@@ -401,12 +434,18 @@ function publicRow(row) {
     price: row.price,
     original_price: row.original_price || null,
     image: row.image,
+    images: row.images && row.images.length ? row.images : undefined,
+    description: row.description || undefined,
+    highlights: row.highlights && row.highlights.length ? row.highlights : undefined,
     available_countries: row.available_countries,
     stock: row.stock,
     stock_status: row.stock_status,
     taager_product_id: row.taager_product_id,
     created_at: row.created_at,
-    source: "taager",
+    source: row.source || "taager",
+    external_url: row.external_url || null,
+    rating: row.rating || 0,
+    reviewCount: row.reviewCount || 0,
   };
 }
 
@@ -453,6 +492,66 @@ function parseContentRange(value) {
   return match ? Number(match[1]) : 0;
 }
 
+/**
+ * Ids of Jumia rows that exist in Supabase but are switched off. The bundled
+ * snapshot must not silently republish them: a draft saved in the product lab
+ * has to stay a draft until it is activated.
+ */
+async function fetchSuppressedJumiaIds() {
+  try {
+    const url =
+      `${SUPABASE_URL}/rest/v1/taager_products?select=id` +
+      `&source=eq.jumia&is_active=eq.false&limit=4000`;
+    const response = await fetchJson(url);
+    const rows = await response.json();
+    return new Set(
+      (Array.isArray(rows) ? rows : []).map((row) => String(row.id || "").trim())
+    );
+  } catch (error) {
+    console.warn(
+      "catalog: suppressed Jumia lookup failed:",
+      error && error.message ? error.message : error
+    );
+    return new Set();
+  }
+}
+
+/**
+ * Full PDP fields for marketplace rows. The lean catalog intentionally omits
+ * long descriptions and image galleries (they would bloat 6k supplier rows),
+ * so Jumia detail is fetched from its own small subset and merged in.
+ */
+async function fetchJumiaDetails() {
+  try {
+    const url =
+      `${SUPABASE_URL}/rest/v1/taager_products?` +
+      `select=id,description,images,raw_data` +
+      `&source=eq.jumia&is_active=eq.true&limit=4000`;
+    const response = await fetchJson(url);
+    const rows = await response.json();
+    const map = new Map();
+    for (const row of Array.isArray(rows) ? rows : []) {
+      if (!row || !row.id) continue;
+      const raw =
+        row.raw_data && typeof row.raw_data === "object" ? row.raw_data : {};
+      map.set(String(row.id), {
+        description: String(row.description || "").trim(),
+        images: Array.isArray(row.images) ? row.images : [],
+        highlights: Array.isArray(raw.highlights) ? raw.highlights : [],
+        rating: Number(raw.rating) || 0,
+        reviewCount: Number(raw.reviews || raw.reviewCount) || 0,
+      });
+    }
+    return map;
+  } catch (error) {
+    console.warn(
+      "catalog: Jumia detail lookup failed:",
+      error && error.message ? error.message : error
+    );
+    return new Map();
+  }
+}
+
 async function fetchCatalogRows() {
   const first = await fetchPage(0, true);
   if (first.rows.length < PAGE_SIZE) return first.rows;
@@ -494,8 +593,43 @@ let cache = {
 };
 
 async function refreshCatalog() {
-  const rawRows = await fetchCatalogRows();
-  const rows = rawRows.map(prepareRow).filter(Boolean);
+  let rawRows = [];
+  try {
+    rawRows = await fetchCatalogRows();
+  } catch (error) {
+    // Jumia rows still keep the shop/search usable when Supabase hiccups.
+    console.warn(
+      "catalog: Supabase fetch failed:",
+      error && error.message ? error.message : error
+    );
+  }
+
+  const jumiaRows = getJumiaRawRows();
+  const [suppressedIds, jumiaDetails] = await Promise.all([
+    fetchSuppressedJumiaIds(),
+    fetchJumiaDetails(),
+  ]);
+  const liveRows = rawRows.map(prepareRow).filter(Boolean);
+  for (const row of liveRows) {
+    const detail = jumiaDetails.get(row.id);
+    if (!detail) continue;
+    if (detail.description) row.description = detail.description;
+    if (detail.images.length) row.images = detail.images;
+    if (detail.highlights.length) row.highlights = detail.highlights;
+    if (detail.rating) row.rating = detail.rating;
+    if (detail.reviewCount) row.reviewCount = detail.reviewCount;
+  }
+  // A row saved through the admin lab wins over the generated snapshot so an
+  // edited price/URL is not shadowed by the bundled copy; the snapshot still
+  // fills every id that is not in Supabase. Rows explicitly saved as drafts
+  // (is_active=false) suppress the snapshot instead of falling back to it.
+  const liveIds = new Set(liveRows.map((row) => row.id));
+  const fallbackJumia = jumiaRows
+    .map(prepareRow)
+    .filter(Boolean)
+    .filter((row) => !liveIds.has(row.id))
+    .filter((row) => !suppressedIds.has(row.id));
+  const rows = liveRows.concat(fallbackJumia);
   if (!rows.length) {
     throw new Error("Catalog is empty");
   }
@@ -544,6 +678,7 @@ export async function getCatalogRowById(id) {
   const lowered = wanted.toLowerCase();
   return (
     rows.find((row) => row.id.toLowerCase() === lowered) ||
+    rows.find((row) => row.id.toLowerCase() === "jumia_" + lowered) ||
     rows.find(
       (row) =>
         row.taager_product_id &&
