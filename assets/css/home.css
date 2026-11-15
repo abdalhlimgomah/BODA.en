@@ -816,22 +816,6 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
     background: var(--color-success); color: var(--color-text-inverse); font-size: 0.55rem; font-weight: var(--weight-extrabold);
     padding: 2px 8px; border-radius: 4px; line-height: 1.5;
 }
-.noon-product-media-wrap .buda-badge-jumia {
-    position: absolute; top: 8px; right: 8px; z-index: 3;
-    background: #F68B1E; color: #fff; font-size: 0.55rem; font-weight: var(--weight-extrabold);
-    padding: 2px 8px; border-radius: 4px; line-height: 1.5;
-}
-/* Jumia marketplace cards — details live on BudoQ, purchase on Jumia */
-.noon-external-card { cursor: pointer; }
-.noon-external-media { display: block; }
-.noon-jumia-cta {
-    display: flex; align-items: center; justify-content: center; gap: 5px;
-    width: 100%; min-height: 34px; margin-top: 2px; border: 0; border-radius: 10px;
-    background: #F68B1E; color: #fff; font-family: inherit; font-size: 0.78rem; font-weight: var(--weight-extrabold);
-    text-decoration: none; cursor: pointer; transition: background 0.2s ease;
-}
-.noon-jumia-cta:hover { background: #E07A12; color: #fff; }
-.noon-jumia-cta .material-icons-outlined { font-size: 15px; }
 .noon-product-body { display: grid; gap: 4px; padding: 10px; }
 .noon-rating-pill { display: flex; align-items: center; gap: 3px; justify-self: start; font-size: var(--text-caption); font-weight: var(--weight-bold); color: var(--color-text-secondary); }
 .noon-rating-stars { color: var(--color-success); font-size: var(--text-caption); line-height: 1; }
@@ -1514,6 +1498,441 @@ body.home-loading .nsq-footer, body.home-hydrating .nsq-footer { display: none; 
   .hm-cats-wrap {
     margin-top: var(--space-1);
   }
+}
+
+/* ========================================================================
+   BUDOKYO DISCOVERY DECK
+   A dense editorial product flow replacing the old three-column mega offers.
+   ======================================================================== */
+.buda-mega-offers.buda-pulse-deck {
+  --buda-pulse-base: var(--color-primary-900);
+  --buda-pulse-raised: var(--color-primary-800);
+  --buda-pulse-outline: var(--color-primary-700);
+  --buda-pulse-ink: var(--color-text-inverse);
+  --buda-pulse-muted: var(--color-primary-100);
+  --buda-pulse-accent: var(--color-primary-200);
+  display: block !important;
+  position: relative;
+  isolation: isolate;
+  overflow: clip;
+  margin: var(--space-3) var(--space-2) var(--space-4);
+  padding: var(--space-3);
+  border: var(--border-width-thin) solid var(--buda-pulse-outline);
+  border-radius: var(--radius-3xl);
+  background: var(--buda-pulse-base);
+  box-shadow: var(--shadow-lg);
+  color: var(--buda-pulse-ink);
+  font-family: var(--font-primary);
+}
+.buda-pulse-deck__ambient {
+  position: absolute;
+  inset: var(--space-0);
+  z-index: var(--z-base);
+  pointer-events: none;
+  background: var(--gradient-primary);
+  opacity: 0.24;
+}
+.buda-pulse-deck > *:not(.buda-pulse-deck__ambient) {
+  position: relative;
+  z-index: var(--z-dropdown);
+}
+.buda-pulse-deck__header,
+.buda-pulse-deck__lead-row,
+.buda-pulse-deck__section-head,
+.buda-pulse-motion__header,
+.buda-pulse-deck__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.buda-pulse-deck__header {
+  align-items: flex-start;
+  margin-block-end: var(--space-3);
+}
+.buda-pulse-deck__eyebrow,
+.buda-pulse-deck__section-head span,
+.buda-pulse-motion__header span,
+.buda-pulse-manifesto > div > span,
+.buda-pulse-card__marker,
+.buda-pulse-campaign__signal,
+.buda-pulse-deck__footer > span {
+  margin: var(--space-0);
+  color: var(--buda-pulse-accent);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: var(--tracking-wide);
+}
+.buda-pulse-deck__header h2,
+.buda-pulse-deck__section-head h3,
+.buda-pulse-motion__header h3 {
+  margin: var(--space-1) var(--space-0) var(--space-0);
+  color: var(--buda-pulse-ink) !important;
+  font-size: var(--text-heading-md);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-tight);
+}
+.buda-pulse-deck__header p,
+.buda-pulse-deck__section-head p,
+.buda-pulse-motion__header p,
+.buda-pulse-manifesto p {
+  margin: var(--space-1) var(--space-0) var(--space-0);
+  color: var(--buda-pulse-muted);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-normal);
+}
+.buda-pulse-deck__all {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  flex: 0 0 auto;
+  min-block-size: var(--space-6);
+  padding-inline: var(--space-2);
+  border: var(--border-width-thin) solid var(--buda-pulse-outline);
+  border-radius: var(--radius-btn);
+  background: var(--buda-pulse-raised);
+  color: var(--buda-pulse-ink);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  text-decoration: none;
+  transition: transform var(--transition-default), border-color var(--transition-fast), box-shadow var(--transition-default);
+}
+.buda-pulse-deck__all:hover {
+  transform: var(--hover-lift);
+  border-color: var(--buda-pulse-accent);
+  box-shadow: var(--shadow-md);
+}
+.buda-pulse-deck__all:focus-visible,
+.buda-pulse-card:focus-visible,
+.buda-pulse-campaign:focus-visible {
+  outline: var(--border-focus);
+  outline-offset: var(--space-0-5);
+}
+.buda-pulse-deck__lead-row {
+  display: grid;
+  align-items: stretch;
+  grid-template-columns: minmax(var(--space-0), 1fr);
+  margin-block-end: var(--space-4);
+}
+.buda-pulse-campaign,
+.buda-pulse-manifesto {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-block-size: calc(var(--space-12) + var(--space-12));
+  overflow: hidden;
+  border: var(--border-width-thin) solid var(--buda-pulse-outline);
+  border-radius: var(--radius-2xl);
+  background: var(--gradient-primary);
+  box-shadow: var(--shadow-md);
+}
+.buda-pulse-campaign {
+  padding: var(--space-3);
+  color: var(--color-text-inverse);
+  text-decoration: none;
+  transition: transform var(--transition-default), box-shadow var(--transition-default);
+}
+.buda-pulse-campaign:hover {
+  transform: var(--hover-lift);
+  box-shadow: var(--shadow-xl);
+}
+.buda-pulse-campaign__image,
+.buda-pulse-campaign__wash {
+  position: absolute;
+  inset: var(--space-0);
+}
+.buda-pulse-campaign__image {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+}
+.buda-pulse-campaign__wash {
+  background: var(--gradient-primary);
+  opacity: 0.8;
+}
+.buda-pulse-campaign__signal,
+.buda-pulse-campaign__copy {
+  position: relative;
+  z-index: var(--z-dropdown);
+}
+.buda-pulse-campaign__signal {
+  align-self: flex-start;
+  color: var(--color-text-inverse);
+}
+.buda-pulse-campaign__copy {
+  display: grid;
+  gap: var(--space-1);
+  max-inline-size: min(100%, calc(var(--space-12) + var(--space-12) + var(--space-12)));
+}
+.buda-pulse-campaign__copy strong {
+  font-size: var(--text-heading-sm);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-tight);
+}
+.buda-pulse-campaign__copy small {
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-semibold);
+  line-height: var(--leading-normal);
+}
+.buda-pulse-campaign.is-art-only .buda-pulse-campaign__image {
+  visibility: hidden;
+}
+.buda-pulse-manifesto {
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--buda-pulse-raised);
+  color: var(--buda-pulse-ink);
+}
+.buda-pulse-manifesto__count {
+  color: var(--buda-pulse-accent);
+  font-size: var(--text-display);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-tight);
+}
+.buda-pulse-manifesto strong {
+  display: block;
+  margin-block-start: var(--space-1);
+  color: var(--buda-pulse-ink);
+  font-size: var(--text-body-lg);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-snug);
+}
+.buda-pulse-deck__section-head,
+.buda-pulse-motion__header {
+  align-items: flex-end;
+  margin-block: var(--space-4) var(--space-2);
+}
+.buda-pulse-deck__section-head p,
+.buda-pulse-motion__header p {
+  max-inline-size: calc(var(--space-12) + var(--space-12));
+  text-align: start;
+}
+.buda-pulse-grid,
+.buda-pulse-motion__rail {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(var(--space-0), 1fr));
+  gap: var(--space-1);
+}
+.buda-pulse-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-inline-size: var(--space-0);
+  overflow: hidden;
+  padding: var(--space-1);
+  border: var(--border-width-thin) solid var(--buda-pulse-outline);
+  border-radius: var(--radius-xl);
+  background: var(--buda-pulse-raised);
+  box-shadow: var(--shadow-xs);
+  color: var(--buda-pulse-ink);
+  font: inherit;
+  text-align: start;
+  cursor: pointer;
+  transition: transform var(--transition-default), box-shadow var(--transition-default), border-color var(--transition-fast);
+}
+.buda-pulse-card:hover {
+  transform: var(--hover-lift);
+  border-color: var(--buda-pulse-accent);
+  box-shadow: var(--shadow-card-hover);
+}
+.buda-pulse-card:active { transform: var(--press-scale); }
+.buda-pulse-card__index,
+.buda-pulse-card__saving {
+  position: absolute;
+  z-index: var(--z-dropdown);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-block-size: var(--space-3);
+  padding-inline: var(--space-1);
+  border-radius: var(--radius-badge);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-tight);
+}
+.buda-pulse-card__index {
+  inset-block-start: var(--space-2);
+  inset-inline-start: var(--space-2);
+  background: var(--buda-pulse-outline);
+  color: var(--buda-pulse-muted);
+}
+.buda-pulse-card__saving {
+  inset-block-start: var(--space-2);
+  inset-inline-end: var(--space-2);
+  background: var(--color-danger);
+  color: var(--color-text-inverse);
+}
+.buda-pulse-card__media {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-skeleton);
+}
+.buda-pulse-card__media img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: contain;
+  padding: var(--space-1);
+}
+.buda-pulse-card__media.is-empty img { visibility: hidden; }
+.buda-pulse-card__content {
+  display: grid;
+  gap: var(--space-0-5);
+  padding: var(--space-1) var(--space-0-5) var(--space-0-5);
+}
+.buda-pulse-card__marker {
+  color: var(--buda-pulse-accent);
+  font-size: var(--text-caption);
+}
+.buda-pulse-card__name {
+  display: -webkit-box;
+  min-block-size: calc(var(--space-3) + var(--space-3));
+  overflow: hidden;
+  color: var(--buda-pulse-ink);
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-bold);
+  line-height: var(--leading-normal);
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.buda-pulse-card__price-line {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-0-5);
+  color: var(--buda-pulse-ink);
+}
+.buda-pulse-card__price-line b {
+  font-size: var(--text-body-sm);
+  font-weight: var(--weight-extrabold);
+}
+.buda-pulse-card__old-price {
+  color: var(--buda-pulse-muted);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-medium);
+}
+.buda-pulse-campaign--flash,
+.buda-pulse-campaign--flow {
+  grid-column: span 2;
+  min-block-size: calc(var(--space-12) + var(--space-6));
+}
+.buda-pulse-campaign--flash { background: var(--gradient-hover); }
+.buda-pulse-campaign--flow { background: var(--gradient-subtle); }
+.buda-pulse-campaign--flow .buda-pulse-campaign__wash { background: var(--gradient-subtle); }
+.buda-pulse-campaign--flow .buda-pulse-campaign__copy,
+.buda-pulse-campaign--flow .buda-pulse-campaign__signal { color: var(--color-text); }
+.buda-pulse-motion {
+  margin-block-start: var(--space-4);
+  padding-block-start: var(--space-2);
+  border-block-start: var(--border-width-thin) solid var(--buda-pulse-outline);
+}
+.buda-pulse-card--motion {
+  background: var(--buda-pulse-base);
+  box-shadow: none;
+}
+.buda-pulse-card--motion .buda-pulse-card__index {
+  background: var(--buda-pulse-outline);
+  color: var(--buda-pulse-accent);
+}
+.buda-pulse-deck__footer {
+  align-items: center;
+  flex-wrap: wrap;
+  margin-block-start: var(--space-3);
+  padding-block-start: var(--space-2);
+  border-block-start: var(--border-width-thin) solid var(--buda-pulse-outline);
+}
+.buda-pulse-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.buda-pulse-chip {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--space-4);
+  padding-inline: var(--space-2);
+  border: var(--border-width-thin) solid var(--buda-pulse-outline);
+  border-radius: var(--radius-badge);
+  background: var(--buda-pulse-raised);
+  color: var(--buda-pulse-muted);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-bold);
+}
+.buda-pulse-empty {
+  display: grid;
+  grid-column: 1 / -1;
+  gap: var(--space-1);
+  min-block-size: calc(var(--space-12) + var(--space-6));
+  padding: var(--space-3);
+  border: var(--border-width-thin) solid var(--buda-pulse-outline);
+  border-radius: var(--radius-xl);
+  background: var(--buda-pulse-raised);
+  color: var(--buda-pulse-ink);
+}
+.buda-pulse-empty span {
+  color: var(--buda-pulse-accent);
+  font-size: var(--text-caption);
+  font-weight: var(--weight-extrabold);
+  letter-spacing: var(--tracking-wide);
+}
+.buda-pulse-empty strong {
+  font-size: var(--text-heading-sm);
+  font-weight: var(--weight-extrabold);
+  line-height: var(--leading-tight);
+}
+.buda-pulse-empty p {
+  margin: var(--space-0);
+  color: var(--buda-pulse-muted);
+  font-size: var(--text-body-sm);
+  line-height: var(--leading-normal);
+}
+[data-theme="dark"] .buda-mega-offers.buda-pulse-deck {
+  --buda-pulse-base: var(--color-bg);
+  --buda-pulse-raised: var(--color-card);
+  --buda-pulse-outline: var(--color-border);
+  --buda-pulse-ink: var(--color-text);
+  --buda-pulse-muted: var(--color-text-secondary);
+  --buda-pulse-accent: var(--color-primary-400);
+}
+@media (prefers-color-scheme: dark) {
+  [data-theme="system"] .buda-mega-offers.buda-pulse-deck {
+    --buda-pulse-base: var(--color-bg);
+    --buda-pulse-raised: var(--color-card);
+    --buda-pulse-outline: var(--color-border);
+    --buda-pulse-ink: var(--color-text);
+    --buda-pulse-muted: var(--color-text-secondary);
+    --buda-pulse-accent: var(--color-primary-400);
+  }
+}
+@media (min-width: 768px) {
+  .buda-mega-offers.buda-pulse-deck {
+    margin-inline: var(--space-0);
+    padding: var(--space-4);
+  }
+  .buda-pulse-deck__lead-row {
+    grid-template-columns: minmax(var(--space-0), 5fr) minmax(var(--space-0), 3fr);
+  }
+  .buda-pulse-grid,
+  .buda-pulse-motion__rail { grid-template-columns: repeat(4, minmax(var(--space-0), 1fr)); }
+  .buda-pulse-campaign--flash { grid-column: span 2; }
+  .buda-pulse-campaign--flow { grid-column: span 2; }
+}
+@media (min-width: 1200px) {
+  .buda-mega-offers.buda-pulse-deck { display: block !important; }
+  .buda-pulse-grid,
+  .buda-pulse-motion__rail { grid-template-columns: repeat(6, minmax(var(--space-0), 1fr)); }
+  .buda-pulse-campaign--flash { grid-column: span 2; }
+  .buda-pulse-campaign--flow { grid-column: span 2; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .buda-pulse-deck *,
+  .buda-pulse-deck *::before,
+  .buda-pulse-deck *::after { transition-duration: var(--duration-instant); }
 }
 
 /* The ad strip under the hero is a mobile-only element — never on desktop */
