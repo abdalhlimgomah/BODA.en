@@ -21,7 +21,6 @@ PL.state = {
     rating: "0",
     discount: "0",
     availOnly: false,
-    source: "",
   },
   activeFilterCount: 0,
 };
@@ -69,7 +68,6 @@ PL.readUrlParams = function () {
   f.rating = params.get("rating") || "0";
   f.discount = params.get("discount") || "0";
   f.availOnly = params.get("availOnly") === "1";
-  f.source = params.get("source") || "";
   var page = parseInt(params.get("page"), 10);
   PL.state.currentPage = page > 0 ? page : 1;
   var sort = params.get("sort");
@@ -100,7 +98,6 @@ PL.syncUrl = function () {
   if (f.rating !== "0") params.set("rating", f.rating);
   if (f.discount !== "0") params.set("discount", f.discount);
   if (f.availOnly) params.set("availOnly", "1");
-  if (f.source) params.set("source", f.source);
   if (PL.state.currentPage > 1) params.set("page", String(PL.state.currentPage));
   if (PL.state.sortBy !== "default") params.set("sort", PL.state.sortBy);
   if (PL.state.viewMode !== "grid") params.set("view", PL.state.viewMode);
@@ -177,9 +174,6 @@ PL.matchProduct = function (p) {
   if (f.availOnly) {
     if (p.stock === 0 || p.quantity === 0 || p.is_available === false) return false;
   }
-
-  // Provider (jumia | taager)
-  if (f.source && String(p.source || "taager") !== f.source) return false;
 
   return true;
 };
@@ -554,7 +548,6 @@ PL.bindEvents = function () {
       rating: "0",
       discount: "0",
       availOnly: false,
-      source: "",
     };
     PL.state.sortBy = "default";
     PL.state.currentPage = 1;

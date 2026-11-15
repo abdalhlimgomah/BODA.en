@@ -195,14 +195,6 @@ var HOME_CONFIG = {
     { type: "categories" },
     { type: "features" },
     { type: "mega-offers", id: "hm-mega-offers" },
-    {
-      type: "jumia",
-      id: "hm-jumia",
-      title: "منتجات جوميا",
-      subtitle: "توصيل لكل محافظات مصر",
-      sortKey: "discount",
-      viewAll: "product-listing.html?source=jumia",
-    },
     { type: "banner", index: 1 },
     {
       type: "shein-trend",
@@ -577,23 +569,6 @@ function getGalleryImages(product) {
 }
 function resolvePrice(product) {
   var supplierPrice = Number(product?.price) || 0;
-  // Jumia items are sold on Jumia at the listed EGP price. BudoQ's pricing
-  // tiers and fake-original-price rules must never rewrite an affiliate price.
-  if (product && product.source === "jumia") {
-    var jumiaPrice = supplierPrice;
-    var jumiaOriginal = Number(
-      product.original_price || product.originalPrice || 0
-    );
-    var jumiaHasDiscount = jumiaOriginal > jumiaPrice;
-    return {
-      finalPrice: jumiaPrice,
-      originalPrice: jumiaHasDiscount ? jumiaOriginal : jumiaPrice,
-      hasDiscount: jumiaHasDiscount,
-      discountPercent: jumiaHasDiscount
-        ? Math.round(((jumiaOriginal - jumiaPrice) / jumiaOriginal) * 100)
-        : 0,
-    };
-  }
   var sellingPrice = supplierPrice;
   if (window.PricingEngine && window.PricingEngine.tiersLoaded) {
     sellingPrice = window.PricingEngine.calculate(supplierPrice);
@@ -1175,14 +1150,6 @@ async function getHomeSourceProducts(options) {
 // ========== REAL TRUST BADGES (same logic as PDP delivery-card) ==========
 function buildProductBadges(raw) {
   raw = raw || {};
-  if (raw.source === "jumia") {
-    return [
-      { icon: "local_shipping", label: "توصيل من جوميا" },
-      { icon: "payments", label: "الدفع عند الاستلام" },
-      { icon: "published_with_changes", label: "إرجاع حسب سياسة جوميا" },
-      { icon: "verified", label: "يُباع على جوميا" },
-    ];
-  }
   var ret = raw.return_allowed;
   var canReturn = ret === true || ret === "true" || ret === 1 || ret === "1";
   var declaredReturn = ret !== undefined && ret !== null && ret !== "";
@@ -1341,51 +1308,40 @@ function buildProductCard(product) {
     "'\" />";
   var dots = "",
     counter = "";
-  var isJumia = product.source === "jumia";
-  var sellerName = isJumia
-    ? "يُباع عبر جوميا"
-    : product.seller || product.brand || "";
+  var sellerName = product.seller || product.brand || "";
   var instMonths = Math.min(24, Math.max(3, Number(product.installment_months) || 3));
-  var isOfficial = !isJumia && (product.official_store || product.is_official || false);
-  var variantCount = isJumia ? 0 : getProductVariants(product).length;
-  var mediaTag =
-    '<button class="noon-product-media" data-view-product="' + id +
-      '" aria-label="عرض المنتج">' +
-      '<div class="buda-pulse-dot" data-pulse-dot="' + id + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div>' +
-      imgs +
-      (dots ? '<span class="noon-img-dots">' + dots + "</span>" : "") +
-      (counter) +
-      "</button>";
+  var isOfficial = product.official_store || product.is_official || false;
+  var variantCount = getProductVariants(product).length;
   return (
-    '<article class="noon-product-card' + (isJumia ? " noon-external-card" : "") + '">' +
+    '<article class="noon-product-card">' +
     '<div class="noon-product-media-wrap">' +
     (rp.hasDiscount && rp.discountPercent > 10
       ? '<span class="buda-badge">-' + rp.discountPercent + '%</span>'
       : "") +
-    (isJumia
-      ? '<span class="buda-badge-jumia">جوميا</span>'
-      : "") +
     (isOfficial
       ? '<span class="buda-badge-official">المتجر الرسمي</span>'
       : "") +
-    (isJumia
-      ? ""
-      : '<button class="icon-btn noon-wishlist-btn ' +
-        (isWish ? "is-active" : "") +
-        '" data-wishlist="' +
-        id +
-        '" aria-label="إضافة إلى المفضلة" aria-pressed="' +
-        (isWish ? "true" : "false") +
-        '">' +
-        '<span class="material-icons-outlined" style="font-size:18px;">' +
-        (isWish ? "favorite" : "favorite_border") +
-        "</span></button>") +
-    mediaTag +
-    (isJumia
-      ? ""
-      : '<button class="noon-add-square" data-add-to-cart="' +
-        id +
-        '" aria-label="إضافة إلى السلة">+</button>') +
+    '<button class="icon-btn noon-wishlist-btn ' +
+    (isWish ? "is-active" : "") +
+    '" data-wishlist="' +
+    id +
+    '" aria-label="إضافة إلى المفضلة" aria-pressed="' +
+    (isWish ? "true" : "false") +
+    '">' +
+    '<span class="material-icons-outlined" style="font-size:18px;">' +
+    (isWish ? "favorite" : "favorite_border") +
+    "</span></button>" +
+    '<button class="noon-product-media" data-view-product="' + id +
+    '" aria-label="عرض المنتج">' +
+    '<div class="buda-pulse-dot" data-pulse-dot="' + id + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div>' +
+    imgs +
+    (dots ? '<span class="noon-img-dots">' + dots + "</span>" : "") +
+    (counter) +
+    "</button>" +
+    "" +
+    '<button class="noon-add-square" data-add-to-cart="' +
+    id +
+    '" aria-label="إضافة إلى السلة">+</button>' +
     (variantCount > 1
       ? '<span class="noon-variants-badge" title="متوفر بأكثر من لون ونوع"><img src="https://f.nooncdn.com/s/app/com/noon/images/colorVariants.svg" alt="" width="18" height="18" loading="lazy" /><span class="noon-variants-count">' + variantCount + '</span></span>'
       : "") +
@@ -1414,14 +1370,11 @@ function buildProductCard(product) {
         "%</span></span>"
       : "") +
     "</div>" +
-    (isJumia
-      ? '<button type="button" class="noon-jumia-cta" data-view-product="' + id +
-        '"><span class="material-icons-outlined">visibility</span> عرض التفاصيل</button>'
-      : '<div class="noon-installment" data-months="' +
-        instMonths +
-        '"><span class="material-icons-outlined">bolt</span><span class="noon-install-text">' +
-        formatMoney(rp.finalPrice / instMonths) +
-        " / شهر</span></div>") +
+    '<div class="noon-installment" data-months="' +
+    instMonths +
+    '"><span class="material-icons-outlined">bolt</span><span class="noon-install-text">' +
+    formatMoney(rp.finalPrice / instMonths) +
+    " / شهر</span></div>" +
     '<div class="noon-badges"><div class="noon-badge-track">' +
     buildProductBadges(product)
       .map(function (b2) {
@@ -1596,13 +1549,12 @@ function attachProductCardEvents(container) {
         target.closest("[data-add-to-cart]") ||
         target.closest("[data-wishlist]") ||
         target.closest(".noon-img-dots") ||
-        target.closest("[data-view-product]") ||
-        target.closest("a")
+        target.closest("[data-view-product]")
       )
         return;
       var pid = card.querySelector("[data-view-product]")
         ?.getAttribute("data-view-product");
-      if (pid) navigateToProduct(pid);
+      navigateToProduct(pid);
     });
   });
   container.querySelectorAll("[data-wishlist]").forEach(function (b) {
@@ -1722,7 +1674,6 @@ var HM = {};
 HM.contentEl = null;
 HM.allProducts = [];
 HM.taagerOnly = [];
-HM.jumiaOnly = [];
 HM.sectionData = {}; // stores rendered data for each section id
 
 // Banner size mapping
@@ -1810,7 +1761,7 @@ HM.renderProductCarousel = function (section, products) {
     escapeHtml(section.title || "") +
     "</h2>" +
     (section.viewAll
-      ? '<a href="' + escapeHtml(section.viewAll) + '">عرض الكل</a>'
+      ? '<a href="' + escapeHtml(section.viewAll) + '">/a>'
       : "") +
     "</div>" +
     '<div class="hm-section-body">' +
@@ -2285,29 +2236,6 @@ HM.renderTaagerExtra = function (section) {
   var offset = (taagerExtraRotationOffset * 5 + sectionIndex * 7) % pool.length;
   var rotated = pool.slice(offset).concat(pool.slice(0, offset));
   return HM.renderProductCarousel(section, rotated.slice(0, 10));
-};
-
-// Jumia Egypt — affiliate carousel. Cards open the BudoQ PDP; the outbound
-// "buy from Jumia" link lives inside the PDP so the shop stays first-party.
-HM.renderJumia = function (section) {
-  var pool = HM.jumiaOnly.length ? [].concat(HM.jumiaOnly) : [];
-  if (!pool.length) return null;
-  if (section.sortKey === "discount") {
-    pool.sort(function (a, b) {
-      return resolvePrice(b).discountPercent - resolvePrice(a).discountPercent;
-    });
-  } else if (section.sortKey === "rating") {
-    pool.sort(function (a, b) {
-      return resolveRating(b).rating - resolveRating(a).rating;
-    });
-  } else if (section.sortKey === "price") {
-    pool.sort(function (a, b) {
-      return (Number(a.price) || 0) - (Number(b.price) || 0);
-    });
-  } else {
-    pool = shuffleProducts(pool);
-  }
-  return HM.renderProductCarousel(section, pool.slice(0, 10));
 };
 
 // ========== SHEIN-STYLE RENDERERS ==========
@@ -2807,8 +2735,6 @@ HM.renderSection = function (section) {
       return HM.renderRandom(section);
     case "taager-extra":
       return HM.renderTaagerExtra(section);
-    case "jumia":
-      return HM.renderJumia(section);
     case "shein-trend":
       return HM.renderSheinTrend(section);
     case "shein-style":
@@ -3365,105 +3291,210 @@ function renderSummerSection() {
   HM.contentEl.insertBefore(secEl, megaEl);
 }
 
-// ========== MEGA OFFERS RENDERER (Noon-style 3 columns) ==========
+// ========== BUDOKYO DISCOVERY DECK (dense editorial product flow) ==========
 HM.renderMegaOffers = function (section) {
-  if (!HM.allProducts.length) return null;
-  var pool = [].concat(HM.allProducts);
-  pool.sort(function (a, b) { return resolvePrice(b).discountPercent - resolvePrice(a).discountPercent; });
+  if (!HM.allProducts.length || !HM.contentEl) return null;
+
   var cfg = HOME_CONFIG._megaConfig || {};
-  // Col 1: اشتري أكثر
-  var col1Mode = cfg.col1_mode || 'manual';
-  var col1Items = [];
-  if (col1Mode === 'auto') {
-    col1Items = shuffleProducts(pool).slice(0, 4);
-  } else {
-    if (HOME_CONFIG._megaCol1Ids && HOME_CONFIG._megaCol1Ids.length) {
-      var idMap1 = {};
-      HM.allProducts.forEach(function (p) { idMap1[String(p.id)] = p; });
-      HOME_CONFIG._megaCol1Ids.forEach(function (pid) {
-        if (idMap1[pid]) col1Items.push(idMap1[pid]);
-      });
-    }
-    if (!col1Items.length) col1Items = shuffleProducts(pool).slice(0, 4);
+  var pool = [].concat(HM.allProducts);
+  pool.sort(function (a, b) {
+    return resolvePrice(b).discountPercent - resolvePrice(a).discountPercent;
+  });
+  var productById = {};
+  HM.allProducts.forEach(function (product) {
+    productById[String(product.id)] = product;
+  });
+
+  function selectedProducts(ids, mode, fallback) {
+    if (mode === "auto") return fallback;
+    var result = [];
+    (ids || []).forEach(function (id) {
+      if (productById[String(id)]) result.push(productById[String(id)]);
+    });
+    return result.length ? result : fallback;
   }
-  // Col 2: عروض ميجا
-  var col2Mode = cfg.col2_mode || 'auto';
-  var col2Items = [];
-  if (col2Mode === 'auto') {
-    col2Items = pool.slice(0, 4);
-  } else {
-    if (HOME_CONFIG._megaCol2Ids && HOME_CONFIG._megaCol2Ids.length) {
-      var idMap2 = {};
-      HM.allProducts.forEach(function (p) { idMap2[String(p.id)] = p; });
-      HOME_CONFIG._megaCol2Ids.forEach(function (pid) {
-        if (idMap2[pid]) col2Items.push(idMap2[pid]);
-      });
-    }
-    if (!col2Items.length) col2Items = pool.slice(0, 4);
+
+  function uniqueProducts(products) {
+    var seen = {};
+    return products.filter(function (product) {
+      var id = String(product.id);
+      if (seen[id]) return false;
+      seen[id] = true;
+      return true;
+    });
   }
-  var html =
-    '<div class="buda-mega-offers hm-fade">' +
-    '  <div class="buda-mega-col buda-mega-col-1">' +
-    '    <h3 class="buda-mega-col-title"><span class="material-icons-outlined">emoji_events</span> الأكثر مبيعاً</h3>' +
-    '    <div class="buda-mega-grid" id="buda-mega-grid-3">';
-  col1Items.forEach(function (p, idx) {
-    var rp = resolvePrice(p);
-    var img = getImage(p);
-    html +=
-      '<div class="buda-mega-product" data-view-product="' + String(p.id) + '">' +
-      '<span class="buda-mega-rank">' + (idx + 1) + '</span>' +
-      (rp.hasDiscount ? '<span class="buda-mega-product-badge">-' + rp.discountPercent + '%</span>' : '') +
-      '<div class="buda-mega-product-img-wrap"><div class="buda-pulse-dot" data-pulse-dot="' + String(p.id) + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img class="buda-mega-product-img" src="' + img + '" alt="' + escapeHtml(p.name || '') + '" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
-      '<div class="buda-mega-product-info">' +
-      '<p class="buda-mega-product-name">' + escapeHtml((p.name || '').slice(0, 25)) + '</p>' +
-      '<span class="buda-mega-product-price">' + formatMoney(rp.finalPrice) + '</span>' +
-      (rp.hasDiscount ? '<span class="buda-mega-product-old">' + formatMoney(rp.originalPrice) + '</span>' : '') +
-      '</div></div>';
+
+  function productCategory(product) {
+    var value = product.category_name || product.category || product.categoryName || "";
+    if (Array.isArray(value)) value = value[0];
+    if (!value && Array.isArray(product.categories)) value = product.categories[0];
+    value = typeof value === "string" ? value.trim() : "";
+    // Some feeds use "product" as a technical fallback category. It is not
+    // shopper-facing copy and should never make its way into the chip rail.
+    return /^(product|products|منتج|منتجات|other|others|unknown|bundle|bundles|set)$/i.test(value) ? "" : value;
+  }
+
+  function isTechProduct(product) {
+    // Marketplace taxonomy may label a blender or a shoe as "electronics".
+    // Gate this deck on shopper-visible product metadata instead of trusting a
+    // broad category label, then explicitly reject common non-tech matches.
+    var visibleMetadata = [
+      product.name,
+      product.brand,
+      product.brand_name,
+    ].filter(Boolean).join(" ").toLowerCase();
+    var isExplicitlyNonTech = /(blender|mixer|coffee|kettle|kitchen|bath|diving|swim|shoe|sneaker|apparel|fashion|beauty|skincare|bioderma|chair|clothing|خلاط|مطبخ|قهوه|قهوة|غلاية|حمام|غوص|سباح|حذاء|كوتشي|ملابس|تجميل|عناي[هة]|بيوديرما|كرسي)/.test(visibleMetadata);
+    var hasTechSignal = /(phone|mobile|smartphone|iphone|android|samsung|nokia|xiaomi|huawei|oppo|realme|tablet|ipad|laptop|notebook|computer|monitor|gaming|console|playstation|xbox|headphone|earphone|earbuds|airpods|speaker|audio|camera|charger|cable|keyboard|mouse|router|power ?bank|smart ?watch|electronics?|electronic|technology|tech|bluetooth|usb|adapter|screen protector|phone case|هاتف|جوال|موبايل|آيفون|ايفون|سامسونج|نوكيا|شاومي|هواوي|اوبو|ريلمي|تابلت|آيباد|ايباد|لابتوب|كمبيوتر|حاسوب|شاشة|جيمينج|بلايستيشن|اكس بوكس|سماعة|سماعات|ايربودز|ايربود|صوت|كاميرا|شاحن|كابل|كيبورد|لوحة مفاتيح|ماوس|راوتر|باور ?بانك|ساعة ذكية|بلوتوث|وصلة|جراب|كفر|حافظة موبايل)/.test(visibleMetadata);
+    return hasTechSignal && !isExplicitlyNonTech;
+  }
+
+  function isTechCampaign(campaign) {
+    if (!campaign) return false;
+    var visibleMetadata = [
+      campaign.title,
+      campaign.subtitle,
+      campaign.name,
+      campaign.category,
+      campaign.image_alt,
+      campaign.alt,
+      campaign.image_url,
+    ].filter(Boolean).join(" ").toLowerCase();
+    var isExplicitlyNonTech = /(beauty|skin|skincare|bioderma|makeup|fashion|perfume|تجميل|عناي[هة]|بشر[هة]|بيوديرما|مكياج|عطر|ملابس)/.test(visibleMetadata);
+    var hasTechSignal = /(phone|mobile|iphone|samsung|nokia|xiaomi|laptop|computer|gaming|console|headphone|audio|camera|charger|electronics?|technology|tech|هاتف|جوال|موبايل|إلكترون|الكترون|لابتوب|كمبيوتر|جيمينج|بلايستيشن|سماعة|كاميرا|شاحن|تقنية)/.test(visibleMetadata);
+    return hasTechSignal && !isExplicitlyNonTech;
+  }
+
+  function productCard(product, index, lane) {
+    var price = resolvePrice(product);
+    var image = getImage(product, 280);
+    var name = product.name || "منتج مختار";
+    var priceText = price.finalPrice > 0 ? formatMoney(price.finalPrice) : "السعر عند الطلب";
+    var oldPrice = price.hasDiscount && price.originalPrice > price.finalPrice
+      ? '<s class="buda-pulse-card__old-price">' + formatMoney(price.originalPrice) + '</s>'
+      : "";
+    var saving = price.hasDiscount && price.discountPercent > 0
+      ? '<span class="buda-pulse-card__saving">وفر ' + price.discountPercent + '%</span>'
+      : "";
+    var marker = lane === "motion" ? "المسار المتحرك" : "اختيارات اليوم";
+    return '<button type="button" class="buda-pulse-card buda-pulse-card--' + lane + '" data-view-product="' + escapeHtml(String(product.id)) + '" aria-label="عرض ' + escapeHtml(name) + '">' +
+      '<span class="buda-pulse-card__index" aria-hidden="true">' + String(index + 1).padStart(2, "0") + '</span>' +
+      saving +
+      '<span class="buda-pulse-card__media">' +
+      '<img src="' + escapeHtml(image) + '" alt="' + escapeHtml(name) + '" loading="lazy" onerror="this.closest(\'.buda-pulse-card__media\').classList.add(\'is-empty\')">' +
+      '</span>' +
+      '<span class="buda-pulse-card__content">' +
+      '<span class="buda-pulse-card__marker">' + marker + '</span>' +
+      '<strong class="buda-pulse-card__name">' + escapeHtml(name) + '</strong>' +
+      '<span class="buda-pulse-card__price-line"><b>' + priceText + '</b>' + oldPrice + '</span>' +
+      '</span>' +
+      '</button>';
+  }
+
+  function campaignTile(campaign, modifier, fallbackTitle, fallbackSubtitle) {
+    var title = campaign && campaign.title ? campaign.title : fallbackTitle;
+    var subtitle = campaign && campaign.subtitle ? campaign.subtitle : fallbackSubtitle;
+    var imageAlt = campaign && (campaign.image_alt || campaign.alt || campaign.title || campaign.subtitle);
+    var hasImage = campaign && campaign.image_url && isTechCampaign(campaign) && imageAlt;
+    var className = "buda-pulse-campaign buda-pulse-campaign--" + modifier + (hasImage ? " has-image" : "");
+    var image = hasImage
+      ? '<img class="buda-pulse-campaign__image" src="' + escapeHtml(getImagePathRaw(campaign.image_url)) + '" alt="' + escapeHtml(imageAlt) + '" loading="lazy" onerror="this.closest(\'.buda-pulse-campaign\').classList.add(\'is-art-only\')">'
+      : "";
+    var content = '<span class="buda-pulse-campaign__signal" aria-hidden="true">BUDO//Q</span>' + image +
+      '<span class="buda-pulse-campaign__wash" aria-hidden="true"></span>' +
+      '<span class="buda-pulse-campaign__copy"><strong>' + escapeHtml(title) + '</strong><small>' + escapeHtml(subtitle) + '</small></span>';
+    var url = campaign && campaign.link_url && campaign.link_url !== "#" ? campaign.link_url : "";
+    if (url) {
+      return '<a class="' + className + '" href="' + escapeHtml(url) + '" aria-label="استكشف ' + escapeHtml(title) + '">' + content + '</a>';
+    }
+    return '<aside class="' + className + '" aria-label="' + escapeHtml(title) + '">' + content + '</aside>';
+  }
+
+  var techPool = pool.filter(isTechProduct);
+  var col1 = selectedProducts(
+    HOME_CONFIG._megaCol1Ids,
+    cfg.col1_mode || "manual",
+    shuffleProducts(techPool).slice(0, 8)
+  ).filter(isTechProduct);
+  var col2 = selectedProducts(
+    HOME_CONFIG._megaCol2Ids,
+    cfg.col2_mode || "auto",
+    techPool.slice(0, 8)
+  ).filter(isTechProduct);
+  var stream = uniqueProducts([].concat(col1, col2, techPool));
+  // Keep the opening grid scan-friendly, then keep every remaining configured
+  // product in the second lane instead of silently dropping it after a handful.
+  var mainItems = stream.slice(0, 12);
+  var motionItems = stream.slice(12);
+  var campaigns = Array.isArray(HOME_CONFIG._megaBanners) ? HOME_CONFIG._megaBanners : [];
+  var techCampaigns = campaigns.filter(isTechCampaign);
+  var leadCampaign = techCampaigns[0] || null;
+  var flowCampaign = techCampaigns[1] || null;
+  var categories = [];
+  stream.forEach(function (product) {
+    var category = productCategory(product);
+    if (category && categories.indexOf(category) === -1 && categories.length < 5) categories.push(category);
   });
-  html +=
-    '    </div></div>' +
-    '  <div class="buda-mega-col buda-mega-col-2">' +
-    '    <h3 class="buda-mega-col-title"><span class="material-icons-outlined">bolt</span> عروض خاطفة</h3>' +
-    '    <div class="buda-mega-grid" id="buda-mega-grid-2">';
-  col2Items.forEach(function (p) {
-    var rp = resolvePrice(p);
-    var img = getImage(p);
-    html +=
-      '<div class="buda-mega-product" data-view-product="' + String(p.id) + '">' +
-      (rp.hasDiscount ? '<span class="buda-mega-stamp">-' + rp.discountPercent + '%</span>' : '') +
-      '<div class="buda-mega-product-img-wrap"><div class="buda-pulse-dot" data-pulse-dot="' + String(p.id) + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img class="buda-mega-product-img" src="' + img + '" alt="' + escapeHtml(p.name || '') + '" loading="lazy" onerror="this.style.display=\'none\'" /></div>' +
-      '<div class="buda-mega-product-info">' +
-      '<p class="buda-mega-product-name">' + escapeHtml((p.name || '').slice(0, 25)) + '</p>' +
-      '<span class="buda-mega-product-price">' + formatMoney(rp.finalPrice) + '</span>' +
-      (rp.hasDiscount ? '<span class="buda-mega-product-old">' + formatMoney(rp.originalPrice) + '</span>' : '') +
-      (rp.hasDiscount ? '<span class="buda-mega-product-discount">-' + rp.discountPercent + '%</span>' : '') +
-      '</div></div>';
+
+  var html = '<section class="buda-mega-offers buda-pulse-deck hm-fade" aria-labelledby="buda-pulse-title">' +
+    '<div class="buda-pulse-deck__ambient" aria-hidden="true"></div>' +
+    '<header class="buda-pulse-deck__header">' +
+    '<div><p class="buda-pulse-deck__eyebrow">BUDOKYO / DISCOVERY MODE</p>' +
+    '<h2 id="buda-pulse-title">مسار التقنية الذي يشبهك</h2>' +
+    '<p>الأكثر مبيعاً وعروض خاطفة وتوفيرات مرتبة في رحلة واحدة.</p></div>' +
+    '<a class="buda-pulse-deck__all" href="products.html" aria-label="عرض كل المنتجات">كل المنتجات <span aria-hidden="true">←</span></a>' +
+    '</header>' +
+    '<div class="buda-pulse-deck__lead-row">' +
+    campaignTile(leadCampaign, "lead", "اختر جهازك بإشارة أوضح", "منتجات أكثر، بطاقات أقل ازدحاماً.") +
+    '<aside class="buda-pulse-manifesto" aria-label="وعد Budokyo للتسوق الذكي">' +
+    '<span class="buda-pulse-manifesto__count" aria-hidden="true">' + String(stream.length).padStart(2, "0") + '</span>' +
+    '<div><span>إشارة اليوم</span><strong>خيارات كثيرة، نظرة أسرع.</strong><p>افتح ما يلفت انتباهك واترك الباقي للمسار.</p></div>' +
+    '</aside></div>' +
+    '<div class="buda-pulse-deck__section-head">' +
+    '<div><span>01 / الأكثر مبيعاً</span><h3>نقطة البداية</h3></div>' +
+    '<p>بطاقات أصغر لتقارن اختيارات أكثر من دون تمرير لا ينتهي.</p>' +
+    '</div><div class="buda-pulse-grid">';
+
+  mainItems.forEach(function (product, index) {
+    html += productCard(product, index, "main");
+    // Let a complete first desktop row stay product-first. Campaigns then
+    // punctuate the scan instead of consuming the opening choices.
+    if (index === 5) {
+      html += campaignTile(null, "flash", "عروض خاطفة", "التقط الإشارة المناسبة عندما تظهر.");
+    }
+    if (index === 7) {
+      html += campaignTile(flowCampaign, "flow", "كوبونات التوفير", "العروض المميزة تتخلل طريقك، لا تقطعه.");
+    }
   });
-  // Col 3: banners from Supabase or defaults
-  var banners = HOME_CONFIG._megaBanners && HOME_CONFIG._megaBanners.length ? HOME_CONFIG._megaBanners : [
-    { image_url: '../assets/images/Home/ar_mb_eg-sfu-01_(14).1782231635.9679332_20260701054344.png', link_url: 'products.html?category=electronics', title: 'إلكترونيات', subtitle: 'خصم يصل إلى 50%' },
-    { image_url: '../assets/images/Home/ar_mb_eg-sfu-01.1782196424.5733478_20260701065112.png', link_url: 'products.html?category=beauty-and-care', title: 'عروض التجميل', subtitle: 'تسوق الآن' }
-  ];
-  html +=
-    '    </div></div>' +
-    '  <div class="buda-mega-col buda-mega-col-3">' +
-    '    <h3 class="buda-mega-col-title"><span class="material-icons-outlined">confirmation_number</span> كوبونات التوفير</h3>' +
-    '    <div class="buda-mega-banners">';
-  banners.forEach(function (b) {
-    html +=
-      '      <a class="buda-mega-banner buda-coupon" href="' + escapeHtml(b.link_url || '#') + '">' +
-      '        <span class="buda-coupon-tag">وفّر أكثر</span>' +
-      '        <div class="hm-banner-img"><div class="buda-pulse-dot"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div><img src="' + getImagePathRaw(b.image_url) + '" alt="" loading="lazy" onerror="this.closest(\'.buda-mega-banner\').style.display=\'none\'" /></div>' +
-      '        <div class="buda-mega-banner-overlay"><strong>' + escapeHtml(b.title || '') + '</strong><span>' + escapeHtml(b.subtitle || '') + '</span></div>' +
-      '      </a>';
-  });
-  html +=
-    '    </div>' +
-    '  </div></div>';
-  var temp = document.createElement('div');
+  if (!mainItems.length) {
+    html += '<aside class="buda-pulse-empty" aria-label="تحديثات تقنية قادمة">' +
+      '<span>TECH SIGNAL / STANDBY</span><strong>نرتب الإشارات التقنية التالية الآن.</strong>' +
+      '<p>تابع العروض المضيئة هنا عند وصول اختيارات التقنية المناسبة.</p></aside>';
+  }
+  html += '</div>';
+
+  if (motionItems.length) {
+    html += '<section class="buda-pulse-motion" aria-labelledby="buda-pulse-motion-title">' +
+      '<div class="buda-pulse-motion__header"><div><span>02 / عروض في حركة</span><h3 id="buda-pulse-motion-title">المسار مستمر</h3></div>' +
+      '<p>دفعة أخرى من المنتجات لتبقى المقارنة سهلة وسريعة.</p></div>' +
+      '<div class="buda-pulse-motion__rail">';
+    motionItems.forEach(function (product, index) {
+      html += productCard(product, index + mainItems.length, "motion");
+    });
+    html += '</div></section>';
+  }
+
+  if (categories.length) {
+    html += '<footer class="buda-pulse-deck__footer"><span>تحرك حسب الإشارة</span><div class="buda-pulse-chip-list">';
+    categories.forEach(function (category) {
+      html += '<span class="buda-pulse-chip">' + escapeHtml(category) + '</span>';
+    });
+    html += '</div></footer>';
+  }
+
+  html += '</section>';
+  var temp = document.createElement("div");
   temp.innerHTML = html;
   var el = temp.firstElementChild;
-  if (!HM.contentEl) return null;
   HM.contentEl.appendChild(el);
   attachProductCardEvents(el);
   return el;
@@ -4050,9 +4081,6 @@ HM.init = async function () {
   HM.taagerOnly = HM.allProducts.filter(function (p) {
     return p.source === "taager";
   });
-  HM.jumiaOnly = HM.allProducts.filter(function (p) {
-    return p.source === "jumia" && p.external_url;
-  });
 
   if (skeletonEl) {
     await hmRenderProductSkeleton(skeletonEl);
@@ -4097,9 +4125,6 @@ HM.init = async function () {
     HM.taagerOnly = HM.allProducts.filter(function (p) {
       return p.source === "taager";
     });
-    HM.jumiaOnly = HM.allProducts.filter(function (p) {
-      return p.source === "jumia" && p.external_url;
-    });
     HM.contentEl.innerHTML = "";
     HM.renderAll();
     renderSummerSection();
@@ -4115,9 +4140,6 @@ HM.init = async function () {
     HM.allProducts = normalizeProducts(source);
     HM.taagerOnly = HM.allProducts.filter(function (p) {
       return p.source === "taager";
-    });
-    HM.jumiaOnly = HM.allProducts.filter(function (p) {
-      return p.source === "jumia" && p.external_url;
     });
     HM.contentEl.innerHTML = "";
     HM.renderAll();
@@ -4137,9 +4159,6 @@ HM.init = async function () {
     HM.allProducts = normalizeProducts(source);
     HM.taagerOnly = HM.allProducts.filter(function (p) {
       return p.source === "taager";
-    });
-    HM.jumiaOnly = HM.allProducts.filter(function (p) {
-      return p.source === "jumia" && p.external_url;
     });
     HM.contentEl.innerHTML = "";
     HM.renderAll();
