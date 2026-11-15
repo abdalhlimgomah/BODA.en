@@ -1,0 +1,182 @@
+/* ===== Product Review-All page (عرض الكل) ===== */
+
+.pra-page {
+  max-width: 860px;
+  padding-top: 14px;
+  padding-bottom: 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.pra-crumb {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  color: var(--pdp-muted);
+  padding: 0 4px;
+}
+.pra-crumb a {
+  color: var(--pdp-blue);
+  text-decoration: none;
+}
+.pra-crumb span {
+  color: var(--pdp-muted);
+}
+
+.pra-status {
+  display: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #f8f9fb;
+  color: var(--pdp-muted);
+  font-size: 0.85rem;
+  text-align: center;
+}
+.pra-status.show {
+  display: block;
+}
+.pra-status.error {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.pra-card {
+  background: #fff;
+  border: 1px solid var(--pdp-border);
+  border-radius: 16px;
+  padding: 16px;
+}
+
+/* ---- Product mini card ---- */
+#pra-product {
+  display: none;
+  align-items: center;
+  gap: 14px;
+}
+.pra-thumb {
+  flex: 0 0 auto;
+  width: 92px;
+  height: 92px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid var(--pdp-border);
+  background: #f8f9fb;
+  display: flex;
+}
+.pra-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.pra-product-info {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#pra-name {
+  margin: 0;
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--pdp-text);
+  line-height: 1.45;
+}
+.pra-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.pra-avg-stars,
+#pra-avg-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.pra-avg-num {
+  font-weight: 800;
+  color: var(--pdp-text);
+}
+.pra-avg-num.muted {
+  color: var(--pdp-muted);
+  font-weight: 600;
+}
+.pra-count {
+  color: var(--pdp-muted);
+  font-size: 0.82rem;
+}
+.pra-back-link {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--pdp-blue);
+  text-decoration: none;
+}
+
+/* ---- Analysis ---- */
+.pra-analysis {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.pra-analysis .pdp-review-summary-card {
+  margin: 0;
+}
+.pra-analysis-block {
+  display: none;
+  padding-top: 14px;
+  border-top: 1px dashed var(--pdp-border);
+}
+.pra-block-title {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--pdp-text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.pra-block-title .material-icons-outlined {
+  font-size: 18px;
+  color: var(--pdp-blue);
+}
+.pra-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 8px;
+}
+.pra-feature-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f8f9fb;
+  border: 1px solid var(--pdp-border);
+  font-size: 0.8rem;
+  color: var(--pdp-text);
+}
+.pra-feature-item .material-icons-outlined {
+  font-size: 16px;
+  color: #22c55e;
+}
+
+/* ---- Reviews ---- */
+.pra-reviews .pdp-review-list {
+  margin-top: 4px;
+}
+.pra-review-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.pra-review-controls .pdp-review-sort {
+  align-self: flex-end;
+}
+.pra-count-inline {
+  color: var(--pdp-muted);
+  font-size: 0.8rem;
+  font-weight: 600;
+}

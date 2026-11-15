@@ -1,0 +1,123 @@
+/* ============================================================
+   QtyTiers — خصم الكميات (تايجر) بمحاذاة منتقي المقاس
+   ============================================================ */
+
+.pdp-qty-tier-section {
+  margin-top: 0;
+  padding: 0;
+  background: none;
+  box-shadow: none;
+  border-radius: 0;
+}
+.pdp-qty-tier-section:not(:empty) {
+  display: block;
+}
+
+.pdp-qty-tier-header {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 12px;
+}
+.pdp-qty-tier-title {
+  font-size: 0.95rem;
+  font-weight: 900;
+  color: var(--pdp-ink);
+  margin: 0;
+}
+.pdp-qty-tier-sub {
+  font-size: 0.78rem;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+.pdp-qty-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+/* Chip: quantity + discount like the size picker */
+.pdp-qty-btn {
+  position: relative;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 76px;
+  min-height: 46px;
+  padding: 6px 14px;
+  border: 1px solid #c9ccd4;
+  border-radius: 8px;
+  background: #fff;
+  color: var(--pdp-text);
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease, background 0.15s ease;
+  user-select: none;
+  flex: none;
+}
+.pdp-qty-btn:hover {
+  border-color: #7c818c;
+}
+.pdp-qty-btn:active {
+  transform: scale(0.97);
+}
+.pdp-qty-btn-main {
+  font-size: 0.85rem;
+  font-weight: 800;
+  line-height: 1.25;
+}
+.pdp-qty-btn-sub {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #16a34a;
+  line-height: 1.25;
+}
+.pdp-qty-btn.is-selected {
+  border-color: var(--pdp-ink);
+  box-shadow: inset 0 0 0 1.5px var(--pdp-ink);
+  color: var(--pdp-ink);
+  font-weight: 900;
+}
+.pdp-qty-btn.is-selected .pdp-qty-btn-main {
+  font-weight: 900;
+}
+
+/* Summary strip under the chips */
+.pdp-qty-summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #f0fdf4;
+  border: 1px solid #d1fae5;
+}
+.pdp-qty-summary-total {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: #15803d;
+}
+.pdp-qty-summary-original {
+  font-size: 0.82rem;
+  color: #6b7280;
+  text-decoration: line-through;
+}
+.pdp-qty-summary-save {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #16a34a;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #dcfce7;
+}
+
+@media (max-width: 1199px) {
+  .pdp-qty-tier-section {
+    margin: 0 auto;
+    width: 100%;
+  }
+}

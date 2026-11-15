@@ -1,0 +1,262 @@
+﻿/* ===== Account Profile Card ===== */
+
+.profile-card-top {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profile-avatar-wrap {
+  flex-shrink: 0;
+}
+
+.profile-card-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.profile-edit-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: var(--noon-text);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.profile-edit-link:hover {
+  background: #e8e8e8;
+}
+
+.profile-edit-link .material-icons-outlined {
+  font-size: 18px;
+}
+
+/* Progress bar */
+.profile-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.profile-progress-bar-track {
+  flex: 1;
+  max-width: 160px;
+  height: 6px;
+  border-radius: 3px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.profile-progress-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  background: var(--color-primary-500);
+  transition: width 0.4s ease;
+  width: 0%;
+}
+
+.profile-progress-label {
+  font-size: 0.72rem;
+  color: #888;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+/* ===== Edit Account Page ===== */
+
+.edit-account-page {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.edit-account-page .page-title {
+  font-size: 1.1rem;
+  font-weight: 900;
+  margin: 0 0 4px;
+}
+
+.edit-account-page .page-subtitle {
+  font-size: 0.82rem;
+  color: #888;
+  margin: 0 0 20px;
+}
+
+.edit-section {
+  margin-bottom: 20px;
+}
+
+.edit-section-title {
+  font-size: 0.9rem;
+  font-weight: 800;
+  margin: 0 0 12px;
+  color: var(--noon-text);
+}
+
+.edit-field {
+  margin-bottom: 14px;
+}
+
+.edit-field label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #666;
+  margin-bottom: 4px;
+}
+
+.edit-field .field-note {
+  font-size: 0.72rem;
+  color: #999;
+  margin-top: 4px;
+}
+
+.edit-field input.noon-input[readonly] {
+  background: #f9f9f9;
+  color: #999;
+  cursor: default;
+}
+
+.edit-field .add-phone-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  border: 1px dashed #ccc;
+  border-radius: 8px;
+  background: none;
+  color: var(--noon-text);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.edit-field .add-phone-btn:hover {
+  border-color: var(--color-primary-500);
+  background: var(--color-primary-50);
+}
+
+.birthday-selects {
+  display: flex;
+  gap: 8px;
+}
+
+.birthday-selects select {
+  flex: 1;
+  padding: 10px 8px;
+  border: 1px solid var(--noon-border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: #fff;
+  color: var(--noon-text);
+  cursor: pointer;
+}
+
+.birthday-display {
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 6px;
+}
+
+.gender-options {
+  display: flex;
+  gap: 12px;
+}
+
+.gender-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border: 1px solid var(--noon-border);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.gender-option:hover {
+  border-color: var(--color-primary-500);
+}
+
+.gender-option.active {
+  border-color: var(--color-primary-500);
+  background: var(--color-primary-50);
+}
+
+.gender-option input[type="radio"] {
+  display: none;
+}
+
+.nationality-select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--noon-border);
+  border-radius: 8px;
+  font-size: 0.85rem;
+  background: #fff;
+  color: var(--noon-text);
+  cursor: pointer;
+}
+
+.edit-submit-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  background: var(--color-primary-600);
+  color: #000000;
+  font-size: 0.95rem;
+  font-weight: 200;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  margin-top: 24px;
+}
+
+.edit-submit-btn:hover {
+  opacity: 0.85;
+}
+
+.edit-submit-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+/* Language switcher in header */
+.lang-switcher {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 8px;
+  padding: 5px 10px;
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-family: inherit;
+  transition: background 0.2s;
+  margin-inline-start: 8px;
+}
+.lang-switcher:hover {
+  background: rgba(255,255,255,0.2);
+}
+.lang-switcher .material-icons-outlined {
+  font-size: 16px;
+}
+.lang-switcher .lang-label {
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+}
+
