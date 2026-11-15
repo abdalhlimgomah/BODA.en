@@ -58,22 +58,6 @@
         }
         return local;
       }
-      // Direct table lookup first: shared links must resolve even when the
-      // product is not in the latest client slice or the edge function is down.
-      try {
-        var client = global.supabaseClient;
-        if (client && typeof client.from === "function") {
-          var direct = await client.from("taager_products").select("*").eq("id", String(id)).limit(1);
-          if (!direct.error && direct.data && direct.data.length) {
-            var record = direct.data[0];
-            if (utils().productMatchesMarket && !utils().productMatchesMarket(record, requestedMarket)) {
-              return null;
-            }
-            if (global.addProductToStore) global.addProductToStore(record);
-            return record;
-          }
-        }
-      } catch (e) { console.warn("[PDP] taager_products direct lookup failed", e); }
       try {
         var base = global.TAAGER_EDGE_FUNCTION_URL || "";
         if (base) {
