@@ -21,6 +21,7 @@ PL.state = {
     rating: "0",
     discount: "0",
     availOnly: false,
+    source: "",
   },
   activeFilterCount: 0,
 };
@@ -68,6 +69,7 @@ PL.readUrlParams = function () {
   f.rating = params.get("rating") || "0";
   f.discount = params.get("discount") || "0";
   f.availOnly = params.get("availOnly") === "1";
+  f.source = params.get("source") || "";
   var page = parseInt(params.get("page"), 10);
   PL.state.currentPage = page > 0 ? page : 1;
   var sort = params.get("sort");
@@ -98,6 +100,7 @@ PL.syncUrl = function () {
   if (f.rating !== "0") params.set("rating", f.rating);
   if (f.discount !== "0") params.set("discount", f.discount);
   if (f.availOnly) params.set("availOnly", "1");
+  if (f.source) params.set("source", f.source);
   if (PL.state.currentPage > 1) params.set("page", String(PL.state.currentPage));
   if (PL.state.sortBy !== "default") params.set("sort", PL.state.sortBy);
   if (PL.state.viewMode !== "grid") params.set("view", PL.state.viewMode);
@@ -174,6 +177,9 @@ PL.matchProduct = function (p) {
   if (f.availOnly) {
     if (p.stock === 0 || p.quantity === 0 || p.is_available === false) return false;
   }
+
+  // Provider (jumia | taager)
+  if (f.source && String(p.source || "taager") !== f.source) return false;
 
   return true;
 };
@@ -548,6 +554,7 @@ PL.bindEvents = function () {
       rating: "0",
       discount: "0",
       availOnly: false,
+      source: "",
     };
     PL.state.sortBy = "default";
     PL.state.currentPage = 1;
@@ -673,47 +680,67 @@ PL.closeMobileFilter = function () {
 
 // ========== FETCH PRODUCTS ==========
 PL.fetchProducts = async function () {
-  var source;
+  var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code || "EG";
+  var source = null;
 
-  // Try Supabase first
-  if (typeof getSupabaseClient === "function") {
-    var client = getSupabaseClient();
-    if (client) {
-      try {
-        var result = await client.from("products").select("*").order("created_at", { ascending: false });
-        if (!result.error && Array.isArray(result.data)) {
-          source = result.data.filter(function (r) { return r && typeof r.id !== "undefined"; });
-          if (window.addProductToStore) source.forEach(function (p) { window.addProductToStore(p); });
+  // 1. Full catalog from our serverless API. This is the path that replaces
+  //    the old 200-row client slice, so every category actually has products.
+  try {
+    var response = await fetch(
+      "/api/catalog?country=" + encodeURIComponent(currentCountry) + "&limit=8000",
+      { headers: { Accept: "application/json" } }
+    );
+    if (response.ok) {
+      var rows = await response.json();
+      if (Array.isArray(rows) && rows.length) {
+        source = rows;
+        if (window.addProductToStore) {
+          rows.forEach(function (p) { window.addProductToStore(p); });
         }
+      }
+    }
+  } catch (e) {
+    console.warn("Catalog API error:", e);
+  }
+
+  // 2. Fallback: direct Supabase/local store (kept for offline and old data).
+  if (!source || !source.length) {
+    if (typeof getSupabaseClient === "function") {
+      var client = getSupabaseClient();
+      if (client) {
+        try {
+          var result = await client.from("products").select("*").order("created_at", { ascending: false });
+          if (!result.error && Array.isArray(result.data)) {
+            source = result.data.filter(function (r) { return r && typeof r.id !== "undefined"; });
+            if (window.addProductToStore) source.forEach(function (p) { window.addProductToStore(p); });
+          }
+        } catch (e) {
+          console.warn("Supabase fetch error:", e);
+        }
+      }
+    }
+
+    if (!source || !source.length) {
+      source = window.BudaStore && typeof window.BudaStore.getAllProducts === "function"
+        ? Object.values(window.BudaStore.getAllProducts()).filter(Boolean)
+        : [];
+    }
+
+    if (window.TaagerIntegration) {
+      try {
+        var cc = (window.TaagerIntegration.getSelectedCountry() || {}).code;
+        var tp = await window.TaagerIntegration.fetchTaagerProducts(cc);
+        window.TaagerIntegration.mergeTaagerIntoStore(tp);
+        source = source.concat(tp);
+        source = window.TaagerIntegration.filterByCountry(source, cc);
       } catch (e) {
-        console.warn("Supabase fetch error:", e);
+        console.warn("Taager error:", e);
       }
     }
   }
 
-  // Fallback to local store
-  if (!source || !source.length) {
-    source = window.BudaStore && typeof window.BudaStore.getAllProducts === "function"
-      ? Object.values(window.BudaStore.getAllProducts()).filter(Boolean)
-      : [];
-  }
-
-  // Taager integration
-  if (window.TaagerIntegration) {
-    try {
-      var cc = (window.TaagerIntegration.getSelectedCountry() || {}).code;
-      var tp = await window.TaagerIntegration.fetchTaagerProducts(cc);
-      window.TaagerIntegration.mergeTaagerIntoStore(tp);
-      source = source.concat(tp);
-      // Strict: no "keep the unfiltered list when nothing matched" fallback.
-      source = window.TaagerIntegration.filterByCountry(source, cc);
-    } catch (e) {
-      console.warn("Taager error:", e);
-    }
-  }
-
-  // Filter by current country
-  var currentCountry = (window.TaagerIntegration?.getSelectedCountry?.() || {}).code;
+  // Filter by current country. `/api/catalog` already scopes server-side, but
+  // this also protects the fallback path and products restored from cache.
   source = (source || []).filter(function (p) {
     if (window.TaagerIntegration && typeof window.TaagerIntegration.matchesCountry === "function") {
       return window.TaagerIntegration.matchesCountry(p, currentCountry);

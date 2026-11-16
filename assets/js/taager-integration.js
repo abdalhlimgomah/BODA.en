@@ -1074,6 +1074,7 @@
     fetchTaagerProducts: fetchTaagerProducts,
     fetchTaagerProductDetail: fetchTaagerProductDetail,
     normalizeTaagerProduct: normalizeTaagerProduct,
+    normalizeStoredTaagerProduct: normalizeStoredTaagerProduct,
     filterByCountry: filterByCountry,
     matchesCountry: matchesCountry,
     filterProductsByCountry: filterProductsByCountry,
