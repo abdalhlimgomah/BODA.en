@@ -11,69 +11,6 @@ function normalizeTerm(value) {
   return String(value || "").trim();
 }
 
-// ---------------------------------------------------------------
-// Server-side search
-// ---------------------------------------------------------------
-// The catalog holds thousands of products. Loading it in the browser was the
-// reason most products (and most queries) never showed up, so search now asks
-// the server and only falls back to the local index when the request fails.
-
-function getSearchCountry() {
-  try {
-    if (window.TaagerIntegration && typeof window.TaagerIntegration.getSelectedCountry === "function") {
-      var country = window.TaagerIntegration.getSelectedCountry();
-      if (country && country.code) return String(country.code).toUpperCase();
-    }
-  } catch (_e) {}
-  return "";
-}
-
-var __searchAbort = null;
-var __suggestAbort = null;
-var __searchSeq = 0;
-
-async function fetchServerSearch(term, options) {
-  options = options || {};
-  var params = new URLSearchParams();
-  params.set("q", term);
-  var country = getSearchCountry();
-  if (country) params.set("country", country);
-  if (options.mode) params.set("mode", options.mode);
-  if (options.limit) params.set("limit", String(options.limit));
-
-  var isSuggest = options.mode === "suggest";
-  if (isSuggest) {
-    if (__suggestAbort) __suggestAbort.abort();
-  } else if (__searchAbort) {
-    __searchAbort.abort();
-  }
-
-  var controller = new AbortController();
-  if (isSuggest) __suggestAbort = controller;
-  else __searchAbort = controller;
-
-  var timer = setTimeout(function () { controller.abort(); }, 9000);
-  try {
-    var response = await fetch("/api/search?" + params.toString(), {
-      signal: controller.signal,
-      headers: { Accept: "application/json" },
-    });
-    if (!response.ok) return null;
-    var data = await response.json();
-    if (!data || data.error) return null;
-    return data;
-  } catch (_err) {
-    return null;
-  } finally {
-    clearTimeout(timer);
-    if (isSuggest) {
-      if (__suggestAbort === controller) __suggestAbort = null;
-    } else if (__searchAbort === controller) {
-      __searchAbort = null;
-    }
-  }
-}
-
 function escapeHtml(value) {
   return String(value ?? "")
     .replaceAll("&", "&amp;")
@@ -146,8 +83,6 @@ function renderSearchHistory() {
     item.addEventListener("click", () => {
       const term = item.getAttribute("data-term") || "";
       inputEl.value = term;
-      const desktopInput = document.getElementById("buda-header-search-input");
-      if (desktopInput) desktopInput.value = term;
       performSearch(term);
     });
   });
@@ -262,13 +197,22 @@ async function fetchSuggestions(term) {
 
 // Flag to suppress suggestions after Enter/search is triggered
 let _suppressSuggestions = false;
-let __suggestTimer = null;
-let __suggestSeq = 0;
 
-function paintSuggestions(suggestions) {
+async function renderSuggestions(term) {
   const suggestionsEl = document.getElementById("suggestions");
   const inputEl = document.getElementById("search-input");
   if (!suggestionsEl || !inputEl) return;
+
+  if (!term) {
+    suggestionsEl.innerHTML = "";
+    suggestionsEl.classList.add("hidden");
+    return;
+  }
+
+  const suggestions = await fetchSuggestions(term);
+
+  // If Enter was pressed while we were fetching, don't show the dropdown
+  if (_suppressSuggestions) return;
 
   if (!suggestions.length) {
     suggestionsEl.innerHTML = "";
@@ -295,58 +239,10 @@ function paintSuggestions(suggestions) {
     item.addEventListener("click", () => {
       const value = item.getAttribute("data-value") || "";
       inputEl.value = value;
-      const desktopInput = document.getElementById("buda-header-search-input");
-      if (desktopInput) desktopInput.value = value;
       suggestionsEl.classList.add("hidden");
       performSearch(value);
     });
   });
-}
-
-async function renderSuggestions(term) {
-  const suggestionsEl = document.getElementById("suggestions");
-  const inputEl = document.getElementById("search-input");
-  if (!suggestionsEl || !inputEl) return;
-
-  if (!term) {
-    clearTimeout(__suggestTimer);
-    suggestionsEl.innerHTML = "";
-    suggestionsEl.classList.add("hidden");
-    return;
-  }
-
-  const seq = ++__suggestSeq;
-
-  // Local keywords paint instantly; the server adds full-catalog matches.
-  let local = [];
-  try {
-    local = await fetchSuggestions(term);
-  } catch (_e) {
-    local = [];
-  }
-
-  if (seq !== __suggestSeq || _suppressSuggestions) return;
-  paintSuggestions(local);
-
-  clearTimeout(__suggestTimer);
-  __suggestTimer = setTimeout(async () => {
-    const data = await fetchServerSearch(term, { mode: "suggest" });
-    if (seq !== __suggestSeq || _suppressSuggestions) return;
-
-    const remote = data && Array.isArray(data.suggestions) ? data.suggestions : [];
-    if (!remote.length) return;
-
-    const merged = [];
-    const seen = new Set();
-    remote.concat(local).forEach((value) => {
-      const key = String(value || "").trim();
-      if (!key || seen.has(key)) return;
-      seen.add(key);
-      merged.push(key);
-    });
-
-    paintSuggestions(merged.slice(0, 8));
-  }, 180);
 }
 
 // Variables for search results, filters and pagination
@@ -360,7 +256,6 @@ const _PRODUCTS_PER_PAGE = 20;
 let _activeCategoryFilter = "الكل";
 let _activeBrandFilter = "الكل";
 let _activePriceFilter = null;
-let _currentCategoryFilter = "الكل";
 
 function renderSidebarFilters() {
   const catContainer = document.getElementById("category-filters");
@@ -1002,15 +897,6 @@ window.renderProductsInContainer = function(container, products) {
   applyCategoryFilterAndRender();
 };
 
-function showEmptySearchState(resultsEl, layoutEl) {
-  resultsEl.innerHTML = '<div class="search-empty-state">لا توجد نتائج مطابقة لهذا البحث.</div>';
-  const filterContainer = document.getElementById("search-filter-container");
-  if (filterContainer) filterContainer.classList.add("hidden");
-  const paginationEl = document.getElementById("pagination");
-  if (paginationEl) paginationEl.innerHTML = "";
-  if (layoutEl) layoutEl.classList.remove('results-visible');
-}
-
 async function performSearch(query) {
   const resultsEl = document.getElementById("search-results");
   if (!resultsEl) return;
@@ -1034,71 +920,47 @@ async function performSearch(query) {
   saveSearchHistory(term);
   renderSearchHistory();
 
-  const seq = ++__searchSeq;
-  resultsEl.innerHTML = "";
-  showSearchSkeleton();
-
-  // Server first: it searches the full catalog, not the small client cache.
-  const server = await fetchServerSearch(term, { limit: 500 });
-  if (seq !== __searchSeq) return;
-
-  let usedServer = false;
-  if (server && Array.isArray(server.items)) {
-    usedServer = true;
-    _currentSearchResults = server.items;
+  if (!_allSearchProducts.length) {
+    showSearchSkeleton();
+    await loadAllSearchProducts();
   }
 
-  if (!usedServer) {
-    if (!_allSearchProducts.length) await loadAllSearchProducts();
-    if (seq !== __searchSeq) return;
-    _currentSearchResults = searchProductsLocal(term);
-  }
-
+  // Initial search (instant, uses dictionary + morphological)
+  _currentSearchResults = searchProductsLocal(term);
   _currentCategoryFilter = "الكل";
   _currentPage = 1;
 
-  // The server may miss a product whose details only exist in the local
-  // index; give the client matcher one chance before declaring no results.
-  if (usedServer && !_currentSearchResults.length) {
-    if (!_allSearchProducts.length) await loadAllSearchProducts();
-    if (seq !== __searchSeq) return;
-    const local = searchProductsLocal(term);
-    if (local.length) {
-      _currentSearchResults = local;
-      usedServer = false;
+  // Background translation via API for better results (non-blocking)
+  var apiWords = normalizeArabicText(term).split(" ").filter(Boolean);
+  var _searchTermAtFetch = term;
+  fetchTranslations(apiWords).then(function() {
+    if (_searchTermAtFetch !== normalizeTerm(document.getElementById("search-input")?.value || document.getElementById("buda-header-search-input")?.value || "")) return;
+    var enriched = searchProductsLocal(term);
+    if (enriched.length > (_currentSearchResults || []).length) {
+      _currentSearchResults = enriched;
+      _currentCategoryFilter = "الكل";
+      _currentPage = 1;
+      hideSearchSkeleton();
+      renderSidebarFilters();
+      applyAllFiltersAndRender();
+      if (layoutEl) layoutEl.classList.add('results-visible');
     }
-  }
+  });
 
-  if (_currentSearchResults.length) {
+  if (!_currentSearchResults.length) {
     hideSearchSkeleton();
-    renderSidebarFilters();
-    applyAllFiltersAndRender();
-    if (layoutEl) layoutEl.classList.add('results-visible');
-
-    if (usedServer) return;
-
-    // Local fallback: background translation may still widen the match.
-    var apiWords = normalizeArabicText(term).split(" ").filter(Boolean);
-    var _searchTermAtFetch = term;
-    fetchTranslations(apiWords).then(function () {
-      if (seq !== __searchSeq) return;
-      if (_searchTermAtFetch !== normalizeTerm(document.getElementById("search-input")?.value || document.getElementById("buda-header-search-input")?.value || "")) return;
-      var enriched = searchProductsLocal(term);
-      if (enriched.length > (_currentSearchResults || []).length) {
-        _currentSearchResults = enriched;
-        _currentCategoryFilter = "الكل";
-        _currentPage = 1;
-        hideSearchSkeleton();
-        renderSidebarFilters();
-        applyAllFiltersAndRender();
-        if (layoutEl) layoutEl.classList.add('results-visible');
-      }
-    });
+    resultsEl.innerHTML = '<div class="search-empty-state">لا توجد نتائج مطابقة لهذا البحث.</div>';
+    const filterContainer = document.getElementById("search-filter-container");
+    if (filterContainer) filterContainer.classList.add("hidden");
+    const paginationEl = document.getElementById("pagination");
+    if (paginationEl) paginationEl.innerHTML = "";
+    if (layoutEl) layoutEl.classList.remove('results-visible');
     return;
   }
 
-  hideSearchSkeleton();
-  showEmptySearchState(resultsEl, layoutEl);
+  renderSidebarFilters();
+  applyAllFiltersAndRender();
+  if (layoutEl) layoutEl.classList.add('results-visible');
 }
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -1141,16 +1003,13 @@ document.addEventListener("DOMContentLoaded", () => {
   attachSearchKeydown(mobileInput);
   attachSearchKeydown(desktopInput);
 
-  // Build the offline fallback index in idle time. Server search works without
-  // it, so it must not compete with the first query for bandwidth.
-  var idleLoad = window.requestIdleCallback || function (cb) { return setTimeout(cb, 2500); };
-  idleLoad(function () { loadAllSearchProducts(); });
+  // Load search index immediately
+  loadAllSearchProducts();
 
   // Check for ?q= query param from search redirect with Enter key
   var urlParams = new URLSearchParams(window.location.search);
   var queryFromUrl = normalizeTerm(urlParams.get("q") || "");
-  if (mobileInput) mobileInput.value = queryFromUrl;
-  if (desktopInput) desktopInput.value = queryFromUrl;
+  inputEl.value = queryFromUrl ? queryFromUrl : "";
   localStorage.removeItem("lastSearch");
 
   renderSearchHistory();

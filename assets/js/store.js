@@ -363,7 +363,12 @@ function resolveRatingsSource(product = {}) {
     .trim()
     .toLowerCase();
 
-  if (source === "ratings" || source === "supabase_ratings" || source === "supabase") {
+  if (
+    source === "ratings" ||
+    source === "supabase_ratings" ||
+    source === "supabase" ||
+    source === "jumia"
+  ) {
     return "ratings";
   }
 

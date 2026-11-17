@@ -195,14 +195,6 @@ var HOME_CONFIG = {
     { type: "categories" },
     { type: "features" },
     { type: "mega-offers", id: "hm-mega-offers" },
-    {
-      type: "jumia",
-      id: "hm-jumia",
-      title: "منتجات جوميا",
-      subtitle: "توصيل لكل محافظات مصر",
-      sortKey: "discount",
-      viewAll: "product-listing.html?source=jumia",
-    },
     { type: "banner", index: 1 },
     {
       type: "shein-trend",
@@ -577,23 +569,6 @@ function getGalleryImages(product) {
 }
 function resolvePrice(product) {
   var supplierPrice = Number(product?.price) || 0;
-  // Jumia items are sold on Jumia at the listed EGP price. BudoQ's pricing
-  // tiers and fake-original-price rules must never rewrite an affiliate price.
-  if (product && product.source === "jumia") {
-    var jumiaPrice = supplierPrice;
-    var jumiaOriginal = Number(
-      product.original_price || product.originalPrice || 0
-    );
-    var jumiaHasDiscount = jumiaOriginal > jumiaPrice;
-    return {
-      finalPrice: jumiaPrice,
-      originalPrice: jumiaHasDiscount ? jumiaOriginal : jumiaPrice,
-      hasDiscount: jumiaHasDiscount,
-      discountPercent: jumiaHasDiscount
-        ? Math.round(((jumiaOriginal - jumiaPrice) / jumiaOriginal) * 100)
-        : 0,
-    };
-  }
   var sellingPrice = supplierPrice;
   if (window.PricingEngine && window.PricingEngine.tiersLoaded) {
     sellingPrice = window.PricingEngine.calculate(supplierPrice);
@@ -1117,26 +1092,6 @@ function invalidateHomeProductsSourceCache() {
   homeSourceCacheCountry = "";
   homeSourceCacheTimestamp = 0;
 }
-
-// The real external catalog lives behind /api/catalog. The legacy
-// /api/products route reads the empty `products` table, so home sections used
-// to fall back to a 200-row slice. Prefer the full, country-scoped catalog and
-// keep the legacy path only as a fallback.
-async function fetchHomeCatalog(countryCode) {
-  var code = String(countryCode || "").toUpperCase().trim();
-  var url = "/api/catalog?limit=8000";
-  if (code) url += "&country=" + encodeURIComponent(code);
-  try {
-    var response = await fetch(url, { headers: { Accept: "application/json" } });
-    if (!response.ok) return [];
-    var rows = await response.json();
-    return Array.isArray(rows) ? rows : [];
-  } catch (e) {
-    console.warn("home catalog API failed:", e);
-    return [];
-  }
-}
-
 async function getHomeSourceProducts(options) {
   var forceRefresh = Boolean(options?.forceRefresh);
   var now = Date.now();
@@ -1150,8 +1105,7 @@ async function getHomeSourceProducts(options) {
     now - homeSourceCacheTimestamp < HOME_PRODUCTS_SOURCE_CACHE_MS
   )
     return [].concat(homeSourceCache);
-  var products = await fetchHomeCatalog(country);
-  if (!products.length) products = await fetchSupabaseProducts("");
+  var products = await fetchSupabaseProducts("");
   if (!products.length) products = getLocalProducts();
   // Filter products by current country
   products = filterProductsByCountry(products, country);
@@ -1175,14 +1129,6 @@ async function getHomeSourceProducts(options) {
 // ========== REAL TRUST BADGES (same logic as PDP delivery-card) ==========
 function buildProductBadges(raw) {
   raw = raw || {};
-  if (raw.source === "jumia") {
-    return [
-      { icon: "local_shipping", label: "توصيل من جوميا" },
-      { icon: "payments", label: "الدفع عند الاستلام" },
-      { icon: "published_with_changes", label: "إرجاع حسب سياسة جوميا" },
-      { icon: "verified", label: "يُباع على جوميا" },
-    ];
-  }
   var ret = raw.return_allowed;
   var canReturn = ret === true || ret === "true" || ret === 1 || ret === "1";
   var declaredReturn = ret !== undefined && ret !== null && ret !== "";
@@ -1341,51 +1287,40 @@ function buildProductCard(product) {
     "'\" />";
   var dots = "",
     counter = "";
-  var isJumia = product.source === "jumia";
-  var sellerName = isJumia
-    ? "يُباع عبر جوميا"
-    : product.seller || product.brand || "";
+  var sellerName = product.seller || product.brand || "";
   var instMonths = Math.min(24, Math.max(3, Number(product.installment_months) || 3));
-  var isOfficial = !isJumia && (product.official_store || product.is_official || false);
-  var variantCount = isJumia ? 0 : getProductVariants(product).length;
-  var mediaTag =
-    '<button class="noon-product-media" data-view-product="' + id +
-      '" aria-label="عرض المنتج">' +
-      '<div class="buda-pulse-dot" data-pulse-dot="' + id + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div>' +
-      imgs +
-      (dots ? '<span class="noon-img-dots">' + dots + "</span>" : "") +
-      (counter) +
-      "</button>";
+  var isOfficial = product.official_store || product.is_official || false;
+  var variantCount = getProductVariants(product).length;
   return (
-    '<article class="noon-product-card' + (isJumia ? " noon-external-card" : "") + '">' +
+    '<article class="noon-product-card">' +
     '<div class="noon-product-media-wrap">' +
     (rp.hasDiscount && rp.discountPercent > 10
       ? '<span class="buda-badge">-' + rp.discountPercent + '%</span>'
       : "") +
-    (isJumia
-      ? '<span class="buda-badge-jumia">جوميا</span>'
-      : "") +
     (isOfficial
       ? '<span class="buda-badge-official">المتجر الرسمي</span>'
       : "") +
-    (isJumia
-      ? ""
-      : '<button class="icon-btn noon-wishlist-btn ' +
-        (isWish ? "is-active" : "") +
-        '" data-wishlist="' +
-        id +
-        '" aria-label="إضافة إلى المفضلة" aria-pressed="' +
-        (isWish ? "true" : "false") +
-        '">' +
-        '<span class="material-icons-outlined" style="font-size:18px;">' +
-        (isWish ? "favorite" : "favorite_border") +
-        "</span></button>") +
-    mediaTag +
-    (isJumia
-      ? ""
-      : '<button class="noon-add-square" data-add-to-cart="' +
-        id +
-        '" aria-label="إضافة إلى السلة">+</button>') +
+    '<button class="icon-btn noon-wishlist-btn ' +
+    (isWish ? "is-active" : "") +
+    '" data-wishlist="' +
+    id +
+    '" aria-label="إضافة إلى المفضلة" aria-pressed="' +
+    (isWish ? "true" : "false") +
+    '">' +
+    '<span class="material-icons-outlined" style="font-size:18px;">' +
+    (isWish ? "favorite" : "favorite_border") +
+    "</span></button>" +
+    '<button class="noon-product-media" data-view-product="' + id +
+    '" aria-label="عرض المنتج">' +
+    '<div class="buda-pulse-dot" data-pulse-dot="' + id + '"><div class="buda-pulse-dot-inner"><div class="buda-pulse-dot-circle"></div></div></div>' +
+    imgs +
+    (dots ? '<span class="noon-img-dots">' + dots + "</span>" : "") +
+    (counter) +
+    "</button>" +
+    "" +
+    '<button class="noon-add-square" data-add-to-cart="' +
+    id +
+    '" aria-label="إضافة إلى السلة">+</button>' +
     (variantCount > 1
       ? '<span class="noon-variants-badge" title="متوفر بأكثر من لون ونوع"><img src="https://f.nooncdn.com/s/app/com/noon/images/colorVariants.svg" alt="" width="18" height="18" loading="lazy" /><span class="noon-variants-count">' + variantCount + '</span></span>'
       : "") +
@@ -1414,14 +1349,11 @@ function buildProductCard(product) {
         "%</span></span>"
       : "") +
     "</div>" +
-    (isJumia
-      ? '<button type="button" class="noon-jumia-cta" data-view-product="' + id +
-        '"><span class="material-icons-outlined">visibility</span> عرض التفاصيل</button>'
-      : '<div class="noon-installment" data-months="' +
-        instMonths +
-        '"><span class="material-icons-outlined">bolt</span><span class="noon-install-text">' +
-        formatMoney(rp.finalPrice / instMonths) +
-        " / شهر</span></div>") +
+    '<div class="noon-installment" data-months="' +
+    instMonths +
+    '"><span class="material-icons-outlined">bolt</span><span class="noon-install-text">' +
+    formatMoney(rp.finalPrice / instMonths) +
+    " / شهر</span></div>" +
     '<div class="noon-badges"><div class="noon-badge-track">' +
     buildProductBadges(product)
       .map(function (b2) {
@@ -1596,13 +1528,12 @@ function attachProductCardEvents(container) {
         target.closest("[data-add-to-cart]") ||
         target.closest("[data-wishlist]") ||
         target.closest(".noon-img-dots") ||
-        target.closest("[data-view-product]") ||
-        target.closest("a")
+        target.closest("[data-view-product]")
       )
         return;
       var pid = card.querySelector("[data-view-product]")
         ?.getAttribute("data-view-product");
-      if (pid) navigateToProduct(pid);
+      navigateToProduct(pid);
     });
   });
   container.querySelectorAll("[data-wishlist]").forEach(function (b) {
@@ -1722,7 +1653,6 @@ var HM = {};
 HM.contentEl = null;
 HM.allProducts = [];
 HM.taagerOnly = [];
-HM.jumiaOnly = [];
 HM.sectionData = {}; // stores rendered data for each section id
 
 // Banner size mapping
@@ -1810,7 +1740,7 @@ HM.renderProductCarousel = function (section, products) {
     escapeHtml(section.title || "") +
     "</h2>" +
     (section.viewAll
-      ? '<a href="' + escapeHtml(section.viewAll) + '">عرض الكل</a>'
+      ? '<a href="' + escapeHtml(section.viewAll) + '">/a>'
       : "") +
     "</div>" +
     '<div class="hm-section-body">' +
@@ -2285,29 +2215,6 @@ HM.renderTaagerExtra = function (section) {
   var offset = (taagerExtraRotationOffset * 5 + sectionIndex * 7) % pool.length;
   var rotated = pool.slice(offset).concat(pool.slice(0, offset));
   return HM.renderProductCarousel(section, rotated.slice(0, 10));
-};
-
-// Jumia Egypt — affiliate carousel. Cards open the BudoQ PDP; the outbound
-// "buy from Jumia" link lives inside the PDP so the shop stays first-party.
-HM.renderJumia = function (section) {
-  var pool = HM.jumiaOnly.length ? [].concat(HM.jumiaOnly) : [];
-  if (!pool.length) return null;
-  if (section.sortKey === "discount") {
-    pool.sort(function (a, b) {
-      return resolvePrice(b).discountPercent - resolvePrice(a).discountPercent;
-    });
-  } else if (section.sortKey === "rating") {
-    pool.sort(function (a, b) {
-      return resolveRating(b).rating - resolveRating(a).rating;
-    });
-  } else if (section.sortKey === "price") {
-    pool.sort(function (a, b) {
-      return (Number(a.price) || 0) - (Number(b.price) || 0);
-    });
-  } else {
-    pool = shuffleProducts(pool);
-  }
-  return HM.renderProductCarousel(section, pool.slice(0, 10));
 };
 
 // ========== SHEIN-STYLE RENDERERS ==========
@@ -2807,8 +2714,6 @@ HM.renderSection = function (section) {
       return HM.renderRandom(section);
     case "taager-extra":
       return HM.renderTaagerExtra(section);
-    case "jumia":
-      return HM.renderJumia(section);
     case "shein-trend":
       return HM.renderSheinTrend(section);
     case "shein-style":
@@ -3641,9 +3546,8 @@ function hmApplyDynamicData(data) {
 
 async function hmFetchConfigViaApi(country) {
   try {
-    if (location.protocol === "file:") return null;
-    // Try the edge endpoint everywhere, including local dev. If the dev server
-    // does not implement it the request simply 404s and tier 3 takes over.
+    var host = String(location.hostname || "");
+    if (location.protocol === "file:" || /^(localhost|127\.0\.0\.1|\[::1\])$/.test(host)) return null;
     var url = "/api/home-config?country=" + encodeURIComponent(country || "EG");
     var resp = await fetch(url, { headers: { Accept: "application/json" } });
     if (!resp.ok) return null;
@@ -4050,9 +3954,6 @@ HM.init = async function () {
   HM.taagerOnly = HM.allProducts.filter(function (p) {
     return p.source === "taager";
   });
-  HM.jumiaOnly = HM.allProducts.filter(function (p) {
-    return p.source === "jumia" && p.external_url;
-  });
 
   if (skeletonEl) {
     await hmRenderProductSkeleton(skeletonEl);
@@ -4097,9 +3998,6 @@ HM.init = async function () {
     HM.taagerOnly = HM.allProducts.filter(function (p) {
       return p.source === "taager";
     });
-    HM.jumiaOnly = HM.allProducts.filter(function (p) {
-      return p.source === "jumia" && p.external_url;
-    });
     HM.contentEl.innerHTML = "";
     HM.renderAll();
     renderSummerSection();
@@ -4115,9 +4013,6 @@ HM.init = async function () {
     HM.allProducts = normalizeProducts(source);
     HM.taagerOnly = HM.allProducts.filter(function (p) {
       return p.source === "taager";
-    });
-    HM.jumiaOnly = HM.allProducts.filter(function (p) {
-      return p.source === "jumia" && p.external_url;
     });
     HM.contentEl.innerHTML = "";
     HM.renderAll();
@@ -4137,9 +4032,6 @@ HM.init = async function () {
     HM.allProducts = normalizeProducts(source);
     HM.taagerOnly = HM.allProducts.filter(function (p) {
       return p.source === "taager";
-    });
-    HM.jumiaOnly = HM.allProducts.filter(function (p) {
-      return p.source === "jumia" && p.external_url;
     });
     HM.contentEl.innerHTML = "";
     HM.renderAll();
