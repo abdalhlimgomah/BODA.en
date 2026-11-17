@@ -12,6 +12,14 @@
   function qs(s) { return document.querySelector(s); }
   function qsa(s) { return Array.prototype.slice.call(document.querySelectorAll(s)); }
 
+  /** Opens an external marketplace listing (Jumia) in a new tab. */
+  function openExternal(url) {
+    var value = String(url || "").trim();
+    if (!/^https?:\/\//i.test(value)) return false;
+    window.open(value, "_blank", "noopener,noreferrer");
+    return true;
+  }
+
   var vm = null;
   var allProducts = [];
   var _syncDepth = 0;
@@ -23,6 +31,11 @@
    // ---------------------------------------------------------------
    function onAddToCart(qty) {
      if (!vm) return;
+     // Jumia rows are marketplace listings: checkout happens on jumia.com.eg.
+     if (vm.isExternal && vm.externalUrl) {
+       openExternal(vm.externalUrl);
+       return;
+     }
      if (global.PDP.SizeSelector && !global.PDP.SizeSelector.requireSize()) return;
      qty = U.clampInt(qty, 1, 99);
      var opts = {};
@@ -92,59 +105,6 @@
        global.PDP.StickyCart.syncWishlistButtons(document.getElementById("pdp-root"), isInWishlist);
      }
    }
-
-  // ---------------------------------------------------------------
-  // External marketplace products (currently Jumia Egypt)
-  //
-  // The page is a normal BudoQ product page — gallery, title, price,
-  // rating, description and specs all come from the catalog. The only
-  // difference is that fulfilment is owned by the marketplace, so the
-  // Add-to-Cart flow is replaced by one clearly labelled outbound CTA.
-  // ---------------------------------------------------------------
-  function applyExternalMode() {
-    if (!vm || !vm.external || !vm.external.isExternal) return;
-    document.body.classList.add("pdp-external-product");
-
-    var delivery = document.querySelector("[data-pdp-delivery]");
-    if (delivery) delivery.style.display = "none";
-    var installment = document.querySelector("[data-pdp-installment]");
-    if (installment) installment.style.display = "none";
-
-    var sizesSection = document.getElementById("pdp-sizes-section");
-    if (sizesSection) sizesSection.style.display = "none";
-    var variantsSection = document.getElementById("pdp-variants-section");
-    if (variantsSection) variantsSection.style.display = "none";
-
-    var nudges = document.querySelector(".pdp-nudges");
-    if (nudges && !nudges.querySelector(".pdp-jumia-nudge")) {
-      var nudge = document.createElement("span");
-      nudge.className = "pdp-nudge pdp-jumia-nudge";
-      nudge.innerHTML = '<span class="material-icons-outlined">storefront</span>يُباع عبر جوميا';
-      nudges.appendChild(nudge);
-    }
-
-    var priceRoot = document.querySelector("[data-pdp-price]");
-    if (!priceRoot || document.getElementById("pdp-external-panel")) return;
-    var url = vm.external.url;
-    var panel = document.createElement("div");
-    panel.id = "pdp-external-panel";
-    panel.className = "pdp-external-panel";
-    panel.innerHTML =
-      '<div class="pdp-external-panel-head">' +
-        '<span class="pdp-external-logo">جوميا</span>' +
-        '<div class="pdp-external-copy">' +
-          '<strong>الشراء من جوميا مصر</strong>' +
-          '<span>هذا المنتج معروض من جوميا. الشراء والدفع والتوصيل يتمون على جوميا.</span>' +
-        '</div>' +
-      '</div>' +
-      (url
-        ? '<a class="pdp-external-buy" href="' + U.escapeHtml(url) + '" target="_blank" rel="sponsored noopener noreferrer">' +
-            '<span class="material-icons-outlined">shopping_bag</span>اشتري من جوميا' +
-            '<span class="material-icons-outlined pdp-external-open">open_in_new</span></a>' +
-          '<p class="pdp-external-note">يفتح في نافذة جديدة. السعر والتوافر حسب جوميا وقت الشراء.</p>'
-        : '<button type="button" class="pdp-external-buy" disabled><span class="material-icons-outlined">link_off</span>رابط الشراء غير متوفر حاليًا</button>');
-    priceRoot.insertAdjacentElement("afterend", panel);
-  }
 
    // ---------------------------------------------------------------
    // Render all buybox regions
@@ -290,6 +250,13 @@
     var root = document.getElementById("pdp-reviews");
     if (!root || !vm) return;
     if (global.PDP.Reviews) global.PDP.Reviews.render(root, vm);
+  }
+
+  /** Jumia-sourced seller/delivery/rating/related details (hidden by default). */
+  function renderJumiaDetails() {
+    var root = document.getElementById("pdp-jumia-details");
+    if (!root || !vm) return;
+    if (global.PDP.JumiaBlock) global.PDP.JumiaBlock.render(root, vm);
   }
 
   // ---------------------------------------------------------------
@@ -450,10 +417,10 @@
     }
 
     renderBuybox();
-    applyExternalMode();
     syncAvailability();
     renderOverview();
     renderSpecs();
+    renderJumiaDetails();
     renderReviews();
     initTabs();
     renderBanner();

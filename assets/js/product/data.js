@@ -50,26 +50,6 @@
   async function loadRemoteProduct(id) {
     if (!id) return null;
     var requestedMarket = utils().getRequestedMarket ? utils().getRequestedMarket() : "";
-    if (String(id).indexOf("jumia_") === 0) {
-      // Jumia rows live in the merged server catalog, not in Supabase.
-      try {
-        var catalogRes = await fetch(
-          "/api/catalog?id=" + encodeURIComponent(id) + "&_v=2",
-        );
-        if (catalogRes.ok) {
-          var rows = await catalogRes.json();
-          var row = Array.isArray(rows) ? rows[0] : null;
-          if (row) {
-            if (global.addProductToStore) global.addProductToStore(row);
-            if (utils().productMatchesMarket && !utils().productMatchesMarket(row, requestedMarket)) {
-              return null;
-            }
-            return row;
-          }
-        }
-      } catch (e) { console.warn("[PDP] jumia catalog lookup failed", e); }
-      return null;
-    }
     if (String(id).indexOf("taager_") === 0) {
       var local = global.BudaStore && global.BudaStore.getProductById ? global.BudaStore.getProductById(id) : null;
       if (local) {
@@ -78,22 +58,6 @@
         }
         return local;
       }
-      // Direct table lookup first: shared links must resolve even when the
-      // product is not in the latest client slice or the edge function is down.
-      try {
-        var client = global.supabaseClient;
-        if (client && typeof client.from === "function") {
-          var direct = await client.from("taager_products").select("*").eq("id", String(id)).limit(1);
-          if (!direct.error && direct.data && direct.data.length) {
-            var record = direct.data[0];
-            if (utils().productMatchesMarket && !utils().productMatchesMarket(record, requestedMarket)) {
-              return null;
-            }
-            if (global.addProductToStore) global.addProductToStore(record);
-            return record;
-          }
-        }
-      } catch (e) { console.warn("[PDP] taager_products direct lookup failed", e); }
       try {
         var base = global.TAAGER_EDGE_FUNCTION_URL || "";
         if (base) {
@@ -191,8 +155,6 @@
     var requestedMarket = utils().getRequestedMarket ? utils().getRequestedMarket() : "";
     var product = null;
     if (id && global.BudaStore && global.BudaStore.getProductById) product = global.BudaStore.getProductById(id) || null;
-    // Jumia rows render on the normal BudoQ PDP; the affiliate purchase
-    // button lives inside the page instead of replacing it.
     // Check market for cached product
     if (product && utils().productMatchesMarket && !utils().productMatchesMarket(product, requestedMarket)) {
       product = null;
@@ -216,8 +178,10 @@
       }
     } else if (id) {
       var imageCount = product ? utils().getProductImages(product).length : 0;
-      if (!product || !looksComplete(product) || imageCount <= 1) {
-        // Thin/missing record: block on the authoritative lookup as before.
+      var isJumiaProduct = String(id).indexOf("jumia_") === 0 || Boolean(product && String(product.source || "").toLowerCase() === "jumia");
+      if (!product || !looksComplete(product) || imageCount <= 1 || isJumiaProduct) {
+        // Jumia rows always re-read the authoritative row so raw_data (seller,
+        // delivery, rating breakdown, related products) is available before paint.
         var remote2 = await loadRemoteProduct(id);
         if (remote2) product = product ? Object.assign({}, product, remote2) : remote2;
       } else {
@@ -326,24 +290,24 @@
     if (!product) return false;
     var src = String(product.source || "").toLowerCase();
     var pid = String(product.id || product.product_id || "");
-    return src === "vendor" || src === "taager" || src === "jumia" ||
-      pid.indexOf("vendor_") === 0 || pid.indexOf("taager_") === 0 || pid.indexOf("jumia_") === 0;
-  }
-
-  /** Jumia rows are outbound marketplace items: no BudoQ stock/checkout. */
-  function isExternalProduct(product) {
-    return Boolean(product && (product.source === "jumia" || String(product.id || "").indexOf("jumia_") === 0));
+    return (
+      src === "vendor" ||
+      src === "taager" ||
+      src === "jumia" ||
+      pid.indexOf("vendor_") === 0 ||
+      pid.indexOf("taager_") === 0 ||
+      pid.indexOf("jumia_") === 0
+    );
   }
 
   function buildPrice(product) {
     var u = utils();
     var current = 0, original = 0;
+    var finalPrice = isFinalPriceProduct(product);
     if (global.BudaStore && global.BudaStore.resolveProductPrice) {
       var r = global.BudaStore.resolveProductPrice(product);
       current = r.currentPrice > 0 ? r.currentPrice : 0;
-      // Marketplace prices are final: the BudoQ markup belongs to products we
-      // fulfil ourselves. Never inflate a Jumia price away from Jumia's own.
-      if (!isExternalProduct(product) && global.PricingEngine && global.PricingEngine.tiersLoaded) {
+      if (!finalPrice && global.PricingEngine && global.PricingEngine.tiersLoaded) {
         current = global.PricingEngine.calculate(current);
       }
       original = r.originalPrice > current ? r.originalPrice : current;
@@ -373,17 +337,13 @@
   }
 
   function buildStock(product) {
-    if (isExternalProduct(product)) {
-      // The marketplace owns availability; never show a fake "1 left" badge.
-      return { quantity: 99, status: "in_stock" };
-    }
     var qty = Math.max(0, Math.round(Number(product && (product.stock || product.quantity)) || 0));
     // Vendoor/Taager rows store `stock` = minimum variant stock, which reads as a fake
     // "1 left" scare while there may be plenty in hand. Use the real total for the
     // product-level badge; the per-size number is surfaced when a size is selected.
     var pidSrc = String(product && product.source || "").toLowerCase();
     var pid = String(product && (product.id || product.product_id) || "");
-    var isFinal = pidSrc === "vendor" || pidSrc === "taager" || pid.indexOf("vendor_") === 0 || pid.indexOf("taager_") === 0;
+    var isFinal = pidSrc === "vendor" || pidSrc === "taager" || pidSrc === "jumia" || pid.indexOf("vendor_") === 0 || pid.indexOf("taager_") === 0 || pid.indexOf("jumia_") === 0;
     if (isFinal && Array.isArray(product.sizes) && product.sizes.length) {
       var total = 0;
       for (var vi = 0; vi < product.sizes.length; vi++) {
@@ -433,6 +393,24 @@
   }
 
   function buildDelivery(product, badges) {
+    var jd = buildJumiaDetails(product);
+    if (jd) {
+      var jdDelivery = jd.delivery || {};
+      var jdFee = Number(jdDelivery.shipping_fee) || 0;
+      var jdFreeOver = Number(jdDelivery.free_over) || 0;
+      return {
+        express: false,
+        etaDate: jdDelivery.eta_text || "حسب جوميا",
+        etaEndDate: "",
+        cutoffTs: 0,
+        feeText: jdFee > 0 ? utils().money(jdFee) : (jdDelivery.free_shipping_text ? "مجاني" : "تُحسب على جوميا"),
+        isJumia: true,
+        etaText: jdDelivery.eta_text || "",
+        freeShippingText: jdDelivery.free_shipping_text || "",
+        freeOver: jdFreeOver,
+        lines: Array.isArray(jdDelivery.lines) ? jdDelivery.lines.slice() : [],
+      };
+    }
     var cutoff = nextCutoff();
     var shippingDays = badges.express ? 1 : 3;
     var etaStart = new Date(cutoff);
@@ -450,6 +428,7 @@
   }
 
   function buildInstallment(product, price) {
+    if (isFinalPriceProduct(product) && String(product && product.source || "").toLowerCase() === "jumia") return null;
     if (price.current < 20) return null; // not meaningful below a small floor
     var months = utils().clampInt(product && product.installment_months, 3, 24) || 3;
     var provider = String((product && product.installment_provider) || "ValU");
@@ -689,12 +668,6 @@
     });
     var qd = product && product.quick_details;
     if (qd && String(qd).trim()) rows.push({ label: "تفاصيل سريعة", value: String(qd).trim() });
-    if (isExternalProduct(product)) {
-      if (!rows.some(function (r) { return r.label === "يُباع عبر"; })) {
-        rows.push({ label: "يُباع عبر", value: "جوميا مصر" });
-      }
-      rows.push({ label: "طريقة الشراء", value: "من خلال صفحة المنتج على جوميا" });
-    }
     var generic = { product: true, products: true, category: true, general: true, عام: true, منتج: true };
     return rows.filter(function (r) {
       if (r.label === "الفئة" && generic[String(r.value).toLowerCase().trim()]) return false;
@@ -716,23 +689,15 @@
   }
 
   function buildSeller(product) {
-    if (isExternalProduct(product)) {
-      return {
-        name: "جوميا مصر",
-        yearsWithBuda: 0,
-        rating: 0,
-        positivePercent: 0,
-        salesCount: 0,
-        shippingSpeedText: "الشراء والتوصيل عبر جوميا",
-        isOfficial: true,
-        external: true,
-      };
-    }
-    var sellerField = product && (product.seller || product.vendor);
+    var sellerField = product && (product.j_seller_name || product.seller || product.vendor);
+    var jumiaSellerRating = Number(product && product.j_seller_rating) || 0;
+    var jumiaFollowers = Number(product && product.j_seller_followers) || 0;
     var hasSellerStats = product && (
       Number(product.seller_rating) > 0 ||
       Number(product.seller_satisfaction) > 0 ||
-      Number(product.seller_orders || product.sales_count || product.sold) > 0
+      Number(product.seller_orders || product.sales_count || product.sold) > 0 ||
+      jumiaSellerRating > 0 ||
+      jumiaFollowers > 0
     );
 
     // Use real data only if there are actual stats OR a specific non-generic name
@@ -742,9 +707,10 @@
         name: String(name),
         yearsWithBuda: 0,
         rating: Number(product && product.seller_rating) || 0,
-        positivePercent: Number(product && product.seller_satisfaction) || 0,
+        positivePercent: Number(product && product.seller_satisfaction) || jumiaSellerRating,
         salesCount: Number(product && (product.seller_orders || product.sales_count || product.sold)) || 0,
-        shippingSpeedText: (product && product.seller_shipping_speed) || (product && (product.express || product.noon_express) ? "شحن سريع" : ""),
+        followers: jumiaFollowers,
+        shippingSpeedText: (product && product.seller_shipping_speed) || (product && (product.express || product.noon_express) ? "شحن سريع" : "") || (jumiaSellerRating > 0 ? "يتم البيع عبر جوميا" : ""),
         isOfficial: Boolean(product && (product.seller_official || product.is_official_store)),
       };
     }
@@ -768,7 +734,6 @@
    */
   async function resolveSeller(product, presolved) {
     if (!product || !product.id) return buildSeller(product);
-    if (isExternalProduct(product)) return buildSeller(product);
     var sellerField = product.seller || product.vendor;
     var hasSellerStats = (
       Number(product.seller_rating) > 0 ||
@@ -921,6 +886,140 @@
     }).filter(function (c) { return c.name; });
   }
 
+  // ---------------------------------------------------------------
+  // Jumia-sourced details (raw_data.jumia + optional j_* columns)
+  // ---------------------------------------------------------------
+
+  function asObject(value) {
+    if (!value) return null;
+    if (typeof value === "object") return value;
+    try { var parsed = JSON.parse(value); return parsed && typeof parsed === "object" ? parsed : null; }
+    catch (e) { return null; }
+  }
+
+  function asArray(value) {
+    if (Array.isArray(value)) return value;
+    if (!value) return [];
+    if (typeof value === "string") {
+      var parsed = asObject(value);
+      if (Array.isArray(parsed)) return parsed;
+      return value.split("\n").map(function (line) { return line.trim(); }).filter(Boolean);
+    }
+    return [];
+  }
+
+  function firstValue() {
+    for (var i = 0; i < arguments.length; i++) {
+      var value = arguments[i];
+      if (value !== undefined && value !== null && value !== "") return value;
+    }
+    return "";
+  }
+
+  function buildJumiaDetails(product) {
+    if (!product) return null;
+    var raw = parseRaw(product.raw_data) || {};
+    var nested = asObject(raw.jumia) || {};
+    var jumiaId = String(product.id || product.product_id || "").indexOf("jumia_") === 0;
+    var isJumia =
+      String(product.source || "").toLowerCase() === "jumia" ||
+      jumiaId ||
+      String(raw.supplier_source || "").toLowerCase() === "jumia";
+    if (!isJumia) return null;
+
+    var sellerRaw = asObject(firstValue(product.j_seller, nested.seller, raw.seller_info)) || {};
+    if (typeof raw.seller_info === "string" && !sellerRaw.name) sellerRaw.name = raw.seller_info;
+    if (typeof nested.seller === "string" && !sellerRaw.name) sellerRaw.name = nested.seller;
+    var sellerName = String(
+      firstValue(product.j_seller_name, sellerRaw.name, typeof nested.seller === "string" ? nested.seller : "", product.seller, "")
+    ).trim();
+    var sellerRating = Number(firstValue(product.j_seller_rating, sellerRaw.rating, 0)) || 0;
+    var sellerFollowers = Number(firstValue(product.j_seller_followers, sellerRaw.followers, 0)) || 0;
+    var sellerPerformance = asArray(firstValue(product.j_seller_performance, sellerRaw.performance, []))
+      .map(function (item) {
+        if (!item) return null;
+        if (typeof item === "string") return { label: item, value: "" };
+        return {
+          label: String(item.label || item.name || item.key || "").trim(),
+          value: String(item.value || item.val || item.text || "").trim(),
+        };
+      })
+      .filter(function (item) { return item && item.label; });
+
+    var delivery = asObject(firstValue(product.j_delivery, nested.delivery, raw.delivery)) || {};
+    var lines = asArray(delivery.lines).map(function (line) {
+      if (!line) return "";
+      if (typeof line === "string") return line;
+      return String(line.text || line.label || line.value || "").trim();
+    }).filter(Boolean);
+
+    var breadcrumb = asArray(firstValue(product.j_breadcrumb, nested.breadcrumb, raw.breadcrumb))
+      .map(function (item) {
+        if (typeof item === "string") return { name: item };
+        return { name: String((item && (item.name || item.label || item.title)) || "").trim() };
+      })
+      .filter(function (item) { return item.name; });
+
+    var related = asArray(firstValue(product.j_related, nested.related, raw.related))
+      .map(function (item) {
+        if (!item || typeof item !== "object") return null;
+        return {
+          name: String(item.name || item.title || "").trim(),
+          price: Number(item.price) || 0,
+          image: String(item.image || item.img || "").trim(),
+          url: String(item.url || item.link || "").trim(),
+        };
+      })
+      .filter(function (item) { return item && item.name; });
+
+    var breakdownRaw = asObject(firstValue(product.j_rating_breakdown, nested.rating_breakdown, raw.rating_breakdown)) || {};
+    var breakdown = {};
+    Object.keys(breakdownRaw).forEach(function (key) {
+      var value = Number(breakdownRaw[key]);
+      if (!isNaN(value) && value > 0) breakdown[String(key)] = value;
+    });
+
+    var externalUrl = String(
+      firstValue(product.external_url, product.j_url, product.taager_code, nested.url, raw.external_url, raw.source_url, "")
+    ).trim();
+
+    return {
+      source: "jumia",
+      externalUrl: externalUrl,
+      sku: String(firstValue(product.j_sku, nested.sku, product.sku, jumiaId ? String(product.id).replace(/^jumia_/i, "") : "")).trim(),
+      seller: {
+        name: sellerName,
+        rating: sellerRating,
+        followers: sellerFollowers,
+        performance: sellerPerformance,
+        url: String(firstValue(product.j_seller_url, sellerRaw.url, "")).trim(),
+      },
+      delivery: {
+        lines: lines,
+        free_shipping_text: String(firstValue(delivery.free_shipping_text, delivery.freeShippingText, "")).trim(),
+        shipping_fee: Number(firstValue(delivery.shipping_fee, delivery.shippingFee, 0)) || 0,
+        free_over: Number(firstValue(delivery.free_over, delivery.freeOver, 0)) || 0,
+        eta_text: String(firstValue(delivery.eta_text, delivery.etaText, "")).trim(),
+        warranty: String(firstValue(delivery.warranty, "")).trim(),
+        return_policy: String(firstValue(delivery.return_policy, delivery.returnPolicy, "")).trim(),
+      },
+      rating: {
+        average: Number(firstValue(product.rating, product.j_rating, nested.rating, raw.rating, 0)) || 0,
+        count: Math.round(Number(firstValue(product.review_count, product.reviews_count, product.j_reviews_count, nested.reviews_count, raw.reviews, 0))) || 0,
+        breakdown: breakdown,
+      },
+      warranty: String(firstValue(product.j_warranty, product.warranty, nested.warranty, raw.warranty, delivery.warranty, "")).trim(),
+      returnPolicy: String(firstValue(product.j_return_policy, product.return_policy, nested.return_policy, raw.return_policy, delivery.return_policy, "")).trim(),
+      stockText: String(firstValue(product.j_stock_text, nested.stock_text, "")).trim(),
+      currency: String(firstValue(product.j_currency, nested.currency, "EGP")).trim() || "EGP",
+      scrapedAt: String(firstValue(product.j_scraped_at, nested.fetched_at, raw.saved_at, "")).trim(),
+      specs: asArray(firstValue(product.j_specs, raw.specifications, nested.specs, raw.specs)),
+      highlights: asArray(firstValue(product.j_highlights, raw.highlights, nested.highlights, raw.features)),
+      breadcrumb: breadcrumb,
+      related: related,
+    };
+  }
+
   /** Builds the full, stable view-model every component consumes. */
   function buildViewModel(product, extras) {
     extras = extras || {};
@@ -928,17 +1027,10 @@
     var badges = buildBadges(product);
     var images = utils().getProductImages(product);
     var videos = Array.isArray(product && product.videos) ? product.videos.map(String).filter(Boolean) : [];
+    var jumia = buildJumiaDetails(product);
     return {
       id: String(product.id),
       raw: product,
-      external: isExternalProduct(product)
-        ? {
-            isExternal: true,
-            source: "jumia",
-            label: "جوميا مصر",
-            url: String(product.external_url || ""),
-          }
-        : null,
       name: (product && product.name) || "منتج",
       brand: (product && (product.brand || product.brand_name || product.vendor)) || "",
       category: (product && product.category) || "",
@@ -961,6 +1053,10 @@
       soldCount: Number(product && (product.sales_count || product.sold || product.sales)) || 0,
       banner: buildBanner(product),
       reviews: extras.reviews || { average: 0, count: 0, comments: [], ratingsRows: [] },
+      jumia: jumia,
+      source: String((product && product.source) || (jumia ? "jumia" : "internal")),
+      externalUrl: jumia ? jumia.externalUrl : "",
+      isExternal: Boolean(jumia && jumia.externalUrl),
     };
   }
 

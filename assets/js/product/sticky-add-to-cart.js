@@ -22,31 +22,19 @@
       oldPriceEl.style.display = vm.price.hasDiscount ? "" : "none";
     }
 
-    var ext = vm.external && vm.external.isExternal ? vm.external : null;
-    if (ext) {
-      var qtyWrap = U.qs(".pdp-sticky-qty", root);
-      if (qtyWrap) qtyWrap.style.display = "none";
-      if (addBtn) {
-        if (ext.url) {
-          addBtn.outerHTML =
-            '<a class="pdp-external-buy pdp-sticky-external" href="' + U.escapeHtml(ext.url) + '" target="_blank" rel="sponsored noopener noreferrer">' +
-            '<span class="material-icons-outlined">shopping_bag</span>اشتري من جوميا</a>';
-        } else {
-          addBtn.disabled = true;
-          addBtn.innerHTML = '<span class="material-icons-outlined">link_off</span>غير متوفر';
-        }
-      }
-      if (wishBtn && actions && actions.onToggleWishlist) {
-        wishBtn.addEventListener("click", function () { actions.onToggleWishlist(wishBtn); });
-      }
-      return;
-    }
-
     var outOfStock = vm.stock.status === "out_of_stock";
+    var isExternal = Boolean(vm.isExternal && vm.externalUrl);
     if (addBtn) {
-      addBtn.disabled = outOfStock;
-      addBtn.innerHTML = '<span class="material-icons-outlined">shopping_cart</span>' + (outOfStock ? "نفد المخزون" : "أضف للعربة");
+      addBtn.disabled = outOfStock && !isExternal;
+      addBtn.classList.toggle("is-external", isExternal);
+      if (isExternal) {
+        addBtn.innerHTML = '<span class="material-icons-outlined">open_in_new</span>اشترِ من جوميا';
+      } else {
+        addBtn.innerHTML = '<span class="material-icons-outlined">shopping_cart</span>' + (outOfStock ? "نفد المخزون" : "أضف للعربة");
+      }
     }
+    var qtyWrap = U.qs(".pdp-sticky-qty", root);
+    if (qtyWrap) qtyWrap.style.display = isExternal ? "none" : "";
     if (plusBtn && vm.stock.status === "low_stock") plusBtn.setAttribute("data-max", String(vm.stock.quantity));
 
     if (minusBtn && qtyValueEl) {

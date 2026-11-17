@@ -3,10 +3,95 @@
 
   var U = global.PDP.Utils;
 
+  function jumiaRatingData(vm) {
+    var jumia = (vm && vm.jumia) || {};
+    var rating = jumia.rating || {};
+    var levels = [5, 4, 3, 2, 1];
+    var counts = levels.map(function (level) {
+      return Math.max(0, Math.round(Number((rating.breakdown || {})[String(level)]) || 0));
+    });
+    var url = String(jumia.externalUrl || "").trim();
+    return {
+      average: Number(rating.average) || 0,
+      total: Math.max(0, Math.round(Number(rating.count) || 0)),
+      levels: levels,
+      counts: counts,
+      sum: counts.reduce(function (acc, value) { return acc + value; }, 0),
+      url: /^https?:\/\//i.test(url) ? url : "",
+      seller: String((jumia.seller && jumia.seller.name) || "").trim(),
+    };
+  }
+
+  /** Full Jumia rating card, used when the shop has no local reviews yet. */
+  function jumiaSummaryHtml(vm) {
+    var data = jumiaRatingData(vm);
+    var html = '<div class="pdp-reviews-header">';
+    html += '<h2>التقييمات</h2>';
+    html += '<div class="pdp-reviews-header-actions">';
+    if (data.url) {
+      html += '<a class="pdp-reviews-write-btn" href="' + U.escapeHtml(data.url) + '" target="_blank" rel="noopener noreferrer">' +
+        '<span class="material-icons-outlined" style="font-size:15px;vertical-align:-3px">open_in_new</span> عرض التقييمات على جوميا</a>';
+    }
+    html += '</div></div>';
+
+    html += '<div class="pdp-review-summary-card">';
+    html += '<div class="pdp-review-avg-col">';
+    html += '<div class="pdp-review-avg-num">' + (data.average > 0 ? data.average.toFixed(1) : "—") + '</div>';
+    html += '<div class="pdp-review-avg-stars">' + U.starsMarkup(data.average) + '</div>';
+    html += '<div class="pdp-review-avg-total">' + (data.total > 0 ? data.total + " تقييم على جوميا" : "تقييم جوميا") + '</div>';
+    html += '</div>';
+
+    if (data.sum > 0) {
+      html += '<div class="pdp-review-dist-col">';
+      for (var i = 0; i < data.levels.length; i++) {
+        var pct = Math.round((data.counts[i] / data.sum) * 100);
+        html += '<div class="pdp-review-dist-row">';
+        html += '<span class="pdp-review-dist-label">' + data.levels[i] + ' نجوم</span>';
+        html += '<div class="pdp-review-dist-track"><div class="pdp-review-dist-fill" style="width:' + pct + '%"></div></div>';
+        html += '<span class="pdp-review-dist-pct">' + pct + '%</span>';
+        html += '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+
+    html += '<div class="pdp-jumia-review-note"><span class="material-icons-outlined">storefront</span><span>' +
+      'هذه التقييمات مسحوبة من صفحة المنتج على جوميا' +
+      (data.seller ? " (البائع: " + U.escapeHtml(data.seller) + ")" : "") +
+      '، ولا توجد تقييمات محلية بعد.</span></div>';
+    return html;
+  }
+
+  /** Compact marketplace strip shown above local reviews when both exist. */
+  function jumiaStripHtml(jumia) {
+    var data = jumiaRatingData({ jumia: jumia });
+    var html = '<div class="pdp-review-jumia-strip">';
+    html += '<span class="material-icons-outlined">verified</span>';
+    html += '<span>تقييم جوميا: <strong>' + (data.average > 0 ? data.average.toFixed(1) : "—") + "</strong>" +
+      (data.total > 0 ? " من 5 (" + data.total + " تقييم)" : "") + "</span>";
+    if (data.url) {
+      html += '<a href="' + U.escapeHtml(data.url) + '" target="_blank" rel="noopener noreferrer">عرض على جوميا</a>';
+    }
+    html += '</div>';
+    return html;
+  }
+
   function render(root, vm) {
     if (!root) return;
     var reviews = vm.reviews;
-    if (!reviews || !reviews.comments || !reviews.comments.length) {
+    var hasComments = Boolean(reviews && reviews.comments && reviews.comments.length);
+    var jumia = vm.jumia || null;
+    var jumiaRating = jumia && jumia.rating ? jumia.rating : null;
+    var hasJumiaRating = Boolean(jumiaRating && (Number(jumiaRating.average) > 0 || Number(jumiaRating.count) > 0));
+
+    // Jumia listings carry their own marketplace rating; when the shop has no
+    // local reviews yet, show that rating instead of "no reviews" + a review
+    // button that would be counted against a product the visitor didn't buy here.
+    if (!hasComments && hasJumiaRating) {
+      root.innerHTML = jumiaSummaryHtml(vm);
+      return;
+    }
+    if (!hasComments) {
       root.innerHTML = '<div class="pdp-empty-note">لا توجد تقييمات بعد. كن أول من يقيم!</div>';
       return;
     }
@@ -30,6 +115,9 @@
     html += '<div class="pdp-reviews-header-actions">';
     html += '<button type="button" class="pdp-reviews-write-btn"><span class="material-icons-outlined" style="font-size:15px;vertical-align:-3px">rate_review</span> كتابة تقييم</button>';
     html += '</div></div>';
+
+    // ---- Jumia marketplace rating strip (kept separate from local reviews) ----
+    if (hasJumiaRating) html += jumiaStripHtml(jumia);
 
     // ---- Summary card ----
     html += '<div class="pdp-review-summary-card">';
