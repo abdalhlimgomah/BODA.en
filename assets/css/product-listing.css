@@ -572,20 +572,3 @@
   from { opacity: 0; transform: translateY(16px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
-/* --- Jumia marketplace cards --- */
-.noon-product-media-wrap .buda-badge-jumia {
-  position: absolute; top: 8px; right: 8px; z-index: 3;
-  background: #F68B1E; color: #fff; font-size: 0.58rem; font-weight: 800;
-  padding: 2px 8px; border-radius: 6px; line-height: 1.5;
-}
-.noon-external-card { cursor: pointer; }
-.noon-external-media { display: block; }
-.noon-jumia-cta {
-  display: flex; align-items: center; justify-content: center; gap: 5px;
-  width: 100%; min-height: 34px; margin-top: 2px; border: 0; border-radius: 10px;
-  background: #F68B1E; color: #fff; font-family: inherit; font-size: 0.78rem; font-weight: 800;
-  text-decoration: none; cursor: pointer; transition: background 200ms ease;
-}
-.noon-jumia-cta:hover { background: #E07A12; color: #fff; }
-.noon-jumia-cta .material-icons-outlined { font-size: 15px; }
